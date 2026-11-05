@@ -1,0 +1,43 @@
+# Huddle: keeps the status labels of the Issues up to date from each «Depends on» section.
+# Copied by `huddle-setup`. It reads huddle.json at the repo root and runs `huddle labels`.
+name: huddle-labels
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  # A comment can ask for changes, and new commits answer them: the job decides the change-request label from both.
+  issue_comment:
+    types: [created, edited, deleted]
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft, closed]
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: huddle-labels
+  cancel-in-progress: false
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    env:
+      # Which version of Huddle to run. Set it to a release tag or a full commit SHA to pin it.
+      HUDDLE_REF: main
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Get Huddle
+        run: |
+          git clone --quiet https://github.com/SrProfessional/huddle.git "$RUNNER_TEMP/huddle"
+          git -C "$RUNNER_TEMP/huddle" checkout --quiet "$HUDDLE_REF"
+      - name: Update the labels
+        run: node "$RUNNER_TEMP/huddle/bin/huddle" labels
