@@ -51,7 +51,3 @@ test('the factory rejects an unknown platform and a missing one', async () => {
   await assert.rejects(() => createPlatform({ platform: 'bitbucket', project: 'a/b' }), /platform.*bitbucket/);
   await assert.rejects(() => createPlatform({ project: 'a/b' }), /platform/);
 });
-
-test('the factory says plainly when an adapter is not installed yet (gitlab arrives with H3)', async () => {
-  await assert.rejects(() => createPlatform({ platform: 'gitlab', project: 'g/p' }), /gitlab/);
-});
