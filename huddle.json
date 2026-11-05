@@ -1,0 +1,9 @@
+{
+  "$schema": "./huddle.schema.json",
+  "platform": "github",
+  "project": "SrProfessional/Huddle",
+  "ai_manager": "SrProfessional",
+  "assignees": ["SrProfessional"],
+  "max_open_per_person": 5,
+  "default_branch": "main"
+}
