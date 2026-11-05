@@ -368,14 +368,27 @@ test('labels takes «changes requested» off once the session said «Ready for r
   assert.deepEqual(pushed.world.labelsOf(5), ['in review']);
 });
 
-test('labels reads the request on the PR too, and a taken (👀) request still counts', async () => {
+test('a pending request on the PR takes «in review» off and puts «changes requested» on; no other status label', async () => {
   const h = harness({ setup: (w) => {
     w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in review'], reviews: [50] });
+    w.review({ number: 50, commits: ['2026-11-05T09:00:00Z'] });
+    w.comment(50, request(401));
+  } });
+  await run(['labels'], h.ctx);
+  assert.deepEqual(h.world.labelsOf(5), [CHANGES]);
+});
+
+test('once the request is taken (👀) the Issue is «in progress» and loses «changes requested»; after the work, «in review» again', async () => {
+  const h = harness({ setup: (w) => {
+    w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: [CHANGES], reviews: [50] });
     w.review({ number: 50, commits: ['2026-11-05T09:00:00Z'] });
     w.comment(50, request(401, { taken: true }));
   } });
   await run(['labels'], h.ctx);
-  assert.deepEqual(h.world.labelsOf(5), ['in review', CHANGES]);
+  assert.deepEqual(h.world.labelsOf(5).sort(), ['in progress']);
+  h.world.review({ number: 50, commits: ['2026-11-05T09:00:00Z', '2026-11-05T12:00:00Z'] });
+  await run(['labels'], h.ctx);
+  assert.deepEqual(h.world.labelsOf(5), ['in review']);
 });
 
 test('labels takes «needs decision» off when the AI Manager answered with a prompt', async () => {
