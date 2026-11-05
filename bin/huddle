@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+// Huddle: one CLI. labels | wait | take | pending | hook | doctor. See lib/cli/run.mjs.
+import { main } from '../lib/cli/main.mjs';
+
+process.exitCode = await main(process.argv.slice(2));
