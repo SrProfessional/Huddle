@@ -9,6 +9,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const reviews = new Map(); // number -> { number, draft, open }
   const comments = new Map(); // id -> { ...GitHub comment, issue }
   const repoLabels = new Map(); // name -> { color, description }
+  const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // login -> id
   const calls = [];
   const merged = [];
   let nextId = 9000;
@@ -25,6 +26,14 @@ export function fakeGithub({ project = PROJECT } = {}) {
     // Every repo-scoped command must name the project, so a wrong or missing -R is caught.
     if (a !== 'api') need(values(args, '-R')[0] === project, args);
 
+    if (a === 'issue' && b === 'list' && values(args, '--state')[0] === 'closed') {
+      need(values(args, '--json')[0] === 'number,labels', args);
+      return JSON.stringify([...issues.values()].filter((i) => i.state === 'CLOSED').map((i) => ({ number: i.number, labels: i.labels.map((name) => ({ name })) })));
+    }
+    if (a === 'label' && b === 'list') {
+      need(values(args, '--json')[0] === 'name', args);
+      return JSON.stringify([...repoLabels.keys()].map((name) => ({ name })));
+    }
     if (a === 'issue' && b === 'list') {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
       return JSON.stringify([...issues.values()].filter((i) => i.state === 'OPEN').map((i) => ({
@@ -39,6 +48,13 @@ export function fakeGithub({ project = PROJECT } = {}) {
       if (fields === 'state,stateReason') return JSON.stringify({ state: it.state, stateReason: it.stateReason });
       if (fields === 'closedByPullRequestsReferences') return JSON.stringify({ closedByPullRequestsReferences: it.reviews.map((number) => ({ number })) });
       need(false, args);
+    }
+    if (a === 'pr' && b === 'list' && args.includes('--head')) {
+      need(values(args, '--state')[0] === 'open' && values(args, '--json')[0] === 'number,closingIssuesReferences', args);
+      const head = values(args, '--head')[0];
+      return JSON.stringify([...reviews.values()].filter((r) => r.open && r.branch === head).map((r) => ({
+        number: r.number, closingIssuesReferences: [...issues.values()].filter((i) => i.reviews.includes(r.number)).map((i) => ({ number: i.number })),
+      })));
     }
     if (a === 'pr' && b === 'list') {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
@@ -66,8 +82,14 @@ export function fakeGithub({ project = PROJECT } = {}) {
       return '';
     }
     if (a === 'api') {
-      const path = args.find((x) => x.startsWith('repos/') || x === 'user');
+      const path = args.find((x) => x.startsWith('repos/') || x.startsWith('users/') || x === 'user');
       if (path === 'user') return JSON.stringify({ login: 'SrProfessional', id: 1 });
+      let u;
+      if ((u = /^users\/([^/]+)$/.exec(path))) {
+        const login = decodeURIComponent(u[1]);
+        if (!users.has(login)) throw new Error(`gh ${args.join(' ')} failed: gh: Not Found (HTTP 404)`);
+        return JSON.stringify({ login, id: users.get(login) });
+      }
       const base = `repos/${project}/`;
       need(path && path.startsWith(base), args);
       const rest = path.slice(base.length);
@@ -82,6 +104,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
         const c = { id: nextId++, issue: Number(m[1]), body: JSON.parse(opts.input).body, created_at: '2026-11-05T12:00:00Z', html_url: `https://github.test/${project}/issues/${m[1]}#c`, user: { login: 'SrProfessional' }, reactions: { eyes: 0 } };
         comments.set(c.id, c);
         return JSON.stringify(commentJson(c));
+      }
+      if ((m = /^pulls\/(\d+)\/commits$/.exec(rest))) {
+        need(method === 'GET' && args.includes('--paginate') && args.includes('--slurp'), args);
+        const r = reviews.get(Number(m[1]));
+        need(r, args);
+        return JSON.stringify([r.commits.map((date) => ({ sha: 'abc', commit: { committer: { date }, author: { date: '2000-01-01T00:00:00Z' } } }))]);
       }
       if ((m = /^issues\/comments\/(\d+)$/.exec(rest))) {
         need(method === 'PATCH' && values(args, '--input')[0] === '-' && comments.has(Number(m[1])), args);
@@ -104,7 +132,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const [s, reason] = { open: ['OPEN', ''], merged: ['CLOSED', 'COMPLETED'], 'closed-by-hand': ['CLOSED', 'NOT_PLANNED'] }[state];
       issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: s, stateReason: reason, reviews: [...closing] });
     },
-    review({ number, draft = false, open = true }) { reviews.set(number, { number, draft, open }); },
+    review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { number, draft, open, branch, commits: [...commits] }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       comments.set(id, { id, issue, body, created_at: createdAt, html_url: `https://github.test/${project}/issues/${issue}#c${id}`, user: { login: author }, reactions: { eyes: taken ? 1 : 0 } });
     },
