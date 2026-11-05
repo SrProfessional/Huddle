@@ -1,6 +1,4 @@
-# Huddle
-
-**Decision-led development for teams coding with AI.**
+# Huddle: Decision-led development for teams coding with AI
 
 Huddle is a team method and a Claude Code plugin. One person, the AI Manager, hands out tasks as Issues. Each developer
 pastes the Issue's «Prompt for Claude Code» into a session. The session works on its own branch, stops to ask when a
@@ -8,7 +6,11 @@ decision is not its to make, opens a pull request (a merge request on GitLab) an
 
 It works with GitHub and GitLab, including self-managed GitLab.
 
-> **Status:** under construction. The design is in [docs/design.md](docs/design.md). Version 0.1.0 is not released yet.
+> **Status:** pre-release. Version 0.1.0 is not tagged yet (see the [changelog](CHANGELOG.md)). The design is in
+> [docs/design.md](docs/design.md).
+
+**Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
+[GitLab notes](docs/gitlab.md)
 
 > Our job is no longer typing code. It is making good decisions. The AI writes, tests and asks; the person decides.
 
@@ -28,6 +30,66 @@ asking.
 | Each person explains the project to the AI in their own way. | Every session reads the same context and the same rules. |
 | Tasks collide in the same files. | Each task has its own files, so two people do not collide. |
 | Mistakes show up late, in review or in production. | Tests and review catch mistakes before merging. |
+
+## Install
+
+You need, on the machine of the person who sets the project up (the AI Manager):
+
+- [Claude Code](https://claude.com/claude-code).
+- Node 22 or newer and `git`.
+- **GitHub:** the [`gh`](https://cli.github.com) CLI, logged in with `gh auth login`.
+  **GitLab:** the [`glab`](https://gitlab.com/gitlab-org/cli) CLI, logged in with `glab auth login`
+  (add `--hostname gitlab.example.com` for a self-managed server).
+
+Get the plugin and start Claude Code with it:
+
+```sh
+git clone https://github.com/SrProfessional/huddle.git
+claude --plugin-dir ./huddle
+```
+
+In this guide `huddle <command>` is the CLI. If `huddle` is not on your PATH, run `node ./huddle/bin/huddle <command>`
+(the path of your clone). Inside a session, the skills run it for you.
+
+Huddle has no runtime dependencies, so there is nothing to `npm install`. Every developer of the team repeats these two
+lines (and logs in to `gh` or `glab`) once.
+
+## Quickstart for GitHub
+
+About five minutes, in the repo you want to run with Huddle. You are the AI Manager.
+
+1. Open Claude Code in the repo with the plugin loaded (see [Install](#install)) and create a branch:
+   `git switch -c huddle-setup`.
+2. Run `/huddle-setup`. It asks for the platform (`github`), the host (empty for github.com), the project (`owner/repo`),
+   the login of the AI Manager and the logins of the developers.
+3. It writes `huddle.json`, the Issue and PR templates, the labels workflow (`.github/workflows/huddle-labels.yml`) and
+   the Huddle block of `CLAUDE.md`. Nothing outside the markers of that block is touched.
+4. Run `huddle doctor`. It should show ✔ for the file, the login, the AI Manager and the labels. If a label is missing,
+   run `huddle labels` once.
+5. Commit, push and open a PR with the setup files. Merge it: you are the only one who merges.
+6. Write the first task with `/huddle-issue`. The developer opens Claude Code in their clone and runs `/huddle-start <n>`
+   with the Issue number (or pastes the «Prompt for Claude Code» of the Issue).
+
+Next: [the first day](docs/first-day.md).
+
+## Quickstart for GitLab
+
+The same five minutes, plus two steps only the AI Manager can do, because GitLab CI does not react to Issue events and the
+CI job token cannot edit Issues.
+
+1. Open Claude Code in the project with the plugin loaded and create a branch: `git switch -c huddle-setup`.
+2. Run `/huddle-setup`. Answer `gitlab`, the host (empty for gitlab.com, or for example `gitlab.example.com`), the project
+   path (groups allowed, such as `team/app`), the AI Manager and the developers.
+3. It writes `huddle.json`, `.gitlab/issue_templates/Task.md`, `.gitlab/merge_request_templates/Default.md` and
+   `huddle-labels.gitlab-ci.yml`, and inserts the Huddle block in `CLAUDE.md`. Add
+   `include: local: huddle-labels.gitlab-ci.yml` to your `.gitlab-ci.yml`.
+4. Run `huddle doctor`, then `huddle labels` if a label is missing.
+5. **Create the schedule:** CI/CD > Schedules, cron `*/10 * * * *`, on the default branch.
+6. **Create the token:** a project access token with the `api` scope, stored as the masked, protected CI variable
+   `HUDDLE_TOKEN`.
+7. Commit, push and open a merge request. Merge it.
+
+Steps 5 and 6 in detail, and everything about self-managed servers: [docs/gitlab.md](docs/gitlab.md).
 
 ## The cycle
 
@@ -126,6 +188,22 @@ windows.
   reason.
 - **Chat in your language; the repository is in English.** You talk to Claude Code in the language you prefer. Commit
   messages, pull requests, Issues, code comments and documents are in English.
+
+## Commands
+
+| Command | Who | What it does |
+|---|---|---|
+| `/huddle-setup` | AI Manager | Installs Huddle in a repo, or refreshes its block and templates. |
+| `/huddle-issue` | AI Manager | Writes a new Issue from the template. |
+| `/huddle-start <n>` | Developer | Starts or continues Issue `n`. |
+| `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
+| `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
+| `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
+| `huddle wait <n>` | Session | Waits in the background for the AI Manager's request on Issue `n`. |
+| `huddle take <n>` | Session | Marks the pending request 👀 and prints its prompt. |
+| `huddle pending [n]` | Anyone | Lists the requests nobody has done yet. |
+| `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending. |
+| `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager and the labels. |
 
 ## What the plugin adds
 
