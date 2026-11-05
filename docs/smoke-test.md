@@ -7,7 +7,8 @@ every release. Tick a box only when you saw the result with your own eyes; write
 Use a throwaway sandbox. Never run this on a team repo. Never paste a token into a chat, a file, an Issue or a commit.
 
 Two sessions are needed: the **AI Manager** session (you) and a **developer** session (a second clone, or a second
-person). `huddle` below means `node <huddle clone>/bin/huddle`.
+person). `huddle` below means `node <plugin folder>/bin/huddle`, where the plugin folder is where Claude Code installed
+the plugin (see `/plugin`), not a clone of the Huddle repo.
 
 ## 1. Setup
 
@@ -16,16 +17,24 @@ person). `huddle` below means `node <huddle clone>/bin/huddle`.
 | Sandbox | empty repo `<you>/huddle-sandbox` on github.com | empty project `<you>/huddle-sandbox` on gitlab.com |
 | Login | `gh auth login` | `glab auth login` |
 
-1. [ ] Create the sandbox and push a first commit to its default branch (a README is enough).
-2. [ ] Run `/huddle-setup` in the sandbox. It writes `huddle.json` (`platform`, `project`, `ai_manager` = your login,
+1. [ ] **Install the plugin from the marketplace**, in the AI Manager session: `/plugin marketplace add SrProfessional/Huddle`,
+   then `/plugin install huddle@huddle`. `/plugin` lists `huddle` as enabled at version 0.1.0 (or the version under test),
+   and `/huddle-setup` is available.
+2. [ ] Create the sandbox and push a first commit to its default branch (a README is enough).
+3. [ ] **The committed snippet offers the plugin to the developer session.** Commit the `extraKnownMarketplaces` +
+   `enabledPlugins` snippet from the README in the sandbox's `.claude/settings.json` and push it. In a developer session
+   with no Huddle installed (a clean user profile, or after `/plugin uninstall huddle@huddle`), open Claude Code in a
+   fresh clone and trust the folder. It offers the `huddle` marketplace and the plugin; accept; `/plugin` then shows
+   `huddle@huddle` enabled and `/huddle-start` is available. Note in Results whether the snippet worked as written.
+4. [ ] Run `/huddle-setup` in the sandbox. It writes `huddle.json` (`platform`, `project`, `ai_manager` = your login,
    `assignees` = the developer login), the CLAUDE.md block, the Issue and PR/MR templates, and the labels job.
-3. [ ] **GitLab only:** do the schedule and `HUDDLE_TOKEN` steps of [gitlab.md](gitlab.md) (Maintainer token, scope `api`,
+5. [ ] **GitLab only:** do the schedule and `HUDDLE_TOKEN` steps of [gitlab.md](gitlab.md) (Maintainer token, scope `api`,
    masked and protected variable; schedule `*/10 * * * *` on the default branch). Do the token step yourself.
-4. [ ] Merge the setup to the default branch.
-5. [ ] `huddle doctor`: all ✔ (`huddle.json`, `login`, `ai_manager`, `labels`). If `labels` fails, run `huddle labels` once.
-6. [ ] The labels exist on the platform: `ready`, `assigned`, `in progress`, `in review`, `blocked`, `needs decision`,
+6. [ ] Merge the setup to the default branch.
+7. [ ] `huddle doctor`: all ✔ (`huddle.json`, `login`, `ai_manager`, `labels`). If `labels` fails, run `huddle labels` once.
+8. [ ] The labels exist on the platform: `ready`, `assigned`, `in progress`, `in review`, `blocked`, `needs decision`,
    `changes requested from AI Manager`.
-7. [ ] Run `huddle labels --dry-run`: it exits 0 and prints no error.
+9. [ ] Run `huddle labels --dry-run`: it exits 0 and prints no error.
 
 ## 2. An Issue with a dependency
 
@@ -63,7 +72,7 @@ person). `huddle` below means `node <huddle clone>/bin/huddle`.
 
 1. [ ] As the AI Manager, post a second `## Prompt for Claude Code` request on the PR/MR. Close the developer session
    without taking it.
-2. [ ] Open a new developer session in the sandbox (`claude --plugin-dir <huddle clone>`).
+2. [ ] Open a new developer session in the sandbox with the installed plugin (no `--plugin-dir`): `claude`, in the sandbox clone.
 3. [ ] The SessionStart hook announces the pending request within the 45 s timeout, and `huddle pending` lists it.
 4. [ ] Offline (network off), a new session still opens quickly and the hook stays silent.
 5. [ ] The developer takes the request (`huddle take <A>`), pushes, and comments «Ready for review again».
