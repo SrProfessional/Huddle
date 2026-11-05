@@ -138,6 +138,16 @@ The method works with plain Issues and a good `CLAUDE.md`. The plugin takes the 
 - A session that waits for the review on its own and picks up the AI Manager's requested changes as soon as they arrive.
 - The same commands on GitHub, on gitlab.com and on a company's own GitLab server.
 
+## Development
+
+Node 22 or newer. Huddle has no runtime dependencies, and the tests use only Node's own test runner:
+
+```sh
+npm test
+```
+
+The tests never call a real GitHub or GitLab.
+
 ## License
 
 [MIT](LICENSE)
