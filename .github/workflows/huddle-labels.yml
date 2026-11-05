@@ -1,0 +1,44 @@
+# Huddle labels for this repository: Huddle runs on itself. The same job as templates/github/workflows/huddle-labels.yml, except that it runs the
+# checked-out code of this repo instead of cloning Huddle. It reads huddle.json at the root and runs `huddle labels`: status labels from each
+# «Depends on», assignment of ready Issues, «changes requested from AI Manager» from the comments, and no Huddle label on closed Issues.
+# No secrets: only GITHUB_TOKEN, whose own changes do not start the workflow again. Actions pinned to a full commit SHA, as in test.yml.
+name: huddle-labels
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  # A comment can ask for changes, and new commits answer them: the job decides the change-request label from both.
+  issue_comment:
+    types: [created, edited, deleted]
+  pull_request:
+    types: [opened, reopened, edited, synchronize, ready_for_review, converted_to_draft, closed]
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: huddle-labels
+  cancel-in-progress: false
+
+jobs:
+  labels:
+    name: Huddle labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Update the labels
+        run: node bin/huddle labels
