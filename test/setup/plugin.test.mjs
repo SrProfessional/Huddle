@@ -59,6 +59,42 @@ test('only the AI Manager merges: review says so, start never merges and uses wa
   assert.match(start, /huddle" take/);
 });
 
+test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a team repo has no bin/huddle and no huddle on the PATH', () => {
+  const full = /node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle"/g;
+  for (const name of SKILLS) {
+    const rest = read(`skills/${name}/SKILL.md`).replace(full, '<HUDDLE>');
+    assert.doesNotMatch(rest, /bin\/huddle/, `${name}: bin/huddle outside the full command`);
+    assert.doesNotMatch(rest, /\bhuddle (wait|take|doctor|labels|pending|hook)\b/, `${name}: bare huddle command`);
+  }
+});
+
+test('the label is always named in full: «changes requested from AI Manager»', () => {
+  for (const name of SKILLS) assert.doesNotMatch(read(`skills/${name}/SKILL.md`), /changes requested(?! from AI Manager)/, name);
+  assert.match(read('skills/huddle-review/SKILL.md'), /changes requested from AI Manager/);
+  assert.match(read('skills/huddle-start/SKILL.md'), /changes requested from AI Manager/);
+});
+
+test('setup says an empty max open per person means no limit, and gives no default of 2', () => {
+  const t = read('skills/huddle-setup/SKILL.md');
+  assert.match(t, /empty = no limit/);
+  assert.doesNotMatch(t, /default 2/);
+});
+
+// The text block of the «## Prompt for Claude Code» a skill posts: from its opening fence to the closing one.
+const templateOf = (name) => {
+  const t = read(`skills/${name}/SKILL.md`);
+  const m = t.match(/## Prompt for Claude Code\r?\n\r?\n```text\r?\n([\s\S]*?)\r?\n```\r?\n````/);
+  assert.ok(m, `${name}: no prompt template found`);
+  return m[1];
+};
+
+test('the review and decide prompt templates start with the take step', () => {
+  for (const name of ['huddle-review', 'huddle-decide']) {
+    const first = templateOf(name).split('\n')[0];
+    assert.match(first, /^First run \/huddle-start <n>: it marks this request as taken \(👀\), so the Issue shows «in progress»\./, name);
+  }
+});
+
 test('plugin.json names the plugin', () => {
   const p = JSON.parse(read('.claude-plugin/plugin.json'));
   assert.equal(p.name, 'huddle');

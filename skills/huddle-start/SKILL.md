@@ -25,8 +25,8 @@ branch, production or secrets. The rules are in the Huddle block of `CLAUDE.md`;
 1. Tell the developer which request is pending and ask if you should continue.
 2. If yes, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`. It marks the request 👀 and prints the AI Manager's prompt.
 3. Follow that prompt as if the developer had pasted it; same rules. Only comments by the `ai_manager` login count.
-4. Push, then comment «Ready for review again» with the counts. Do not touch the `changes requested` label: the labels job
-   decides it. Then run `huddle wait <n>` again.
+4. Push, then comment «Ready for review again» with the counts. Do not touch the `changes requested from AI Manager`
+   label: the labels job decides it. Then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>` again.
 
 ## When you cannot go on
 

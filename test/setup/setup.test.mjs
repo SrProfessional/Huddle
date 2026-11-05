@@ -26,7 +26,7 @@ test('GitHub: writes a valid huddle.json and the GitHub templates, and no GitLab
   assert.equal(config.platform, 'github');
   assert.equal(config.project, 'acme/app');
   assert.deepEqual(config.assignees, ['ana', 'luis']);
-  assert.match(JSON.parse(read(root, 'huddle.json')).$schema, /huddle\.schema\.json$/);
+  assert.equal(JSON.parse(read(root, 'huddle.json')).$schema, 'https://raw.githubusercontent.com/SrProfessional/Huddle/main/huddle.schema.json');
   assert.equal(read(root, '.github/ISSUE_TEMPLATE/task.md'), tpl('github/ISSUE_TEMPLATE/task.md'));
   assert.equal(read(root, '.github/pull_request_template.md'), tpl('github/pull_request_template.md'));
   assert.equal(read(root, '.github/workflows/huddle-labels.yml'), tpl('github/workflows/huddle-labels.yml'));

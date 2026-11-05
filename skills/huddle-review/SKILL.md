@@ -5,7 +5,7 @@ description: Use when the AI Manager reviews a developer's PR/MR and must either
 
 # huddle-review
 
-For the AI Manager only. Run `bin/huddle doctor`: if you are not the `ai_manager` login in `huddle.json`, you do not
+For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`, you do not
 merge, deploy or change settings; give the review as text and stop.
 
 ## Review
@@ -24,12 +24,13 @@ heading and a text block:
 ## Prompt for Claude Code
 
 ```text
+First run /huddle-start <n>: it marks this request as taken (👀), so the Issue shows «in progress».
 <what to fix, one item per line, with file and why; end with: push, then comment «Ready for review again» with the counts>
 ```
 ````
 
 Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Do not edit labels: the labels job puts
-`changes requested` on from the comment.
+`changes requested from AI Manager` on from the comment, and the take step in the prompt takes it off.
 
 ## All good
 

@@ -13,7 +13,7 @@ Installs Huddle in the repo you are in. Run it from the repo root, on a branch t
 2. **Host:** empty for github.com / gitlab.com; otherwise the server name (GitHub Enterprise, self-managed GitLab).
 3. **Project:** `owner/repo` on GitHub, the project path (groups allowed) on GitLab. Offer the one from `git remote get-url origin`.
 4. **AI Manager:** the login of the one person who hands out Issues, answers decisions, reviews and merges.
-5. **Team:** the logins of the developers who get Issues. Optional: max open Issues per person (default 2), default branch.
+5. **Team:** the logins of the developers who get Issues. Optional: max open Issues per person (empty = no limit), default branch.
 
 Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the developer to log in themselves and stop.
 

@@ -5,7 +5,7 @@ description: Use when the AI Manager wants to write a new Issue for a developer 
 
 # huddle-issue
 
-For the AI Manager (the `ai_manager` login in `huddle.json`). Check with `bin/huddle doctor` that you are that login; if
+For the AI Manager (the `ai_manager` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that login; if
 not, stop and say so.
 
 ## Do

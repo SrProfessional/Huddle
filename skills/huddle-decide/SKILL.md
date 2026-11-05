@@ -5,7 +5,7 @@ description: Use when an Issue has the needs decision label and the AI Manager m
 
 # huddle-decide
 
-For the AI Manager only. Run `bin/huddle doctor`: if you are not the `ai_manager` login in `huddle.json`, stop; a developer
+For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`, stop; a developer
 session never answers its own decision.
 
 ## Do
@@ -20,6 +20,7 @@ session never answers its own decision.
 ## Prompt for Claude Code
 
 ```text
+First run /huddle-start <n>: it marks this request as taken (👀), so the Issue shows «in progress».
 Decision: <the chosen option and why, in one or two lines>.
 <what to do now, concrete; end with: push, then comment «Ready for review again» with the counts>
 ```
@@ -27,5 +28,5 @@ Decision: <the chosen option and why, in one or two lines>.
 
    Use `gh issue comment` / `gh pr comment` (or `glab issue note` / `glab mr note`).
 4. Do not change labels or close anything: the labels job takes `needs decision` off once the answer is there, and the
-   developer's `huddle wait` picks the comment up.
+   developer's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
 5. If the decision changes the Issue's scope, edit the Issue text too, so it stays true.
