@@ -1,0 +1,66 @@
+// Huddle: the plugin files (docs/design.md §4, §8): five skills and the SessionStart hook.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const abs = (rel) => fileURLToPath(new URL(`../../${rel}`, import.meta.url));
+const read = (rel) => readFileSync(abs(rel), 'utf8');
+const SKILLS = ['huddle-setup', 'huddle-start', 'huddle-issue', 'huddle-review', 'huddle-decide'];
+
+const frontmatter = (text) => {
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
+  assert.ok(m, 'missing frontmatter');
+  return Object.fromEntries(m[1].split(/\r?\n/).map((l) => [l.slice(0, l.indexOf(':')), l.slice(l.indexOf(':') + 1).trim()]));
+};
+
+test('hooks.json runs `huddle hook` on startup and resume, with a timeout of 45 s', () => {
+  const entries = JSON.parse(read('hooks/hooks.json')).hooks.SessionStart;
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].matcher, 'startup|resume');
+  const [h] = entries[0].hooks;
+  assert.equal(h.type, 'command');
+  assert.match(h.command, /\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle" hook$/);
+  assert.equal(h.timeout, 45);
+});
+
+for (const name of SKILLS) {
+  test(`${name}: SKILL.md has a name, says when to use it, and is short`, () => {
+    const text = read(`skills/${name}/SKILL.md`);
+    const fm = frontmatter(text);
+    assert.equal(fm.name, name);
+    assert.match(fm.description, /^Use when /);
+    assert.ok(text.split('\n').length <= 90, 'keep it short');
+    assert.doesNotMatch(text, /socialcortex|docs\/equipo|scripts\/huddle/i);
+  });
+}
+
+test('setup asks the five questions and calls lib/setup', () => {
+  const t = read('skills/huddle-setup/SKILL.md');
+  for (const q of [/platform/i, /host/i, /project/i, /AI Manager/, /team/i]) assert.match(t, q);
+  assert.match(t, /lib\/setup\/cli\.mjs/);
+  assert.match(t, /bin\/huddle" doctor/);
+});
+
+test('review and decide post «## Prompt for Claude Code» on the PR/MR and on its Issue', () => {
+  for (const name of ['huddle-review', 'huddle-decide']) {
+    const t = read(`skills/${name}/SKILL.md`);
+    assert.match(t, /## Prompt for Claude Code/);
+    assert.match(t, /PR\/MR/);
+    assert.match(t, /Issue/);
+  }
+});
+
+test('only the AI Manager merges: review says so, start never merges and uses wait/take', () => {
+  assert.match(read('skills/huddle-review/SKILL.md'), /AI Manager/);
+  const start = read('skills/huddle-start/SKILL.md');
+  assert.match(start, /never merge/i);
+  assert.match(start, /huddle" wait/);
+  assert.match(start, /huddle" take/);
+});
+
+test('plugin.json names the plugin', () => {
+  const p = JSON.parse(read('.claude-plugin/plugin.json'));
+  assert.equal(p.name, 'huddle');
+  assert.ok(existsSync(abs('hooks/hooks.json')));
+});
