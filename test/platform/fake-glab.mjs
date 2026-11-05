@@ -33,7 +33,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const addSystemNote = (issue, body) => notes.set(nextNote, { id: nextNote++, issue, body, created_at: '2026-11-01T00:00:00Z', author: 'SrProfessional', system: true, eyes: false });
   const user = (login) => ({ id: users.get(login), username: login, name: login });
   const noteJson = (n) => ({ id: n.id, body: n.body, created_at: n.created_at, author: user(n.author), system: n.system, noteable_iid: n.issue, noteable_type: 'Issue' });
-  const mrJson = (r) => ({ iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}` });
+  const mrJson = (r) => ({ iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}`, source_branch: r.branch ?? '' });
   const issueJson = (i) => ({
     iid: i.iid, title: i.title, description: i.description, state: i.state,
     labels: [...i.labels], assignees: i.assignees.map(user), assignee: i.assignees[0] ? user(i.assignees[0]) : null,
@@ -73,8 +73,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     let m;
 
     if (rest === 'issues' && method === 'GET') {
-      need(q.get('state') === 'opened', args);
-      return pages([...issues.values()].filter((i) => i.state === 'opened').map(issueJson), paginate);
+      need(q.get('state') === 'opened' || q.get('state') === 'closed', args);
+      return pages([...issues.values()].filter((i) => i.state === q.get('state')).map(issueJson), paginate);
     }
     if ((m = /^issues\/(\d+)$/.exec(rest))) {
       const it = issueOf(m[1], args);
@@ -120,7 +120,17 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     }
     if (rest === 'merge_requests' && method === 'GET') {
       need(q.get('state') === 'opened', args);
-      return pages([...reviews.values()].filter((r) => r.state === 'opened').map(mrJson), paginate);
+      const branch = q.get('source_branch');
+      return pages([...reviews.values()].filter((r) => r.state === 'opened' && (branch === null || r.branch === branch)).map(mrJson), paginate);
+    }
+    if ((m = /^merge_requests\/(\d+)\/closes_issues$/.exec(rest))) {
+      need(method === 'GET' && reviews.has(Number(m[1])), args);
+      return pages([...issues.values()].filter((i) => i.reviews.includes(Number(m[1]))).map(issueJson), paginate);
+    }
+    if ((m = /^merge_requests\/(\d+)\/commits$/.exec(rest))) {
+      const r = reviews.get(Number(m[1]));
+      need(method === 'GET' && r, args);
+      return pages(r.commits.map((d) => ({ id: 'abc', committed_date: d, authored_date: '2000-01-01T00:00:00Z' })), paginate);
     }
     if ((m = /^merge_requests\/(\d+)\/merge$/.exec(rest))) {
       const r = reviews.get(Number(m[1]));
@@ -162,7 +172,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       issues.set(number, it);
       addSystemNote(number, `changed title to «${title}»`);
     },
-    review({ number, draft = false, open = true }) { reviews.set(number, { iid: number, draft, state: open ? 'opened' : 'closed' }); },
+    review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { iid: number, draft, state: open ? 'opened' : 'closed', branch, commits: [...commits] }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       if (!users.has(author)) users.set(author, users.size + 1);
       notes.set(id, { id, issue, body, created_at: createdAt, author, system: false, eyes: taken });
