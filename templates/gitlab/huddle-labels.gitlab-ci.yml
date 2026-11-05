@@ -2,6 +2,8 @@
 # Copied by `huddle-setup`; add `include: local: huddle-labels.gitlab-ci.yml` to .gitlab-ci.yml.
 #
 # GitLab CI does not react to Issue events, so this job runs on a pipeline schedule and on every MR pipeline.
+# GitLab has no CI trigger for comments, so after a comment the label can take up to 10 minutes to change; a push to an
+# MR starts a pipeline and updates it at once.
 # Create the schedule in CI/CD > Schedules, with the cron `*/10 * * * *`, on the default branch.
 #
 # It needs a token: the job token cannot edit Issues. The AI Manager creates a project access token with the `api` scope

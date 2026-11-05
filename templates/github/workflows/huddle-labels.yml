@@ -5,8 +5,11 @@ name: huddle-labels
 on:
   issues:
     types: [opened, edited, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  # A comment can ask for changes, and new commits answer them: the job decides the change-request label from both.
+  issue_comment:
+    types: [created, edited, deleted]
   pull_request:
-    types: [opened, reopened, ready_for_review, converted_to_draft, closed]
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft, closed]
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:

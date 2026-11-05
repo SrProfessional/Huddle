@@ -93,3 +93,25 @@ test('GitHub workflow runs on schedule and Issue events, with least privilege an
   assert.match(text, /^permissions:\n(?:[ \t]+.*\n)*?[ \t]+issues: write/m);
   assert.doesNotMatch(text, /(echo|printf)[^\n]*(GH_TOKEN|secrets\.)/);
 });
+
+test('GitHub workflow also runs on comments and on new commits of a PR', () => {
+  const text = read('github/workflows/huddle-labels.yml');
+  assert.match(text, /^\s+issue_comment:\n\s+types: \[created, edited, deleted\]/m);
+  assert.match(text, /^\s+pull_request:\n\s+types: \[[^\]]*\bsynchronize\b[^\]]*\]/m);
+});
+
+test('GitLab job says the label can lag up to 10 minutes after a comment', () => {
+  const comments = read('gitlab/huddle-labels.gitlab-ci.yml').split('\n').filter((l) => l.trim().startsWith('#')).join('\n');
+  assert.match(comments, /up to 10 minutes/);
+  assert.match(comments, /comment/i);
+});
+
+test('nobody is told to add or remove «changes requested from AI Manager» by hand', () => {
+  for (const f of FILES) {
+    for (const line of read(f).split('\n')) {
+      if (!/changes requested/i.test(line)) continue;
+      assert.doesNotMatch(line, /\b(add|remove|put|set|delete|clear)\b/i, `${f}: ${line}`);
+    }
+  }
+  assert.match(read('CLAUDE.huddle.md'), /by hand/);
+});

@@ -37,8 +37,9 @@ If the work cannot go on without a decision, commit and push what is done. Then 
 ### After the review
 
 The AI Manager's requests come as comments with a `## Prompt for Claude Code` heading and a text block. Only comments by
-the `ai_manager` login in `huddle.json` count. After pushing the changes, comment «Ready for review again» with the counts
-and remove the label `changes requested from AI Manager`.
+the `ai_manager` login in `huddle.json` count. After pushing the changes, comment «Ready for review again» with the counts.
+The label `changes requested from AI Manager` is decided by the labels job from the comments and the new commits: nobody
+puts it or takes it off by hand.
 
 ### The AI Manager role
 
