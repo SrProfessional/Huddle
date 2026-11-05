@@ -4,7 +4,7 @@ import { promptOf, lastWorkAt, pendingRequests, isManager } from '../../lib/core
 
 const fence = '```';
 const ask = (text, heading = '## Prompt for Claude Code') => `🔁 Changes requested\n\n1. Fix it.\n\n${heading}\n\n${fence}text\n${text}\n${fence}\n`;
-const comment = (id, login, body, at, eyes = 0) => ({ id, user: { login }, body, created_at: at, reactions: { eyes }, html_url: `https://x/${id}` });
+const comment = (id, author, body, createdAt, taken = false) => ({ id, author, body, createdAt, taken, url: `https://x/${id}` });
 
 test('the prompt is the text block under «Prompt for Claude Code» (or the older «Prompt to continue»)', () => {
   assert.equal(promptOf(ask('Continue Issue #7.')), 'Continue Issue #7.');
@@ -20,8 +20,8 @@ test('a comment without that heading, or with a block that is not text, has no p
 });
 
 test('the AI Manager is matched by login, ignoring case', () => {
-  assert.equal(isManager({ user: { login: 'SrProfessional' } }, 'srprofessional'), true);
-  assert.equal(isManager({ user: { login: 'someone' } }, 'srprofessional'), false);
+  assert.equal(isManager({ author: 'SrProfessional' }, 'srprofessional'), true);
+  assert.equal(isManager({ author: 'someone' }, 'srprofessional'), false);
   assert.equal(isManager({}, 'srprofessional'), false);
 });
 
@@ -57,7 +57,7 @@ test('only the AI Manager counts: a prompt from anyone else is ignored (nobody e
 });
 
 test('a request someone already took (👀) is never pending again, so it never runs twice', () => {
-  const comments = [comment(1, 'mgr', ask('Do X'), '2026-11-04T10:00:00Z', 1)];
+  const comments = [comment(1, 'mgr', ask('Do X'), '2026-11-04T10:00:00Z', true)];
   assert.deepEqual(pendingRequests({ manager: 'mgr', comments, lastWork: 0 }), []);
 });
 
