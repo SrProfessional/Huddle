@@ -1,0 +1,15 @@
+{
+  "name": "huddle",
+  "owner": {
+    "name": "SrProfessional"
+  },
+  "description": "Huddle: Decision-led development for teams coding with AI.",
+  "plugins": [
+    {
+      "name": "huddle",
+      "source": "./",
+      "description": "Decision-led development for teams coding with AI.",
+      "version": "0.0.0"
+    }
+  ]
+}
