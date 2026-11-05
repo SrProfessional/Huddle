@@ -328,6 +328,82 @@ test('pending falls back to my Issues on a branch that resolves no Issue, on no 
   }
 });
 
+// --- the request labels are automatic (SocialCortex PR #139) ---
+
+const NONE = '## Depends on\n\nNone.\n';
+const CHANGES = 'changes requested from AI Manager';
+const requestWorld = (extra) => (w) => {
+  w.issue({ number: 5, title: 'five', body: NONE, assignees: ['ana'], labels: ['in progress'] });
+  extra(w);
+};
+
+test('labels puts «changes requested» on an Issue whose prompt waits, and --dry-run only says so', async () => {
+  const setup = requestWorld((w) => w.comment(5, request(401)));
+  const dry = harness({ setup });
+  assert.equal(await run(['labels', '--dry-run'], dry.ctx), 0);
+  assert.match(dry.text(), new RegExp(`#5 \\+ ${CHANGES}`));
+  assert.deepEqual(dry.world.labelsOf(5), ['in progress']);
+  const h = harness({ setup });
+  await run(['labels'], h.ctx);
+  assert.deepEqual(h.world.labelsOf(5), ['in progress', CHANGES]);
+  h.out.length = 0;
+  await run(['labels'], h.ctx);
+  assert.doesNotMatch(h.text(), new RegExp(CHANGES), 'a second run changes nothing');
+});
+
+test('labels takes «changes requested» off once the session said «Ready for review again» or pushed a newer commit', async () => {
+  const ready = harness({ setup: (w) => {
+    w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in progress', CHANGES] });
+    w.comment(5, request(401));
+    w.comment(5, { id: 402, author: 'dev', createdAt: '2026-11-05T12:00:00Z', body: 'Ready for review again\n\n12 passed' });
+  } });
+  await run(['labels'], ready.ctx);
+  assert.deepEqual(ready.world.labelsOf(5), ['in progress']);
+  const pushed = harness({ setup: (w) => {
+    w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in review', CHANGES], reviews: [50] });
+    w.review({ number: 50, commits: ['2026-11-05T12:00:00Z'] });
+    w.comment(50, request(401));
+  } });
+  await run(['labels'], pushed.ctx);
+  assert.deepEqual(pushed.world.labelsOf(5), ['in review']);
+});
+
+test('labels reads the request on the PR too, and a taken (👀) request still counts', async () => {
+  const h = harness({ setup: (w) => {
+    w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in review'], reviews: [50] });
+    w.review({ number: 50, commits: ['2026-11-05T09:00:00Z'] });
+    w.comment(50, request(401, { taken: true }));
+  } });
+  await run(['labels'], h.ctx);
+  assert.deepEqual(h.world.labelsOf(5), ['in review', CHANGES]);
+});
+
+test('labels takes «needs decision» off when the AI Manager answered with a prompt', async () => {
+  const h = harness({ setup: (w) => {
+    w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in progress', 'needs decision'] });
+    w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the AI Manager: which one?' });
+    w.comment(5, request(411, { createdAt: '2026-11-05T10:00:00Z' }));
+  } });
+  await run(['labels'], h.ctx);
+  assert.deepEqual(h.world.labelsOf(5), ['in progress', CHANGES]);
+  const waiting = harness({ setup: (w) => {
+    w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in progress', 'needs decision'] });
+    w.comment(5, request(411, { createdAt: '2026-11-05T08:00:00Z' }));
+    w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the AI Manager: which one?' });
+  } });
+  await run(['labels'], waiting.ctx);
+  assert.deepEqual(waiting.world.labelsOf(5), ['in progress', 'needs decision'], 'the question is newer: it waits for the AI Manager');
+});
+
+test('labels leaves Issues without «Depends on» alone, and uses the renamed labels', async () => {
+  const unmanaged = harness({ setup: (w) => { w.issue({ number: 5, body: 'no section', labels: [] }); w.comment(5, request(401)); } });
+  await run(['labels'], unmanaged.ctx);
+  assert.deepEqual(unmanaged.world.labelsOf(5), []);
+  const renamed = harness({ config: { ...CONFIG, labels: { changes: 'needs-changes' } }, setup: requestWorld((w) => w.comment(5, request(401))) });
+  await run(['labels'], renamed.ctx);
+  assert.deepEqual(renamed.world.labelsOf(5), ['in progress', 'needs-changes']);
+});
+
 test('hook narrows to the Issue of the branch too', async () => {
   const h = harness({ setup: branchWorld });
   h.ctx.currentBranch = async () => 'h5-thing';
