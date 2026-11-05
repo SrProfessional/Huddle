@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SrProfessional/huddle/main/huddle.schema.json",
+  "title": "huddle.json",
+  "description": "Configuration of Huddle for one repository. No secrets ever go in it.",
+  "type": "object",
+  "required": ["platform", "project", "ai_manager"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "platform": { "enum": ["github", "gitlab"], "description": "github or gitlab." },
+    "host": { "type": "string", "description": "Empty means github.com or gitlab.com." },
+    "project": { "type": "string", "minLength": 1, "description": "owner/repo on GitHub, or the project path (groups allowed) on GitLab." },
+    "ai_manager": { "type": "string", "minLength": 1, "description": "Login of the AI Manager: the only person whose comments count as requests." },
+    "assignees": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Logins of the team that get ready Issues." },
+    "max_open_per_person": { "type": "integer", "minimum": 1, "description": "Nobody gets more open Issues than this." },
+    "default_branch": { "type": "string", "minLength": 1 },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional renames of the seven status labels.",
+      "properties": {
+        "ready": { "type": "string", "minLength": 1 },
+        "assigned": { "type": "string", "minLength": 1 },
+        "progress": { "type": "string", "minLength": 1 },
+        "review": { "type": "string", "minLength": 1 },
+        "blocked": { "type": "string", "minLength": 1 },
+        "decision": { "type": "string", "minLength": 1 },
+        "changes": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
