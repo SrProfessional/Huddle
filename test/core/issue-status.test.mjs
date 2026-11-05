@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { dependsOn, LABELS, statusOf, plan } from '../../lib/core/issue-status.mjs';
 
 const body = (deps) => `## Goal\n\nSomething.\n\n## Depends on\n\n${deps}\n\n## Branch\n\n\`x\`\n`;
-const closed = new Map([[40, { state: 'CLOSED', stateReason: 'COMPLETED' }], [41, { state: 'OPEN', stateReason: '' }], [9, { state: 'CLOSED', stateReason: 'NOT_PLANNED' }]]);
+const closed = new Map([[40, { open: false, merged: true }], [41, { open: true, merged: false }], [9, { open: false, merged: false }]]);
 
 test('reads the issue numbers of the «Depends on» section only', () => {
   assert.deepEqual(dependsOn(body('- #40: its API.\n- #41: the order (see #99 in the text).')), [40, 41, 99]);
@@ -27,10 +27,10 @@ test('a dependency closed without being completed, or that does not exist, still
 
 test('the plan only changes what is wrong, and leaves other labels alone', () => {
   const open = [
-    { number: 50, body: body('- #40'), assignees: [], labels: [{ name: 'bug' }] },
-    { number: 51, body: body('- #41'), assignees: [], labels: [{ name: LABELS.blocked.name }] },
-    { number: 52, body: body('- #40'), assignees: [{ login: 'a' }], labels: [{ name: LABELS.ready.name }] },
-    { number: 53, body: '## Goal\n\nNo section.\n', assignees: [], labels: [{ name: LABELS.ready.name }] },
+    { number: 50, body: body('- #40'), assignees: [], labels: ['bug'] },
+    { number: 51, body: body('- #41'), assignees: [], labels: [LABELS.blocked.name] },
+    { number: 52, body: body('- #40'), assignees: ['a'], labels: [LABELS.ready.name] },
+    { number: 53, body: '## Goal\n\nNo section.\n', assignees: [], labels: [LABELS.ready.name] },
   ];
   const p = plan({ open, issues: closed });
   assert.deepEqual(p.map((x) => [x.number, x.add, x.remove]), [
