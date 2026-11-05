@@ -7,13 +7,16 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
 1. Install Claude Code, Node 22 or newer and `git`.
 2. Install `gh` (GitHub) or `glab` (GitLab) and log in yourself, with `gh auth login` or `glab auth login`. For a
    self-managed GitLab add `--hostname <your server>`. Never paste a token into a chat, a file or an Issue.
-3. Clone the team's repo, and clone Huddle next to it:
+3. Clone the team's repo and open Claude Code in it. If the repo commits the Huddle marketplace in its
+   `.claude/settings.json`, Claude Code offers the plugin once you trust the folder. If not, install it yourself:
 
-   ```sh
-   git clone https://github.com/SrProfessional/huddle.git
+   ```text
+   /plugin marketplace add SrProfessional/Huddle
+   /plugin install huddle@huddle
    ```
 
-4. Open Claude Code in the team's repo with the plugin: `claude --plugin-dir ../huddle`.
+   You do not need to clone Huddle. Cloning it is only for people who work on Huddle itself, with
+   `claude --plugin-dir ./Huddle` (see the [README](../README.md#install)).
 
 ## 2. Check it works
 

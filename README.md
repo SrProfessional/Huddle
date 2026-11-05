@@ -41,18 +41,41 @@ You need, on the machine of the person who sets the project up (the AI Manager):
   **GitLab:** the [`glab`](https://gitlab.com/gitlab-org/cli) CLI, logged in with `glab auth login`
   (add `--hostname gitlab.example.com` for a self-managed server).
 
-Get the plugin and start Claude Code with it:
+Install the plugin from its marketplace. In Claude Code run:
 
-```sh
-git clone https://github.com/SrProfessional/huddle.git
-claude --plugin-dir ./huddle
+```text
+/plugin marketplace add SrProfessional/Huddle
+/plugin install huddle@huddle
 ```
 
-In this guide `huddle <command>` is the CLI. If `huddle` is not on your PATH, run `node ./huddle/bin/huddle <command>`
-(the path of your clone). Inside a session, the skills run it for you.
+To give the plugin to every developer of a project, commit this in the project's `.claude/settings.json`. Claude Code
+offers the marketplace and the plugin to each developer who trusts the folder:
 
-Huddle has no runtime dependencies, so there is nothing to `npm install`. Every developer of the team repeats these two
-lines (and logs in to `gh` or `glab`) once.
+```json
+{
+  "extraKnownMarketplaces": {
+    "huddle": {
+      "source": { "source": "github", "repo": "SrProfessional/Huddle" }
+    }
+  },
+  "enabledPlugins": {
+    "huddle@huddle": true
+  }
+}
+```
+
+In this guide `huddle <command>` is the CLI. Inside a session, the skills run it for you. Outside a session, run it from
+the plugin's folder, for example `node <plugin folder>/bin/huddle <command>`.
+
+Huddle has no runtime dependencies, so there is nothing to `npm install`. Every developer of the team installs the plugin
+(and logs in to `gh` or `glab`) once. To update it later, see [Updating Huddle](docs/team-guide.md#updating-huddle).
+
+To work on Huddle itself, clone it and load your clone instead of the marketplace copy:
+
+```sh
+git clone https://github.com/SrProfessional/Huddle.git
+claude --plugin-dir ./Huddle
+```
 
 ## Quickstart for GitHub
 

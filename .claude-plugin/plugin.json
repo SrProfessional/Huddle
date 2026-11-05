@@ -1,5 +1,8 @@
 {
   "name": "huddle",
   "version": "0.0.0",
-  "description": "Decision-led development for teams coding with AI."
+  "description": "Decision-led development for teams coding with AI.",
+  "author": {
+    "name": "SrProfessional"
+  }
 }
