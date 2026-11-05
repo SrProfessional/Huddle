@@ -19,13 +19,24 @@ test('the session\'s «in progress» label is the sign that it started, and stay
   assert.deepEqual(plan({ open, issues: done }).map((c) => [c.number, c.add, c.remove]), [[2, LABELS.assigned.name, [LABELS.ready.name]]]);
 });
 
-test('an Issue that lost its dependency or its person drops «in progress»', () => {
+// Ported from SocialCortex (PR #138), with neutral shapes.
+test('a started Issue that gets a new dependency keeps «in progress» next to «blocked»; one that lost its person drops it', () => {
   const open = [
     { number: 3, body: '## Depends on\n\n- #41\n\n## Branch\n', assignees: ['a'], labels: [LABELS.progress.name] },
     { number: 4, body, assignees: [], labels: [LABELS.progress.name] },
   ];
   assert.deepEqual(plan({ open, issues: done }).map((c) => [c.number, c.add, c.remove]), [
-    [3, LABELS.blocked.name, [LABELS.progress.name]],
+    [3, LABELS.blocked.name, []],
     [4, LABELS.ready.name, [LABELS.progress.name]],
   ]);
+});
+
+test('a started Issue that was blocked goes back to «in progress», not «assigned», once its dependency is merged', () => {
+  const open = [{ number: 5, body, assignees: ['a'], labels: [LABELS.blocked.name, LABELS.progress.name] }];
+  assert.deepEqual(plan({ open, issues: done }).map((c) => [c.number, c.add, c.remove]), [[5, null, [LABELS.blocked.name]]]);
+});
+
+test('a blocked Issue that never started gets only «blocked»', () => {
+  const open = [{ number: 6, body: '## Depends on\n\n- #41\n\n## Branch\n', assignees: ['a'], labels: [LABELS.assigned.name] }];
+  assert.deepEqual(plan({ open, issues: done }).map((c) => [c.number, c.add, c.remove]), [[6, LABELS.blocked.name, [LABELS.assigned.name]]]);
 });
