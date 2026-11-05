@@ -1,0 +1,35 @@
+# Huddle: keeps the status labels of the Issues up to date from each «Depends on» section.
+# Copied by `huddle-setup`; add `include: local: huddle-labels.gitlab-ci.yml` to .gitlab-ci.yml.
+#
+# GitLab CI does not react to Issue events, so this job runs on a pipeline schedule and on every MR pipeline.
+# Create the schedule in CI/CD > Schedules, with the cron `*/10 * * * *`, on the default branch.
+#
+# It needs a token: the job token cannot edit Issues. The AI Manager creates a project access token with the `api` scope
+# and stores it as the CI variable HUDDLE_TOKEN (masked and protected). This file only reads the variable; the job
+# never prints it and never turns on shell tracing.
+
+huddle-labels:
+  stage: .post
+  image: node:24
+  variables:
+    # Which version of Huddle to run (a release tag or a full commit SHA to pin it) and which glab to install.
+    HUDDLE_REF: main
+    GLAB_VERSION: "1.50.0"
+    GIT_DEPTH: "1"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  resource_group: huddle-labels
+  script:
+    - |
+      if [ -z "$HUDDLE_TOKEN" ]; then
+        echo "HUDDLE_TOKEN is not set: the AI Manager must add it as a masked, protected CI variable." >&2
+        exit 1
+      fi
+    - export GITLAB_TOKEN="$HUDDLE_TOKEN"
+    - export GITLAB_HOST="$CI_SERVER_FQDN"
+    - curl -fsSL -o /tmp/glab.deb "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_linux_amd64.deb"
+    - dpkg -i /tmp/glab.deb
+    - git clone --quiet https://github.com/SrProfessional/huddle.git /tmp/huddle
+    - git -C /tmp/huddle checkout --quiet "$HUDDLE_REF"
+    - node /tmp/huddle/bin/huddle labels
