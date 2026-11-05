@@ -1,4 +1,4 @@
-# Huddle as an open-source Claude Code plugin — design
+# Huddle as an open-source Claude Code plugin: design
 
 **Name:** Huddle: Decision-led development for teams coding with AI
 **Status:** approved by the AI Manager (2026-11-05)
