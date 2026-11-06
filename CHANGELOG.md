@@ -32,6 +32,14 @@ Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub
 
 ### Fixed
 
+- `/huddle-setup` compares a template with the project's copy ignoring line endings. On Windows with `core.autocrlf=true`
+  the copy has CRLF, and a refresh used to skip it as «edited by the project». A copy that differs only in line endings is
+  now refreshed and keeps the line ending it already has (CRLF stays CRLF); a copy with a real edit is still kept.
+- GitLab `huddle take` and `huddle labels` were slow (over 2 minutes on a real project): one `glab` call per note for its
+  👀 award. The adapter now reads the award only for the notes that could be a request (by the AI Manager, with a «Prompt for
+  Claude Code» heading, newer than the last commit or «Ready for review again»), and runs those calls 8 at a time. For an
+  Issue with 30 notes, 2 of them requests, `comments` goes from 31 `glab` calls to 3. The adapter reads `ai_manager` from
+  `huddle.json`; without it every note is read, as before.
 - GitLab: a request left on a merge request is now seen. Issues and MRs are numbered separately on GitLab, so the adapter
   read the notes of MR !2 as the notes of Issue #2 (`huddle pending` said «Nothing pending» and no label moved). Notes,
   the 👀 award, note edits and new notes of an MR now use `merge_requests/:iid` (`comments`, `postComment`, `editComment`
