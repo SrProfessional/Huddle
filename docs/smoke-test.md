@@ -26,13 +26,18 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
    `assignees` = the developer login), the CLAUDE.md block, the Issue and PR/MR templates, the labels job, and
    `.claude/settings.json` with `extraKnownMarketplaces.huddle` and `enabledPlugins["huddle@huddle"]`. Open
    `.claude/settings.json` and check both keys are there: setup wrote it, not you by hand.
-4. [ ] Merge the setup to the default branch. **The settings snippet that setup wrote offers the plugin to the developer
-   session:** open a fresh clone of the sandbox in a developer session **without** Huddle installed (a clean user profile,
-   or after `claude plugin uninstall huddle@huddle`) and trust the folder. Do it twice, in the CLI and in the VS Code
-   extension. Each must offer the `huddle` marketplace and the plugin; accept; `claude plugin list` then shows
-   `huddle@huddle` enabled and `/huddle-start` is available. Note in Results whether each one offered the plugin.
+4. [ ] Merge the setup to the default branch. **Each developer installs Huddle once on their machine** (see
+   [first-day.md](first-day.md)): the settings snippet is only a helper and does not offer the plugin to a session that
+   has not installed it. In the developer session run `claude plugin marketplace add SrProfessional/Huddle` and
+   `claude plugin install huddle@huddle`, open a new session in a fresh clone of the sandbox, and run `huddle doctor`: it
+   shows ✔ on `plugin`, and `/huddle-start` is available. Note in Results what you saw.
 5. [ ] **GitLab only:** do the schedule and `HUDDLE_TOKEN` steps of [gitlab.md](gitlab.md) (Maintainer token, scope `api`,
    masked and protected variable; schedule `*/10 * * * *` on the default branch). Do the token step yourself.
+   Then check the two machine requirements of [gitlab.md](gitlab.md#on-the-developers-machine): `glab` is on the PATH of
+   the terminal that starts Claude (on Windows, open a new terminal after installing it; without it the hook stays
+   silent and `huddle doctor` shows ✖ on `login`), and Git uses `glab` for gitlab.com
+   (`git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"`, then `git ls-remote origin`
+   works without a prompt). Labels change by the schedule, so they can take up to 10 minutes.
 6. [ ] `huddle doctor`: ✔ on `huddle.json`, `login` and `ai_manager`. `labels` fails on a new repo, as the labels do not
    exist yet.
 7. [ ] Run `huddle labels` once on the new repo: it prints «7 labels created.».
@@ -78,9 +83,10 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
 1. [ ] As the AI Manager, post a second `## Prompt for Claude Code` request on the PR/MR. Close the developer session
    without taking it.
 2. [ ] Open a new developer session in the sandbox with the installed plugin (no `--plugin-dir`): `claude`, in the sandbox clone.
-3. [ ] When the session opens, **before typing anything**, the developer sees the visible line «Huddle: the AI Manager left
-   1 request…» (within the 45 s timeout), and `huddle pending` lists it. After the first message, Claude asks whether to
-   continue.
+3. [ ] **In the CLI** (`claude` in a terminal), when the session opens and **before typing anything**, the developer sees
+   the visible line «Huddle: the AI Manager left 1 request…» (within the 45 s timeout), and `huddle pending` lists it.
+   After the first message, Claude asks whether to continue. **In the VS Code panel** nothing shows until the first
+   message; then Claude asks. That is expected behavior, not a failure: note it in Results.
 4. [ ] Offline (network off), a new session still opens quickly and the hook stays silent.
 5. [ ] The developer takes the request (`huddle take <A>`), pushes, and comments «Ready for review again».
 
@@ -107,22 +113,24 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
 
 ## Results
 
-Fill in one row per step before the release PR is merged, with the date, the Huddle commit and anything unexpected.
-Copy the table into the PR description.
-
-Date: ________  Huddle commit: ________  AI Manager: ________
+Results of the run of 2026-11-06 (Huddle `main` with H12, H14 and H15; AI Manager SrProfessional; GitHub sandbox
+`SrProfessional/huddle-sandbox-2`, GitLab sandbox `SrProfessional/huddle-sandbox` on gitlab.com). For the next release,
+run the checklist again and replace the table, with the date, the Huddle commit and anything unexpected. Copy the table
+into the PR description.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|
-| 1. Setup | | | |
-| 2. Issue with a dependency | | | |
-| 3. Start | | | |
-| 4. PR / MR | | | |
-| 5. Review request taken | | | |
-| 6. Hook on reopen | | | |
-| 7. Merge | | | |
-| 8. Dependency unblocks | | | |
-| 9. Clean up | | | |
+| 1. Setup | ✔ | ✔ | Install by terminal (`claude plugin …`). Setup writes `.claude/settings.json`. GitHub: «7 labels created.». GitLab: the MR pipeline skips green without the protected token, and the schedule on `main` runs labels. The snippet does not offer the plugin (documented in H14): each developer installs once. |
+| 2. Issue with a dependency | ✔ | ✔ | A assigned, B blocked |
+| 3. Start | ✔ | ✔ | B refused, A started in its own worktree |
+| 4. PR / MR | ✔ | ✔ | `Closes #A`, in progress → in review |
+| 5. Review request taken | ✔ (5.5 not testable) | ✔ | GitLab: the request is left **only on the MR** and is pending, taken 👀, then cleared. 5.5 needs a second account. |
+| 6. Hook on reopen | ✔ CLI / VS Code panel: no visible line | ✔ CLI | The visible line shows in the CLI before typing; the VS Code panel shows nothing until the first message, then Claude asks. Offline: silent in 0.5 s. GitLab: silent when `glab` is not on PATH. |
+| 7. Merge | ✔ | ✔ | Merge commit, branch kept, Issue closed |
+| 8. Dependency unblocks | ✔ | ✔ | Control D closed with the normal «Close issue»: C stays blocked |
+| 9. Clean up | after the release | after the release | |
+
+Found and fixed during the test: H12 (#25), H14 (#29), H15 (#32).
 
 Write ✔ or ✘ in each cell. Any ✘ blocks the release: open an Issue for it, fix it, and run the whole checklist again on
 the platform that failed.

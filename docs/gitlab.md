@@ -61,6 +61,25 @@ once per project:
 
 Huddle only reads the variable. It never reads a token from a file, never prints it and never turns on shell tracing.
 
+## On the developer's machine
+
+Every developer who works on a GitLab repo needs two things on their own machine. The AI Manager checks them once in
+the [smoke test](smoke-test.md).
+
+1. **`glab` must be on the PATH of the terminal that starts Claude.** If it is not, the SessionStart hook stays silent
+   and `huddle doctor` shows ✖ on `login`. After installing `glab` on Windows, open a new terminal (or reload the PATH).
+2. **Git must use `glab` for gitlab.com.** If it does not, a session cannot push: the credential manager cannot open a
+   browser from a session. In a terminal where `glab` is on the PATH run:
+
+   ```text
+   git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"
+   ```
+
+   and check it with `git ls-remote origin`: it must answer with no prompt. (For a self-managed host, use that host
+   instead of `gitlab.com`.)
+
+Labels change by the schedule, so they can take up to 10 minutes (see [The schedule](#the-schedule)).
+
 ## What works differently
 
 | On GitLab | What Huddle does |
