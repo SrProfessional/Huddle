@@ -73,3 +73,13 @@ test('GitLab gets the same settings.json', () => inTemp((root) => {
   setup(root, { platform: 'gitlab', project: 'team/app', ai_manager: 'santiago' });
   assert.deepEqual(settings(root), SNIPPET);
 }));
+
+// Finding 4: the skill gave examples for platform, host and project but none for the AI Manager and the team.
+test('the huddle-setup skill gives examples for the AI Manager and the team, and says it writes settings.json', () => {
+  const t = readFileSync(new URL('../../skills/huddle-setup/SKILL.md', import.meta.url), 'utf8');
+  assert.match(t, /\*\*AI Manager:\*\*[^\n]*for example `SrProfessional`/);
+  assert.match(t, /gh api user/);
+  assert.match(t, /glab api user/);
+  assert.match(t, /\*\*Team:\*\*[^\n]*for example `SrProfessional, Santiago123`/);
+  assert.match(t, /\.claude\/settings\.json/);
+});
