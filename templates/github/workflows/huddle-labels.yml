@@ -37,7 +37,7 @@ jobs:
           node-version: 24
       - name: Get Huddle
         run: |
-          git clone --quiet https://github.com/SrProfessional/huddle.git "$RUNNER_TEMP/huddle"
+          git clone --quiet https://github.com/SrProfessional/Huddle.git "$RUNNER_TEMP/huddle"
           git -C "$RUNNER_TEMP/huddle" checkout --quiet "$HUDDLE_REF"
       - name: Update the labels
         run: node "$RUNNER_TEMP/huddle/bin/huddle" labels

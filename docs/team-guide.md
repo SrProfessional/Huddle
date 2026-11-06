@@ -75,6 +75,8 @@ and fill the AI Manager's queue with half-reviewed PRs. More speed comes from mo
 ## Updating Huddle
 
 Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
-of `/plugin` (or run `claude plugin update huddle@huddle`). If you work from a clone with `--plugin-dir`, pull it
+of `/plugin` (or run `claude plugin update huddle@huddle`). The VS Code extension has no `/plugin`: in a terminal run
+`claude plugin marketplace update huddle` and `claude plugin update huddle@huddle`. Either way, open a new session after
+the update. If you work from a clone with `--plugin-dir`, pull it
 instead. Then run `/huddle-setup` again, on a branch. It replaces only what is between
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->` in `CLAUDE.md`, so your own rules stay. Edited templates are kept.
