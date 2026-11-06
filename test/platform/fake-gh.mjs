@@ -150,6 +150,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
     labelsOf: (n) => [...issues.get(n).labels],
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries(repoLabels),
+    repoLabel(name) { repoLabels.set(name, { color: 'ededed', description: '' }); },
     commentBody: (id) => comments.get(id)?.body,
     isTaken: (id) => comments.get(id).reactions.eyes > 0,
     merged: () => [...merged],

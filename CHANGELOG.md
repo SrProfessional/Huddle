@@ -25,3 +25,6 @@ Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub
 
 - GitHub: an Issue closed by hand with «Close issue» (which also closes as «completed») no longer unblocks the Issues that
   depend on it. A dependency is merged only when the last close was done by a merged PR (read from the Issue's closing event).
+- The SessionStart hook now also prints a visible line (`systemMessage`) for the developer when a request from the AI
+  Manager is pending, besides the context for Claude. With nothing pending, or offline, it stays silent.
+- `huddle labels` says how many labels it created («7 labels created.»), and `--dry-run` how many it would create.
