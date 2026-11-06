@@ -63,11 +63,45 @@ and the session continues on the same branch. The session never closes the Issue
 Many sessions at once slow the machine (each runs tests and builds), split your attention until your answers get rushed,
 and fill the AI Manager's queue with half-reviewed PRs. More speed comes from more developers, not more windows.
 
+## Progress
+
+A project has **areas**, and the areas are **milestones** (GitHub and GitLab both have them). Each Issue goes in one
+milestone; `/huddle-issue` asks which. Huddle only reads milestones: it never creates or edits them.
+
+The percentage of an area counts the work that is not written yet. The AI Manager writes an estimate of the Issues still
+missing in the milestone description, on a line of its own:
+
+```text
+Huddle remaining: 4
+```
+
+For one area, `merged` is the Issues that a merged PR/MR closed, `total` is `merged` plus the Issues still open, and the
+percentage is `merged ÷ (total + remaining)`, rounded down to a whole number.
+
+- An Issue closed «not planned», or closed by hand, counts in neither part.
+- No line (or one that is not a whole number) means remaining 0, and the report says the estimate is missing.
+- An area with nothing to count shows a dash, never `NaN`.
+- The total of the project is the sum of `merged` over the sum of `total + remaining`. It covers the open milestones and the
+  ones closed in the last 90 days.
+- Open Issues with no milestone are listed as «no area» and left out of every percentage.
+
+You see it in three places:
+
+1. `huddle progress` prints the table, with a text bar, and the total. `huddle progress --json` prints the data.
+2. A **«Huddle progress» Issue**, created by the labels job and rewritten after each run, only when its text changes. On
+   GitHub it is pinned. It has no «Depends on», so the labels logic ignores it. Set `"progress_issue": false` in
+   `huddle.json` to turn it off.
+3. One line when a session opens, for example `Progress: Content 60% · Social networks 100% · Ads 0% · Total 53%`.
+
+Progress never blocks the labels: if reading milestones fails, the labels are still updated and the run prints one line
+about it.
+
 ## Every day
 
 | I want to | Run |
 |---|---|
 | Know if something is waiting for me | `huddle pending` |
+| See how far each area has come | `huddle progress` |
 | Check my setup | `huddle doctor` |
 | See what the labels job would change | `huddle labels --dry-run` |
 | Continue after a request | `/huddle-start`, or answer yes to the hook |

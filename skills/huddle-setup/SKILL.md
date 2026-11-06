@@ -28,4 +28,7 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
    schedule and the `HUDDLE_TOKEN` variable: only the AI Manager sets those up).
 4. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` and show the result. If it reports a missing label, run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` (the AI Manager's login only).
-5. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.
+5. Tell the developer, in one line: the areas of the project are its milestones, and each area's percentage counts the
+   Issues still to write, which the AI Manager states on a line of the milestone description, for example `Huddle remaining: 4`
+   (see `huddle progress`).
+6. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.

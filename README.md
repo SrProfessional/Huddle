@@ -232,7 +232,8 @@ windows.
 | `huddle wait <n>` | Session | Waits in the background for the AI Manager's request on Issue `n`. |
 | `huddle take <n>` | Session | Marks the pending request 👀 and prints its prompt. |
 | `huddle pending [n]` | Anyone | Lists the requests nobody has done yet. |
-| `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending. |
+| `huddle progress [--json]` | Anyone | Shows how far each area (milestone) has come, as a percentage, and the total. |
+| `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
 | `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager and the labels. |
 
 ## What the plugin adds
@@ -242,6 +243,8 @@ The method works with plain Issues and a good `CLAUDE.md`. The plugin takes the 
 - Status labels that move on their own: ready, assigned, in progress, in review, blocked, needs decision, and changes
   requested from AI Manager.
 - A dependency check before a session starts: if an Issue it depends on is not merged yet, the session does not begin.
+- Progress by area: milestones are the areas, and `huddle progress`, a pinned «Huddle progress» Issue and one line when a
+  session opens show each area's percentage and the total (see the [team guide](docs/team-guide.md#progress)).
 - Skills to set a project up, start an Issue, write a new Issue, review a pull request and ask for a decision.
 - A session that waits for the review on its own and picks up the AI Manager's requested changes as soon as they arrive.
 - The same commands on GitHub, on gitlab.com and on a company's own GitLab server.

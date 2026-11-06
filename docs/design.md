@@ -221,7 +221,7 @@ The progress Issue itself is not counted.
 **Three places.**
 
 1. **A «Huddle progress» Issue.** The labels job creates it once and rewrites it after the labels, only when its text
-   changes. It is found by a marker comment in its body, `<!-- huddle:progress -->`, never by its title. It has no
+   changes. A project with no milestones gets none. It is found by a marker comment in its body, `<!-- huddle:progress -->`, never by its title. It has no
    «Depends on», so the labels logic ignores it. On GitHub it is pinned; GitLab has no pinned Issues, so it is only
    created. `"progress_issue": false` in `huddle.json` turns it off.
 2. **`huddle progress`**, a table of areas with a text bar and the total. `--json` prints the data.
