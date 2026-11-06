@@ -7,27 +7,29 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
 1. Install Claude Code, Node 22 or newer and `git`.
 2. Install `gh` (GitHub) or `glab` (GitLab) and log in yourself, with `gh auth login` or `glab auth login`. For a
    self-managed GitLab add `--hostname <your server>`. Never paste a token into a chat, a file or an Issue.
-3. Clone the team's repo and open Claude Code in it. If the repo commits the Huddle marketplace in its
-   `.claude/settings.json`, Claude Code offers the plugin once you trust the folder. If not, install it yourself:
-
-   ```text
-   /plugin marketplace add SrProfessional/Huddle
-   /plugin install huddle@huddle
-   ```
-
-   The VS Code extension has no `/plugin`. Run this in a terminal, then open a new session:
+3. Install Huddle once on your machine, whatever the repo commits. In a terminal run, then open a new session:
 
    ```text
    claude plugin marketplace add SrProfessional/Huddle
    claude plugin install huddle@huddle
    ```
 
+   In the CLI the same works as `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`.
+   The VS Code extension has no `/plugin`, so use the terminal form.
+
+   The team's repo may commit a `.claude/settings.json` snippet. It is only a helper: it enables the plugin for the
+   project and, in the CLI, registers the marketplace silently, only after the trust dialog of that folder itself. If a
+   parent folder is already trusted there is no dialog and it is not used, and it is not documented for the VS Code
+   extension. Do not wait for it: install Huddle yourself.
+
+4. Clone the team's repo and open Claude Code in it.
+
    You do not need to clone Huddle. Cloning it is only for people who work on Huddle itself, with
    `claude --plugin-dir ./Huddle` (see the [README](../README.md#install)).
 
 ## 2. Check it works
 
-Run `huddle doctor`. You want ✔ on `huddle.json`, `login`, `ai_manager` and `labels`. If `login` fails, log in again. If
+Run `huddle doctor`. You want ✔ on `plugin`, `huddle.json`, `login`, `ai_manager` and `labels`. If `login` fails, log in again. If
 `labels` fails, tell the AI Manager: only they run `huddle labels`.
 
 Read `CLAUDE.md` (the Huddle block holds the rules) and [the team guide](team-guide.md). They take ten minutes and answer

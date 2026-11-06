@@ -33,7 +33,8 @@ asking.
 
 ## Install
 
-You need, on the machine of the person who sets the project up (the AI Manager):
+**Every developer installs Huddle once, on their own machine.** Committing a settings snippet to the repo does not do it
+for them (see [the settings snippet](#the-settings-snippet-is-a-helper)). You need:
 
 - [Claude Code](https://claude.com/claude-code).
 - Node 22 or newer and `git`.
@@ -41,22 +42,29 @@ You need, on the machine of the person who sets the project up (the AI Manager):
   **GitLab:** the [`glab`](https://gitlab.com/gitlab-org/cli) CLI, logged in with `glab auth login`
   (add `--hostname gitlab.example.com` for a self-managed server).
 
-Install the plugin from its marketplace. In Claude Code run:
-
-```text
-/plugin marketplace add SrProfessional/Huddle
-/plugin install huddle@huddle
-```
-
-The VS Code extension has no `/plugin`. Run the terminal form in any terminal instead, then open a new session:
+Install the plugin from its marketplace. Run this once in any terminal (it is the way that works in the CLI and in the
+VS Code extension), then open a new session:
 
 ```text
 claude plugin marketplace add SrProfessional/Huddle
 claude plugin install huddle@huddle
 ```
 
-To give the plugin to every developer of a project, commit this in the project's `.claude/settings.json` (`/huddle-setup` writes it for you). Claude Code
-offers the marketplace and the plugin to each developer who trusts the folder:
+In the Claude Code CLI you can run the same as `/plugin` commands, then open a new session:
+
+```text
+/plugin marketplace add SrProfessional/Huddle
+/plugin install huddle@huddle
+```
+
+The VS Code extension has no `/plugin`, so use the terminal form there.
+
+### The settings snippet is a helper
+
+`/huddle-setup` also writes this into the project's `.claude/settings.json`. It enables the plugin for the project and,
+in the CLI, registers the marketplace silently, only after the trust dialog of that folder itself. It does not install
+anything for a developer who has not done the step above: when a parent folder is already trusted there is no dialog and
+the marketplace key is not used, and it is not documented for the VS Code extension. Keep it as a helper, not as the way in.
 
 ```json
 {
@@ -75,7 +83,7 @@ In this guide `huddle <command>` is the CLI. Inside a session, the skills run it
 the plugin's folder, for example `node <plugin folder>/bin/huddle <command>`.
 
 Huddle has no runtime dependencies, so there is nothing to `npm install`. Every developer of the team installs the plugin
-(and logs in to `gh` or `glab`) once. To update it later, see [Updating Huddle](docs/team-guide.md#updating-huddle).
+(and logs in to `gh` or `glab`) once. `huddle doctor` has a «plugin» check that tells you if it runs from an installed plugin. To update it later, see [Updating Huddle](docs/team-guide.md#updating-huddle).
 
 To work on Huddle itself, clone it and load your clone instead of the marketplace copy:
 
@@ -114,7 +122,8 @@ CI job token cannot edit Issues.
    `huddle-labels.gitlab-ci.yml`, and inserts the Huddle block in `CLAUDE.md`. Add
    `include: local: huddle-labels.gitlab-ci.yml` to your `.gitlab-ci.yml`.
 4. Run `huddle doctor`, then `huddle labels` if a label is missing.
-5. **Create the schedule:** CI/CD > Schedules, cron `*/10 * * * *`, on the default branch.
+5. **Create the schedule:** CI/CD > Schedules, cron `*/10 * * * *`, on the default branch. The schedule is what updates
+   the labels, so on GitLab a label can take up to 10 minutes to change, also after a push.
 6. **Create the token:** a project access token with the `api` scope, stored as the masked, protected CI variable
    `HUDDLE_TOKEN`.
 7. Commit, push and open a merge request. Merge it.

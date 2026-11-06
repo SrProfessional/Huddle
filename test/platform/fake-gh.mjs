@@ -147,6 +147,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
     comment(issue, { id, author, body, createdAt, taken = false }) {
       comments.set(id, { id, issue, body, created_at: createdAt, html_url: `https://github.test/${project}/issues/${issue}#c${id}`, user: { login: author }, reactions: { eyes: taken ? 1 : 0 } });
     },
+    /** A comment on PR `pr`. On GitHub a PR is also an Issue, so it is the same call as `comment`. */
+    reviewComment(pr, c) { this.comment(pr, c); },
     labelsOf: (n) => [...issues.get(n).labels],
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries(repoLabels),

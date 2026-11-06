@@ -39,6 +39,17 @@ test('the GitLab guide covers the schedule, the HUDDLE_TOKEN step and a self-man
   assert.match(t, /"host"/);
 });
 
+test('GitLab docs: token stays protected, MR pipelines skip, labels lag up to 10 minutes also after a push', () => {
+  const t = read('docs/gitlab.md');
+  assert.match(t, /Huddle: HUDDLE_TOKEN is only available on protected branches/);
+  assert.match(t, /up to 10 minutes[^.]*also after a push/s);
+  assert.match(t, /`test` stage/);
+  for (const f of ['README.md', 'docs/gitlab.md', 'docs/team-guide.md', 'docs/first-day.md', 'docs/roles.md']) {
+    assert.doesNotMatch(read(f), /push[^.\n]*updates it at once/i, f);
+  }
+  assert.match(read('README.md'), /up to 10 minutes[^.]*also after a push/s);
+});
+
 // --- every command in the docs exists in the CLI or the skills ---------------------------------------------------------------
 
 const CLI = ['labels', 'wait', 'take', 'pending', 'hook', 'doctor'];

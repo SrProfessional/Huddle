@@ -72,6 +72,17 @@ and fill the AI Manager's queue with half-reviewed PRs. More speed comes from mo
 | See what the labels job would change | `huddle labels --dry-run` |
 | Continue after a request | `/huddle-start`, or answer yes to the hook |
 
+## Installing Huddle
+
+Every developer installs Huddle once on their own machine: in a terminal run `claude plugin marketplace add SrProfessional/Huddle`
+and `claude plugin install huddle@huddle`, then open a new session (in the CLI, `/plugin marketplace add ...` and
+`/plugin install ...` work too). The AI Manager sends these two commands to each developer after `/huddle-setup`.
+
+The `.claude/settings.json` snippet that setup writes is only a helper. It enables the plugin for the project and, in the
+CLI, registers the marketplace silently, only after the trust dialog of that folder itself. When a parent folder is already
+trusted there is no dialog and it is not used, and it is not documented for the VS Code extension. `huddle doctor` shows
+a «plugin» line so a developer can check their own machine.
+
 ## Updating Huddle
 
 Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
