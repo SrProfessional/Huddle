@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-// Huddle: one CLI. labels | wait | take | pending | hook | doctor. See lib/cli/run.mjs.
-import { main } from '../lib/cli/main.mjs';
+// Huddle: one CLI. labels | wait | take | pending | progress | hook | doctor. See lib/cli/run.mjs.
+import { endProcess, main } from '../lib/cli/main.mjs';
 
-process.exitCode = await main(process.argv.slice(2));
+const argv = process.argv.slice(2);
+const code = await main(argv);
+process.exitCode = code;
+endProcess(argv, code); // the hook does not wait for a child process that is still running

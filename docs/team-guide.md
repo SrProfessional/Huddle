@@ -93,6 +93,9 @@ You see it in three places:
    `huddle.json` to turn it off.
 3. One line when a session opens, for example `Progress: Content 60% · Social networks 100% · Ads 0% · Total 53%`.
 
+If someone closes the «Huddle progress» Issue, the next labels run creates a new one and pins it. GitHub pins at most 3
+Issues, so unpin an old one if the pin fails (the run says so in one line).
+
 Progress never blocks the labels: if reading milestones fails, the labels are still updated and the run prints one line
 about it.
 

@@ -38,6 +38,41 @@ test('[github] closed milestones are paged newest first and paging stops at the 
   assert.equal(calls.length, 3);
 });
 
+test('[github] a milestone closed long ago but edited recently is not in the window: closedAt decides, updatedAt only stops the paging', async () => {
+  const { run, world } = fakeGithub();
+  const adapter = createGithub({ project: 'acme/app' }, { run });
+  world.milestone({ title: 'Edited yesterday', state: 'closed', closedAt: '2026-04-20T00:00:00Z', updatedAt: '2026-11-05T00:00:00Z' }); // closed 200 days ago
+  world.milestone({ title: 'Closed last month', state: 'closed', closedAt: '2026-10-06T00:00:00Z' });
+  world.issue({ number: 1, milestone: 'Edited yesterday', state: 'merged' });
+  world.issue({ number: 2, milestone: 'Closed last month', state: 'merged' });
+  const found = await adapter.listMilestones({ since: '2026-08-08T00:00:00.000Z' });
+  assert.deepEqual(found.map((m) => m.title), ['Closed last month']);
+});
+
+test('[gitlab] closed_by calls run at most 8 at a time, however many closed Issues a milestone has', async () => {
+  const { run, world, project } = fakeGitlab();
+  let running = 0, peak = 0, closedByCalls = 0;
+  const slow = async (args, opts) => {
+    const isClosedBy = args.some((a) => String(a).includes('/closed_by'));
+    if (!isClosedBy) return run(args, opts);
+    closedByCalls += 1;
+    running += 1;
+    peak = Math.max(peak, running);
+    await new Promise((r) => setTimeout(r, 5));
+    running -= 1;
+    return run(args, opts);
+  };
+  const adapter = createGitlab({ project }, { run: slow });
+  world.milestone({ title: 'Big' });
+  for (let n = 1; n <= 30; n++) world.issue({ number: n, milestone: 'Big', state: 'merged' });
+  const [m] = await adapter.listMilestones({ since: '2026-08-08T00:00:00.000Z' });
+  assert.equal(m.issues.length, 30);
+  assert.ok(m.issues.every((i) => i.merged));
+  assert.equal(closedByCalls, 30, 'one call per closed Issue');
+  assert.ok(peak <= 8, `at most 8 at once (saw ${peak})`);
+  assert.ok(peak > 1, 'still concurrent');
+});
+
 test('[gitlab] pinIssue does nothing (GitLab has no pinned Issues) and says so', async () => {
   const { run, world, project } = fakeGitlab();
   const adapter = createGitlab({ project }, { run });

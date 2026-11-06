@@ -26,6 +26,22 @@ test('bin/huddle with no command prints usage', () => {
   assert.equal(r.status, 2);
   assert.match(r.stderr, /Usage: huddle/);
 });
+test('after the hook has printed, the process ends at once, so a lingering gh/glab child cannot keep it past the hook timeout', async () => {
+  const { endProcess } = await import('../../lib/cli/main.mjs');
+  const exits = [];
+  const proc = { stdout: { write: (s, cb) => cb() }, exit: (code) => exits.push(code) };
+  endProcess(['hook'], 0, proc);
+  assert.deepEqual(exits, [0], 'the hook exits right after its output is flushed');
+  endProcess(['labels'], 0, proc);
+  endProcess(['progress', '--json'], 0, proc);
+  assert.deepEqual(exits, [0], 'other commands end by themselves');
+  const waits = { stdout: { write: (s, cb) => { waits.cb = cb; } }, exit: (code) => exits.push(code) };
+  endProcess(['hook'], 0, waits);
+  assert.deepEqual(exits, [0], 'not before the output is flushed');
+  waits.cb();
+  assert.deepEqual(exits, [0, 0]);
+  assert.match(fs.readFileSync(BIN, 'utf8'), /endProcess/, 'bin/huddle calls it');
+});
 test('package.json has the bin entry', () => {
   const pkg = JSON.parse(fs.readFileSync(path.resolve(path.dirname(BIN), '..', 'package.json'), 'utf8'));
   assert.equal(pkg.bin.huddle, 'bin/huddle');

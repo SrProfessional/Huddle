@@ -205,8 +205,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
       comments.set(id, { id, issue, body, created_at: createdAt, html_url: `https://github.test/${project}/issues/${issue}#c${id}`, user: { login: author }, reactions: { eyes: taken ? 1 : 0 } });
     },
     // closedAt: when a closed milestone was closed (ISO); GitHub also bumps its updatedAt, which is what the adapter pages by.
-    milestone({ title, description = '', state = 'open', closedAt = null }) {
-      milestones.set(title, { number: milestones.size + 1, title, description, state: state.toUpperCase(), closedAt, updatedAt: closedAt ?? '2026-11-01T00:00:00Z' });
+    milestone({ title, description = '', state = 'open', closedAt = null, updatedAt }) {
+      milestones.set(title, { number: milestones.size + 1, title, description, state: state.toUpperCase(), closedAt, updatedAt: updatedAt ?? closedAt ?? '2026-11-01T00:00:00Z' });
     },
     created: () => [...issues.values()].filter((i) => i.number >= 900).map((i) => ({ number: i.number, title: i.title, body: i.body })),
     bodyOf: (n) => issues.get(n).body,

@@ -236,4 +236,5 @@ the labels and reports one line about the error.
 `since`, each with its description and its Issues as `{ number, open, merged }`; `createIssue`, `updateIssue` and
 `pinIssue` (a no-op on GitLab). On GitHub one GraphQL query per page reads the milestones with their Issues and the last
 close of each; on GitLab the REST equivalents are used (the closing date of a milestone is its `updated_at`, which GitLab
-does not expose otherwise). Open Issues now also carry their `milestone`, so «no area» costs no extra call.
+does not expose otherwise; GitHub decides by `closedAt`). GitLab costs one `closed_by` call per closed Issue, at most 8 at a
+time. The hook ends the process right after it prints, so a call still running cannot hold it past its timeout. Open Issues now also carry their `milestone`, so «no area» costs no extra call.

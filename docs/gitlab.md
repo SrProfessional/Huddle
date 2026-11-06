@@ -67,6 +67,7 @@ Huddle only reads the variable. It never reads a token from a file, never prints
 | `Closes #N` works only for MRs into the default branch. | The MR template uses `Closes #N`. Open the MR into the default branch. |
 | Merging can remove the source branch. | Huddle merges without removing it. |
 | There are no pinned Issues. | The «Huddle progress» Issue is created, but not pinned. Find it in the Issue list by its title, «Huddle progress». |
+| Reading progress costs one call per closed Issue (`closed_by`). | At most 8 `glab` calls run at once. A milestone with 300 closed Issues means 300 calls on every labels run and every session start, so keep finished areas closed: a closed milestone leaves the percentage after 90 days. In the session hook the progress read is dropped after 20 s. |
 | A milestone has no closing date. | The date of its last update stands for it, to decide if it closed in the last 90 days. Only project milestones are read. |
 
 ## Check it
