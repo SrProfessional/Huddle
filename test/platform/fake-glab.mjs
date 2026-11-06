@@ -30,9 +30,10 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     for (let i = 0; i < Math.max(items.length, 1); i += PAGE_SIZE) out.push(JSON.stringify(items.slice(i, i + PAGE_SIZE)));
     return out.join('\n'); // glab prints the pages one after another
   };
-  const addSystemNote = (issue, body) => notes.set(nextNote, { id: nextNote++, issue, body, created_at: '2026-11-01T00:00:00Z', author: 'SrProfessional', system: true, eyes: false });
+  const reviewOf = (iid, args) => { const r = reviews.get(Number(iid)); if (!r) throw new Error(`fake glab: no MR ${iid} (glab ${args.join(' ')})`); return r; };
+  const addSystemNote = (issue, body) => notes.set(nextNote, { id: nextNote++, issue, mr: false, body, created_at: '2026-11-01T00:00:00Z', author: 'SrProfessional', system: true, eyes: false });
   const user = (login) => ({ id: users.get(login), username: login, name: login });
-  const noteJson = (n) => ({ id: n.id, body: n.body, created_at: n.created_at, author: user(n.author), system: n.system, noteable_iid: n.issue, noteable_type: 'Issue' });
+  const noteJson = (n) => ({ id: n.id, body: n.body, created_at: n.created_at, author: user(n.author), system: n.system, noteable_iid: n.issue, noteable_type: n.mr ? 'MergeRequest' : 'Issue' });
   const mrJson = (r) => ({ iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}`, source_branch: r.branch ?? '' });
   const issueJson = (i) => ({
     iid: i.iid, title: i.title, description: i.description, state: i.state,
@@ -93,26 +94,28 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       return JSON.stringify(issueJson(it));
     }
     if ((m = /^issues\/(\d+)\/closed_by$/.exec(rest))) return JSON.stringify(closers(issueOf(m[1], args)).map(mrJson));
-    if ((m = /^issues\/(\d+)\/notes$/.exec(rest))) {
-      const it = issueOf(m[1], args);
+    // Notes live under their own kind: issues/:iid/notes for an Issue, merge_requests/:iid/notes for an MR. The two numberings are separate.
+    if ((m = /^(issues|merge_requests)\/(\d+)\/notes$/.exec(rest))) {
+      const mr = m[1] === 'merge_requests';
+      const it = mr ? { iid: reviewOf(m[2], args).iid } : issueOf(m[2], args);
       if (method === 'GET') {
         need(q.get('sort') === 'asc' && q.get('order_by') === 'created_at', args);
-        return pages([...notes.values()].filter((n) => n.issue === it.iid).sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id - b.id).map(noteJson), paginate);
+        return pages([...notes.values()].filter((n) => n.issue === it.iid && n.mr === mr).sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id - b.id).map(noteJson), paginate);
       }
       need(method === 'POST', args);
-      const n = { id: nextNote++, issue: it.iid, body: body().body, created_at: '2026-11-05T12:00:00Z', author: 'SrProfessional', system: false, eyes: false };
+      const n = { id: nextNote++, issue: it.iid, mr, body: body().body, created_at: '2026-11-05T12:00:00Z', author: 'SrProfessional', system: false, eyes: false };
       notes.set(n.id, n);
       return JSON.stringify(noteJson(n));
     }
-    if ((m = /^issues\/(\d+)\/notes\/(\d+)$/.exec(rest))) {
-      const n = notes.get(Number(m[2]));
-      need(method === 'PUT' && n && n.issue === Number(m[1]) && !n.system, args); // a note is only addressable through its own Issue
+    if ((m = /^(issues|merge_requests)\/(\d+)\/notes\/(\d+)$/.exec(rest))) {
+      const n = notes.get(Number(m[3]));
+      need(method === 'PUT' && n && n.issue === Number(m[2]) && n.mr === (m[1] === 'merge_requests') && !n.system, args); // a note is only addressable through its own Issue
       n.body = body().body;
       return JSON.stringify(noteJson(n));
     }
-    if ((m = /^issues\/(\d+)\/notes\/(\d+)\/award_emoji$/.exec(rest))) {
-      const n = notes.get(Number(m[2]));
-      need(n && n.issue === Number(m[1]), args);
+    if ((m = /^(issues|merge_requests)\/(\d+)\/notes\/(\d+)\/award_emoji$/.exec(rest))) {
+      const n = notes.get(Number(m[3]));
+      need(n && n.issue === Number(m[2]) && n.mr === (m[1] === 'merge_requests'), args);
       if (method === 'GET') return pages(n.eyes ? [{ id: 1, name: 'eyes' }] : [{ id: 2, name: 'thumbsup' }].slice(0, 0), paginate);
       need(method === 'POST' && body().name === 'eyes', args);
       n.eyes = true;
@@ -166,7 +169,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       // GitLab has no «closed as completed»: an Issue counts as merged only because a merged MR closes it.
       if (state === 'merged' && !it.reviews.length) {
         const iid = 10000 + number;
-        reviews.set(iid, { iid, draft: false, state: 'merged' });
+        reviews.set(iid, { iid, draft: false, state: 'merged', commits: [] });
         it.reviews.push(iid);
       }
       issues.set(number, it);
@@ -175,7 +178,12 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { iid: number, draft, state: open ? 'opened' : 'closed', branch, commits: [...commits] }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       if (!users.has(author)) users.set(author, users.size + 1);
-      notes.set(id, { id, issue, body, created_at: createdAt, author, system: false, eyes: taken });
+      notes.set(id, { id, issue, mr: false, body, created_at: createdAt, author, system: false, eyes: taken });
+    },
+    /** A note on merge request `mr`. MR numbers are separate from Issue numbers: this is not a note on Issue `mr`. */
+    reviewComment(mr, { id, author, body, createdAt, taken = false }) {
+      if (!users.has(author)) users.set(author, users.size + 1);
+      notes.set(id, { id, issue: mr, mr: true, body, created_at: createdAt, author, system: false, eyes: taken });
     },
     labelsOf: (n) => [...issues.get(n).labels],
     assigneesOf: (n) => [...issues.get(n).assignees],
