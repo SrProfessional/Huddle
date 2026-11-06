@@ -179,3 +179,61 @@ H3 and H5 can run in parallel with H4. H8 runs in the SocialCortex repo, and not
 - Create the public repo `SrProfessional/huddle`.
 - Get a gitlab.com account for the sandbox project of H9.
 - Put the project access token in place for that project (H9).
+
+## 12. Progress
+
+A team sees how far each part of its project has come, as a percentage, and the total. It works for any project on GitHub
+or GitLab and asks nothing specific of one team. Decided by the AI Manager on 2026-11-06 (Issue #28).
+
+**Areas are milestones.** A project has areas (for example «Social networks», «Content» and «Ads»); each Issue goes in one
+milestone, on GitHub and on GitLab alike. Huddle only reads milestones, it never creates or edits them.
+
+**The Issues not written yet count.** The AI Manager keeps an estimate of the Issues still missing in each area, in the
+milestone's description, on a line of its own:
+
+```text
+Huddle remaining: 4
+```
+
+- The line is matched on its own line, as `Huddle remaining:` and a whole number. The first such line wins.
+- No line, or a line whose value is not a whole number (`four`, `-2`, `4 or 5`), means remaining 0, and the report says the
+  estimate is missing for that area.
+
+**Formulas.** For one area:
+
+| Name | Meaning |
+|---|---|
+| `merged` | Issues that are closed and whose last close was a merged PR/MR (the same rule as `issueState`, §7) |
+| `total` | `merged` plus the Issues of the milestone that are still open |
+| `remaining` | the estimate of the description (0 when missing) |
+| `percent` | `merged ÷ (total + remaining)`, rounded **down** to a whole number |
+
+An Issue closed «not planned», or closed by hand (without a merged PR/MR), counts in neither `merged` nor `total`: it was
+never going to be part of the work. An area with `total + remaining = 0` shows «—», never `NaN` or `0%`.
+
+The **total** of the project is the sum of `merged` over the sum of `total + remaining` of all areas, rounded down, with
+the same «—» rule. The areas that count are the **open milestones and the milestones closed in the last 90 days**, so a
+finished area stays visible for a while and then leaves the percentage.
+
+**No area.** Open Issues with no milestone are listed as «no area» with their count and are left out of every percentage.
+The progress Issue itself is not counted.
+
+**Three places.**
+
+1. **A «Huddle progress» Issue.** The labels job creates it once and rewrites it after the labels, only when its text
+   changes. It is found by a marker comment in its body, `<!-- huddle:progress -->`, never by its title. It has no
+   «Depends on», so the labels logic ignores it. On GitHub it is pinned; GitLab has no pinned Issues, so it is only
+   created. `"progress_issue": false` in `huddle.json` turns it off.
+2. **`huddle progress`**, a table of areas with a text bar and the total. `--json` prints the data.
+3. **One line when a session opens**, in the SessionStart hook's visible `systemMessage`, for example
+   `Progress: Content 60% · Social networks 100% · Ads 0% · Total 53%`. It appears only when the project has milestones, it
+   sits next to the pending-request line, and offline it stays silent.
+
+**Best effort.** Progress never stops the labels. If a platform call for progress fails, the labels run has already updated
+the labels and reports one line about the error.
+
+**Adapter operations** (added to §7): `listMilestones({ since })` returns the open milestones and the ones closed since
+`since`, each with its description and its Issues as `{ number, open, merged }`; `createIssue`, `updateIssue` and
+`pinIssue` (a no-op on GitLab). On GitHub one GraphQL query per page reads the milestones with their Issues and the last
+close of each; on GitLab the REST equivalents are used (the closing date of a milestone is its `updated_at`, which GitLab
+does not expose otherwise). Open Issues now also carry their `milestone`, so «no area» costs no extra call.
