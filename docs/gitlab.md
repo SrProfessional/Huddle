@@ -32,14 +32,16 @@ differs in a few places. Everything on this page except the first section is don
 
 ## The schedule
 
-GitLab CI does not react to Issue events, so the labels job runs on a schedule and on every merge request pipeline.
+GitLab CI does not react to Issue events, so the labels job runs on a schedule and on every merge request pipeline (the merge request ones only skip, see below).
+It runs in the `test` stage, which GitLab always defines, so it works in a project with no other CI.
 
 1. Add to your `.gitlab-ci.yml`: `include: local: huddle-labels.gitlab-ci.yml`.
 2. Go to **CI/CD > Schedules > New schedule**.
 3. Cron: `*/10 * * * *`. Target branch: the default branch. Leave it active.
 
-A comment does not start a pipeline, so after one the label can take up to 10 minutes to change. A push to a merge
-request starts a pipeline and updates it at once.
+The schedule is what changes the labels. A comment does not start a pipeline, and the merge request pipelines do not
+have the token (see below), so on GitLab a label can take up to 10 minutes to change, also after a push to a merge
+request.
 
 ## The HUDDLE_TOKEN step
 
@@ -52,8 +54,10 @@ once per project:
 3. **Settings > CI/CD > Variables > Add variable.** Key `HUDDLE_TOKEN`, the token as value. The variable must be
    masked and protected: turn on **Mask variable** and **Protect variable**.
 4. Because the variable is protected, the schedule must run on a protected branch. The default branch normally is.
-   Merge request pipelines from unprotected branches do not get the variable: there the job stops with a message saying
-   `HUDDLE_TOKEN` is not set, which is expected.
+   Merge request pipelines from unprotected branches do not get the variable: there the job ends green, prints
+   «Huddle: HUDDLE_TOKEN is only available on protected branches; the schedule on the default branch updates the
+   labels.» and changes nothing. That is expected; keep the variable protected. On a schedule or on a protected branch
+   a missing token still fails the job.
 
 Huddle only reads the variable. It never reads a token from a file, never prints it and never turns on shell tracing.
 

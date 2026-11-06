@@ -2,16 +2,21 @@
 # Copied by `huddle-setup`; add `include: local: huddle-labels.gitlab-ci.yml` to .gitlab-ci.yml.
 #
 # GitLab CI does not react to Issue events, so this job runs on a pipeline schedule and on every MR pipeline.
-# GitLab has no CI trigger for comments, so after a comment the label can take up to 10 minutes to change; a push to an
-# MR starts a pipeline and updates it at once.
+# GitLab has no CI trigger for comments, so after a comment or after a push the label can take up to 10 minutes to change:
+# the schedule is what updates the labels.
 # Create the schedule in CI/CD > Schedules, with the cron `*/10 * * * *`, on the default branch.
 #
 # It needs a token: the job token cannot edit Issues. The AI Manager creates a project access token with the `api` scope
 # and stores it as the CI variable HUDDLE_TOKEN (masked and protected). This file only reads the variable; the job
 # never prints it and never turns on shell tracing.
+#
+# A protected variable is empty in pipelines of unprotected refs (most MR pipelines). There the job ends green with one
+# line and changes nothing. On a schedule or on a protected ref a missing token still fails.
 
 huddle-labels:
-  stage: .post
+  # A normal stage, not .pre/.post: GitLab treats a pipeline with only .pre/.post jobs as empty and never runs it, and a
+  # project with no other CI has only this job. `test` is one of the default stages, so it always exists.
+  stage: test
   image: node:24
   variables:
     # Which version of Huddle to run (a release tag or a full commit SHA to pin it) and which glab to install.
@@ -25,6 +30,10 @@ huddle-labels:
   script:
     - |
       if [ -z "$HUDDLE_TOKEN" ]; then
+        if [ "$CI_PIPELINE_SOURCE" != "schedule" ] && [ "$CI_COMMIT_REF_PROTECTED" != "true" ]; then
+          echo "Huddle: HUDDLE_TOKEN is only available on protected branches; the schedule on the default branch updates the labels."
+          exit 0
+        fi
         echo "HUDDLE_TOKEN is not set: the AI Manager must add it as a masked, protected CI variable." >&2
         exit 1
       fi
@@ -32,6 +41,6 @@ huddle-labels:
     - export GITLAB_HOST="$CI_SERVER_FQDN"
     - curl -fsSL -o /tmp/glab.deb "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_linux_amd64.deb"
     - dpkg -i /tmp/glab.deb
-    - git clone --quiet https://github.com/SrProfessional/huddle.git /tmp/huddle
+    - git clone --quiet https://github.com/SrProfessional/Huddle.git /tmp/huddle
     - git -C /tmp/huddle checkout --quiet "$HUDDLE_REF"
     - node /tmp/huddle/bin/huddle labels
