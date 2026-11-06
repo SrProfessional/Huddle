@@ -27,6 +27,15 @@ Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub
   turns the Issue off. `/huddle-issue` asks for the milestone and `/huddle-setup` explains the areas. The adapters gain
   `listMilestones`, `createIssue`, `updateIssue` and `pinIssue`, and open Issues carry their `milestone`.
 
+### Changed
+
+- Install docs (README, first-day guide, team guide): every developer installs Huddle once on their machine, with
+  `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`, then opens a new
+  session. The `.claude/settings.json` snippet is described as a helper: it enables the plugin for the project and, in the
+  CLI, registers the marketplace silently only after the folder's own trust dialog. The docs no longer say it «offers» the plugin.
+- `/huddle-setup` reports a note to send every developer the two install commands.
+- `huddle doctor` has a «plugin» check: ✔ when it runs from an installed plugin, otherwise a hint with the two commands (no network).
+
 ### Fixed
 
 - GitHub: an Issue closed by hand with «Close issue» (which also closes as «completed») no longer unblocks the Issues that

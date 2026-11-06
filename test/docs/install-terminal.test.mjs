@@ -36,3 +36,27 @@ test('the GitHub labels workflow template clones https://github.com/SrProfession
   assert.match(t, /git clone --quiet https:\/\/github\.com\/SrProfessional\/Huddle\.git /);
   assert.doesNotMatch(t, /SrProfessional\/huddle\b/);
 });
+
+// Issue #29: the settings snippet is a helper; each developer installs Huddle once.
+const INSTALL_DOCS = ['README.md', 'docs/first-day.md', 'docs/team-guide.md', 'docs/roles.md', 'docs/gitlab.md', 'skills/huddle-setup/SKILL.md'];
+
+test('no doc says the settings snippet «offers» or «prompts» the plugin', () => {
+  for (const file of INSTALL_DOCS) {
+    const t = read(file).replace(/\s+/g, ' ');
+    assert.doesNotMatch(t, /(offers|prompts)[^.]{0,40}(marketplace|plugin)/i, file);
+    assert.doesNotMatch(t, /Claude Code offers/i, file);
+  }
+});
+
+test('README, first-day guide and team guide say every developer installs once, and what the snippet really does', () => {
+  for (const file of ['README.md', 'docs/first-day.md', 'docs/team-guide.md']) {
+    const t = read(file).replace(/\s+/g, ' ');
+    assert.match(t, /claude plugin marketplace add SrProfessional\/Huddle/, file);
+    assert.match(t, /claude plugin install huddle@huddle/, file);
+    assert.match(t, /once/i, file);
+    assert.match(t, /silently/i, file);
+    assert.match(t, /trust dialog/i, file);
+    assert.match(t, /parent folder/i, file);
+    assert.match(t, /not documented for the VS Code extension/i, file);
+  }
+});
