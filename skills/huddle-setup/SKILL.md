@@ -24,8 +24,10 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
 2. It writes `huddle.json`, the Issue and PR/MR templates and the labels job of that platform, and inserts the Huddle block
    in `CLAUDE.md`. It also writes `.claude/settings.json` with the marketplace and the enabled plugin (`extraKnownMarketplaces.huddle` and
    `enabledPlugins["huddle@huddle"]`): it creates the file, or merges those two keys and keeps every other key. Run again later and it replaces only that block; the project's own text and edited templates stay.
+   That file is only a helper: it enables the plugin for the project and, in the CLI, registers the marketplace silently after the folder's own trust dialog. It does not install Huddle for anyone.
 3. Read the JSON report. Show the developer `written`, `skipped` and every line of `notes` (GitLab needs a pipeline
    schedule and the `HUDDLE_TOKEN` variable: only the AI Manager sets those up).
 4. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` and show the result. If it reports a missing label, run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` (the AI Manager's login only).
-5. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.
+5. Tell the AI Manager to send every developer the two install commands, to run once on their machine in a terminal, then open a new session: `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`.
+6. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.
