@@ -51,3 +51,34 @@ test('the factory rejects an unknown platform and a missing one', async () => {
   await assert.rejects(() => createPlatform({ platform: 'bitbucket', project: 'a/b' }), /platform.*bitbucket/);
   await assert.rejects(() => createPlatform({ project: 'a/b' }), /platform/);
 });
+
+// Finding 1 of the first smoke test: GitHub's «Close issue» button also closes as COMPLETED, so only the closing event tells a hand close from a merged PR.
+test('[github] issueState: an Issue closed by hand as completed is not merged', async () => {
+  const { adapter, world } = create();
+  world.issue({ number: 50, state: 'closed-by-hand' });
+  assert.deepEqual(await adapter.issueState(50), { open: false, merged: false });
+});
+
+test('[github] issueState: an Issue closed by a merged PR is merged', async () => {
+  const { adapter, world } = create();
+  world.issue({ number: 51, state: 'merged' });
+  assert.deepEqual(await adapter.issueState(51), { open: false, merged: true });
+});
+
+test('[github] issueState: reopened and then closed by hand is not merged; the last close decides', async () => {
+  const { adapter, world } = create();
+  world.issue({ number: 52, state: 'closed-by-hand', closes: [{ pr: 70, merged: true }, { pr: null }] });
+  assert.deepEqual(await adapter.issueState(52), { open: false, merged: false });
+  world.issue({ number: 53, state: 'merged', closes: [{ pr: null }, { pr: 71, merged: true }] });
+  assert.deepEqual(await adapter.issueState(53), { open: false, merged: true });
+});
+
+test('[github] issueState: a closer PR that is not merged, an open Issue, and an Issue with no close event are not merged', async () => {
+  const { adapter, world } = create();
+  world.issue({ number: 54, state: 'merged', closes: [{ pr: 72, merged: false }] });
+  world.issue({ number: 55, state: 'open', closes: [{ pr: 70, merged: true }] }); // reopened since
+  world.issue({ number: 56, state: 'merged', closes: [] });
+  assert.deepEqual(await adapter.issueState(54), { open: false, merged: false });
+  assert.deepEqual(await adapter.issueState(55), { open: true, merged: false });
+  assert.deepEqual(await adapter.issueState(56), { open: false, merged: false });
+});

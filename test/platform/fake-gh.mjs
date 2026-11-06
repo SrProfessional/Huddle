@@ -42,10 +42,20 @@ export function fakeGithub({ project = PROJECT } = {}) {
         closedByPullRequestsReferences: i.reviews.map((number) => ({ number })),
       })));
     }
+    if (a === 'api' && b === 'graphql') {
+      // The one query issueState sends: the Issue state plus its last CLOSED_EVENT and who closed it.
+      const query = values(args, '-f').find((x) => x.startsWith('query=')) ?? '';
+      need(/timelineItems\(itemTypes: ?\[CLOSED_EVENT\], ?last: ?1\)/.test(query) && /closer/.test(query), args);
+      const vars = Object.fromEntries(values(args, '-F').map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
+      need(vars.owner === project.split('/')[0] && vars.name === project.split('/')[1] && /^\d+$/.test(vars.number ?? ''), args);
+      const it = issueOf(vars.number, args);
+      const last = it.closes.at(-1);
+      const nodes = last ? [{ __typename: 'ClosedEvent', closer: last.pr === null ? null : { __typename: 'PullRequest', number: last.pr, merged: last.merged } }] : [];
+      return JSON.stringify({ data: { repository: { issue: { state: it.state, timelineItems: { nodes } } } } });
+    }
     if (a === 'issue' && b === 'view') {
       const it = issueOf(args[2], args);
       const fields = values(args, '--json')[0];
-      if (fields === 'state,stateReason') return JSON.stringify({ state: it.state, stateReason: it.stateReason });
       if (fields === 'closedByPullRequestsReferences') return JSON.stringify({ closedByPullRequestsReferences: it.reviews.map((number) => ({ number })) });
       need(false, args);
     }
@@ -128,9 +138,10 @@ export function fakeGithub({ project = PROJECT } = {}) {
 
   // The neutral side the contract suite uses. Another platform's fake offers the same methods over its own wire format.
   const world = {
-    issue({ number, title = '', body = '', assignees = [], labels = [], state = 'open', reviews: closing = [] }) {
-      const [s, reason] = { open: ['OPEN', ''], merged: ['CLOSED', 'COMPLETED'], 'closed-by-hand': ['CLOSED', 'NOT_PLANNED'] }[state];
-      issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: s, stateReason: reason, reviews: [...closing] });
+    // `closes` overrides the close history (oldest first, each { pr: number|null, merged }), for what the neutral states cannot say.
+    issue({ number, title = '', body = '', assignees = [], labels = [], state = 'open', reviews: closing = [], closes }) {
+      const defaults = { open: ['OPEN', []], merged: ['CLOSED', [{ pr: 70, merged: true }]], 'closed-by-hand': ['CLOSED', [{ pr: null }]] }[state];
+      issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing] });
     },
     review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { number, draft, open, branch, commits: [...commits] }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
