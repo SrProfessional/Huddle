@@ -15,6 +15,13 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    /plugin install huddle@huddle
    ```
 
+   The VS Code extension has no `/plugin`. Run this in a terminal, then open a new session:
+
+   ```text
+   claude plugin marketplace add SrProfessional/Huddle
+   claude plugin install huddle@huddle
+   ```
+
    You do not need to clone Huddle. Cloning it is only for people who work on Huddle itself, with
    `claude --plugin-dir ./Huddle` (see the [README](../README.md#install)).
 

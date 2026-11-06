@@ -48,7 +48,14 @@ Install the plugin from its marketplace. In Claude Code run:
 /plugin install huddle@huddle
 ```
 
-To give the plugin to every developer of a project, commit this in the project's `.claude/settings.json`. Claude Code
+The VS Code extension has no `/plugin`. Run the terminal form in any terminal instead, then open a new session:
+
+```text
+claude plugin marketplace add SrProfessional/Huddle
+claude plugin install huddle@huddle
+```
+
+To give the plugin to every developer of a project, commit this in the project's `.claude/settings.json` (`/huddle-setup` writes it for you). Claude Code
 offers the marketplace and the plugin to each developer who trusts the folder:
 
 ```json
