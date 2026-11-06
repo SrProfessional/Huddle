@@ -15,6 +15,7 @@
     "assignees": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Logins of the team that get ready Issues." },
     "max_open_per_person": { "type": "integer", "minimum": 1, "description": "Nobody gets more open Issues than this." },
     "default_branch": { "type": "string", "minLength": 1 },
+    "progress_issue": { "type": "boolean", "description": "false turns off the «Huddle progress» Issue that `huddle labels` keeps up to date. Default: true." },
     "labels": {
       "type": "object",
       "additionalProperties": false,

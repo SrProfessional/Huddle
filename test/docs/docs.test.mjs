@@ -41,7 +41,7 @@ test('the GitLab guide covers the schedule, the HUDDLE_TOKEN step and a self-man
 
 // --- every command in the docs exists in the CLI or the skills ---------------------------------------------------------------
 
-const CLI = ['labels', 'wait', 'take', 'pending', 'hook', 'doctor'];
+const CLI = ['labels', 'wait', 'take', 'pending', 'progress', 'hook', 'doctor'];
 const skills = readdirSync(path.join(root, 'skills')).filter((d) => existsSync(path.join(root, 'skills', d, 'SKILL.md')));
 
 /** The text inside code fences and inline code spans: where commands are written. */
