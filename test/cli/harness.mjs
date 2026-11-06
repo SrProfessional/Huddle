@@ -1,11 +1,17 @@
-// Test harness for the CLI: runs `run(argv, ctx)` against the in-memory fake `gh`, with a huddle.json held in memory. Never starts a process.
+// Test harness for the CLI: runs `run(argv, ctx)` against the in-memory fake `gh` (or, with `gitlab: true`, the fake `glab`),
+// with a huddle.json held in memory. Never starts a process.
 import { fakeGithub } from '../platform/fake-gh.mjs';
+import { fakeGitlab } from '../platform/fake-glab.mjs';
 import { createGithub } from '../../lib/platform/github.mjs';
+import { createGitlab } from '../../lib/platform/gitlab.mjs';
 
 export const CONFIG = { platform: 'github', project: 'acme/app', ai_manager: 'SrProfessional', assignees: ['ana', 'luis'], max_open_per_person: 2 };
+export const GITLAB_CONFIG = { ...CONFIG, platform: 'gitlab' };
 
-export function harness({ config = CONFIG, file, wrap = (a) => a, sleep = async () => {}, setup } = {}) {
-  const fake = fakeGithub();
+export function harness({ config, gitlab = false, file, wrap = (a) => a, sleep = async () => {}, setup } = {}) {
+  config ??= gitlab ? GITLAB_CONFIG : CONFIG;
+  const fake = gitlab ? fakeGitlab() : fakeGithub();
+  const create = gitlab ? createGitlab : createGithub;
   setup?.(fake.world);
   const out = [];
   const err = [];
@@ -14,7 +20,7 @@ export function harness({ config = CONFIG, file, wrap = (a) => a, sleep = async 
   const ctx = {
     root: '/repo',
     readFile: (p) => files.get(p.replaceAll('\\', '/')) ?? null,
-    createPlatform: async (cfg) => wrap(createGithub(cfg, { run: fake.run }), fake),
+    createPlatform: async (cfg) => wrap(create(cfg, { run: fake.run }), fake),
     out: (s) => out.push(s),
     err: (s) => err.push(s),
     sleep,

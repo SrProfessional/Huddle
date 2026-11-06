@@ -113,6 +113,27 @@ test('[gitlab] editing or marking a note nobody listed is a clear error', async 
   await assert.rejects(() => adapter.markTaken(555), /555/);
 });
 
+test('[gitlab] MR notes, awards and edits go through merge_requests/:iid, apart from an Issue with the same number', async () => {
+  const { adapter, world } = make();
+  world.issue({ number: 2, title: 'an Issue' });
+  world.review({ number: 2 });
+  world.comment(2, { id: 301, author: 'ana', body: 'on the Issue', createdAt: '2026-11-04T10:00:00Z' });
+  world.reviewComment(2, { id: 302, author: 'SrProfessional', body: 'on the MR', createdAt: '2026-11-04T11:00:00Z' });
+  assert.deepEqual((await adapter.comments(2)).map((c) => c.id), [301]);
+  const onMr = await adapter.comments(2, { review: true });
+  assert.deepEqual(onMr.map((c) => [c.id, c.taken]), [[302, false]]);
+  assert.match(onMr[0].url, /\/-\/merge_requests\/2#note_302$/);
+  await adapter.markTaken(2, 302, { review: true });
+  await adapter.editComment(2, 302, 'on the MR (edited)', { review: true });
+  assert.equal(world.isTaken(302), true);
+  assert.equal(world.isTaken(301), false);
+  assert.equal(world.commentBody(302), 'on the MR (edited)');
+  const posted = await adapter.postComment(2, 'Ready for review again', { review: true });
+  assert.match(posted.url, /\/-\/merge_requests\/2#note_/);
+  assert.deepEqual((await adapter.comments(2, { review: true })).map((c) => c.body), ['on the MR (edited)', 'Ready for review again']);
+  assert.deepEqual((await adapter.comments(2)).map((c) => c.id), [301], 'the Issue is untouched');
+});
+
 test('[gitlab] a comment url points at the note on the right host', async () => {
   const { adapter, world } = make({ host: 'gitlab.example.com' });
   world.issue({ number: 4 });

@@ -67,6 +67,7 @@ Huddle only reads the variable. It never reads a token from a file, never prints
 |---|---|
 | A close has no reason and no closing event, only `closed_by`. | A dependency counts as merged only when a merged MR closed it. An Issue closed by hand unblocks nothing (GitHub gives the same result by reading the event that closed the Issue). |
 | Notes include system notes («added label ...»). | The adapter drops them before anything reads comments. |
+| Issues and merge requests are numbered separately (Issue #2 and MR !2 are different things). | Requests left on an MR are read through the MR, and messages say «MR !2» instead of «PR #2». |
 | Self-approval may be disabled. | The AI Manager approves with a comment, then merges. |
 | `Closes #N` works only for MRs into the default branch. | The MR template uses `Closes #N`. Open the MR into the default branch. |
 | Merging can remove the source branch. | Huddle merges without removing it. |
