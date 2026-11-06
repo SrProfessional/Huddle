@@ -34,7 +34,7 @@ export function contract({ name, create }) {
     world.issue({ number: 3, state: 'merged' });
     const open = await adapter.listOpenIssues();
     assert.deepEqual(open.map((i) => i.number), [1, 2], 'closed Issues are not listed');
-    assert.deepEqual(open[0], { number: 1, title: 'One', body: body('- None'), assignees: ['ana'], labels: ['ready', 'bug'], reviews: [7] });
+    assert.deepEqual(open[0], { number: 1, title: 'One', body: body('- None'), assignees: ['ana'], labels: ['ready', 'bug'], reviews: [7], milestone: null });
     assert.deepEqual([open[1].assignees, open[1].labels, open[1].reviews], [[], [], []]);
   });
 
@@ -191,6 +191,55 @@ export function contract({ name, create }) {
     assert.equal(await adapter.findUser('SrProfessional'), true);
     assert.equal(await adapter.findUser('ana'), true);
     assert.equal(await adapter.findUser('nobody-here'), false);
+  });
+
+  t('open Issues carry the title of their milestone, or null, so «no area» costs no extra call', async ({ adapter, world }) => {
+    world.milestone({ title: 'Content' });
+    world.issue({ number: 1, milestone: 'Content' });
+    world.issue({ number: 2 });
+    assert.deepEqual((await adapter.listOpenIssues()).map((i) => [i.number, i.milestone]), [[1, 'Content'], [2, null]]);
+  });
+
+  t('listMilestones: the open ones and those closed since the date, with description and their Issues as { number, open, merged }', async ({ adapter, world }) => {
+    world.milestone({ title: 'Content', description: 'Posts.\n\nHuddle remaining: 2' });
+    world.milestone({ title: 'Social networks', description: '' });
+    world.milestone({ title: 'Ads', description: 'Huddle remaining: 0' });
+    world.milestone({ title: 'Launch', state: 'closed', closedAt: '2026-10-20T00:00:00Z' });
+    world.milestone({ title: 'Old beta', state: 'closed', closedAt: '2026-05-01T00:00:00Z' });
+    world.issue({ number: 1, milestone: 'Content', state: 'merged' });
+    world.issue({ number: 2, milestone: 'Content', state: 'closed-by-hand' });
+    world.issue({ number: 3, milestone: 'Content' });
+    world.issue({ number: 4, milestone: 'Content' });
+    world.issue({ number: 5, milestone: 'Content', state: 'merged' });
+    world.issue({ number: 6, milestone: 'Launch', state: 'merged' });
+    world.issue({ number: 7, milestone: 'Old beta', state: 'merged' });
+    world.issue({ number: 8 });
+    const found = await adapter.listMilestones({ since: '2026-08-08T00:00:00.000Z' });
+    const byTitle = Object.fromEntries(found.map((m) => [m.title, m]));
+    assert.deepEqual(Object.keys(byTitle).sort(), ['Ads', 'Content', 'Launch', 'Social networks'], 'open ones, and the one closed in the window; not the old one');
+    assert.equal(byTitle.Content.description, 'Posts.\n\nHuddle remaining: 2');
+    assert.deepEqual([byTitle.Content.state, byTitle.Launch.state], ['open', 'closed']);
+    assert.deepEqual(byTitle.Content.issues.map((i) => [i.number, i.open, i.merged]).sort((a, b) => a[0] - b[0]), [
+      [1, false, true], [2, false, false], [3, true, false], [4, true, false], [5, false, true],
+    ], 'more Issues than one page: all of them, and merged only when a merged PR/MR closed it');
+    assert.deepEqual(byTitle.Ads.issues, []);
+    assert.deepEqual(byTitle.Launch.issues, [{ number: 6, open: false, merged: true }]);
+    assert.equal(typeof byTitle.Launch.closedAt, 'string');
+    assert.equal(byTitle.Content.closedAt ?? null, null);
+  });
+
+  t('listMilestones with nothing to list is an empty list', async ({ adapter }) => {
+    assert.deepEqual(await adapter.listMilestones({ since: '2026-08-08T00:00:00.000Z' }), []);
+  });
+
+  t('createIssue, updateIssue and pinIssue: a created Issue is listed with its body, rewritten in place, and pinning never throws', async ({ adapter, world }) => {
+    const created = await adapter.createIssue({ title: 'Huddle progress', body: 'first' });
+    assert.equal(typeof created.number, 'number');
+    assert.deepEqual(world.created(), [{ number: created.number, title: 'Huddle progress', body: 'first' }]);
+    assert.deepEqual((await adapter.listOpenIssues()).map((i) => [i.number, i.body]), [[created.number, 'first']]);
+    await adapter.updateIssue(created.number, { body: 'second' });
+    assert.equal(world.bodyOf(created.number), 'second');
+    assert.equal(typeof (await adapter.pinIssue(created)), 'boolean');
   });
 
   t('editComment and markTaken work cold: the Issue number comes with the comment id, no earlier read needed', async ({ adapter, world }) => {

@@ -5,7 +5,10 @@
 const PROJECT = 'acme/app';
 
 export function fakeGithub({ project = PROJECT } = {}) {
-  const issues = new Map(); // number -> { number, title, body, assignees[], labels[], state, stateReason, reviews[] }
+  const issues = new Map(); // number -> { number, title, body, assignees[], labels[], state, closes[], reviews[], milestone }
+  const milestones = new Map(); // title -> { number, title, description, state: 'OPEN' | 'CLOSED', closedAt, updatedAt }
+  const pinned = [];
+  let nextIssue = 900;
   const reviews = new Map(); // number -> { number, draft, open }
   const comments = new Map(); // id -> { ...GitHub comment, issue }
   const repoLabels = new Map(); // name -> { color, description }
@@ -18,6 +21,42 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const need = (cond, args) => { if (!cond) throw new Error(`fake gh: unexpected command: gh ${args.join(' ')}`); };
   const issueOf = (n, args) => { const it = issues.get(Number(n)); if (!it) throw new Error(`fake gh: no Issue ${n} (gh ${args.join(' ')})`); return it; };
   const commentJson = (c) => ({ id: c.id, body: c.body, created_at: c.created_at, html_url: c.html_url, user: c.user, reactions: c.reactions });
+
+  // The milestone queries of the adapter: pages of milestones (newest update first), each with a page of its Issues and the last close of each.
+  const MILESTONE_PAGE = 2;
+  const ISSUE_PAGE = 2;
+  function graphql(args) {
+    const query = values(args, '-f').find((x) => x.startsWith('query=')) ?? '';
+    const vars = Object.fromEntries([...values(args, '-f'), ...values(args, '-F')].filter((x) => !x.startsWith('query=')).map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
+    need(/timelineItems\(itemTypes: ?\[CLOSED_EVENT\], ?last: ?1\)/.test(query) || /pinIssue/.test(query), args);
+    const issuePage = (title, after) => {
+      const all = [...issues.values()].filter((i) => i.milestone === title).sort((x, y) => x.number - y.number);
+      const start = Number(after ?? 0);
+      const nodes = all.slice(start, start + ISSUE_PAGE).map((it) => {
+        const last = it.closes.at(-1);
+        const closes = last ? [{ __typename: 'ClosedEvent', closer: last.pr === null ? null : { __typename: 'PullRequest', number: last.pr, merged: last.merged } }] : [];
+        return { number: it.number, state: it.state, timelineItems: { nodes: closes } };
+      });
+      return { pageInfo: { hasNextPage: start + ISSUE_PAGE < all.length, endCursor: String(start + ISSUE_PAGE) }, nodes };
+    };
+    if (/pinIssue/.test(query)) {
+      need(/^I_\d+$/.test(vars.id ?? '') && issues.has(Number(vars.id.slice(2))), args);
+      pinned.push(Number(vars.id.slice(2)));
+      return JSON.stringify({ data: { pinIssue: { issue: { number: Number(vars.id.slice(2)) } } } });
+    }
+    if (/node\(id/.test(query)) {
+      const m = [...milestones.values()].find((x) => `M${x.number}` === vars.id);
+      need(m, args);
+      return JSON.stringify({ data: { node: { issues: issuePage(m.title, vars.after) } } });
+    }
+    need(vars.owner === project.split('/')[0] && vars.name === project.split('/')[1], args);
+    const states = /states: ?\[(OPEN|CLOSED)\]/.exec(query);
+    need(states && /orderBy: ?\{field: ?UPDATED_AT, ?direction: ?DESC\}/.test(query), args);
+    const all = [...milestones.values()].filter((m) => m.state === states[1]).sort((x, y) => y.updatedAt.localeCompare(x.updatedAt));
+    const start = Number(vars.after ?? 0);
+    const nodes = all.slice(start, start + MILESTONE_PAGE).map((m) => ({ id: `M${m.number}`, title: m.title, description: m.description, state: m.state, closedAt: m.closedAt, updatedAt: m.updatedAt, issues: issuePage(m.title) }));
+    return JSON.stringify({ data: { repository: { milestones: { pageInfo: { hasNextPage: start + MILESTONE_PAGE < all.length, endCursor: String(start + MILESTONE_PAGE) }, nodes } } } });
+  }
 
   function run(args, opts = {}) {
     args = args.map(String);
@@ -40,8 +79,10 @@ export function fakeGithub({ project = PROJECT } = {}) {
         number: i.number, title: i.title, body: i.body,
         assignees: i.assignees.map((login) => ({ login })), labels: i.labels.map((name) => ({ name })),
         closedByPullRequestsReferences: i.reviews.map((number) => ({ number })),
+        milestone: i.milestone ? { title: i.milestone } : null,
       })));
     }
+    if (a === 'api' && b === 'graphql' && /milestones\(|node\(id|pinIssue/.test(values(args, '-f').find((x) => x.startsWith('query=')) ?? '')) return graphql(args);
     if (a === 'api' && b === 'graphql') {
       // The one query issueState sends: the Issue state plus its last CLOSED_EVENT and who closed it.
       const query = values(args, '-f').find((x) => x.startsWith('query=')) ?? '';
@@ -105,6 +146,22 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const rest = path.slice(base.length);
       const method = (values(args, '-X')[0] ?? 'GET').toUpperCase();
       let m;
+      if (rest === 'issues' && method === 'POST') {
+        need(values(args, '--input')[0] === '-', args);
+        const b = JSON.parse(opts.input);
+        need(typeof b.title === 'string' && typeof b.body === 'string', args);
+        const n = nextIssue++;
+        issues.set(n, { number: n, title: b.title, body: b.body, assignees: [], labels: [], state: 'OPEN', closes: [], reviews: [], milestone: null });
+        return JSON.stringify({ number: n, node_id: `I_${n}`, html_url: `https://github.test/${project}/issues/${n}` });
+      }
+      if ((m = /^issues\/(\d+)$/.exec(rest)) && method === 'PATCH') {
+        need(values(args, '--input')[0] === '-', args);
+        const it = issueOf(m[1], args);
+        const b = JSON.parse(opts.input);
+        for (const k of Object.keys(b)) need(k === 'body' || k === 'title', args);
+        Object.assign(it, b);
+        return JSON.stringify({ number: it.number });
+      }
       if ((m = /^issues\/(\d+)\/comments$/.exec(rest))) {
         if (method === 'GET') {
           need(args.includes('--paginate') && args.includes('--slurp'), args);
@@ -139,14 +196,21 @@ export function fakeGithub({ project = PROJECT } = {}) {
   // The neutral side the contract suite uses. Another platform's fake offers the same methods over its own wire format.
   const world = {
     // `closes` overrides the close history (oldest first, each { pr: number|null, merged }), for what the neutral states cannot say.
-    issue({ number, title = '', body = '', assignees = [], labels = [], state = 'open', reviews: closing = [], closes }) {
+    issue({ number, title = '', body = '', assignees = [], labels = [], state = 'open', reviews: closing = [], closes, milestone = null }) {
       const defaults = { open: ['OPEN', []], merged: ['CLOSED', [{ pr: 70, merged: true }]], 'closed-by-hand': ['CLOSED', [{ pr: null }]] }[state];
-      issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing] });
+      issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing], milestone });
     },
     review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { number, draft, open, branch, commits: [...commits] }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       comments.set(id, { id, issue, body, created_at: createdAt, html_url: `https://github.test/${project}/issues/${issue}#c${id}`, user: { login: author }, reactions: { eyes: taken ? 1 : 0 } });
     },
+    // closedAt: when a closed milestone was closed (ISO); GitHub also bumps its updatedAt, which is what the adapter pages by.
+    milestone({ title, description = '', state = 'open', closedAt = null }) {
+      milestones.set(title, { number: milestones.size + 1, title, description, state: state.toUpperCase(), closedAt, updatedAt: closedAt ?? '2026-11-01T00:00:00Z' });
+    },
+    created: () => [...issues.values()].filter((i) => i.number >= 900).map((i) => ({ number: i.number, title: i.title, body: i.body })),
+    bodyOf: (n) => issues.get(n).body,
+    pinned: () => [...pinned],
     labelsOf: (n) => [...issues.get(n).labels],
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries(repoLabels),
