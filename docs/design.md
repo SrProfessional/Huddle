@@ -116,7 +116,7 @@ All network access goes through one interface. The core never calls `gh` or `gla
 | Operation | GitHub (`gh`) | GitLab (`glab api`, REST v4) |
 |---|---|---|
 | `listOpenIssues()` with body, assignees, labels | `gh issue list --json …` | `GET /projects/:id/issues?state=opened` (paged) |
-| `issueState(n)` → `{open, merged}` | `state` + `stateReason == COMPLETED` | closed **and** `GET /issues/:iid/closed_by` has a merged MR |
+| `issueState(n)` → `{open, merged}` | closed **and** the last `ClosedEvent` (GraphQL `timelineItems`) has a merged PR as `closer` (a hand close also gives `COMPLETED`) | closed **and** `GET /issues/:iid/closed_by` has a merged MR |
 | `openReviews()` → PR/MR numbers, not drafts | `gh pr list` | `GET /merge_requests?state=opened`, `draft == false` |
 | `reviewsClosing(n)` | `closedByPullRequestsReferences` | `GET /issues/:iid/closed_by` |
 | `comments(n)` / `postComment` / `editComment` | issue comments API | notes API (`system == false` only) |
