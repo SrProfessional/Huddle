@@ -126,7 +126,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
       for (const l of values(args, '--remove-label')) it.labels = it.labels.filter((x) => x !== l);
       for (const u of values(args, '--add-assignee')) if (!it.assignees.includes(u)) it.assignees.push(u);
       for (const t of values(args, '--milestone')) {
-        if (!milestones.has(t)) throw new Error(`gh ${args.join(' ')} failed: could not add to milestone '${t}': 'not found'`);
+        // Like the real `gh issue edit --milestone`: it finds the title only among the open milestones.
+        if (milestones.get(t)?.state !== 'OPEN') throw new Error(`gh ${args.join(' ')} failed: could not add to milestone '${t}': 'not found'`);
         it.milestone = t;
       }
       if (args.includes('--remove-milestone')) it.milestone = null;
@@ -192,8 +193,15 @@ export function fakeGithub({ project = PROJECT } = {}) {
         need(values(args, '--input')[0] === '-', args);
         const it = issueOf(m[1], args);
         const b = JSON.parse(opts.input);
-        for (const k of Object.keys(b)) need(k === 'body' || k === 'title', args);
-        Object.assign(it, b);
+        for (const k of Object.keys(b)) need(k === 'body' || k === 'title' || k === 'milestone', args);
+        if ('milestone' in b) {
+          // The REST way: the milestone number, any state; null takes the Issue out.
+          const ms = b.milestone === null ? null : [...milestones.values()].find((x) => x.number === b.milestone);
+          need(b.milestone === null || ms, args);
+          it.milestone = ms ? ms.title : null;
+        }
+        const { milestone: _ignored, ...fields } = b;
+        Object.assign(it, fields);
         return JSON.stringify({ number: it.number });
       }
       if ((m = /^issues\/(\d+)\/comments$/.exec(rest))) {

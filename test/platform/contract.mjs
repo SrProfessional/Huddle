@@ -208,6 +208,20 @@ export function contract({ name, create }) {
     await assert.rejects(adapter.setIssueMilestone(5, 'Nope'), /Nope/);
   });
 
+  t('setIssueMilestone puts an Issue in a closed milestone (an old area), and takes it out again', async ({ adapter, world }) => {
+    world.milestone({ title: 'Shipped', state: 'closed', closedAt: '2026-01-01T00:00:00Z' });
+    world.issue({ number: 5 });
+    world.issue({ number: 6, state: 'merged' });
+    await adapter.setIssueMilestone(5, 'Shipped');
+    await adapter.setIssueMilestone(6, 'Shipped');
+    assert.equal(world.milestoneOf(5), 'Shipped');
+    assert.equal(world.milestoneOf(6), 'Shipped');
+    await adapter.setIssueMilestone(6, null);
+    assert.equal(world.milestoneOf(6), null);
+    await assert.rejects(adapter.setIssueMilestone(5, 'Nope'), /Nope/);
+    assert.equal(world.milestoneOf(5), 'Shipped');
+  });
+
   t('reviewCommits(n) gives the commit dates of a PR/MR, so the core sees work newer than a request', async ({ adapter, world }) => {
     world.review({ number: 60, commits: ['2026-11-04T09:00:00Z', '2026-11-04T12:00:00Z'] });
     world.review({ number: 61 });
