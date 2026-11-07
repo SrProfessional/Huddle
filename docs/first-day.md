@@ -23,7 +23,8 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    extension. Do not wait for it: install Huddle yourself.
 
    **On GitLab, two more things:** `glab` must be on the PATH of the terminal that starts Claude (if not, the hook stays
-   silent and `huddle doctor` shows ✖ on `login`; after installing `glab` on Windows, open a new terminal), and Git must
+   silent and `huddle doctor` shows ✖ on `login` saying `glab` is not installed or not on the PATH, with the install command; after
+   installing `glab` on Windows, open a new terminal, or reload the PATH as that line says), and Git must
    use `glab` for gitlab.com, or a session cannot push (the credential manager cannot open a browser from a session).
    In a terminal where `glab` is on the PATH run
    `git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"`, and check it with
@@ -37,7 +38,7 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
 
 ## 2. Check it works
 
-Run `huddle doctor`. You want ✔ on `plugin`, `huddle.json`, `login`, `ai_manager` and `labels`. If `login` fails, log in again. If
+Run `huddle doctor`. You want ✔ on `plugin`, `huddle.json`, `login`, `ai_manager` and `labels`. If `login` fails, read the line: «`gh`/`glab` is not installed or not on the PATH of this terminal» comes with the install command for your system (on Windows, then open a new terminal, or reload the PATH in PowerShell as the line shows); «is not logged in» comes with the step, `gh auth login` or `glab auth login` (with `--hostname <host>` on a self-managed server). If
 `labels` fails, tell the AI Manager: only they run `huddle labels`.
 
 Read `CLAUDE.md` (the Huddle block holds the rules) and [the team guide](team-guide.md). They take ten minutes and answer
