@@ -9,7 +9,7 @@
       "name": "huddle",
       "source": "./",
       "description": "Decision-led development for teams coding with AI.",
-      "version": "0.0.0"
+      "version": "0.1.0"
     }
   ]
 }

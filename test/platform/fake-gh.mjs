@@ -211,6 +211,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
     created: () => [...issues.values()].filter((i) => i.number >= 900).map((i) => ({ number: i.number, title: i.title, body: i.body })),
     bodyOf: (n) => issues.get(n).body,
     pinned: () => [...pinned],
+    /** A comment on PR `pr`. On GitHub a PR is also an Issue, so it is the same call as `comment`. */
+    reviewComment(pr, c) { this.comment(pr, c); },
     labelsOf: (n) => [...issues.get(n).labels],
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries(repoLabels),

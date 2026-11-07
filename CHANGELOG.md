@@ -5,10 +5,23 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
-Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub repo and a sandbox GitLab project.
+### Added
+
+- Progress by area, as a percentage (Issue #28). Areas are milestones; each area's percentage is merged Issues over all the
+  work it will need, using a `Huddle remaining: N` line of the milestone description for the Issues not written yet.
+  Shown by `huddle progress` (and `--json`), by a «Huddle progress» Issue that the labels job keeps up to date (pinned on
+  GitHub; GitLab has no pinned Issues), and by one line in the SessionStart hook. `"progress_issue": false` in `huddle.json`
+  turns the Issue off. `/huddle-issue` asks for the milestone and `/huddle-setup` explains the areas. The adapters gain
+  `listMilestones`, `createIssue`, `updateIssue` and `pinIssue`, and open Issues carry their `milestone`.
+
+## [0.1.0]
+
+The first release. It is tagged only after the smoke test in [docs/smoke-test.md](docs/smoke-test.md) passes on a sandbox
+GitHub repo and a sandbox GitLab project.
 
 ### Added
 
+- The smoke test checklist, `docs/smoke-test.md`, run by hand before each release.
 - The core: issue status from «Depends on», review requests, assignment by load.
 - The platform adapters for GitHub (`gh`) and GitLab (`glab api`, including self-managed hosts), with a shared contract
   test run against canned responses.
@@ -20,12 +33,6 @@ Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub
 - A plugin marketplace: `.claude-plugin/marketplace.json` makes this repo the marketplace `huddle`, so teams install with
   `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`, or commit it in `.claude/settings.json`.
 - The public docs: README with a quickstart for GitHub and for GitLab, roles, first day, team guide and GitLab notes.
-- Progress by area, as a percentage (Issue #28). Areas are milestones; each area's percentage is merged Issues over all the
-  work it will need, using a `Huddle remaining: N` line of the milestone description for the Issues not written yet.
-  Shown by `huddle progress` (and `--json`), by a «Huddle progress» Issue that the labels job keeps up to date (pinned on
-  GitHub; GitLab has no pinned Issues), and by one line in the SessionStart hook. `"progress_issue": false` in `huddle.json`
-  turns the Issue off. `/huddle-issue` asks for the milestone and `/huddle-setup` explains the areas. The adapters gain
-  `listMilestones`, `createIssue`, `updateIssue` and `pinIssue`, and open Issues carry their `milestone`.
 
 ### Changed
 
@@ -38,6 +45,16 @@ Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub
 
 ### Fixed
 
+- GitLab: a request left on a merge request is now seen. Issues and MRs are numbered separately on GitLab, so the adapter
+  read the notes of MR !2 as the notes of Issue #2 (`huddle pending` said «Nothing pending» and no label moved). Notes,
+  the 👀 award, note edits and new notes of an MR now use `merge_requests/:iid` (`comments`, `postComment`, `editComment`
+  and `markTaken` take `{ review: true }`; GitHub ignores it). On GitLab every message says «MR !N» instead of «PR #N»
+  (pending, hook, wait, take).
+- GitLab labels job (first smoke test on gitlab.com): it runs in the `test` stage instead of `.post` (a pipeline with only
+  `.pre`/`.post` jobs is empty and never runs); with the protected `HUDDLE_TOKEN` empty on an unprotected ref that is not a
+  schedule (MR pipelines) it ends green with one line and changes nothing, while a schedule or a protected ref without the
+  token still fails; it clones `https://github.com/SrProfessional/Huddle.git`. The docs say that on GitLab a label can take
+  up to 10 minutes to change, also after a push.
 - GitHub: an Issue closed by hand with «Close issue» (which also closes as «completed») no longer unblocks the Issues that
   depend on it. A dependency is merged only when the last close was done by a merged PR (read from the Issue's closing event).
 - The SessionStart hook now also prints a visible line (`systemMessage`) for the developer when a request from the AI
