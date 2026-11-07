@@ -1,0 +1,17 @@
+
+@page { size: A4; margin: 16mm 14mm; }
+body { padding-block: 0 !important; }
+.wrap { gap: 36px !important; }
+.cycle li, .role, .reason, .rules li, .issue, .compare > div, .note, .tip, .os li, pre { break-inside: avoid; }
+.steps > li, .os, .os > div { display: block; break-inside: auto; }
+.steps > li > * + *, .os > div > * + * { margin-top: 10px; }
+.os > div + div { margin-top: 12px; }
+.os li pre { margin: 6px 0; }
+pre code { font-size: 12.5px !important; }
+.os li { min-width: 0; }
+.steps > li > h3 { break-after: avoid; }
+h2, h3 { break-after: avoid; }
+section { break-inside: auto; }
+.guide section[aria-labelledby="inicio"] { break-before: page; }
+footer { break-before: avoid; break-inside: avoid; }
+.glossary dt, .glossary dd { break-inside: avoid; break-after: avoid; }

@@ -14,6 +14,8 @@ It works with GitHub and GitLab, including self-managed GitLab.
 
 > Our job is no longer typing code. It is making good decisions. The AI writes, tests and asks; the person decides.
 
+**PDF guides:** [the full guide](docs/pdf/huddle-guide.pdf) (cycle, roles, labels, rules and the first day) and [the first day](docs/pdf/huddle-first-day.pdf) alone, to send to a new developer. Rebuild them with `node docs/pdf/build.mjs` (see the file).
+
 ## Why Huddle
 
 AI coding tools made writing code cheap. They did not make teams faster on their own. When every developer prompts the
