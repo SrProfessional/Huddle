@@ -66,7 +66,39 @@ and fill the AI Manager's queue with half-reviewed PRs. More speed comes from mo
 ## Progress
 
 A project has **areas**, and the areas are **milestones** (GitHub and GitLab both have them). Each Issue goes in one
-milestone; `/huddle-issue` asks which. Huddle only reads milestones: it never creates or edits them.
+milestone; `/huddle-issue` asks which. The progress code only reads milestones; the AI Manager defines them with
+`/huddle-areas`, described next.
+
+### Define the areas with /huddle-areas
+
+How many areas a project needs, which ones, which area an old Issue belongs to and how many Issues are still missing are
+judgments. **The number of areas depends on the project and is never fixed**: one project has 3, another more or fewer.
+So the AI Manager does not write them by hand: `/huddle-areas` (AI Manager only) reads the README, `CLAUDE.md`, the specs and
+plans and the Issues, and then:
+
+1. **Proposes the areas**, each with a one-line description and the reason, and waits for you to accept, rename, merge,
+   split or drop them.
+2. **Creates or updates the milestones** after your OK. The description holds the one-line purpose and the
+   `Huddle remaining: N` line. A milestone that already exists is reused, never duplicated.
+3. **Proposes an area for every Issue without one**, open and closed, grouped by area, with «no area» for platform or
+   tooling work that fits none. It applies only what you approve.
+4. **Proposes «remaining» for each area**, with its reasoning (for example «spec X lists 8 parts, 3 are Issues already, so
+   5»). You confirm or edit each number.
+5. **Check-up.** Run it again on a project that has areas: it lists the Issues with no area, the areas with no
+   `Huddle remaining` line and the areas whose estimate looks stale (remaining 0 while the open specs still list parts).
+
+It never changes anything without your explicit OK, and shows every change before applying it. The mechanics are plain
+commands, the same on GitHub and GitLab, that you can also run yourself:
+
+| Command | What it does |
+|---|---|
+| `huddle areas list [--json]` | Each area with its open and merged Issues and its remaining line, and how many Issues have no area. |
+| `huddle areas set <title> --remaining N [--description <text>] [--dry-run]` | Creates the milestone, or updates it keeping every other line of its description. With `--description` the purpose replaces the other text. |
+| `huddle areas assign <issue> <title\|none> [--dry-run]` | Puts an Issue in an area, or takes it out with `none`. |
+| `huddle areas check [--json]` | The check-up as data: Issues with no area, areas with no estimate, areas whose remaining is 0. |
+
+Every command that writes prints what it will change first, and `--dry-run` prints it and stops. Closing or deleting a
+milestone stays a manual act on the platform.
 
 The percentage of an area counts the work that is not written yet. The AI Manager writes an estimate of the Issues still
 missing in the milestone description, on a line of its own:
@@ -105,6 +137,7 @@ about it.
 |---|---|
 | Know if something is waiting for me | `huddle pending` |
 | See how far each area has come | `huddle progress` |
+| Define or check the areas (AI Manager) | `/huddle-areas`, or `huddle areas check` |
 | Check my setup | `huddle doctor` |
 | See what the labels job would change | `huddle labels --dry-run` |
 | Continue after a request | `/huddle-start`, or answer yes to the hook |

@@ -5,6 +5,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `/huddle-areas`, Claude helps define the project's areas (Issue #42). The skill (AI Manager only) reads the README,
+  `CLAUDE.md`, the specs, plans and Issues and always proposes and explains before changing anything: which areas (any
+  number, never a fixed one), an area for each Issue without one, a «remaining» estimate per area with its reasoning, and a
+  check-up on a project that already has areas. The mechanics are the new `huddle areas list | set | assign | check`:
+  `set` creates or updates one milestone keeping the rest of its description, `assign` puts an Issue in an area or takes
+  it out with `none`, `check` reports Issues with no area, areas with no estimate and areas whose remaining is 0, as data
+  with `--json`. Every write prints what it will change first and has `--dry-run`. The adapters gain `findMilestone`,
+  `createMilestone`, `updateMilestone` and `setIssueMilestone`, and closed Issues carry their `title` and `milestone`.
+
 ## [0.2.0] - 2026-11-07
 
 ### Added
