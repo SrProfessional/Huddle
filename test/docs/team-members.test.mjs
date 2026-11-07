@@ -57,6 +57,15 @@ test('the huddle-team skill is for the AI Manager, uses the CLI, never merges an
   assert.match(t, /glab mr create/);
 });
 
+test('the skill checks the whole assignees array, not one line, and gives both PR/MR titles', () => {
+  const t = read('skills/huddle-team/SKILL.md');
+  assert.match(t, /only the `assignees` array may differ/);
+  assert.doesNotMatch(t, /only the `assignees` line/);
+  assert.match(t, /Team: add <login>/);
+  assert.match(t, /Team: remove <login>/);
+  assert.match(t, /--title "Team: add <login>" or "Team: remove <login>"/);
+});
+
 test('the skill prints the message for the new person: both install commands, the login command and, on GitLab, the git credential step', () => {
   const t = read('skills/huddle-team/SKILL.md');
   assert.match(t, /claude plugin marketplace add SrProfessional\/Huddle/);

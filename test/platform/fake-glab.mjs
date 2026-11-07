@@ -72,7 +72,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     if (path === 'users') {
       need(method === 'GET' && q.get('username'), args);
       const login = q.get('username');
-      return JSON.stringify(users.has(login) ? [user(login)] : []);
+      const found = [...users.keys()].find((name) => name.toLowerCase() === login.toLowerCase()); // GitLab usernames are case-insensitive
+      return JSON.stringify(found ? [user(found)] : []);
     }
     need(path.startsWith(`${root}/`), args); // the project path is URL-encoded, groups included
     const rest = path.slice(root.length + 1);

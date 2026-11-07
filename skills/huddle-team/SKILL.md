@@ -19,10 +19,10 @@ AI Manager changes the team. Read `platform`, `host`, `project` and `default_bra
      invite anyone: it changes platform settings, which is the AI Manager's own act. When they have done it, run the command again. If they
      want the file written first, run it with `--anyway`: until the step is done, that person's Issues stay `ready`.
    - If it says the login is already there (add) or not there (remove), nothing changed: tell them and stop.
-4. Check `git diff huddle.json`: only the `assignees` line may differ. Then commit it as `Team: add <login>` (or `Team: remove <login>`) and push
+4. Check `git diff huddle.json`: only the `assignees` array may differ (a multi-line array changes several lines). Then commit it as `Team: add <login>` (or `Team: remove <login>`) and push
    with `git push -u origin <branch>`.
-5. Open the PR (GitHub: `gh pr create --base <default_branch> --title "Team: add <login>" --body ...`) or the MR (GitLab:
-   `glab mr create --target-branch <default_branch> --title "Team: add <login>" --description ... --yes`), with a one-line reason in the body.
+5. Open the PR (GitHub: `gh pr create --base <default_branch> --title "Team: add <login>" or "Team: remove <login>" --body ...`) or the MR (GitLab:
+   `glab mr create --target-branch <default_branch> --title "Team: add <login>" or "Team: remove <login>" --description ... --yes`), with a one-line reason in the body.
    **Never merge it.** The AI Manager merges it after looking, like any change. Give them the link.
 6. On **add**, print the message to send the new person, in the AI Manager's language, with the commands as they are:
 
