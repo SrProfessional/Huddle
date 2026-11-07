@@ -203,21 +203,6 @@ on each other, and tell the AI where not to go.
 **Production in a single pair of hands.** Nobody on the team needs keys or access to the real database. A mistake in one
 session cannot touch what customers use.
 
-## Why not open 10 sessions to take 10 Issues at once?
-
-It sounds faster, but in practice a developer with many open sessions gets less done and decides worse.
-
-- **The computer becomes the bottleneck.** Each session runs tests, starts test databases and builds the app. With many at
-  once, the machine slows down and they all move more slowly than a few would.
-- **Attention does not multiply.** Each session asks questions, sometimes one after another. With ten open, the questions
-  pile up, you lose the thread of each task and start answering fast just to get through. That is when the decision stops
-  being objective, and the decision is exactly what the person brings.
-- **Every session has to be reviewed.** What the AI did is reviewed before opening the pull request. Ten half-reviewed
-  pull requests are worth less than two done well, and they fill up the AI Manager's review queue.
-
-**Our recommendation:** one or two active sessions per person. More speed comes from adding developers, not from adding
-windows.
-
 ## What is not negotiable
 
 - **Never push to the default branch.** One task is one Issue, one branch and one pull request. Only the AI Manager
