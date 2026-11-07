@@ -186,7 +186,9 @@ A team sees how far each part of its project has come, as a percentage, and the 
 or GitLab and asks nothing specific of one team. Decided by the AI Manager on 2026-11-06 (Issue #28).
 
 **Areas are milestones.** A project has areas (for example «Social networks», «Content» and «Ads»); each Issue goes in one
-milestone, on GitHub and on GitLab alike. Huddle only reads milestones, it never creates or edits them.
+milestone, on GitHub and on GitLab alike. The progress code only reads milestones. Creating and editing them, and putting Issues in them, is the job of `huddle areas`
+(Issue #42), and only after the AI Manager's OK: the skill `/huddle-areas` proposes the areas, the estimates and the
+classification, and the CLI prints every change before writing it.
 
 **The Issues not written yet count.** The AI Manager keeps an estimate of the Issues still missing in each area, in the
 milestone's description, on a line of its own:
