@@ -104,6 +104,18 @@
     </dl>
   </section>
 
+  <section aria-labelledby="progress">
+    <span class="eyebrow">Progress</span>
+    <h2 id="progress">How far each area has come</h2>
+    <p>Each area of the project (for example «Content», «Social networks», «Ads») is a milestone, and each Issue belongs to one. The AI Manager writes in each milestone's description how many Issues are still missing, on a line <code>Huddle remaining: N</code>. Huddle then shows, per area and in total, the merged Issues over all the work the area will need:</p>
+    <ul>
+      <li>in a pinned «Huddle progress» Issue that the labels job keeps up to date;</li>
+      <li>with <code>huddle progress</code> (ask Claude Code «run huddle progress»);</li>
+      <li>in one line when a session opens, for example <code>Content 76% · Social networks 55% · Ads 0% · Total 58%</code>.</li>
+    </ul>
+    <p>Issues closed by hand or «not planned» do not count, and Issues with no milestone stay out of the percentage.</p>
+  </section>
+
   <section aria-labelledby="why">
     <span class="eyebrow">Why</span>
     <h2 id="why">Why working this way is better</h2>
@@ -156,7 +168,7 @@
       </li>
       <li>
         <h3>Add someone to the team</h3>
-        <p>Invite them to the repository (GitHub: <em>Settings, Collaborators</em>; GitLab: <em>Manage, Members</em>, role Developer), add their login to <code>assignees</code> in <code>huddle.json</code> with a PR, and send them this guide's first-day section. From then on Huddle assigns them <code>ready</code> Issues.</p>
+        <p>Invite them to the repository (GitHub: <em>Settings, Collaborators</em>; GitLab: <em>Manage, Members</em>, role Developer). Then run <code>/huddle-team</code>: it checks that the login can be assigned, adds it to <code>assignees</code> in <code>huddle.json</code> through a PR, and gives you the message to send them with the install steps. <code>huddle team</code> lists the team and shows who cannot be assigned yet. Once that PR is merged, Huddle assigns them <code>ready</code> Issues.</p>
       </li>
     </ol>
   </section>
