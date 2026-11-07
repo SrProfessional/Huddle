@@ -67,7 +67,10 @@ Every developer who works on a GitLab repo needs two things on their own machine
 the [smoke test](smoke-test.md).
 
 1. **`glab` must be on the PATH of the terminal that starts Claude.** If it is not, the SessionStart hook stays silent
-   and `huddle doctor` shows ✖ on `login`. After installing `glab` on Windows, open a new terminal (or reload the PATH).
+   and `huddle doctor` shows ✖ on `login`: «glab is not installed or not on the PATH of this terminal», with the install
+   command (`winget install --id GLab.GLab` on Windows, `brew install glab` on Mac). After installing `glab` on Windows,
+   open a new terminal, or reload the PATH in PowerShell with the line `huddle doctor` prints. If `glab` runs but is not
+   logged in, the line says «glab is not logged in» and gives `glab auth login` (with `--hostname <host>` when `huddle.json` has a host).
 2. **Git must use `glab` for gitlab.com.** If it does not, a session cannot push: the credential manager cannot open a
    browser from a session. In a terminal where `glab` is on the PATH run:
 

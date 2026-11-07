@@ -200,7 +200,7 @@ test('doctor reports a bad huddle.json', async () => {
 test('doctor reports a missing login', async () => {
   const h = harness({ wrap: (a) => ({ ...a, me: async () => { throw new Error('gh auth login required'); } }) });
   assert.equal(await run(['doctor'], h.ctx), 1);
-  assert.match(h.text(), /✖ login.*gh auth login required/);
+  assert.match(h.text(), /✖ login: gh is not logged in.*gh auth login/); // Issue #41: an auth failure says so, with the step
 });
 
 test('doctor reports missing labels, honoring renames', async () => {
