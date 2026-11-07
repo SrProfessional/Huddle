@@ -14,6 +14,7 @@ One person per repo. They lead the work with the help of their own Claude Code s
 | Answers every «❓ Decision for the AI Manager». | `/huddle-decide` |
 | Reviews each PR (MR on GitLab), asks for changes or merges. | `/huddle-review` |
 | Adds or removes a developer: [Add or remove someone](team-guide.md#add-or-remove-someone). | `/huddle-team` |
+| Defines the project's areas (milestones), puts Issues in them and keeps the estimates up to date: [Define the areas](team-guide.md#define-the-areas-with-huddle-areas). | `/huddle-areas` |
 | Keeps the estimates of the progress: the `Huddle remaining: N` line of each milestone description, the Issues still to write in that area. | `/huddle-issue` asks for the milestone; the estimate is edited by hand |
 
 Only the AI Manager:

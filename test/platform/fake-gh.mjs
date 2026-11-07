@@ -67,8 +67,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
     if (a !== 'api') need(values(args, '-R')[0] === project, args);
 
     if (a === 'issue' && b === 'list' && values(args, '--state')[0] === 'closed') {
-      need(values(args, '--json')[0] === 'number,labels', args);
-      return JSON.stringify([...issues.values()].filter((i) => i.state === 'CLOSED').map((i) => ({ number: i.number, labels: i.labels.map((name) => ({ name })) })));
+      need(values(args, '--json')[0] === 'number,title,labels,milestone', args);
+      return JSON.stringify([...issues.values()].filter((i) => i.state === 'CLOSED').map((i) => ({ number: i.number, title: i.title, labels: i.labels.map((name) => ({ name })), milestone: i.milestone ? { title: i.milestone } : null })));
     }
     if (a === 'label' && b === 'list') {
       need(values(args, '--json')[0] === 'name', args);
@@ -125,6 +125,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
       for (const l of values(args, '--add-label')) if (!it.labels.includes(l)) it.labels.push(l);
       for (const l of values(args, '--remove-label')) it.labels = it.labels.filter((x) => x !== l);
       for (const u of values(args, '--add-assignee')) if (!it.assignees.includes(u)) it.assignees.push(u);
+      for (const t of values(args, '--milestone')) {
+        // Like the real `gh issue edit --milestone`: it finds the title only among the open milestones.
+        if (milestones.get(t)?.state !== 'OPEN') throw new Error(`gh ${args.join(' ')} failed: could not add to milestone '${t}': 'not found'`);
+        it.milestone = t;
+      }
+      if (args.includes('--remove-milestone')) it.milestone = null;
       need(args.length > 4, args);
       return '';
     }
@@ -153,6 +159,28 @@ export function fakeGithub({ project = PROJECT } = {}) {
         if (!collaborators.has(decodeURIComponent(m[1]))) throw new Error(`gh ${args.join(' ')} failed: gh: Not Found (HTTP 404)`);
         return '';
       }
+      if (rest === 'milestones?state=all&per_page=100' && method === 'GET') {
+        need(args.includes('--paginate') && args.includes('--slurp'), args);
+        return JSON.stringify([[...milestones.values()].map((x) => ({ number: x.number, title: x.title, description: x.description || null, state: x.state.toLowerCase() }))]);
+      }
+      if (rest === 'milestones' && method === 'POST') {
+        need(values(args, '--input')[0] === '-', args);
+        const b = JSON.parse(opts.input);
+        need(typeof b.title === 'string' && Object.keys(b).every((k) => k === 'title' || k === 'description'), args);
+        if (milestones.has(b.title)) throw new Error(`gh ${args.join(' ')} failed: Validation Failed: already_exists (HTTP 422)`);
+        const number = milestones.size + 1;
+        milestones.set(b.title, { number, title: b.title, description: b.description ?? '', state: 'OPEN', closedAt: null, updatedAt: '2026-11-07T00:00:00Z' });
+        return JSON.stringify({ number, title: b.title });
+      }
+      if ((m = /^milestones\/(\d+)$/.exec(rest)) && method === 'PATCH') {
+        need(values(args, '--input')[0] === '-', args);
+        const ms = [...milestones.values()].find((x) => x.number === Number(m[1]));
+        need(ms, args);
+        const b = JSON.parse(opts.input);
+        need(Object.keys(b).length > 0 && Object.keys(b).every((k) => k === 'description'), args);
+        ms.description = b.description;
+        return JSON.stringify({ number: ms.number, title: ms.title });
+      }
       if (rest === 'issues' && method === 'POST') {
         need(values(args, '--input')[0] === '-', args);
         const b = JSON.parse(opts.input);
@@ -165,8 +193,15 @@ export function fakeGithub({ project = PROJECT } = {}) {
         need(values(args, '--input')[0] === '-', args);
         const it = issueOf(m[1], args);
         const b = JSON.parse(opts.input);
-        for (const k of Object.keys(b)) need(k === 'body' || k === 'title', args);
-        Object.assign(it, b);
+        for (const k of Object.keys(b)) need(k === 'body' || k === 'title' || k === 'milestone', args);
+        if ('milestone' in b) {
+          // The REST way: the milestone number, any state; null takes the Issue out.
+          const ms = b.milestone === null ? null : [...milestones.values()].find((x) => x.number === b.milestone);
+          need(b.milestone === null || ms, args);
+          it.milestone = ms ? ms.title : null;
+        }
+        const { milestone: _ignored, ...fields } = b;
+        Object.assign(it, fields);
         return JSON.stringify({ number: it.number });
       }
       if ((m = /^issues\/(\d+)\/comments$/.exec(rest))) {
@@ -225,6 +260,9 @@ export function fakeGithub({ project = PROJECT } = {}) {
     /** A comment on PR `pr`. On GitHub a PR is also an Issue, so it is the same call as `comment`. */
     reviewComment(pr, c) { this.comment(pr, c); },
     labelsOf: (n) => [...issues.get(n).labels],
+    milestoneOf: (n) => issues.get(n).milestone,
+    milestoneTitles: () => [...milestones.keys()],
+    milestoneDescription: (title) => milestones.get(title)?.description,
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries(repoLabels),
     repoLabel(name) { repoLabels.set(name, { color: 'ededed', description: '' }); },

@@ -98,8 +98,24 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       return JSON.stringify(issueJson(issues.get(iid)));
     }
     if (rest === 'milestones' && method === 'GET') {
-      need(q.get('state') === 'active' || q.get('state') === 'closed', args);
-      return pages([...milestones.values()].filter((x) => x.state === q.get('state')), paginate);
+      need(!q.get('state') || q.get('state') === 'active' || q.get('state') === 'closed', args); // no state: every milestone
+      return pages([...milestones.values()].filter((x) => !q.get('state') || x.state === q.get('state')), paginate);
+    }
+    if (rest === 'milestones' && method === 'POST') {
+      const b = body();
+      need(typeof b.title === 'string' && Object.keys(b).every((k) => k === 'title' || k === 'description'), args);
+      if ([...milestones.values()].some((x) => x.title === b.title)) throw new Error(`glab ${args.join(' ')} failed: 400 Bad request - Title has already been taken`);
+      const id = 300 + milestones.size;
+      milestones.set(id, { id, iid: milestones.size + 1, title: b.title, description: b.description ?? '', state: 'active', updated_at: '2026-11-07T00:00:00Z' });
+      return JSON.stringify(milestones.get(id));
+    }
+    if ((m = /^milestones\/(\d+)$/.exec(rest)) && method === 'PUT') {
+      const ms = milestones.get(Number(m[1]));
+      need(ms, args);
+      const b = body();
+      need(Object.keys(b).length > 0 && Object.keys(b).every((k) => k === 'description'), args);
+      ms.description = b.description;
+      return JSON.stringify(ms);
     }
     if ((m = /^milestones\/(\d+)\/issues$/.exec(rest))) {
       const ms = milestones.get(Number(m[1]));
@@ -113,6 +129,15 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       const b = body();
       need(Object.keys(b).length > 0, args);
       if (b.description !== undefined) it.description = b.description;
+      if (b.milestone_id !== undefined) {
+        // 0 takes the Issue out of its milestone, like GitLab.
+        if (b.milestone_id === 0) it.milestone = null;
+        else {
+          const ms = milestones.get(b.milestone_id);
+          need(ms, args);
+          it.milestone = ms.title;
+        }
+      }
       for (const l of String(b.add_labels ?? '').split(',').filter(Boolean)) if (!it.labels.includes(l)) { it.labels.push(l); addSystemNote(it.iid, `added ~${l} label`); }
       for (const l of String(b.remove_labels ?? '').split(',').filter(Boolean)) if (it.labels.includes(l)) { it.labels = it.labels.filter((x) => x !== l); addSystemNote(it.iid, `removed ~${l} label`); }
       if (b.assignee_ids) {
@@ -231,6 +256,9 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     bodyOf: (n) => issues.get(n).description,
     pinned: () => [], // GitLab has no pinned Issues
     labelsOf: (n) => [...issues.get(n).labels],
+    milestoneOf: (n) => issues.get(n).milestone,
+    milestoneTitles: () => [...milestones.values()].map((x) => x.title),
+    milestoneDescription: (title) => [...milestones.values()].find((x) => x.title === title)?.description,
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries([...labels.values()].map((l) => [l.name, { color: l.color.replace(/^#/, ''), description: l.description }])),
     commentBody: (id) => notes.get(id)?.body,

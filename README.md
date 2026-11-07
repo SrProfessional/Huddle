@@ -240,11 +240,13 @@ windows.
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
 | `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |
+| `/huddle-areas` | AI Manager | Helps define the project's areas (milestones): proposes them, puts Issues in them, estimates what is missing and checks them later. |
 | `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
 | `huddle wait <n>` | Session | Waits in the background for the AI Manager's request on Issue `n`. |
 | `huddle take <n>` | Session | Marks the pending request 👀 and prints its prompt. |
 | `huddle pending [n]` | Anyone | Lists the requests nobody has done yet. |
 | `huddle progress [--json]` | Anyone | Shows how far each area (milestone) has come, as a percentage, and the total. |
+| `huddle areas [list \| set \| assign \| check]` | AI Manager | The mechanics behind `/huddle-areas`: lists the areas, creates or updates a milestone, puts an Issue in an area, and reports what needs fixing. Every write prints its change first and has `--dry-run` (see [Define the areas](docs/team-guide.md#define-the-areas-with-huddle-areas)). |
 | `huddle team [add <login> [--anyway] \| remove <login>]` | AI Manager | Lists the team with ✔/✖ for «exists» and «can be assigned», or adds or removes an assignee in `huddle.json` (see [Add or remove someone](docs/team-guide.md#add-or-remove-someone)). |
 | `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
 | `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager, the labels and whether each assignee can be assigned. |
@@ -258,6 +260,7 @@ The method works with plain Issues and a good `CLAUDE.md`. The plugin takes the 
 - A dependency check before a session starts: if an Issue it depends on is not merged yet, the session does not begin.
 - Progress by area: milestones are the areas, and `huddle progress`, a pinned «Huddle progress» Issue and one line when a
   session opens show each area's percentage and the total (see the [team guide](docs/team-guide.md#progress)).
+  `/huddle-areas` helps the AI Manager define the areas, whatever their number.
 - Skills to set a project up, start an Issue, write a new Issue, review a pull request and ask for a decision.
 - A session that waits for the review on its own and picks up the AI Manager's requested changes as soon as they arrive.
 - The same commands on GitHub, on gitlab.com and on a company's own GitLab server.
