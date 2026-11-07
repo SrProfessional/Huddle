@@ -120,6 +120,44 @@ CLI, registers the marketplace silently, only after the trust dialog of that fol
 trusted there is no dialog and it is not used, and it is not documented for the VS Code extension. `huddle doctor` shows
 a «plugin» line so a developer can check their own machine.
 
+## Add or remove someone
+
+Only the AI Manager changes the team (see [the roles](roles.md)). Adding a person takes three steps:
+
+1. **They can be assigned.** They are a collaborator (GitHub) or a member with at least the Developer role (GitLab). If
+   not, Huddle can never assign them an Issue, and it stays `ready`.
+2. **Their login is in `assignees`** in `huddle.json`, merged through a PR/MR like any change.
+3. **Their machine is ready.** `gh` (or `glab`) is logged in with `gh auth login` (or `glab auth login`), and the plugin is
+   installed once with the two terminal commands: `claude plugin marketplace add SrProfessional/Huddle` and
+   `claude plugin install huddle@huddle`. On GitLab, Git must also use `glab` to push (see [the GitLab notes](gitlab.md)).
+
+**The easy way: `/huddle-team`.** It asks add or remove and the login, runs the command below, commits `huddle.json` on a
+new branch and opens a PR/MR called «Team: add `<login>`». It never merges and never commits to the default branch. At the
+end it prints the message to send the new person, with the commands of step 3.
+
+**The command, if you prefer it by hand:**
+
+```text
+huddle team                     the AI Manager and the assignees: ✔/✖ for «exists» and «can be assigned»
+huddle team add <login>         adds the login to assignees
+huddle team remove <login>      takes the login out of assignees
+```
+
+`add` and `remove` change only `assignees`: every other key, the order and the line endings of the file stay. Adding
+someone twice, or removing someone who is not there, says so and changes nothing.
+
+They never invite anyone and never change a platform setting. When the login cannot be assigned, `add` prints the step for
+the AI Manager and writes nothing:
+
+- GitHub: Settings → Collaborators → Add people, or `gh api -X PUT repos/<project>/collaborators/<login>`.
+- GitLab: Manage → Members → Invite members, with the role Developer.
+
+Do the step, then run `add` again. To write the file before the step is done, add `--anyway`: that person's Issues stay
+`ready` until the step is done. `huddle doctor` has a «team» check that shows a ⚠ with the step for each assignee who
+cannot be assigned.
+
+Removing someone does not touch their open Issues: they keep that assignee until the AI Manager reassigns them.
+
 ## Updating Huddle
 
 Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab

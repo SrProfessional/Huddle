@@ -237,13 +237,15 @@ windows.
 | `/huddle-start <n>` | Developer | Starts or continues Issue `n`. |
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
+| `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |
 | `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
 | `huddle wait <n>` | Session | Waits in the background for the AI Manager's request on Issue `n`. |
 | `huddle take <n>` | Session | Marks the pending request 👀 and prints its prompt. |
 | `huddle pending [n]` | Anyone | Lists the requests nobody has done yet. |
 | `huddle progress [--json]` | Anyone | Shows how far each area (milestone) has come, as a percentage, and the total. |
+| `huddle team [add <login> [--anyway] \| remove <login>]` | AI Manager | Lists the team with ✔/✖ for «exists» and «can be assigned», or adds or removes an assignee in `huddle.json` (see [Add or remove someone](docs/team-guide.md#add-or-remove-someone)). |
 | `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
-| `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager and the labels. |
+| `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager, the labels and whether each assignee can be assigned. |
 
 ## What the plugin adds
 
