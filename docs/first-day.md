@@ -22,6 +22,14 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    parent folder is already trusted there is no dialog and it is not used, and it is not documented for the VS Code
    extension. Do not wait for it: install Huddle yourself.
 
+   **On GitLab, two more things:** `glab` must be on the PATH of the terminal that starts Claude (if not, the hook stays
+   silent and `huddle doctor` shows ✖ on `login`; after installing `glab` on Windows, open a new terminal), and Git must
+   use `glab` for gitlab.com, or a session cannot push (the credential manager cannot open a browser from a session).
+   In a terminal where `glab` is on the PATH run
+   `git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"`, and check it with
+   `git ls-remote origin`. Labels change by the schedule, so they can take up to 10 minutes: see
+   [Huddle on GitLab](gitlab.md#on-the-developers-machine).
+
 4. Clone the team's repo and open Claude Code in it.
 
    You do not need to clone Huddle. Cloning it is only for people who work on Huddle itself, with

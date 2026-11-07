@@ -5,10 +5,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
-Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub repo and a sandbox GitLab project.
+## [0.1.0]
+
+The first release. It is tagged only after the smoke test in [docs/smoke-test.md](docs/smoke-test.md) passes on a sandbox
+GitHub repo and a sandbox GitLab project.
 
 ### Added
 
+- The smoke test checklist, `docs/smoke-test.md`, run by hand before each release.
 - The core: issue status from «Depends on», review requests, assignment by load.
 - The platform adapters for GitHub (`gh`) and GitLab (`glab api`, including self-managed hosts), with a shared contract
   test run against canned responses.
