@@ -131,8 +131,9 @@ it on (write the platform in Results). Leave `progress_issue` out of `huddle.jso
    Put one more open Issue **P** in **Beta**, and leave one open Issue **X** with no milestone.
 3. [ ] Run `huddle labels` (GitLab: Play the schedule, or wait up to 10 minutes). It ends without an error.
 4. [ ] **The numbers follow the formula.** `huddle progress` shows **Alpha** with merged 1, total 2 (M and O; H and N count in
-   neither), remaining 2, so **25%** (1 ÷ 4); **Beta** with merged 0, total 1, remaining 1, so **0%**; the project **Total
-   20%** (1 ÷ 5); and «no area» with 1 open Issue (X). The progress Issue itself is not counted.
+   neither), remaining 2, so **25%** (1 ÷ 4); **Beta** with merged 0, total 1, remaining 1, so **0%**; the project **Total 16%** (1 ÷ 6: merged 1 over total 3 plus remaining 3); and «no area» with X plus any Issue still open
+   from the earlier sections (open Issues with no milestone from sections 1 to 8 count too, so close them first if you
+   want exactly 1). The progress Issue itself is not counted.
 5. [ ] `huddle progress --json` agrees with the table: the same areas, `merged`, `total`, `remaining`, `percent` and total.
 6. [ ] **The «Huddle progress» Issue is created once.** One new Issue called «Huddle progress» exists, with the marker
    `<!-- huddle:progress -->` in its body and the same numbers as step 4. On **GitHub it is pinned**; on GitLab it is only
@@ -141,15 +142,15 @@ it on (write the platform in Results). Leave `progress_issue` out of `huddle.jso
    GitLab: the «edited» time of the description). Run `huddle labels` again: no second «Huddle progress» Issue appears and
    the edited time does not move.
 8. [ ] **The session-start line shows the areas.** Open a new developer session in the sandbox clone (CLI, as in section 6).
-   Before typing, the visible lines include `Progress: Alpha 25% · Beta 0% · Total 20%` (the order of the areas may
+   Before typing, the visible lines include `Progress: Alpha 25% · Beta 0% · Total 16%` (the order of the areas may
    differ), next to the pending-request line when there is one. VS Code panel: nothing shows until the first message, as
    in section 6. Offline, the line stays silent.
 9. [ ] **Edit a remaining line and see it change.** Change Beta's description to `Huddle remaining: 3`, then run
-   `huddle labels`. `huddle progress` shows **Beta** still 0% and the project **Total 16%** (1 ÷ 6), and the progress
+   `huddle labels`. `huddle progress` shows **Beta** still 0% and the project **Total 12%** (1 ÷ 8: merged 1 over total 3 plus remaining 5), and the progress
    Issue is rewritten once with the new numbers (its edited time moves). Run `huddle labels` once more: it does not move
    again.
 10. [ ] **A line that is not a number counts as 0.** Change Beta's line to `Huddle remaining: four`: `huddle progress` says
-    the estimate is missing for **Beta**, and shows Beta with remaining 0.
+    the estimate is missing for **Beta**, and shows Beta with remaining 0, so the project **Total 20%** (1 ÷ 5: merged 1 over total 3 plus remaining 2).
 11. [ ] **A milestone closed more than 90 days ago stays out.** Use a sandbox milestone that was closed more than 90 days
     ago (for example **Old**, with `Huddle remaining: 5` and one merged Issue). It does **not** appear in `huddle progress`
     or in the total, while a milestone closed this week **does**. A fresh sandbox cannot wait 90 days: if there is no such

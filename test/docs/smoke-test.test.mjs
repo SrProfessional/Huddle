@@ -27,6 +27,39 @@ test('«Progress» covers the formula, the Issue, the hook line and the 90 days'
     assert.ok(t.includes(needle), `missing «${needle}»`);
 });
 
+test('the percentages written in «Progress» are the ones progressOf gives (steps 4, 8, 9 and 10)', async () => {
+  const { progressOf } = await import('../../lib/core/progress.mjs');
+  const issues = (merged, open) => [...Array(merged).fill({ open: false, merged: true }), ...Array(open).fill({ open: true, merged: false })];
+  // Alpha: M merged, O open, H closed by hand and N not planned (both count in nothing). Beta: P open.
+  const alpha = (extra = {}) => ({ title: 'Alpha', description: 'Huddle remaining: 2', issues: [...issues(1, 1), { open: false, merged: false }, { open: false, merged: false }], ...extra });
+  const beta = (description) => ({ title: 'Beta', description, issues: issues(0, 1) });
+  const run = (description) => progressOf({ milestones: [alpha(), beta(description)] });
+  const step4 = run('Huddle remaining: 1');
+  const step9 = run('Huddle remaining: 3');
+  const step10 = run('Huddle remaining: four');
+
+  const steps = section('9\\. Progress').split(/^(?=\d+\. \[ \])/m).filter((s) => /^\d+\. \[ \]/.test(s)).map((s) => s.replace(/\s+/g, ' '));
+  const total = (text) => /\*\*Total (\d+)%\*\* \((\d+) ÷ (\d+)[:)]/.exec(text);
+  const check = (text, result, what) => {
+    const m = total(text);
+    assert.ok(m, `${what}: no «**Total N%** (a ÷ b)»`);
+    const t = result.total;
+    assert.deepEqual([Number(m[1]), Number(m[2]), Number(m[3])], [t.percent, t.merged, t.total + t.remaining], what);
+  };
+  check(steps[3], step4, 'step 4');
+  assert.deepEqual(step4.areas.map((a) => a.percent), [25, 0]);
+  assert.ok(steps[3].includes('**25%** (1 ÷ 4)') && steps[3].includes('**0%**'), 'step 4: the area percentages');
+  const line = (r) => `Progress: ${r.areas.map((a) => `${a.title} ${a.percent}%`).join(' · ')} · Total ${r.total.percent}%`;
+  assert.ok(steps[7].includes(line(step4)), `step 8 must show «${line(step4)}»`);
+  check(steps[8], step9, 'step 9');
+  check(steps[9], step10, 'step 10');
+});
+
+test('«Progress» says «no area» counts X plus the Issues still open from earlier sections', () => {
+  const t = section('9\\. Progress').replace(/\s+/g, ' ');
+  assert.match(t, /X plus any Issue still open from the earlier sections/);
+});
+
 test('«Team members» covers team, add through a PR, doctor and remove', () => {
   const t = section('10\\. Team members');
   for (const needle of ['huddle team', '/huddle-team add', 'did not merge', '`team`', '/huddle-team remove', '✔', '✖'])
