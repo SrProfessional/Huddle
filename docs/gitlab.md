@@ -61,6 +61,25 @@ once per project:
 
 Huddle only reads the variable. It never reads a token from a file, never prints it and never turns on shell tracing.
 
+## On the developer's machine
+
+Every developer who works on a GitLab repo needs two things on their own machine. The AI Manager checks them once in
+the [smoke test](smoke-test.md).
+
+1. **`glab` must be on the PATH of the terminal that starts Claude.** If it is not, the SessionStart hook stays silent
+   and `huddle doctor` shows ✖ on `login`. After installing `glab` on Windows, open a new terminal (or reload the PATH).
+2. **Git must use `glab` for gitlab.com.** If it does not, a session cannot push: the credential manager cannot open a
+   browser from a session. In a terminal where `glab` is on the PATH run:
+
+   ```text
+   git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"
+   ```
+
+   and check it with `git ls-remote origin`: it must answer with no prompt. (For a self-managed host, use that host
+   instead of `gitlab.com`.)
+
+Labels change by the schedule, so they can take up to 10 minutes (see [The schedule](#the-schedule)).
+
 ## What works differently
 
 | On GitLab | What Huddle does |
@@ -71,6 +90,9 @@ Huddle only reads the variable. It never reads a token from a file, never prints
 | Self-approval may be disabled. | The AI Manager approves with a comment, then merges. |
 | `Closes #N` works only for MRs into the default branch. | The MR template uses `Closes #N`. Open the MR into the default branch. |
 | Merging can remove the source branch. | Huddle merges without removing it. |
+| There are no pinned Issues. | The «Huddle progress» Issue is created, but not pinned. Find it in the Issue list by its title, «Huddle progress». |
+| Reading progress costs one call per closed Issue (`closed_by`). | At most 8 `glab` calls run at once. A milestone with 300 closed Issues means 300 calls on every labels run and every session start, so keep finished areas closed: a closed milestone leaves the percentage after 90 days. In the session hook the progress read is dropped after 20 s. |
+| A milestone has no closing date. | The date of its last update stands for it, to decide if it closed in the last 90 days. Only project milestones are read. |
 
 ## Check it
 

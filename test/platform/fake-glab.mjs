@@ -16,9 +16,11 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const notes = new Map(); // id -> { id, issue, body, created_at, author, system, eyes }
   const labels = new Map(); // id -> { id, name, color, description }
   const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // username -> id
+  const milestones = new Map(); // id -> { id, iid, title, description, state: 'active' | 'closed', updated_at }
   const calls = [];
   const merged = [];
   let nextNote = 9000;
+  let nextIssue = 900;
   let nextLabel = 500;
 
   const root = `projects/${encodeURIComponent(project)}`;
@@ -38,6 +40,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const issueJson = (i) => ({
     iid: i.iid, title: i.title, description: i.description, state: i.state,
     labels: [...i.labels], assignees: i.assignees.map(user), assignee: i.assignees[0] ? user(i.assignees[0]) : null,
+    milestone: i.milestone ? { id: [...milestones.values()].find((m) => m.title === i.milestone)?.id, title: i.milestone } : null,
+    web_url: `https://gitlab.test/${project}/-/issues/${i.iid}`,
   });
   const closers = (i) => i.reviews.map((iid) => reviews.get(iid) ?? { iid, draft: false, state: 'opened' });
 
@@ -77,12 +81,29 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       need(q.get('state') === 'opened' || q.get('state') === 'closed', args);
       return pages([...issues.values()].filter((i) => i.state === q.get('state')).map(issueJson), paginate);
     }
+    if (rest === 'issues' && method === 'POST') {
+      const b = body();
+      need(typeof b.title === 'string' && typeof b.description === 'string', args);
+      const iid = nextIssue++;
+      issues.set(iid, { iid, title: b.title, description: b.description, assignees: [], labels: [], state: 'opened', reviews: [], milestone: null });
+      return JSON.stringify(issueJson(issues.get(iid)));
+    }
+    if (rest === 'milestones' && method === 'GET') {
+      need(q.get('state') === 'active' || q.get('state') === 'closed', args);
+      return pages([...milestones.values()].filter((x) => x.state === q.get('state')), paginate);
+    }
+    if ((m = /^milestones\/(\d+)\/issues$/.exec(rest))) {
+      const ms = milestones.get(Number(m[1]));
+      need(method === 'GET' && ms, args);
+      return pages([...issues.values()].filter((i) => i.milestone === ms.title).map(issueJson), paginate);
+    }
     if ((m = /^issues\/(\d+)$/.exec(rest))) {
       const it = issueOf(m[1], args);
       if (method === 'GET') return JSON.stringify(issueJson(it));
       need(method === 'PUT', args);
       const b = body();
       need(Object.keys(b).length > 0, args);
+      if (b.description !== undefined) it.description = b.description;
       for (const l of String(b.add_labels ?? '').split(',').filter(Boolean)) if (!it.labels.includes(l)) { it.labels.push(l); addSystemNote(it.iid, `added ~${l} label`); }
       for (const l of String(b.remove_labels ?? '').split(',').filter(Boolean)) if (it.labels.includes(l)) { it.labels = it.labels.filter((x) => x !== l); addSystemNote(it.iid, `removed ~${l} label`); }
       if (b.assignee_ids) {
@@ -164,8 +185,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   }
 
   const world = {
-    issue({ number, title = '', body = '', assignees = [], labels: names = [], state = 'open', reviews: closing = [] }) {
-      const it = { iid: number, title, description: body, assignees: [...assignees], labels: [...names], state: state === 'open' ? 'opened' : 'closed', reviews: [...closing] };
+    issue({ number, title = '', body = '', assignees = [], labels: names = [], state = 'open', reviews: closing = [], milestone = null }) {
+      const it = { iid: number, title, description: body, assignees: [...assignees], labels: [...names], state: state === 'open' ? 'opened' : 'closed', reviews: [...closing], milestone };
       // GitLab has no «closed as completed»: an Issue counts as merged only because a merged MR closes it.
       if (state === 'merged' && !it.reviews.length) {
         const iid = 10000 + number;
@@ -185,6 +206,14 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       if (!users.has(author)) users.set(author, users.size + 1);
       notes.set(id, { id, issue: mr, mr: true, body, created_at: createdAt, author, system: false, eyes: taken });
     },
+    // closedAt: GitLab has no closing date on a milestone, so it is the last update, which is what the adapter reads.
+    milestone({ title, description = '', state = 'open', closedAt = null }) {
+      const id = 300 + milestones.size;
+      milestones.set(id, { id, iid: milestones.size + 1, title, description, state: state === 'open' ? 'active' : 'closed', updated_at: closedAt ?? '2026-11-01T00:00:00Z' });
+    },
+    created: () => [...issues.values()].filter((i) => i.iid >= 900).map((i) => ({ number: i.iid, title: i.title, body: i.description })),
+    bodyOf: (n) => issues.get(n).description,
+    pinned: () => [], // GitLab has no pinned Issues
     labelsOf: (n) => [...issues.get(n).labels],
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries([...labels.values()].map((l) => [l.name, { color: l.color.replace(/^#/, ''), description: l.description }])),

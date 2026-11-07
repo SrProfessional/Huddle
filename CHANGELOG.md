@@ -5,10 +5,34 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
-Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub repo and a sandbox GitLab project.
+### Added
+
+- Progress by area, as a percentage (Issue #28). Areas are milestones; each area's percentage is merged Issues over all the
+  work it will need, using a `Huddle remaining: N` line of the milestone description for the Issues not written yet.
+  Shown by `huddle progress` (and `--json`), by a «Huddle progress» Issue that the labels job keeps up to date (pinned on
+  GitHub; GitLab has no pinned Issues), and by one line in the SessionStart hook. `"progress_issue": false` in `huddle.json`
+  turns the Issue off. `/huddle-issue` asks for the milestone and `/huddle-setup` explains the areas. The adapters gain
+  `listMilestones`, `createIssue`, `updateIssue` and `pinIssue`, and open Issues carry their `milestone`.
+
+### Fixed
+
+- `/huddle-setup` compares a template with the project's copy ignoring line endings. On Windows with `core.autocrlf=true`
+  the copy has CRLF, and a refresh used to skip it as «edited by the project». A copy that differs only in line endings is
+  now refreshed and keeps the line ending it already has (CRLF stays CRLF); a copy with a real edit is still kept.
+- GitLab `huddle take` and `huddle labels` were slow (over 2 minutes on a real project): one `glab` call per note for its
+  👀 award. The adapter now reads the award only for the notes that could be a request (by the AI Manager, with a «Prompt for
+  Claude Code» heading, newer than the last commit or «Ready for review again»), and runs those calls 8 at a time, with the
+  same `mapLimit` cap as the milestone reads. For an Issue with 30 notes, 2 of them requests, `comments` goes from 31 `glab`
+  calls to 3. The adapter reads `ai_manager` from `huddle.json`; without it every note is read, as before.
+
+## [0.1.0]
+
+The first release. It is tagged only after the smoke test in [docs/smoke-test.md](docs/smoke-test.md) passes on a sandbox
+GitHub repo and a sandbox GitLab project.
 
 ### Added
 
+- The smoke test checklist, `docs/smoke-test.md`, run by hand before each release.
 - The core: issue status from «Depends on», review requests, assignment by load.
 - The platform adapters for GitHub (`gh`) and GitLab (`glab api`, including self-managed hosts), with a shared contract
   test run against canned responses.
@@ -32,14 +56,6 @@ Version 0.1.0 is not tagged yet: it waits for the smoke test on a sandbox GitHub
 
 ### Fixed
 
-- `/huddle-setup` compares a template with the project's copy ignoring line endings. On Windows with `core.autocrlf=true`
-  the copy has CRLF, and a refresh used to skip it as «edited by the project». A copy that differs only in line endings is
-  now refreshed and keeps the line ending it already has (CRLF stays CRLF); a copy with a real edit is still kept.
-- GitLab `huddle take` and `huddle labels` were slow (over 2 minutes on a real project): one `glab` call per note for its
-  👀 award. The adapter now reads the award only for the notes that could be a request (by the AI Manager, with a «Prompt for
-  Claude Code» heading, newer than the last commit or «Ready for review again»), and runs those calls 8 at a time. For an
-  Issue with 30 notes, 2 of them requests, `comments` goes from 31 `glab` calls to 3. The adapter reads `ai_manager` from
-  `huddle.json`; without it every note is read, as before.
 - GitLab: a request left on a merge request is now seen. Issues and MRs are numbered separately on GitLab, so the adapter
   read the notes of MR !2 as the notes of Issue #2 (`huddle pending` said «Nothing pending» and no label moved). Notes,
   the 👀 award, note edits and new notes of an MR now use `merge_requests/:iid` (`comments`, `postComment`, `editComment`
