@@ -158,8 +158,54 @@ export function contract({ name, create }) {
     world.issue({ number: 3, state: 'closed-by-hand', labels: ['needs decision'] });
     world.issue({ number: 4, state: 'merged' });
     const closed = (await adapter.listClosedIssues()).sort((a, b) => a.number - b.number);
-    assert.deepEqual(closed, [{ number: 2, labels: ['in review', 'changes requested from AI Manager', 'bug'] }, { number: 3, labels: ['needs decision'] }, { number: 4, labels: [] }]);
+    assert.deepEqual(closed, [{ number: 2, title: '', labels: ['in review', 'changes requested from AI Manager', 'bug'], milestone: null }, { number: 3, title: '', labels: ['needs decision'], milestone: null }, { number: 4, title: '', labels: [], milestone: null }]);
     assert.deepEqual(closedCleanup(closed), [{ number: 2, remove: ['in review', 'changes requested from AI Manager'] }, { number: 3, remove: ['needs decision'] }]);
+  });
+
+  t('listClosedIssues() also gives the title and the milestone of each closed Issue, for the areas check-up', async ({ adapter, world }) => {
+    world.milestone({ title: 'Content' });
+    world.issue({ number: 2, title: 'Write intro', state: 'merged', milestone: 'Content' });
+    world.issue({ number: 3, title: 'Tooling', state: 'closed-by-hand' });
+    const closed = (await adapter.listClosedIssues()).sort((a, b) => a.number - b.number);
+    assert.deepEqual(closed.map((i) => [i.number, i.title, i.milestone]), [[2, 'Write intro', 'Content'], [3, 'Tooling', null]]);
+  });
+
+  t('findMilestone(title) finds a milestone in any state, ignoring case, and gives null when there is none', async ({ adapter, world }) => {
+    const text = ['Words.', '', 'Huddle remaining: 4'].join('\n');
+    world.milestone({ title: 'Content', description: text });
+    world.milestone({ title: 'Old', state: 'closed', closedAt: '2020-01-01T00:00:00Z' });
+    const found = await adapter.findMilestone('Content');
+    assert.deepEqual([found.title, found.description, found.state], ['Content', text, 'open']);
+    assert.equal((await adapter.findMilestone('  content ')).title, 'Content');
+    assert.equal((await adapter.findMilestone('Old')).state, 'closed');
+    assert.equal(await adapter.findMilestone('Nothing'), null);
+  });
+
+  t('createMilestone and updateMilestone write the description; update keeps the milestone, never makes a second one', async ({ adapter, world }) => {
+    const two = ['Paid reach.', '', 'Huddle remaining: 2'].join('\n');
+    const five = ['Paid reach.', '', 'Huddle remaining: 5'].join('\n');
+    await adapter.createMilestone({ title: 'Ads', description: two });
+    assert.deepEqual(world.milestoneTitles(), ['Ads']);
+    assert.equal(world.milestoneDescription('Ads'), two);
+    await adapter.updateMilestone('Ads', { description: five });
+    assert.deepEqual(world.milestoneTitles(), ['Ads']);
+    assert.equal(world.milestoneDescription('Ads'), five);
+    assert.equal((await adapter.findMilestone('Ads')).description, five);
+    await assert.rejects(adapter.updateMilestone('Missing', { description: 'x' }), /Missing/);
+  });
+
+  t('setIssueMilestone(n, title) puts an Issue in an area, null takes it out; an unknown area is an error', async ({ adapter, world }) => {
+    world.milestone({ title: 'Content' });
+    world.issue({ number: 5 });
+    world.issue({ number: 6, state: 'merged' });
+    await adapter.setIssueMilestone(5, 'Content');
+    await adapter.setIssueMilestone(6, 'Content');
+    assert.equal(world.milestoneOf(5), 'Content');
+    assert.equal(world.milestoneOf(6), 'Content');
+    assert.equal((await adapter.listOpenIssues())[0].milestone, 'Content');
+    await adapter.setIssueMilestone(5, null);
+    assert.equal(world.milestoneOf(5), null);
+    await assert.rejects(adapter.setIssueMilestone(5, 'Nope'), /Nope/);
   });
 
   t('reviewCommits(n) gives the commit dates of a PR/MR, so the core sees work newer than a request', async ({ adapter, world }) => {
