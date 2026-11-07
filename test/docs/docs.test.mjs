@@ -52,7 +52,7 @@ test('GitLab docs: token stays protected, MR pipelines skip, labels lag up to 10
 
 // --- every command in the docs exists in the CLI or the skills ---------------------------------------------------------------
 
-const CLI = ['labels', 'wait', 'take', 'pending', 'hook', 'doctor'];
+const CLI = ['labels', 'wait', 'take', 'pending', 'progress', 'hook', 'doctor'];
 const skills = readdirSync(path.join(root, 'skills')).filter((d) => existsSync(path.join(root, 'skills', d, 'SKILL.md')));
 
 /** The text inside code fences and inline code spans: where commands are written. */

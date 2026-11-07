@@ -30,4 +30,7 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
 4. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` and show the result. If it reports a missing label, run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` (the AI Manager's login only).
 5. Tell the AI Manager to send every developer the two install commands, to run once on their machine in a terminal, then open a new session: `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`.
-6. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.
+6. Tell the developer, in one line: the areas of the project are its milestones, and each area's percentage counts the
+   Issues still to write, which the AI Manager states on a line of the milestone description, for example `Huddle remaining: 4`
+   (see `huddle progress`).
+7. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.

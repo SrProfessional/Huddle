@@ -13,6 +13,7 @@ One person per repo. They lead the work with the help of their own Claude Code s
 | Writes the Issues, each with «Depends on» and a «Prompt for Claude Code». | `/huddle-issue` |
 | Answers every «❓ Decision for the AI Manager». | `/huddle-decide` |
 | Reviews each PR (MR on GitLab), asks for changes or merges. | `/huddle-review` |
+| Keeps the estimates of the progress: the `Huddle remaining: N` line of each milestone description, the Issues still to write in that area. | `/huddle-issue` asks for the milestone; the estimate is edited by hand |
 
 Only the AI Manager:
 

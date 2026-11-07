@@ -19,6 +19,12 @@ not, stop and say so.
      documents; check «Depends on» first; create the branch in its own worktree; TDD; the allowed files only; the tests to
      report with their counts; the closing message; «What was NOT done».
    - **Allowed files**, **Contract or spec**, **Tests that must pass:** concrete, checkable.
-3. Show the draft and wait for the AI Manager's OK. Create it with `gh issue create` (or `glab issue create`) using the
-   repo from `huddle.json`. Do not add status labels or an assignee: the labels job does that.
+   - **Milestone (area):** ask which milestone the Issue goes in. Areas are milestones, and each Issue belongs to one: list the
+     open ones with `gh api repos/<project>/milestones --jq '.[].title'` (or `glab api projects/<encoded project>/milestones?state=active`)
+     and offer them. If the right one does not exist yet, offer to create it. The AI Manager keeps its
+     `Huddle remaining: N` line (the Issues still to write in that area) up to date in the milestone description. With no
+     milestone the Issue is counted as «no area» and left out of the progress percentages.
+3. Show the draft, with its milestone, and wait for the AI Manager's OK. Create it with `gh issue create --milestone "<title>"`
+   (or `glab issue create --milestone "<title>"`) using the repo from `huddle.json`. Do not add status labels or an
+   assignee: the labels job does that.
 4. Answer with the Issue link.
