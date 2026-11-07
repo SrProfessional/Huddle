@@ -11,6 +11,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   with checkboxes and expected results for GitHub and GitLab, and a «Results 0.2.0» table. Step 5.5 is now run with a second
   account: that person comments a «Prompt for Claude Code» block, and `huddle pending` and the labels ignore it. «Not
   testable» stays only for a run with no second account. «Clean up» is now section 11.
+- `huddle doctor` tells «not installed or not on the PATH» apart from «not logged in» (Issue #41). When `gh` or `glab` cannot
+  be started (`ENOENT`), the `login` line says so and gives the install command for the system (`winget install --id
+  GitHub.cli` / `GLab.GLab` on Windows, `brew install gh` / `glab` on Mac, the official page on Linux) and, on Windows, to
+  open a new terminal or reload the PATH. An auth failure says «is not logged in» with `gh auth login` / `glab auth login`
+  (`--hostname <host>` when `huddle.json` has a host). Any other failure keeps the «is not usable» line. The real runners
+  carry the spawn error's `code` on the error they reject with.
 
 ## [0.2.0] - 2026-11-07
 
