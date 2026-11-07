@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- The smoke test (`docs/smoke-test.md`, Issue #40) has two new numbered sections, «Progress» (9) and «Team members» (10),
+  with checkboxes and expected results for GitHub and GitLab, and a «Results 0.2.0» table. Step 5.5 is now run with a second
+  account: that person comments a «Prompt for Claude Code» block, and `huddle pending` and the labels ignore it. «Not
+  testable» stays only for a run with no second account. «Clean up» is now section 11.
+
 ## [0.2.0] - 2026-11-07
 
 ### Added
