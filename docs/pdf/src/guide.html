@@ -1,0 +1,167 @@
+<div class="wrap guide">
+  <header>
+    <div class="brand"><span class="mark" aria-hidden="true">H</span>Huddle</div>
+    <p class="method"><strong>Huddle</strong><span>Decision-led development for teams coding with AI</span></p>
+    <h1>How a team works with Claude Code</h1>
+    <p class="lead">Each person works with Claude Code on their own computer. Tasks arrive as Issues on GitHub or GitLab, ready to start, and Huddle keeps their status up to date by itself. This guide explains the cycle, the roles, the rules and how to start on your first day.</p>
+    <p class="thesis">Our job is no longer typing code. It is making good decisions. The AI writes, tests and asks; the person decides.</p>
+  </header>
+
+  <section aria-labelledby="ciclo">
+    <span class="eyebrow">The cycle</span>
+    <h2 id="ciclo">From an idea to merged code, step by step</h2>
+    <ol class="cycle">
+      <li>
+        <div><span class="who">AI Manager</span><h3>Plans and splits the work</h3>
+        <p>The AI Manager defines what gets built, writes the spec and splits it into tasks that do not step on each other: each one touches different files. When one task needs another first, it says so under «Depends on».</p></div>
+      </li>
+      <li>
+        <div><span class="who">AI Manager</span><h3>Creates the Issue with its prompt ready</h3>
+        <p>With <code>/huddle-issue</code>, each task becomes an Issue from the template: the exact prompt to paste into Claude Code, the files that may and may not be touched, and the tests that must pass. Huddle assigns it to the person with the fewest open Issues.</p></div>
+      </li>
+      <li>
+        <div><span class="who">Developer</span><h3>Starts it with one command</h3>
+        <p><code>/huddle-start N</code> checks that every dependency is merged, creates the branch in a folder of its own, marks the Issue <code>in progress</code> and runs its prompt. There is no need to explain the project: <code>CLAUDE.md</code> already gives the session the context.</p></div>
+      </li>
+      <li class="human">
+        <div><span class="who">Developer · this is where the value is</span><h3>Answers the AI's questions and decides</h3>
+        <p>The session asks what the Issue does not settle: what to do in an unusual case, what text the user sees, what to prioritize. Each answer is a decision, and the quality of the result depends on it. If the work cannot go on without the AI Manager, the session asks a «❓ Decision for the AI Manager» on the Issue and stops.</p></div>
+      </li>
+      <li>
+        <div><span class="who">Claude Code</span><h3>Writes the test, the code and opens the PR</h3>
+        <p>First the failing test, then the code that makes it pass. It opens a pull request (a merge request on GitLab) with the tests it ran and their real results, and closes with a message that starts with <strong>«✅ Issue #N finished»</strong>. Then it keeps waiting for the review in the background.</p></div>
+      </li>
+      <li>
+        <div><span class="who">The platform</span><h3>Automatic tests and labels</h3>
+        <p>The project's CI runs its tests. Huddle's labels job moves each Issue through <code>ready</code>, <code>assigned</code>, <code>in progress</code>, <code>in review</code> and <code>blocked</code>, from its «Depends on» and its PR. Nobody moves those labels by hand.</p></div>
+      </li>
+      <li>
+        <div><span class="who">AI Manager</span><h3>Reviews: asks for changes or merges</h3>
+        <p>With <code>/huddle-review</code>, the AI Manager either comments a request with a «Prompt for Claude Code» block, which the waiting session takes by itself (marking it 👀), or approves and merges. A merged PR closes the Issue and unblocks the ones that depend on it. Anything that touches production or secrets is done only by the AI Manager.</p></div>
+      </li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="roles">
+    <span class="eyebrow">Roles</span>
+    <h2 id="roles">Who does what</h2>
+    <div class="roles">
+      <div class="role">
+        <h3>AI Manager (a single person)</h3>
+        <p class="def">A person, not the AI: leads the work with the help of their own Claude Code session. Their login is <code>ai_manager</code> in <code>huddle.json</code>.</p>
+        <ul>
+          <li>Decides what gets built and in what order.</li>
+          <li>Writes the specs and the Issues with their prompt.</li>
+          <li>Answers every «❓ Decision for the AI Manager».</li>
+          <li>Reviews and merges PRs. The only one who merges into the default branch.</li>
+          <li>The only one who touches production, settings and secrets.</li>
+          <li>Adds and removes people from the team.</li>
+        </ul>
+      </div>
+      <div class="role">
+        <h3>Developer</h3>
+        <p class="def">Listed under <code>assignees</code> in <code>huddle.json</code>.</p>
+        <ul>
+          <li>Takes an assigned Issue and works on its own branch.</li>
+          <li>Answers the session's questions with judgment.</li>
+          <li>Reviews what the AI did before the PR is opened.</li>
+          <li>If something does not fit the Issue, asks the AI Manager instead of improvising.</li>
+          <li>Never merges, never touches production.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="issue">
+    <span class="eyebrow">The Issue</span>
+    <h2 id="issue">What each task brings</h2>
+    <p>The Issue template makes every task arrive complete, so anyone's session starts the same way, no matter who takes it.</p>
+    <div class="issue">
+      <dl>
+        <dt>Goal</dt><dd>What we want to achieve and why, in a few lines.</dd>
+        <dt>Depends on</dt><dd>The Issues that must be merged first, one per line, or «None». Huddle keeps the Issue <code>blocked</code> until they are.</dd>
+        <dt>Branch</dt><dd>The name of the branch, created from an up-to-date default branch.</dd>
+        <dt>Prompt for Claude Code</dt><dd>The text the session runs, with the steps, the tests and how to open the PR.</dd>
+        <dt>Allowed files</dt><dd>The only things the session may touch. Anything else: ask first.</dd>
+        <dt>Contract or spec</dt><dd>The document that rules over the code.</dd>
+        <dt>Tests that must pass</dt><dd>What must pass before the PR, reported with real counts.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="labels">
+    <span class="eyebrow">Labels</span>
+    <h2 id="labels">Where each Issue stands, at a glance</h2>
+    <p>Huddle's labels job updates these on every change (on GitLab, by a schedule every 10 minutes). Filter the Issue list by a label to see, for example, everything waiting for review.</p>
+    <dl class="glossary">
+      <dt><code>ready</code></dt><dd>Its dependencies are merged and nobody has it yet.</dd>
+      <dt><code>assigned</code></dt><dd>Someone has it but has not started.</dd>
+      <dt><code>in progress</code></dt><dd>Its session started it, or took a request from the AI Manager.</dd>
+      <dt><code>in review</code></dt><dd>Its PR is open and waiting for the AI Manager.</dd>
+      <dt><code>blocked</code></dt><dd>It waits for an Issue under «Depends on» to be merged. Closing that Issue by hand does not count.</dd>
+      <dt><code>needs decision</code></dt><dd>The session asked the AI Manager a question and stopped.</dd>
+      <dt><code>changes requested from AI Manager</code></dt><dd>A review request is waiting for the session to take it.</dd>
+    </dl>
+  </section>
+
+  <section aria-labelledby="why">
+    <span class="eyebrow">Why</span>
+    <h2 id="why">Why working this way is better</h2>
+    <div class="compare">
+      <div><h3>Before</h3><ul><li>Most of the time went into writing code by hand.</li><li>Each person explained the project in their own way.</li><li>Tasks collided in the same files.</li><li>Mistakes showed up late, in review or in production.</li></ul></div>
+      <div class="now"><h3>Now</h3><ul><li>The person's time goes into deciding and reviewing.</li><li>Every session reads the same context and the same rules.</li><li>Each task has its own files: two people do not collide.</li><li>Tests and review catch mistakes before merging.</li></ul></div>
+    </div>
+    <div class="reasons">
+      <div class="reason"><h3>The decision is the work</h3><p>The AI is fast at writing and testing, but it does not know the business, the users or the priorities. When it asks, the person brings what the AI does not know. A good answer saves hours; a rushed answer is paid for later.</p></div>
+      <div class="reason"><h3>A ready prompt removes variation</h3><p>If each person writes their own request, each session understands something different. With the prompt written by the AI Manager, they all start with the same goal, the same limits and the same tests.</p></div>
+      <div class="reason"><h3>Clear limits, fewer collisions</h3><p>Allowed and forbidden files let several people move forward at once without stepping on each other, and tell the AI where not to go.</p></div>
+      <div class="reason"><h3>Production in a single pair of hands</h3><p>Nobody on the team needs keys or access to production. A mistake in one session cannot touch what customers use.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sessions">
+    <span class="eyebrow">A frequent question</span>
+    <h2 id="sessions">Why doesn't a developer open 10 sessions to take 10 Issues at once?</h2>
+    <p>It sounds faster, but in practice a developer with many open sessions gets less done and decides worse.</p>
+    <div class="reasons">
+      <div class="reason"><h3>The computer becomes the bottleneck</h3><p>Each session runs tests and builds. With many at once, the machine slows down and they all move more slowly than a few would.</p></div>
+      <div class="reason"><h3>Attention does not multiply</h3><p>Each session asks questions. With ten open, the questions pile up, you lose the thread and start answering fast just to get through. That is when the decision stops being good, and the decision is exactly what the person brings.</p></div>
+      <div class="reason"><h3>Every session has to be reviewed</h3><p>Ten half-reviewed PRs are worth less than two done well, and they fill up the AI Manager's review queue.</p></div>
+    </div>
+    <div class="note"><p><strong>Our recommendation:</strong> one or two active sessions per person. Huddle assigns at most a few open Issues per person for the same reason. More speed comes from adding developers, not from adding windows.</p></div>
+  </section>
+
+  <section aria-labelledby="rules">
+    <span class="eyebrow">Rules</span>
+    <h2 id="rules">What is not negotiable</h2>
+    <ul class="rules">
+      <li><strong>Never push to the default branch.</strong> One task is one Issue, one branch and one PR. Only the AI Manager merges.</li>
+      <li><strong>Only the allowed files.</strong> If another one is needed, ask first.</li>
+      <li><strong>Test first.</strong> Write the failing test, then the code. The PR says which tests were run and with what result.</li>
+      <li><strong>No production and no secrets.</strong> If a permission or a key is missing, stop and tell. Do not look for another way.</li>
+      <li><strong>Nothing is dropped silently.</strong> Everything the Issue asks for ends up done, or listed under «What was NOT done» with the reason.</li>
+      <li><strong>Close the task clearly.</strong> Every session ends with «✅ Issue #N finished» or «⛔ Issue #N stopped», the PR link, the test counts and your next step. If you do not see that message, the session is not over.</li>
+      <li><strong>Chat in your language; the repository is in English.</strong> Commits, PRs, Issues, code comments and new documents are in English.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="team">
+    <span class="eyebrow">For the AI Manager</span>
+    <h2 id="team">Setting up a project and adding people</h2>
+    <ol class="steps">
+      <li>
+        <h3>Put Huddle in the repository</h3>
+        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the AI Manager and the team, then writes <code>huddle.json</code>, the Issue and PR templates, the labels job, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor».</p>
+        <p><strong>On GitLab</strong> two more things, only by you: a project access token with the <code>api</code> scope stored as the masked and protected CI variable <code>HUDDLE_TOKEN</code>, and a pipeline schedule <code>*/10 * * * *</code> on the default branch. Never paste the token in a chat or a file.</p>
+      </li>
+      <li>
+        <h3>Add someone to the team</h3>
+        <p>Invite them to the repository (GitHub: <em>Settings, Collaborators</em>; GitLab: <em>Manage, Members</em>, role Developer), add their login to <code>assignees</code> in <code>huddle.json</code> with a PR, and send them this guide's first-day section. From then on Huddle assigns them <code>ready</code> Issues.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- include: first-day.section.html -->
+
+  <footer>Huddle · decision-led development for teams coding with AI · github.com/SrProfessional/Huddle. The current rules of your project are in its <code>CLAUDE.md</code>.</footer>
+</div>
