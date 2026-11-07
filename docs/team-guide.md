@@ -118,7 +118,10 @@ and `claude plugin install huddle@huddle`, then open a new session (in the CLI, 
 The `.claude/settings.json` snippet that setup writes is only a helper. It enables the plugin for the project and, in the
 CLI, registers the marketplace silently, only after the trust dialog of that folder itself. When a parent folder is already
 trusted there is no dialog and it is not used, and it is not documented for the VS Code extension. `huddle doctor` shows
-a «plugin» line so a developer can check their own machine.
+a «plugin» line so a developer can check their own machine. Its «login» line tells two failures apart: «`gh`/`glab` is not
+installed or not on the PATH of this terminal» (with the install command for the system, and on Windows «open a new
+terminal, or reload the PATH») and «is not logged in» (with `gh auth login` or `glab auth login`, plus `--hostname <host>`
+when `huddle.json` has a host). The SessionStart hook stays silent in both cases.
 
 ## Add or remove someone
 
