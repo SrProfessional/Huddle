@@ -7,6 +7,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Changed
 
+- The smoke test (`docs/smoke-test.md`, Issue #40) has two new numbered sections, «Progress» (9) and «Team members» (10),
+  with checkboxes and expected results for GitHub and GitLab, and a «Results 0.2.0» table. Step 5.5 is now run with a second
+  account: that person comments a «Prompt for Claude Code» block, and `huddle pending` and the labels ignore it. «Not
+  testable» stays only for a run with no second account. «Clean up» is now section 11.
 - `huddle doctor` tells «not installed or not on the PATH» apart from «not logged in» (Issue #41). When `gh` or `glab` cannot
   be started (`ENOENT`), the `login` line says so and gives the install command for the system (`winget install --id
   GitHub.cli` / `GLab.GLab` on Windows, `brew install gh` / `glab` on Mac, the official page on Linux) and, on Windows, to
