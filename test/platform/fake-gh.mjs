@@ -13,6 +13,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const comments = new Map(); // id -> { ...GitHub comment, issue }
   const repoLabels = new Map(); // name -> { color, description }
   const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // login -> id
+  const collaborators = new Set(['SrProfessional', 'ana', 'luis']); // logins with access to the repo
   const calls = [];
   const merged = [];
   let nextId = 9000;
@@ -146,6 +147,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const rest = path.slice(base.length);
       const method = (values(args, '-X')[0] ?? 'GET').toUpperCase();
       let m;
+      if ((m = /^collaborators\/([^/]+)$/.exec(rest))) {
+        // 204 with no body when the user is a collaborator, 404 when not (also for a login that does not exist). Read only: a PUT is a call the tests never allow.
+        need(method === 'GET', args);
+        if (!collaborators.has(decodeURIComponent(m[1]))) throw new Error(`gh ${args.join(' ')} failed: gh: Not Found (HTTP 404)`);
+        return '';
+      }
       if (rest === 'issues' && method === 'POST') {
         need(values(args, '--input')[0] === '-', args);
         const b = JSON.parse(opts.input);
@@ -208,6 +215,10 @@ export function fakeGithub({ project = PROJECT } = {}) {
     milestone({ title, description = '', state = 'open', closedAt = null, updatedAt }) {
       milestones.set(title, { number: milestones.size + 1, title, description, state: state.toUpperCase(), closedAt, updatedAt: updatedAt ?? closedAt ?? '2026-11-01T00:00:00Z' });
     },
+    /** A login that exists on GitHub but has no access to the repo. */
+    user(login) { if (!users.has(login)) users.set(login, users.size + 1); },
+    /** A collaborator. The level only matters on GitLab; any collaborator can be assigned on GitHub. */
+    member(login) { this.user(login); collaborators.add(login); },
     created: () => [...issues.values()].filter((i) => i.number >= 900).map((i) => ({ number: i.number, title: i.title, body: i.body })),
     bodyOf: (n) => issues.get(n).body,
     pinned: () => [...pinned],
