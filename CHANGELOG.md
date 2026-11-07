@@ -14,6 +14,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   turns the Issue off. `/huddle-issue` asks for the milestone and `/huddle-setup` explains the areas. The adapters gain
   `listMilestones`, `createIssue`, `updateIssue` and `pinIssue`, and open Issues carry their `milestone`.
 
+### Fixed
+
+- `/huddle-setup` compares a template with the project's copy ignoring line endings. On Windows with `core.autocrlf=true`
+  the copy has CRLF, and a refresh used to skip it as «edited by the project». A copy that differs only in line endings is
+  now refreshed and keeps the line ending it already has (CRLF stays CRLF); a copy with a real edit is still kept.
+- GitLab `huddle take` and `huddle labels` were slow (over 2 minutes on a real project): one `glab` call per note for its
+  👀 award. The adapter now reads the award only for the notes that could be a request (by the AI Manager, with a «Prompt for
+  Claude Code» heading, newer than the last commit or «Ready for review again»), and runs those calls 8 at a time, with the
+  same `mapLimit` cap as the milestone reads. For an Issue with 30 notes, 2 of them requests, `comments` goes from 31 `glab`
+  calls to 3. The adapter reads `ai_manager` from `huddle.json`; without it every note is read, as before.
+
 ## [0.1.0]
 
 The first release. It is tagged only after the smoke test in [docs/smoke-test.md](docs/smoke-test.md) passes on a sandbox
