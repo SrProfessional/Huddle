@@ -16,6 +16,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const notes = new Map(); // id -> { id, issue, body, created_at, author, system, eyes }
   const labels = new Map(); // id -> { id, name, color, description }
   const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // username -> id
+  const members = new Map([['SrProfessional', 40], ['ana', 30], ['luis', 30]]); // username -> access level (10 Guest, 20 Reporter, 30 Developer, 40 Maintainer)
   const milestones = new Map(); // id -> { id, iid, title, description, state: 'active' | 'closed', updated_at }
   const calls = [];
   const merged = [];
@@ -71,12 +72,20 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     if (path === 'users') {
       need(method === 'GET' && q.get('username'), args);
       const login = q.get('username');
-      return JSON.stringify(users.has(login) ? [user(login)] : []);
+      const found = [...users.keys()].find((name) => name.toLowerCase() === login.toLowerCase()); // GitLab usernames are case-insensitive
+      return JSON.stringify(found ? [user(found)] : []);
     }
     need(path.startsWith(`${root}/`), args); // the project path is URL-encoded, groups included
     const rest = path.slice(root.length + 1);
     let m;
 
+    if ((m = /^members\/all\/(\d+)$/.exec(rest))) {
+      // Direct and inherited members. 404 for a user who is not one (read only: nothing here invites anyone).
+      need(method === 'GET', args);
+      const found = [...members].find(([login]) => users.get(login) === Number(m[1]));
+      if (!found) throw new Error(`glab ${args.join(' ')} failed: 404 Not found`);
+      return JSON.stringify({ ...user(found[0]), access_level: found[1] });
+    }
     if (rest === 'issues' && method === 'GET') {
       need(q.get('state') === 'opened' || q.get('state') === 'closed', args);
       return pages([...issues.values()].filter((i) => i.state === q.get('state')).map(issueJson), paginate);
@@ -210,6 +219,13 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     milestone({ title, description = '', state = 'open', closedAt = null }) {
       const id = 300 + milestones.size;
       milestones.set(id, { id, iid: milestones.size + 1, title, description, state: state === 'open' ? 'active' : 'closed', updated_at: closedAt ?? '2026-11-01T00:00:00Z' });
+    },
+    /** A user that exists on GitLab but is no member of the project. */
+    user(login) { if (!users.has(login)) users.set(login, users.size + 1); },
+    /** A member of the project (or of a group above it) with a role. */
+    member(login, role = 'developer') {
+      this.user(login);
+      members.set(login, { guest: 10, reporter: 20, developer: 30, maintainer: 40, owner: 50 }[role]);
     },
     created: () => [...issues.values()].filter((i) => i.iid >= 900).map((i) => ({ number: i.iid, title: i.title, body: i.description })),
     bodyOf: (n) => issues.get(n).description,

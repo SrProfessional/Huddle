@@ -16,17 +16,19 @@ export function harness({ config, gitlab = false, file, wrap = (a) => a, sleep =
   const out = [];
   const err = [];
   const files = new Map();
+  const writes = [];
   if (file !== null) files.set('/repo/huddle.json', file ?? JSON.stringify(config));
   const ctx = {
     root: '/repo',
     readFile: (p) => files.get(p.replaceAll('\\', '/')) ?? null,
+    writeFile: (p, text) => { files.set(p.replaceAll('\\', '/'), text); writes.push(text); },
     createPlatform: async (cfg) => wrap(create(cfg, { run: fake.run }), fake),
     out: (s) => out.push(s),
     err: (s) => err.push(s),
     sleep,
     hookTimeoutMs: 2000,
   };
-  return { ctx, world: fake.world, out, err, text: () => out.join('\n'), errText: () => err.join('\n') };
+  return { ctx, world: fake.world, out, err, writes, huddleJson: () => files.get('/repo/huddle.json'), text: () => out.join('\n'), errText: () => err.join('\n') };
 }
 
 export const request = (id, extra = {}) => ({ id, author: 'SrProfessional', createdAt: '2026-11-05T10:00:00Z', body: '## Prompt for Claude Code\n\n```text\nDo the thing\n```', ...extra });

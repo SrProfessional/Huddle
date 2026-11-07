@@ -193,6 +193,16 @@ export function contract({ name, create }) {
     assert.equal(await adapter.findUser('nobody-here'), false);
   });
 
+  t('canAssign(login) is true for someone the project can assign, false for a stranger or a login that does not exist', async ({ adapter, world }) => {
+    assert.equal(await adapter.canAssign('ana'), true);
+    assert.equal(await adapter.canAssign('SrProfessional'), true);
+    world.user('outsider'); // has an account, no access to the project
+    assert.equal(await adapter.canAssign('outsider'), false);
+    assert.equal(await adapter.canAssign('nobody-here'), false);
+    world.member('newbie'); // access given after the fact
+    assert.equal(await adapter.canAssign('newbie'), true);
+  });
+
   t('open Issues carry the title of their milestone, or null, so «no area» costs no extra call', async ({ adapter, world }) => {
     world.milestone({ title: 'Content' });
     world.issue({ number: 1, milestone: 'Content' });

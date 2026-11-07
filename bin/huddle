@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Huddle: one CLI. labels | wait | take | pending | progress | hook | doctor. See lib/cli/run.mjs.
+// Huddle: one CLI. labels | wait | take | pending | progress | team | hook | doctor. See lib/cli/run.mjs.
 import { endProcess, main } from '../lib/cli/main.mjs';
 
 const argv = process.argv.slice(2);

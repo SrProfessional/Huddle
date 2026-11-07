@@ -7,6 +7,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Add or remove a team member (Issue #36). `huddle team` lists the AI Manager and the assignees with ✔/✖ for «exists on the
+  platform» and «can be assigned» (collaborator on GitHub, Developer or higher on GitLab). `huddle team add <login>` and
+  `huddle team remove <login>` edit only `assignees` in `huddle.json`, keeping every other key, the order and the line
+  endings; they never invite anyone or change platform settings, and print the step for the AI Manager instead (`--anyway`
+  writes the file regardless). The skill `/huddle-team` does it through a PR/MR and prints the message for the new person.
+  `huddle doctor` gets a «team» check with a ⚠ for each assignee who cannot be assigned. The adapters gain `canAssign`.
+  `docs/team-guide.md` has «Add or remove someone».
 - Progress by area, as a percentage (Issue #28). Areas are milestones; each area's percentage is merged Issues over all the
   work it will need, using a `Huddle remaining: N` line of the milestone description for the Issues not written yet.
   Shown by `huddle progress` (and `--json`), by a «Huddle progress» Issue that the labels job keeps up to date (pinned on
