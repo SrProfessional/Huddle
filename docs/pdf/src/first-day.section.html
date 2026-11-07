@@ -1,0 +1,94 @@
+  <section aria-labelledby="inicio">
+    <span class="eyebrow">Getting started</span>
+    <h2 id="inicio">Your first day, step by step</h2>
+    <p>You do this once. It takes 20 to 40 minutes, mostly waiting for downloads. When a step depends on your computer, there is one block for Windows and another for Mac. Your project may add its own steps (its libraries, its test database): they are in the project's <code>README</code> and step 7 points you there.</p>
+    <div class="tip"><strong>Copy each command from its box, whole and on a single line.</strong> If it pastes split in two lines, join it before pressing Enter.</div>
+    <ol class="steps">
+      <li>
+        <h3>Choose how you will use Claude Code</h3>
+        <p>Claude Code works the same in all its versions: the same rules, the same <code>CLAUDE.md</code> and the same Huddle plugin. Pick the one you find most comfortable; you can switch later.</p>
+        <div class="os">
+          <div><span class="os-name">Desktop app · the easiest</span>
+            <p>For people who are starting out. You see the changes visually and can have several sessions side by side. Requires a paid Claude plan.</p>
+            <p><strong>Install:</strong> follow the Windows or Mac download links at <code>code.claude.com/docs/en/desktop-quickstart</code>, sign in and open the <strong>Code</strong> tab.</p>
+          </div>
+          <div><span class="os-name">VS Code extension</span>
+            <p>For people who want to read and edit the code in an editor while working with Claude Code.</p>
+            <p><strong>Install:</strong> VS Code from <code>code.visualstudio.com</code>; then open the extensions panel (<code>Ctrl+Shift+X</code> or <code>Cmd+Shift+X</code>), search for <strong>Claude Code</strong> (by Anthropic) and install it. The extension has no <code>/plugin</code> command: you install Huddle from a terminal in step 4.</p>
+          </div>
+          <div><span class="os-name">Terminal (CLI)</span>
+            <p>For people who already use the command line. It is also the one that shows Huddle's notice the moment a session opens.</p>
+            <p><strong>Install:</strong> on Windows, in PowerShell:</p><pre><code>irm https://claude.ai/install.ps1 | iex</code></pre><p>On Mac, in Terminal:</p><pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre><p>Then type <code class="nowrap">claude</code> inside the project folder.</p>
+          </div>
+        </div>
+      </li>
+      <li>
+        <h3>Install Git and your platform's command line</h3>
+        <p>Git keeps the code's history. Huddle talks to your platform through its official command line: <code>gh</code> for GitHub, <code>glab</code> for GitLab. Install the one your project uses.</p>
+        <div class="os">
+          <div><span class="os-name">Windows</span>
+            <ol>
+              <li><strong>Git:</strong> download «Git for Windows» from <code>git-scm.com</code> and install it with the default options. It includes <strong>Git Bash</strong>.</li>
+              <li><strong>GitHub:</strong> open PowerShell and type:<pre><code>winget install --id GitHub.cli</code></pre></li>
+              <li><strong>GitLab:</strong><pre><code>winget install --id GLab.GLab</code></pre></li>
+              <li>Close the terminal and open a new one, so it finds the new programs. In VS Code, close every window and open it again.</li>
+            </ol>
+          </div>
+          <div><span class="os-name">Mac</span>
+            <ol>
+              <li><strong>Git:</strong> open Terminal and type (two hyphens before <code>install</code>):<pre><code>xcode-select --install</code></pre></li>
+              <li><strong>Homebrew</strong> (the Mac's program installer): follow the one-line instruction at <code>brew.sh</code>.</li>
+              <li><strong>GitHub:</strong><pre><code>brew install gh</code></pre><strong>GitLab:</strong><pre><code>brew install glab</code></pre></li>
+            </ol>
+          </div>
+        </div>
+        <p><strong>Check:</strong> in a new terminal, <code class="nowrap">gh --version</code> (or <code class="nowrap">glab --version</code>) answers with a version number.</p>
+      </li>
+      <li>
+        <h3>Connect your accounts</h3>
+        <p><strong>The repository:</strong> accept the invitation that arrives by email. Until you accept it, Huddle cannot assign you Issues.</p>
+        <p><strong>GitHub:</strong> type <code class="nowrap">gh auth login</code> and choose GitHub.com, HTTPS and «Login with a web browser».</p>
+        <p><strong>GitLab:</strong> type <code class="nowrap">glab auth login</code>, choose gitlab.com (or your company's server) and sign in with the browser. Then let Git use <code>glab</code> for gitlab.com, so a Claude Code session can push without opening a browser:</p>
+        <pre><code>git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"</code></pre>
+        <p><strong>Claude Code:</strong> open it and sign in with the Claude account the AI Manager tells you.</p>
+      </li>
+      <li>
+        <h3>Install the Huddle plugin</h3>
+        <p>Huddle comes as a Claude Code plugin. Each person installs it once on their own computer; committing it to the repository does not install it for you. In a terminal:</p>
+        <pre><code>claude plugin marketplace add SrProfessional/Huddle</code></pre>
+        <pre><code>claude plugin install huddle@huddle</code></pre>
+        <p>Then open a new Claude Code session. In the CLI you can also type <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code> instead.</p>
+        <p><strong>Check:</strong> <code class="nowrap">claude plugin list</code> shows <code>huddle@huddle</code> enabled. To update it later, run <code class="nowrap">claude plugin marketplace update huddle</code> and open a new session.</p>
+      </li>
+      <li>
+        <h3>Set your language (a single message)</h3>
+        <p>Issues come in English, so Claude Code would answer in English unless you set your language. Open a session and send this message, replacing <code>YOUR_LANGUAGE</code> with your language written in English (for example <code>spanish</code> or <code>portuguese</code>):</p>
+        <pre><code>Add "language": "YOUR_LANGUAGE" to my personal Claude Code settings file, ~/.claude/settings.json. Keep everything else in that file as it is.</code></pre>
+        <p>It asks for permission to edit the file: accept it. From then on it answers in your language in every session. Commits, PRs and comments stay in English.</p>
+      </li>
+      <li>
+        <h3>Download the project and open it</h3>
+        <p>In a terminal, go to the folder where you keep your projects and clone it (the AI Manager gives you its name):</p>
+        <pre><code>gh repo clone OWNER/PROJECT</code></pre>
+        <p>On GitLab: <code class="nowrap">glab repo clone OWNER/PROJECT</code>. Then open that folder in the Claude Code you chose. When it asks whether you trust the folder, say yes.</p>
+      </li>
+      <li>
+        <h3>Do your project's own setup</h3>
+        <p>Every project has its own libraries and tests. Open its <code>README</code> (and its <code>CLAUDE.md</code>) and follow the setup section, or ask Claude Code: «read the README and install what the project needs, then run the tests and tell me the results».</p>
+      </li>
+      <li>
+        <h3>Check that Huddle sees everything</h3>
+        <p>Ask Claude Code: «run huddle doctor». Every line must show ✔: <code>plugin</code>, <code>huddle.json</code>, <code>login</code>, <code>ai_manager</code> and <code>labels</code>. If one shows ✖, its line says what to do; if it is not clear, send it to the AI Manager.</p>
+      </li>
+      <li>
+        <h3>Take your first Issue</h3>
+        <p>Find the Issue assigned to you (label <code>assigned</code>), or type <code class="nowrap">gh issue list --assignee @me</code>. In Claude Code type:</p>
+        <pre><code>/huddle-start N</code></pre>
+        <p>with the Issue's number instead of <code>N</code>. It checks that the Issue's dependencies are merged, creates your branch in a folder of its own, marks the Issue <code>in progress</code> and starts the Issue's prompt. Answer its questions calmly: that is where your work is.</p>
+      </li>
+      <li>
+        <h3>When the AI Manager asks for changes</h3>
+        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the AI Manager leaves a request, the session tells you and asks whether to continue: say yes. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
+      </li>
+    </ol>
+  </section>
