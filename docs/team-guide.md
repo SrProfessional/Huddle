@@ -42,6 +42,32 @@ closed **and** a merged PR/MR closed it. An Issue closed by hand unblocks nothin
 6. A request comes as a comment with a `## Prompt for Claude Code` heading. The session picks it up (`huddle take <n>`),
    pushes the fix and comments «Ready for review again» with the counts.
 
+## Who does each step
+
+The AI Manager's session does every step it can. Before it hands you a step, it checks whether it can do the step itself
+with the tools and logins it has (`gh`, `glab`, the sandboxes, git). If it can, it does it and tells you what it did: it
+merges the PR/MR it approved, tags and publishes a release, and runs the steps of the [smoke test](smoke-test.md) on the
+sandboxes and fills «Results». You do not get commands to copy for those.
+
+Only a step that needs something the session cannot have is yours:
+
+- a second person's account;
+- a payment;
+- a secret (creating, copying or pasting a token);
+- a phone or another device, or watching a new Claude Code window;
+- a legal or business decision;
+- a paid action you must approve;
+- a permission that was denied.
+
+Those steps are marked **🙋 Only you** (**«🙋 Solo tú»** in Spanish texts) and written for someone with no technical
+background. Each one is numbered with one action per step: where to go and what to click, a copy block for anything you
+have to paste, **You should see:** what it looks like when it worked, and **If you see something else:** what to do then.
+A word like terminal or token gets a one-line meaning the first time it appears. Issues use the same mark, so a step
+without it belongs to the session. The rule and the format are in [the design](design.md#13-the-session-does-every-step-it-can).
+
+If a permission is denied or a credential is missing, the session stops and asks, as always: it never looks for another
+way.
+
 ## When the session cannot go on
 
 It does not guess. It commits and pushes what is done, comments on the Issue starting with «❓ Decision for the AI

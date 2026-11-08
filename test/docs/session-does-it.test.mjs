@@ -15,7 +15,7 @@ const skills = readdirSync(path.join(root, 'skills')).map((d) => [d, read(`skill
 const ONLY = '🙋 Only you';
 
 // The «🙋 Only you» steps of a document: each top-level numbered checkbox step tagged with the label, with its indented body.
-const steps = (text) => text.split(/^(?=\d+\. \[[ x]\] )/m).filter((s) => /^\d+\. \[[ x]\] /.test(s));
+const steps = (text) => text.split(/^(?=\d+\. \[[ x]\] |#{2,3} )/m).filter((s) => /^\d+\. \[[ x]\] /.test(s));
 const personSteps = (text) => steps(text).filter((s) => s.startsWith(`${s.split(' ')[0]} [ ] **${ONLY}:**`));
 
 test('design.md §13 states the rule, the human-only cases, the format and «never around a refusal»', () => {
@@ -93,7 +93,7 @@ test('every 🙋 step is numbered, has a copy block when something is pasted, an
     assert.ok((s.match(/^\s+\d+\. \S/gm) || []).length >= 2, `not numbered into sub-steps: ${title}`);
     assert.match(s, /You should see:/, `does not say what to see: ${title}`);
     assert.match(s, /If you see something else:/, `does not say what to do otherwise: ${title}`);
-    if (/\b(paste|type|run)\b/i.test(s)) assert.match(s, /^\s+```text\r?\n[\s\S]+?^\s+```/m, `no copy block: ${title}`);
+    if (/\b(paste|type|run)\b/i.test(s)) assert.match(s, /^\s+(`{3,})text\r?\n[\s\S]+?^\s+\1\s*$/m, `no copy block: ${title}`);
   }
 });
 
@@ -119,7 +119,7 @@ test('team-guide.md explains it: the rule, who gets a 🙋, the format and the r
   assert.ok(m, 'no «## Who does each step» in the team guide');
   const t = m[1].replace(/\s+/g, ' ');
   for (const needle of ['does every step it can', ONLY, '«🙋 Solo tú»', 'second person', 'payment', 'secret', 'phone', 'legal or business',
-    'You should see', 'never looks for another way', '[the design](design.md)'])
+    'You should see', 'never looks for another way', '[the design](design.md#13-the-session-does-every-step-it-can)'])
     assert.ok(t.includes(needle), `team guide is missing «${needle}»`);
 });
 
