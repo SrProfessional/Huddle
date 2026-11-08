@@ -121,3 +121,27 @@ test('the versions are 0.3.0 and the CHANGELOG has an empty «Unreleased» above
   assert.ok(c.indexOf('## [0.3.0]') < c.indexOf('## [0.2.0]'));
   assert.match(c.slice(c.indexOf('## [0.3.0]'), c.indexOf('## [0.2.0]')), /huddle-areas/);
 });
+
+test('«Areas» says to delete Alpha and Beta, and why closing is not enough', () => {
+  const t = section('11\\. Areas').replace(/\s+/g, ' ');
+  assert.ok(!/delete or close/i.test(t), 'closing is not enough');
+  assert.match(t, /\*\*delete\*\* the Alpha and Beta milestones/);
+  assert.match(t, /Milestones → Delete/);
+  assert.match(t, /Delete milestone/);
+  assert.match(t, /closed less than 90 days ago is still listed/);
+  assert.match(t, /Alpha \(closed\)/);
+});
+
+test('«Areas» step 7 sets Docs to a remaining different from step 5, so the closed-area line shows', () => {
+  const steps = section('11\\. Areas').split(/^(?=\d+\. \[ \])/m).filter((s) => /^\d+\. \[ \]/.test(s)).map((s) => s.replace(/\s+/g, ' '));
+  const remaining = (s) => [...s.matchAll(/set "Docs" --remaining (\d+)/g)].map((m) => m[1]);
+  const step5 = remaining(steps[4]);
+  const step7 = remaining(steps[6]);
+  assert.ok(step5.length && step7.length, 'both steps must run set "Docs"');
+  assert.ok(step7.every((n) => !step5.includes(n)), `step 7 uses ${step7}, the same as step 5 (${step5}): it would print «Nothing to change»`);
+  assert.match(steps[6], /the milestone is closed and stays closed/);
+});
+
+test('the CHANGELOG release header is dated 2026-11-08', () => {
+  assert.ok(readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8').includes('## [0.3.0] - 2026-11-08'));
+});

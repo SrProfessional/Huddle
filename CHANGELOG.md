@@ -5,7 +5,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-11-07
+## [0.3.0] - 2026-11-08
 
 ### Added
 

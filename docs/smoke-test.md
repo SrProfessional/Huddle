@@ -189,11 +189,12 @@ second account, use any login that exists on the platform and is not a collabora
 ## 11. Areas
 
 Needs Huddle 0.3.0 or later. Do GitHub and GitLab each in their own sandbox, and tick a box only for the platform you saw
-it on (write the platform in Results). Use a sandbox with **no milestones** for steps 1 and 2: delete or close the Alpha
-and Beta milestones of section 9 first (a milestone closed more than 90 days ago stays out of the lists). Run `huddle`
-as the AI Manager; the skill `/huddle-areas` refuses anyone else.
+it on (write the platform in Results). Use a sandbox with **no milestones** for steps 1 and 2: **delete** the Alpha and Beta
+milestones of section 9 first (GitHub: Milestones → Delete; GitLab: Delete milestone). Closing them is not enough: a
+milestone closed less than 90 days ago is still listed, so `huddle areas list` would show «Alpha (closed)» and never print
+«No areas yet». Run `huddle` as the AI Manager; the skill `/huddle-areas` refuses anyone else.
 
-1. [ ] **No areas yet.** `huddle areas list` prints «No areas yet. Define them with the skill /huddle-areas, or create one:
+1. [ ] **No areas yet** (no milestone left, not even a closed one). `huddle areas list` prints «No areas yet. Define them with the skill /huddle-areas, or create one:
    huddle areas set <title> --remaining N», plus a line «No area: N open, M closed» if Issues exist. `huddle areas check`
    says «Check-up: nothing to fix.» or lists only Issues with no area.
 2. [ ] **The skill proposes and waits.** Run `/huddle-areas`. It reads the README, `CLAUDE.md` and the Issues, and proposes
@@ -218,8 +219,9 @@ as the AI Manager; the skill `/huddle-areas` refuses anyone else.
    the command says «already in area … Nothing to change.»
 7. [ ] **A closed area.** Close the milestone **Docs** on the platform (GitHub: Milestones → Close; GitLab: Close milestone).
    `huddle areas list` shows it as «Docs (closed)». Then `huddle areas assign <O2> "Docs"` works on the **closed** area
-   too: the Issue is in Docs, and the milestone **stays closed**. `huddle areas set "Docs" --remaining 2` also keeps
-   it closed and says so («the milestone is closed and stays closed»). Reopen it afterwards if you need it.
+   too: the Issue is in Docs, and the milestone **stays closed**. `huddle areas set "Docs" --remaining 3` (not 2, which
+   Docs already says since step 5, and which would only print «Nothing to change») also keeps it closed and says so
+   («the milestone is closed and stays closed»). Reopen it afterwards if you need it.
 8. [ ] **None takes an Issue out.** `huddle areas assign <O2> none` prints «Will take Issue #<O2> out of area «Docs»» and
    «Done.»; the Issue has no milestone on the platform.
 9. [ ] **Check finds the gaps.** Create an open Issue **Z** with no area, and a milestone **Bare** by hand with a description
