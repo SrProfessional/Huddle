@@ -1,4 +1,4 @@
-// Huddle: the smoke-test checklist covers what 0.2.0 added (Issue #40). It only reads files.
+// Huddle: the smoke-test checklist covers what 0.2.0 and 0.3.0 added (Issues #40 and #48). It only reads files.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -13,8 +13,8 @@ const section = (heading) => {
   return m[1];
 };
 
-test('«Progress» and «Team members» come before «Clean up», with checkboxes', () => {
-  const order = ['## 9. Progress', '## 10. Team members', '## 11. Clean up'].map((h) => smoke.indexOf(h));
+test('«Progress», «Team members» and «Areas» come before «Clean up», with checkboxes', () => {
+  const order = ['## 9. Progress', '## 10. Team members', '## 11. Areas', '## 12. Clean up'].map((h) => smoke.indexOf(h));
   assert.ok(order.every((i) => i >= 0), 'a section is missing');
   assert.deepEqual([...order].sort((a, b) => a - b), order);
   assert.match(section('9\\. Progress'), /^\d+\. \[ \]/m);
@@ -74,9 +74,50 @@ test('step 5.5 is run with a second account and «not testable» only without on
   assert.match(t, /only\*\* if there is no second account/);
 });
 
-test('a «Results 0.2.0» table sits next to the Results, and the CHANGELOG has it under «Unreleased»', () => {
+test('a «Results 0.2.0» table stays next to the Results, and the CHANGELOG keeps the smoke test under 0.3.0', () => {
   assert.ok(smoke.includes('### Results 0.2.0'));
   const c = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
-  const unreleased = c.slice(c.indexOf('## [Unreleased]'), c.indexOf('## [0.2.0]'));
-  assert.match(unreleased, /smoke test/i);
+  assert.match(c.slice(c.indexOf('## [0.3.0]'), c.indexOf('## [0.2.0]')), /smoke test/i);
+});
+
+test('«Areas» covers list, the skill, set and its reuse, dry run, assign (open, closed, closed area, none), check and progress', () => {
+  const t = section('11\. Areas').replace(/\s+/g, ' ');
+  for (const needle of [
+    'huddle areas list', 'No areas yet', '/huddle-areas', 'huddle areas set', 'huddle areas assign', 'huddle areas check',
+    '--dry-run', 'Dry run: nothing was changed.', 'none', 'huddle progress', 'GitHub', 'GitLab',
+  ]) assert.ok(t.includes(needle), `missing «${needle}»`);
+  assert.match(t, /waits? for (the|your) OK/i);
+  assert.match(t, /another case of the title/i);
+  assert.match(t, /no second milestone/i);
+  assert.match(t, /rest of (its|the) description/i);
+  assert.match(t, /\*\*closed\*\* (Issue|area)/);
+  assert.match(t, /closed area/i);
+  assert.match(t, /no area/i);
+  assert.match(t, /missing|no .Huddle remaining/i);
+  assert.ok(smoke.includes('0.3.0'), 'the version under test must say 0.3.0');
+});
+
+test('«Areas» has a doctor check for `gh` / `glab` off the PATH', () => {
+  const t = section('11\. Areas').replace(/\s+/g, ' ');
+  assert.match(t, /huddle doctor/);
+  assert.match(t, /not installed or not on the PATH/);
+  assert.match(t, /install command/i);
+});
+
+test('a «Results 0.3.0» table with GitHub and GitLab columns covers the new parts, and «Clean up» is 12', () => {
+  assert.ok(smoke.includes('### Results 0.3.0'));
+  const t = smoke.slice(smoke.indexOf('### Results 0.3.0'));
+  assert.match(t, /\| Section \| GitHub \| GitLab \| Notes \|/);
+  for (const row of ['11. Areas', 'huddle doctor', '12. Clean up']) assert.ok(t.includes(row), `missing row «${row}»`);
+  assert.ok(!smoke.includes('11. Clean up'), '«Clean up» moved to 12');
+});
+
+test('the versions are 0.3.0 and the CHANGELOG has an empty «Unreleased» above «0.3.0»', () => {
+  for (const f of ['package.json', '.claude-plugin/plugin.json']) assert.equal(JSON.parse(readFileSync(path.join(root, f), 'utf8')).version, '0.3.0', f);
+  const m = JSON.parse(readFileSync(path.join(root, '.claude-plugin/marketplace.json'), 'utf8'));
+  assert.ok(m.plugins.every((p) => p.version === '0.3.0'));
+  const c = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
+  assert.match(c, /## \[Unreleased\]\r?\n\r?\n## \[0\.3\.0\] - \d{4}-\d{2}-\d{2}/);
+  assert.ok(c.indexOf('## [0.3.0]') < c.indexOf('## [0.2.0]'));
+  assert.match(c.slice(c.indexOf('## [0.3.0]'), c.indexOf('## [0.2.0]')), /huddle-areas/);
 });

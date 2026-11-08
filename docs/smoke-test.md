@@ -20,7 +20,7 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
 1. [ ] **Install the plugin from the marketplace**, in the AI Manager session. In the CLI: `/plugin marketplace add SrProfessional/Huddle`,
    then `/plugin install huddle@huddle`. The VS Code extension has no `/plugin`: in a terminal run
    `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`, then open a new session.
-   `claude plugin list` (or `/plugin`) shows `huddle` enabled at the version under test (0.1.0, or 0.2.0 for sections 9 and 10), and `/huddle-setup` is available.
+   `claude plugin list` (or `/plugin`) shows `huddle` enabled at the version under test (0.1.0, 0.2.0 for sections 9 and 10, or 0.3.0 for section 11), and `/huddle-setup` is available.
 2. [ ] Create the sandbox and push a first commit to its default branch (a README is enough).
 3. [ ] Run `/huddle-setup` in the sandbox. It writes `huddle.json` (`platform`, `project`, `ai_manager` = your login,
    `assignees` = the developer login), the CLAUDE.md block, the Issue and PR/MR templates, the labels job, and
@@ -186,7 +186,58 @@ second account, use any login that exists on the platform and is not a collabora
    changed, not merged by the skill. The AI Manager merges it, and `huddle team` no longer lists S. Open Issues that S had
    keep their assignee.
 
-## 11. Clean up
+## 11. Areas
+
+Needs Huddle 0.3.0 or later. Do GitHub and GitLab each in their own sandbox, and tick a box only for the platform you saw
+it on (write the platform in Results). Use a sandbox with **no milestones** for steps 1 and 2: delete or close the Alpha
+and Beta milestones of section 9 first (a milestone closed more than 90 days ago stays out of the lists). Run `huddle`
+as the AI Manager; the skill `/huddle-areas` refuses anyone else.
+
+1. [ ] **No areas yet.** `huddle areas list` prints «No areas yet. Define them with the skill /huddle-areas, or create one:
+   huddle areas set <title> --remaining N», plus a line «No area: N open, M closed» if Issues exist. `huddle areas check`
+   says «Check-up: nothing to fix.» or lists only Issues with no area.
+2. [ ] **The skill proposes and waits.** Run `/huddle-areas`. It reads the README, `CLAUDE.md` and the Issues, and proposes
+   areas (any number) with a reason for each, and then **waits for the OK**: until you answer, `huddle areas list` still
+   shows no areas and no milestone exists on the platform. Answer «only **Core** and **Docs**», and it runs
+   `huddle areas set ... --dry-run` first and shows it before the real call.
+3. [ ] **Set creates an area.** `huddle areas set "Core" --remaining 3 --description "The engine"` prints
+   «Will create milestone «Core»» with the description lines `The engine` and `Huddle remaining: 3`, then «Done.». The
+   milestone exists on the platform with that description.
+4. [ ] **Set reuses it.** Run `huddle areas set "core" --remaining 4` (another case of the title): it prints «Will update
+   milestone «Core»» and `remaining: 3 → 4`, and the platform still has **no second milestone**. Then edit the milestone
+   description by hand to add a line `Notes: keep me` and run `huddle areas set "Core" --remaining 5`: the rest of its
+   description (`The engine`, `Notes: keep me`) is kept, and only the `Huddle remaining` line changes. Run it once more
+   with the same number: «Nothing to change.»
+5. [ ] **Dry run changes nothing.** `huddle areas set "Docs" --remaining 2 --dry-run` prints «Would create milestone «Docs»»
+   and «Dry run: nothing was changed.»; no milestone «Docs» exists afterwards. The same for
+   `huddle areas assign <issue> "Core" --dry-run`: the Issue keeps its area. Then create Docs for real
+   (`huddle areas set "Docs" --remaining 2`).
+6. [ ] **Assign an open and a closed Issue.** Take an **open** Issue **O2** and a **closed** Issue **C2** (the merged one of
+   section 7 will do), both with no area. `huddle areas assign <O2> "Core"` prints «Will put Issue #<O2> in area «Core»
+   (now: no area).» and «Done.»; the same for `<C2>` with «Docs». On the platform each Issue shows its milestone. Repeating
+   the command says «already in area … Nothing to change.»
+7. [ ] **A closed area.** Close the milestone **Docs** on the platform (GitHub: Milestones → Close; GitLab: Close milestone).
+   `huddle areas list` shows it as «Docs (closed)». Then `huddle areas assign <O2> "Docs"` works on the **closed** area
+   too: the Issue is in Docs, and the milestone **stays closed**. `huddle areas set "Docs" --remaining 2` also keeps
+   it closed and says so («the milestone is closed and stays closed»). Reopen it afterwards if you need it.
+8. [ ] **None takes an Issue out.** `huddle areas assign <O2> none` prints «Will take Issue #<O2> out of area «Docs»» and
+   «Done.»; the Issue has no milestone on the platform.
+9. [ ] **Check finds the gaps.** Create an open Issue **Z** with no area, and a milestone **Bare** by hand with a description
+   that has **no «Huddle remaining» line**. `huddle areas check` lists **Z** under the Issues with no area, and **Bare** as
+   «No «Huddle remaining» line». `huddle areas check --json` has `noArea` with Z and `missingEstimate` with Bare. Fix it
+   with `huddle areas set "Bare" --remaining 1` and `huddle areas assign <Z> "Bare"`: `check` is then clean for them.
+10. [ ] **Progress reflects the changes.** `huddle progress` shows the areas Core, Docs and Bare with the Issues and the
+    `remaining` you set, and the percentages follow the formula of section 9. Run `huddle labels` (GitLab: Play the
+    schedule): the «Huddle progress» Issue is rewritten once with the same numbers.
+11. [ ] **The doctor line for a missing CLI.** Make `gh` (GitHub) or `glab` (GitLab) invisible to the terminal: rename the
+    executable, or start a terminal whose PATH does not include its folder (on Windows, `where gh` finds nothing). Run
+    `huddle doctor`: the `login` line says «gh is not installed or not on the PATH of this terminal» («glab …» on GitLab)
+    and gives the install command (`winget install --id GitHub.cli` / `GLab.GLab` on Windows, `brew install gh` / `glab` on
+    Mac, the official page on Linux), and on Windows says to open a new terminal. It does **not** say «not logged in».
+    Put the CLI back, log out (`gh auth logout` / `glab auth logout`) and run `huddle doctor` again: now it says «is not
+    logged in» with `gh auth login` / `glab auth login`. Log in again afterwards.
+
+## 12. Clean up
 
 1. [ ] Close the extra Issues and milestones, and remove the worktrees and branches the test created.
 2. [ ] Remove the second account from the sandbox (GitHub: Settings → Collaborators; GitLab: Manage → Members).
@@ -209,7 +260,7 @@ into the PR description.
 | 6. Hook on reopen | ✔ CLI / VS Code panel: no visible line | ✔ CLI | The visible line shows in the CLI before typing; the VS Code panel shows nothing until the first message, then Claude asks. Offline: silent in 0.5 s. GitLab: silent when `glab` is not on PATH. |
 | 7. Merge | ✔ | ✔ | Merge commit, branch kept, Issue closed |
 | 8. Dependency unblocks | ✔ | ✔ | Control D closed with the normal «Close issue»: C stays blocked |
-| 11. Clean up | after the release | after the release | |
+| 12. Clean up | after the release | after the release | |
 
 Found and fixed during the test: H12 (#25), H14 (#29), H15 (#32).
 
@@ -223,7 +274,19 @@ into the PR description next to the table above.
 | 5.5 Comment by another account | | | |
 | 9. Progress | | | |
 | 10. Team members | | | |
-| 11. Clean up | | | |
+| 12. Clean up | | | |
+
+### Results 0.3.0
+
+Run of: (date, Huddle commit, AI Manager, sandboxes). Fill it in for the parts added in 0.3.0, and copy it into the PR
+description next to the tables above.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| 11. Areas: list, skill, set, reuse, dry run | | | |
+| 11. Areas: assign (open, closed, closed area, none), check, progress | | | |
+| 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | | | |
+| 12. Clean up | | | |
 
 Write ✔ or ✘ in each cell. Any ✘ blocks the release: open an Issue for it, fix it, and run the whole checklist again on
 the platform that failed.
