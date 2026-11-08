@@ -240,3 +240,54 @@ the labels and reports one line about the error.
 close of each; on GitLab the REST equivalents are used (the closing date of a milestone is its `updated_at`, which GitLab
 does not expose otherwise; GitHub decides by `closedAt`). GitLab costs one `closed_by` call per closed Issue, at most 8 at a
 time. The hook ends the process right after it prints, so a call still running cannot hold it past its timeout. Open Issues now also carry their `milestone`, so «no area» costs no extra call.
+
+## 13. The session does every step it can
+
+Asked by the AI Manager on 2026-11-08 (Issue #50). The AI Manager's own Claude Code session does every step it can, and
+Huddle gives step-by-step instructions only for the steps that truly need the person.
+
+**The rule.** Before a session hands a step to the AI Manager (or to a developer), it checks whether it can do the step
+itself with the tools and logins it has: `gh`, `glab`, the sandboxes and git. If it can, it does it itself and reports what
+it did. Merging an approved PR/MR, tagging a release, creating a release page, running a smoke-test step on the sandboxes
+and filling «Results» are all the session's steps.
+
+**What goes to the person.** Only a step that needs something the session cannot have:
+
+- a second person's account;
+- a payment;
+- a secret (creating, copying or pasting a token);
+- a phone or another device, or watching a new Claude Code window;
+- a legal or business decision;
+- a paid action the person must approve;
+- a permission that was denied.
+
+**The «🙋 Solo tú» format** (the label is «🙋 Only you» in English texts). Every human-only step is written as numbered
+steps for someone with no technical background:
+
+1. **One action per step.** Exactly where to go, and what to click.
+2. **A copy block** (a text block) for anything that is typed or pasted, written exactly as it must be pasted.
+3. **«You should see:»** what the person sees when it worked.
+4. **«If you see something else:»** what to do then.
+5. **No jargon without a one-line explanation.** The first time a word such as terminal, clone or token appears, its
+   meaning follows in brackets.
+
+An example, as it is written in a document:
+
+````text
+🙋 Only you
+1. Open a terminal (the window where you type commands) in the sandbox folder.
+2. Copy this line, paste it in the terminal and press Enter:
+   ```text
+   huddle doctor
+   ```
+You should see: a list where every line starts with ✔.
+If you see something else: copy the whole list and send it to the AI Manager's session.
+````
+
+**Where it applies.** `/huddle-review` merges, tags and releases itself once its own session approved, and asks only for
+the 🙋 steps. `/huddle-issue` marks the steps only a person can do with «🙋» and leaves every other step to the session.
+The closing message of every skill says what the session did, and writes the next step as 🙋 steps when it is the person's.
+The smoke test marks each step «Session» or «🙋 Only you», and `docs/team-guide.md` explains all of it.
+
+**Never around a refusal.** If a permission is denied or a credential is missing, the session stops and asks, as always:
+it never looks for another way.
