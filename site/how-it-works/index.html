@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>How Huddle works: roles, labels, decisions and reviews</title>
+<meta name="description" content="Roles, status labels, areas and progress, decisions and reviews: how developers and one AI Manager work together with Huddle and Claude Code.">
+<link rel="canonical" href="https://srprofessional.github.io/Huddle/how-it-works/">
+<meta name="theme-color" content="#4336d8">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Huddle">
+<meta property="og:title" content="How Huddle works: roles, labels, decisions and reviews">
+<meta property="og:description" content="Roles, status labels, areas and progress, decisions and reviews: how developers and one AI Manager work together with Huddle and Claude Code.">
+<meta property="og:url" content="https://srprofessional.github.io/Huddle/how-it-works/">
+<meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How Huddle works: roles, labels, decisions and reviews">
+<meta name="twitter:description" content="Roles, status labels, areas and progress, decisions and reviews: how developers and one AI Manager work together with Huddle and Claude Code.">
+<meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="11" cy="12" r="7" fill="var(--accent)"/><circle cx="21" cy="12" r="7" fill="var(--accent)" fill-opacity="0.55"/><circle cx="16" cy="21" r="7" fill="var(--accent)" fill-opacity="0.8"/></svg>
+      Huddle
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="../get-started/">Get started</a>
+      <a href="../how-it-works/" aria-current="page">How it works</a>
+      <a href="https://github.com/SrProfessional/Huddle">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>How Huddle works</h1>
+      <p class="lead">One task is one Issue, one branch and one pull request. Two roles, seven labels, and a rule: the AI never guesses at a decision that is not its to make.</p>
+      <ul class="toc">
+        <li><a href="#roles">Roles</a></li>
+        <li><a href="#labels">Labels</a></li>
+        <li><a href="#areas">Areas and progress</a></li>
+        <li><a href="#decisions">Decisions</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#only-you">Only you</a></li>
+      </ul>
+    </div>
+
+    <article>
+      <section id="roles">
+        <h2>Roles</h2>
+        <p class="prose">Huddle has two roles. They are about people, not about the AI: every person has their own Claude Code session.</p>
+        <div class="two">
+          <div>
+            <h3>AI Manager</h3>
+            <p>One person per repo. They install Huddle, write the Issues, answer decisions, review pull requests and merge. Only they merge into the default branch, and only they touch production, settings and secrets.</p>
+          </div>
+          <div>
+            <h3>Developer</h3>
+            <p>Takes an Issue, works on its own branch and answers what the session asks. Their session never merges, never touches the default branch or secrets, and touches only the files the Issue allows.</p>
+          </div>
+        </div>
+        <p class="prose">Why one AI Manager: decisions that nobody owns get answered in a rush, or twice in two ways. One owner keeps the answers consistent and keeps production in a single pair of hands. Each person runs one or two Issues at a time.</p>
+      </section>
+
+      <section id="labels">
+        <h2>Labels</h2>
+        <p class="prose">The status of an Issue lives in its labels. Nobody sets them by hand: a job does, from each Issue's «Depends on» section and from its comments.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Label</th><th scope="col">Meaning</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>ready</code></th><td>Everything it depends on is merged. Waiting for someone.</td></tr>
+              <tr><th scope="row"><code>assigned</code></th><td>A developer has it. Not started.</td></tr>
+              <tr><th scope="row"><code>in progress</code></th><td>A session is working on it.</td></tr>
+              <tr><th scope="row"><code>in review</code></th><td>A pull request is open and waits for the AI Manager.</td></tr>
+              <tr><th scope="row"><code>blocked</code></th><td>It depends on an Issue that is not merged yet.</td></tr>
+              <tr><th scope="row"><code>needs decision</code></th><td>The session asked the AI Manager and waits.</td></tr>
+              <tr><th scope="row"><code>changes requested from AI Manager</code></th><td>The AI Manager asked for changes and nobody has taken the request yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="prose">An Issue lists what it needs under «Depends on». A dependency counts as merged only when the Issue is closed and a merged pull request closed it. An Issue closed by hand unblocks nothing.</p>
+      </section>
+
+      <section id="areas">
+        <h2>Areas and progress</h2>
+        <p class="prose">A team sees how far each part of its project has come, as a percentage, and the total. Areas are milestones, on GitHub and on GitLab alike, and a project has as many as it needs. The AI Manager keeps an estimate of the Issues not written yet in each milestone, so the percentage is honest about the work still to come.</p>
+        <p class="prose">Progress shows in three places: a pinned «Huddle progress» Issue that rewrites itself, the <code>huddle progress</code> command, and one line when a Claude Code session opens. The skill <code>/huddle-areas</code> proposes the areas and puts Issues in them, and it changes nothing until the AI Manager says yes.</p>
+      </section>
+
+      <section id="decisions">
+        <h2>Decisions</h2>
+        <p class="prose">Nothing is dropped silently. Everything an Issue asks for ends up done, or written under «What was NOT done» with the reason. When a session cannot go on without a decision, it does not guess:</p>
+        <ol class="prose">
+          <li>It pushes what is done.</li>
+          <li>It comments on the Issue with the question, the options with their trade-offs and a recommendation, and adds the <code>needs decision</code> label.</li>
+          <li>It stops. The AI Manager answers with <code>/huddle-decide</code>, and the session continues on the same branch.</li>
+        </ol>
+      </section>
+
+      <section id="reviews">
+        <h2>Reviews</h2>
+        <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The AI Manager reviews with <code>/huddle-review</code> and either merges or asks for changes.</p>
+        <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». If Claude Code was closed meanwhile, a hook says on the next start that a request is pending.</p>
+      </section>
+
+      <section id="only-you">
+        <h2>«Only you» steps</h2>
+        <p class="prose">The AI Manager's own Claude Code session does every step it can: merging an approved pull request, tagging a release, running the smoke test on the sandboxes. It hands a step to a person only when it needs something the session cannot have:</p>
+        <ul class="prose">
+          <li>a second person's account;</li>
+          <li>a payment;</li>
+          <li>a secret, such as creating or pasting a token;</li>
+          <li>a phone or another device;</li>
+          <li>a legal or business decision;</li>
+          <li>a paid action the person must approve;</li>
+          <li>a permission that was denied.</li>
+        </ul>
+        <div class="only-you">
+          <h3>What such a step looks like</h3>
+          <p>It is numbered, with one action per step and exactly where to click. Whatever is typed or pasted sits in a copy block. Each step ends with «You should see:» and «If you see something else:», and every technical word is explained once.</p>
+        </div>
+        <p class="prose" style="margin-top: 1.5rem">Want to try it? <a href="../get-started/">Get started</a>, or read the full <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/team-guide.md">team guide</a> and the <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/design.md">design</a>.</p>
+      </section>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Huddle is open source, MIT license.</p>
+    <ul>
+      <li><a href="https://github.com/SrProfessional/Huddle">Repository</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/tree/main/docs">Docs</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/releases">Releases</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/blob/main/CHANGELOG.md">Changelog</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>

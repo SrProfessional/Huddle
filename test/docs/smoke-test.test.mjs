@@ -117,6 +117,7 @@ test('the versions are 0.3.0 and the CHANGELOG has an «Unreleased» section abo
   const m = JSON.parse(readFileSync(path.join(root, '.claude-plugin/marketplace.json'), 'utf8'));
   assert.ok(m.plugins.every((p) => p.version === '0.3.0'));
   const c = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
+  // Work merged after the release (for example the website, Issue #56) lives under «Unreleased» until the next one.
   assert.match(c, /## \[Unreleased\]\r?\n[\s\S]*?## \[0\.3\.0\] - \d{4}-\d{2}-\d{2}/);
   assert.ok(c.indexOf('## [0.3.0]') < c.indexOf('## [0.2.0]'));
   assert.match(c.slice(c.indexOf('## [0.3.0]'), c.indexOf('## [0.2.0]')), /huddle-areas/);

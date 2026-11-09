@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://srprofessional.github.io/Huddle/sitemap.xml
