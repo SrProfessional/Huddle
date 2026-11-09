@@ -1,0 +1,51 @@
+name: Bug report
+description: Report something that does not work. The AI Manager checks it before anyone works on it.
+title: "[Bug] "
+labels:
+  - bug
+  - needs triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The AI Manager reads it, finds the cause and turns it into a ready Bug Issue. Until then it is labeled `needs triage` and nobody is assigned.
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens
+      description: What you see, with the exact error text.
+    validations:
+      required: true
+  - type: textarea
+    id: what-should-happen
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      description: Numbered steps, with the environment (branch or version, browser or OS when it matters).
+      placeholder: |
+        1.
+        2.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Captures, logs, links.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How bad is it?
+      options:
+        - blocking
+        - normal
+        - minor
+      default: 1
+    validations:
+      required: true

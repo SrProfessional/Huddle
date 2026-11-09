@@ -29,7 +29,7 @@ test('labels assigns, creates the labels and sets them', async () => {
   assert.deepEqual(h.world.assigneesOf(2), ['luis']);
   assert.deepEqual(h.world.labelsOf(2), ['assigned']);
   assert.deepEqual(h.world.labelsOf(3), ['blocked']);
-  assert.equal(Object.keys(h.world.repoLabels()).length, 7);
+  assert.equal(Object.keys(h.world.repoLabels()).length, 9);
 });
 
 test('labels applies the renames from huddle.json', async () => {

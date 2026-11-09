@@ -221,6 +221,7 @@ session cannot touch what customers use.
 |---|---|---|
 | `/huddle-setup` | AI Manager | Installs Huddle in a repo, or refreshes its block and templates. |
 | `/huddle-issue` | AI Manager | Writes a new Issue from the template. |
+| `/huddle-bug` | AI Manager | Turns a bug description, or a raw report labeled `needs triage`, into a ready Bug Issue: investigates without changing anything, checks duplicates, sets the severity. |
 | `/huddle-start <n>` | Developer | Starts or continues Issue `n`. |
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
