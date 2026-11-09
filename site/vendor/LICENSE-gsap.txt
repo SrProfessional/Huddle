@@ -1,0 +1,10 @@
+GSAP 3.15.0 and ScrollTrigger 3.15.0
+Copyright 2026, GreenSock. All rights reserved.
+
+Used under the GSAP "Standard 'no charge' license" (GSAP is free for everyone,
+including commercial use, as long as the terms are followed):
+https://gsap.com/standard-license
+
+The same notice is kept at the top of gsap.min.js and ScrollTrigger.min.js.
+The npm package (gsap@3.15.0) ships no separate LICENSE file; its package.json
+names this license.
