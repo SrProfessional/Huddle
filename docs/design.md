@@ -125,6 +125,10 @@ All network access goes through one interface. The core never calls `gh` or `gla
 | `assign(n, user)` | `gh issue edit --add-assignee` | `PUT /issues/:iid` `assignee_ids` (looks the user up first) |
 | `merge(review)` | `gh pr merge --merge` | `PUT /merge_requests/:iid/merge`, never removing the source branch |
 | `me()` | `gh api user` | `GET /user` |
+| `findIssuesByTitle(title)` → open Issues with that title, oldest first | REST `GET /repos/:o/:r/issues?state=open` (pull requests dropped) | `GET /projects/:id/issues?state=opened&search=…&in=title`, exact title kept |
+| `closeIssue(n, { reason })` | `PATCH /issues/:n` `state=closed`, `state_reason` `not_planned` or `completed` | `PUT /issues/:iid` `state_event=close` |
+| `setIssueMilestone(n, title\|null)` → `{ reopened }` | `PATCH /issues/:n` `milestone` | `PUT /issues/:iid` `milestone_id`, read back; a closed milestone is reopened, assigned and closed again |
+| every call | retried on 429 (and 5xx except a POST), at most 3 tries and 60 s (`lib/platform/retry.mjs`) | same |
 
 Things that work differently on GitLab, and what Huddle does about them:
 
@@ -223,7 +227,10 @@ The progress Issue itself is not counted.
 **Three places.**
 
 1. **A «Huddle progress» Issue.** The labels job creates it once and rewrites it after the labels, only when its text
-   changes. A project with no milestones gets none. It is found by a marker comment in its body, `<!-- huddle:progress -->`, never by its title. It has no
+   changes. A project with no milestones gets none. It is the open Issue whose body **starts with** the marker line `<!-- huddle:progress -->` **and** whose title is «Huddle progress»: neither
+   alone is enough, so an Issue that quotes the marker is never touched (Issue #52). It is looked up through the platform's list
+   of Issues, not its search (GitHub search indexes a new Issue late), and every run heals duplicates: the oldest stays, the
+   others are closed with «Duplicate of #N». It has no
    «Depends on», so the labels logic ignores it. On GitHub it is pinned; GitLab has no pinned Issues, so it is only
    created. `"progress_issue": false` in `huddle.json` turns it off.
 2. **`huddle progress`**, a table of areas with a text bar and the total. `--json` prints the data.
