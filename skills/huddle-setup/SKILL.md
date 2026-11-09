@@ -26,7 +26,8 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
    `enabledPlugins["huddle@huddle"]`): it creates the file, or merges those two keys and keeps every other key. Run again later and it replaces only that block; the project's own text and edited templates stay.
    That file is only a helper: it enables the plugin for the project and, in the CLI, registers the marketplace silently after the folder's own trust dialog. It does not install Huddle for anyone.
 3. Read the JSON report. Show the developer `written`, `skipped` and every line of `notes` (GitLab needs a pipeline
-   schedule and the `HUDDLE_TOKEN` variable: only the AI Manager sets those up).
+   schedule, which the AI Manager's session can create with `glab api`, and the `HUDDLE_TOKEN` variable, a secret that only the
+   person can create: give them the «🙋 Only you» steps of docs/gitlab.md, «The HUDDLE_TOKEN step»).
 4. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` and show the result. If it reports a missing label, run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` (the AI Manager's login only).
 5. Tell the AI Manager to send every developer the two install commands, to run once on their machine in a terminal, then open a new session: `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`.
@@ -34,3 +35,13 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
    Issues still to write, which the AI Manager states on a line of the milestone description, for example `Huddle remaining: 4`
    (see `huddle progress`).
 7. Tell the developer to review and commit the files in a branch and PR/MR. Do not commit to the default branch.
+
+## Who does each step
+
+Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,
+and the repo's own tools). If you can, do it and report what you did. Only a step that needs something you cannot have goes to them: a second
+person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must
+approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical
+background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see
+something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those
+🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.

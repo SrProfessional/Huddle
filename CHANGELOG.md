@@ -7,6 +7,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The session does every step it can, and the steps only a person can do are for-dummies steps (Issue #50;
+  `docs/design.md` §13). Before a session hands a step to the AI Manager or a developer, it checks whether it can do it
+  itself with `gh`, `glab`, git and the sandboxes, and if so does it and reports it. Only a step that needs a second
+  person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action or a
+  denied permission goes to the person, written as numbered «🙋 Only you» steps («🙋 Solo tú» in Spanish): one action per
+  step, a copy block for what is pasted, «You should see:» and «If you see something else:». `/huddle-review` now merges,
+  tags and creates the release itself once its session approved, and asks only for 🙋 steps; `/huddle-issue` marks the
+  steps only a person can do; every skill has a «Who does each step» section and its closing message follows it. The smoke
+  test marks each step «Session» or «🙋 Only you» and the session runs its own steps on the sandboxes; the GitLab
+  `HUDDLE_TOKEN` step is now a 🙋 block, and the team guide and the roles page explain it. Docs and skills tests check it.
+
 - `/huddle-areas`, Claude helps define the project's areas (Issue #42). The skill (AI Manager only) reads the README,
   `CLAUDE.md`, the specs, plans and Issues and always proposes and explains before changing anything: which areas (any
   number, never a fixed one), an area for each Issue without one, a «remaining» estimate per area with its reasoning, and a

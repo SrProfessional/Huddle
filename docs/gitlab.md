@@ -45,25 +45,44 @@ request.
 
 ## The HUDDLE_TOKEN step
 
-The job token (`CI_JOB_TOKEN`) cannot edit Issues, so the job needs a token of its own. Only the AI Manager does this,
-once per project:
+The job token (`CI_JOB_TOKEN`) cannot edit Issues, so the job needs a token of its own. A token (a long password that lets a
+program act for you) is a secret, so the AI Manager's session cannot create it and never sees it. This step is only the AI
+Manager's, once per project.
 
-1. **Settings > Access tokens > Add new token.** Role: Maintainer. Scope: `api`. Give it an expiry date you will
-   remember to renew.
-2. Copy the token once. Do not paste it in a chat, a file, an Issue or a commit.
-3. **Settings > CI/CD > Variables > Add variable.** Key `HUDDLE_TOKEN`, the token as value. The variable must be
-   masked and protected: turn on **Mask variable** and **Protect variable**.
-4. Because the variable is protected, the schedule must run on a protected branch. The default branch normally is.
-   Merge request pipelines from unprotected branches do not get the variable: there the job ends green, prints
-   «Huddle: HUDDLE_TOKEN is only available on protected branches; the schedule on the default branch updates the
-   labels.» and changes nothing. That is expected; keep the variable protected. On a schedule or on a protected branch
-   a missing token still fails the job.
+🙋 Only you
+
+1. Open the project on GitLab in your browser. In the left menu click **Settings**, then **Access tokens**.
+2. Click **Add new token**. In **Token name** type the text below:
+   ```text
+   huddle
+   ```
+3. Set an expiry date you will remember to renew. Under **Select a role** choose **Maintainer**. Under **Select scopes** tick
+   only **api**.
+4. Click **Create project access token**. You should see: a box with a long text that starts with `glpat-` and a copy
+   button. If you see something else: you do not have the Owner or Maintainer role; ask the project owner and stop here.
+5. Click the copy button next to the token. Do not paste it in a chat, a file, an Issue or a commit: the variable below is
+   the only place for it.
+6. In the left menu click **Settings**, then **CI/CD**. Next to **Variables** click **Expand**, then **Add variable**.
+7. In **Key** type the text below:
+   ```text
+   HUDDLE_TOKEN
+   ```
+8. Click in **Value**, paste the token (Ctrl+V), and tick **Mask variable** and **Protect variable**.
+9. Click **Add variable**. You should see: `HUDDLE_TOKEN` in the list with «Protected» and «Masked» next to it, and no token
+   text. If you see something else: if the page says the value cannot be masked, check that you pasted only the token,
+   with no spaces or line breaks, and try again.
+
+Because the variable is protected, the schedule must run on a protected branch. The default branch normally is.
+Merge request pipelines from unprotected branches do not get the variable: there the job ends green, prints
+«Huddle: HUDDLE_TOKEN is only available on protected branches; the schedule on the default branch updates the
+labels.» and changes nothing. That is expected; keep the variable protected. On a schedule or on a protected branch
+a missing token still fails the job.
 
 Huddle only reads the variable. It never reads a token from a file, never prints it and never turns on shell tracing.
 
 ## On the developer's machine
 
-Every developer who works on a GitLab repo needs two things on their own machine. The AI Manager checks them once in
+Every developer who works on a GitLab repo needs two things on their own machine. The AI Manager's session checks them once in
 the [smoke test](smoke-test.md).
 
 1. **`glab` must be on the PATH of the terminal that starts Claude.** If it is not, the SessionStart hook stays silent
