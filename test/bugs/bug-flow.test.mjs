@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { run } from '../../lib/cli/run.mjs';
 import { setup } from '../../lib/setup/index.mjs';
-import { assignments, dependsOn, isBlockingBug, plan, severityOf, BUG_LABELS } from '../../lib/core/issue-status.mjs';
+import { assignments, dependsOn, isBlockingBug, plan, severityOf, BUG_LABELS, LABELS } from '../../lib/core/issue-status.mjs';
 import { harness, CONFIG, GITLAB_CONFIG } from '../cli/harness.mjs';
 
 const tpl = (rel) => readFileSync(fileURLToPath(new URL(`../../templates/${rel}`, import.meta.url)), 'utf8');
@@ -133,3 +133,19 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(h.world.labelsOf(2), ['ready']);
   });
 }
+
+// --- label limits --------------------------------------------------------------------------------------------------------------------
+test('every label Huddle creates has a description of at most 100 characters (GitHub limit) and a 6-hex color', () => {
+  for (const l of [...Object.values(LABELS), ...Object.values(BUG_LABELS)]) {
+    assert.ok(l.description.length <= 100, `${l.name}: description is ${l.description.length} characters`);
+    assert.match(l.color, /^[0-9a-f]{6}$/i, `${l.name}: color`);
+  }
+});
+
+test('GitHub: labels creates every label on a new repo, with the renames of huddle.json (the fake answers 422 on a long description)', async () => {
+  const h = harness({ config: { ...CONFIG, labels: { blocked: 'waiting' } }, setup: (w) => w.issue({ number: 1, body: NONE }) });
+  assert.equal(await run(['labels'], h.ctx), 0, h.errText());
+  const names = Object.keys(h.world.repoLabels());
+  for (const n of ['waiting', 'bug', 'needs triage', 'ready']) assert.ok(names.includes(n), `${n} was not created`);
+  for (const [name, l] of Object.entries(h.world.repoLabels())) assert.ok(l.description.length <= 100, name);
+});

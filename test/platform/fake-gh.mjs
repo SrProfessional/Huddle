@@ -141,6 +141,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
     }
     if (a === 'label' && b === 'create') {
       need(args.includes('--force') && values(args, '--color').length === 1, args);
+      // github.com refuses a label description longer than 100 characters (Validation Failed, HTTP 422).
+      if ((values(args, '--description')[0] ?? '').length > 100) throw new Error(`gh ${args.join(' ')} failed: Validation Failed: description is too long (maximum is 100 characters) (HTTP 422)`);
       repoLabels.set(args[2], { color: values(args, '--color')[0], description: values(args, '--description')[0] ?? '' });
       return '';
     }
