@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { run } from '../../lib/cli/run.mjs';
-import { harness, request, CONFIG } from './harness.mjs';
+import { harness, request, CONFIG, GITLAB_CONFIG } from './harness.mjs';
 
 const DEPS = (n) => `## Depends on\n\n- #${n}\n`;
 const labelsWorld = (w) => {
@@ -29,7 +29,8 @@ test('labels assigns, creates the labels and sets them', async () => {
   assert.deepEqual(h.world.assigneesOf(2), ['luis']);
   assert.deepEqual(h.world.labelsOf(2), ['assigned']);
   assert.deepEqual(h.world.labelsOf(3), ['blocked']);
-  assert.equal(Object.keys(h.world.repoLabels()).length, 7);
+  assert.equal(Object.keys(h.world.repoLabels()).length, 8, 'the seven status labels and «design»');
+  assert.ok('design' in h.world.repoLabels());
 });
 
 test('labels applies the renames from huddle.json', async () => {
@@ -425,3 +426,39 @@ test('hook narrows to the Issue of the branch too', async () => {
   assert.match(context, /Issue #5/);
   assert.doesNotMatch(context, /Issue #6/);
 });
+
+// --- Design Issues (Issue #58): a Design Issue has the same «## Depends on» section, so it is a task for the labels job ---
+const DESIGN_BODY = (dep) => `## Goal
+
+Design the settings screen.
+
+## Depends on
+
+- ${dep}
+
+## Allowed files
+
+- design/7-settings/
+
+## Screens
+
+Settings.
+`;
+for (const gitlab of [false, true]) {
+  test(`${gitlab ? 'GitLab' : 'GitHub'}: a Design Issue gets ready / assigned / blocked / in review exactly like a task, and the design label is created`, async () => {
+    const h = harness({ gitlab, config: { ...(gitlab ? GITLAB_CONFIG : CONFIG), assignees: ['ana'] }, setup: (w) => {
+      w.issue({ number: 1, title: 'done', state: 'merged' });
+      w.issue({ number: 7, title: 'Design settings', body: DESIGN_BODY('#1'), labels: ['design'] });
+      w.issue({ number: 8, title: 'Design profile', body: DESIGN_BODY('#9'), labels: ['design'] });
+      w.issue({ number: 9, title: 'open dep', body: '## Depends on\n\nNone.\n', assignees: ['ana'], labels: ['in progress'] });
+      w.issue({ number: 10, title: 'Design home', body: DESIGN_BODY('#1'), assignees: ['ana'], labels: ['design', 'assigned'], reviews: [70] });
+      w.review({ number: 70 });
+    } });
+    assert.equal(await run(['labels'], h.ctx), 0);
+    assert.deepEqual(h.world.assigneesOf(7), ['ana']);
+    assert.deepEqual([...h.world.labelsOf(10)].sort(), ['design', 'in review'], 'its PR is open: in review, and the design label stays');
+    assert.deepEqual([...h.world.labelsOf(7)].sort(), ['assigned', 'design']);
+    assert.deepEqual([...h.world.labelsOf(8)].sort(), ['blocked', 'design']);
+    assert.ok('design' in h.world.repoLabels());
+  });
+}

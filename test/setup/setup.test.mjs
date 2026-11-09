@@ -28,6 +28,7 @@ test('GitHub: writes a valid huddle.json and the GitHub templates, and no GitLab
   assert.deepEqual(config.assignees, ['ana', 'luis']);
   assert.equal(JSON.parse(read(root, 'huddle.json')).$schema, 'https://raw.githubusercontent.com/SrProfessional/Huddle/main/huddle.schema.json');
   assert.equal(read(root, '.github/ISSUE_TEMPLATE/task.md'), tpl('github/ISSUE_TEMPLATE/task.md'));
+  assert.equal(read(root, '.github/ISSUE_TEMPLATE/design.md'), tpl('github/ISSUE_TEMPLATE/design.md'));
   assert.equal(read(root, '.github/pull_request_template.md'), tpl('github/pull_request_template.md'));
   assert.equal(read(root, '.github/workflows/huddle-labels.yml'), tpl('github/workflows/huddle-labels.yml'));
   assert.equal(existsSync(path.join(root, '.gitlab')), false);
@@ -43,6 +44,7 @@ test('GitLab: writes the GitLab templates, the CI job and an .gitlab-ci.yml that
   assert.equal(config.max_open_per_person, 3);
   assert.equal(config.default_branch, 'develop');
   assert.equal(read(root, '.gitlab/issue_templates/Task.md'), tpl('gitlab/issue_templates/Task.md'));
+  assert.equal(read(root, '.gitlab/issue_templates/Design.md'), tpl('gitlab/issue_templates/Design.md'));
   assert.equal(read(root, '.gitlab/merge_request_templates/Default.md'), tpl('gitlab/merge_request_templates/Default.md'));
   assert.equal(read(root, 'huddle-labels.gitlab-ci.yml'), tpl('gitlab/huddle-labels.gitlab-ci.yml'));
   assert.match(read(root, '.gitlab-ci.yml'), /include:\s*\n\s*- local: huddle-labels\.gitlab-ci\.yml/);
@@ -117,4 +119,8 @@ test('the CLI entry takes flags, works in the current folder and prints a JSON r
   assert.ok(report.written.includes('huddle.json'));
   assert.deepEqual(loadConfig(root).assignees, ['ana', 'luis']);
   assert.throws(() => execFileSync(process.execPath, [cli, '--platform', 'nope'], { cwd: root, stdio: 'pipe' }));
+}));
+
+test('setup tells the developer that `huddle labels` creates the design label (setup itself never calls the network)', () => inTemp((root) => {
+  for (const answers of [GH, GL]) assert.ok(setup(root, answers).notes.some((n) => /huddle labels/.test(n) && /design/.test(n)), answers.platform);
 }));
