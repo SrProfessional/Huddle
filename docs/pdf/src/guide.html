@@ -114,6 +114,7 @@
       <li>in one line when a session opens, for example <code>Content 76% · Social networks 55% · Ads 0% · Total 58%</code>.</li>
     </ul>
     <p>Issues closed by hand or «not planned» do not count, and Issues with no milestone stay out of the percentage.</p>
+    <p><strong>Not sure which areas to use?</strong> The AI Manager runs <code>/huddle-areas</code>. Claude reads the README, the specs and the Issues, proposes the areas with the reason for each (as many as the project needs), puts the Issues that have no area in one, and suggests how many Issues are still missing in each. It explains first and changes nothing until the AI Manager says yes. It can be run again later to check that the areas are up to date.</p>
   </section>
 
   <section aria-labelledby="why">
@@ -163,7 +164,7 @@
     <ol class="steps">
       <li>
         <h3>Put Huddle in the repository</h3>
-        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the AI Manager and the team, then writes <code>huddle.json</code>, the Issue and PR templates, the labels job, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor».</p>
+        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the AI Manager and the team, then writes <code>huddle.json</code>, the Issue and PR templates, the labels job, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor». If its <code>login</code> line says «gh is not installed or not on the PATH» (or <code>glab</code>), the tool is missing from that terminal: it gives the install command, and on Windows you open a new terminal afterwards. «Is not logged in» is a different message, with <code>gh auth login</code> or <code>glab auth login</code> as the fix.</p>
         <p><strong>On GitLab</strong> two more things, only by you: a project access token with the <code>api</code> scope stored as the masked and protected CI variable <code>HUDDLE_TOKEN</code>, and a pipeline schedule <code>*/10 * * * *</code> on the default branch. Never paste the token in a chat or a file.</p>
       </li>
       <li>
