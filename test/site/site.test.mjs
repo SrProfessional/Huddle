@@ -353,3 +353,22 @@ test('H27: the CSS turns every effect off under prefers-reduced-motion and hides
   // the other pages do not load the motion scripts
   for (const p of pages.filter((x) => x !== 'index.html')) assert.doesNotMatch(html(p), /vendor\/|landing\.js/, `${p} should not load the motion scripts`);
 });
+
+test('H27: the fonts are served from the site itself, with their licences, and preloaded (no layout shift from a font swap)', () => {
+  for (const p of pages) {
+    const t = html(p);
+    assert.doesNotMatch(t, /fonts\.googleapis\.com|fonts\.gstatic\.com/, `${p}: loads fonts from another origin`);
+    assert.match(t, /<link rel="preload" href="[^"]*fonts\/bricolage-grotesque-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the display font`);
+    assert.match(t, /<link rel="preload" href="[^"]*fonts\/source-serif-4-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the text font`);
+  }
+  const css = read('site/style.css');
+  assert.match(css, /@font-face\s*\{[^}]*Bricolage Grotesque[^}]*fonts\/bricolage-grotesque-latin\.woff2/);
+  assert.match(css, /@font-face\s*\{[^}]*Source Serif 4[^}]*fonts\/source-serif-4-latin\.woff2/);
+  for (const f of ['bricolage-grotesque-latin.woff2', 'source-serif-4-latin.woff2']) {
+    const b = readFileSync(path.join(site, 'fonts', f));
+    assert.equal(b.subarray(0, 4).toString(), 'wOF2', `${f} is not a woff2 file`);
+  }
+  for (const f of ['OFL-bricolage-grotesque.txt', 'OFL-source-serif-4.txt']) {
+    assert.match(readFileSync(path.join(site, 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i, `${f}: licence text`);
+  }
+});
