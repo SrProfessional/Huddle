@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Get started with Huddle: install the Claude Code plugin</title>
+<meta name="description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<link rel="canonical" href="https://srprofessional.github.io/Huddle/get-started/">
+<meta name="theme-color" content="#4336d8">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Huddle">
+<meta property="og:title" content="Get started with Huddle: install the Claude Code plugin">
+<meta property="og:description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta property="og:url" content="https://srprofessional.github.io/Huddle/get-started/">
+<meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Get started with Huddle: install the Claude Code plugin">
+<meta name="twitter:description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="11" cy="12" r="7" fill="var(--accent)"/><circle cx="21" cy="12" r="7" fill="var(--accent)" fill-opacity="0.55"/><circle cx="16" cy="21" r="7" fill="var(--accent)" fill-opacity="0.8"/></svg>
+      Huddle
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="../get-started/" aria-current="page">Get started</a>
+      <a href="../how-it-works/">How it works</a>
+      <a href="https://github.com/SrProfessional/Huddle">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <div class="page-head">
+      <h1>Get started with Huddle</h1>
+      <p class="lead">Install the plugin, set up one repo, write the first Issue. Then a developer takes it. About five minutes for the setup, thirty for a developer's first day.</p>
+      <ul class="toc">
+        <li><a href="#install">Install</a></li>
+        <li><a href="#setup">Set up a repo</a></li>
+        <li><a href="#first-issue">First Issue</a></li>
+        <li><a href="#first-day">A developer's first day</a></li>
+      </ul>
+    </div>
+
+    <article>
+      <section id="install">
+        <h2>1. Install the plugin</h2>
+        <p class="prose">Every developer installs Huddle once, on their own machine. A settings file committed to the repo does not do it for them. You need:</p>
+        <ul class="prose">
+          <li><a href="https://claude.com/claude-code">Claude Code</a>.</li>
+          <li>Node 22 or newer, and <code>git</code>.</li>
+          <li>On GitHub, the <a href="https://cli.github.com">gh</a> command line, logged in with <code>gh auth login</code>. On GitLab, the <a href="https://gitlab.com/gitlab-org/cli">glab</a> command line, logged in with <code>glab auth login</code> (add <code>--hostname gitlab.example.com</code> for a self-managed server).</li>
+        </ul>
+        <p class="prose">Run this once in any terminal, then open a new Claude Code session:</p>
+        <pre tabindex="0"><code>claude plugin marketplace add SrProfessional/Huddle
+claude plugin install huddle@huddle</code></pre>
+        <p class="prose">In the Claude Code command line you can type the same as <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code>. The VS Code extension has no <code>/plugin</code>, so use the terminal form there. Huddle has no runtime dependencies, so there is nothing to <code>npm install</code>.</p>
+      </section>
+
+      <section id="setup">
+        <h2>2. Set up your repo</h2>
+        <p class="prose">This is the AI Manager's step, once per repo. Open Claude Code in the repo and create a branch for the setup:</p>
+        <pre tabindex="0"><code>git switch -c huddle-setup</code></pre>
+        <ol class="prose">
+          <li>Run <code>/huddle-setup</code>. It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the AI Manager and the logins of the developers.</li>
+          <li>It writes <code>huddle.json</code>, the Issue and pull request templates, the job that keeps the labels up to date, and the Huddle block of <code>CLAUDE.md</code>. Nothing outside that block is touched.</li>
+          <li>Run <code>huddle doctor</code>. You want a check mark on the file, the login, the AI Manager and the labels. If a label is missing, run <code>huddle labels</code> once.</li>
+          <li>Commit, push and open a pull request with the setup files. Merge it. The AI Manager is the only one who merges.</li>
+        </ol>
+        <div class="note">
+          <p><strong>On GitLab</strong>, two more steps are only the AI Manager's: a pipeline schedule with the cron <code>*/10 * * * *</code> on the default branch, and a project access token with the <code>api</code> scope stored as the masked, protected CI variable <code>HUDDLE_TOKEN</code>. Labels can take up to ten minutes to change. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/gitlab.md">GitLab notes</a> explain both in detail.</p>
+        </div>
+      </section>
+
+      <section id="first-issue">
+        <h2>3. Write the first Issue</h2>
+        <p class="prose">Run <code>/huddle-issue</code>. It writes the Issue from the template, so every task arrives complete:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Part</th><th scope="col">What it says</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Goal</th><td>What we want to achieve and why, in a few lines.</td></tr>
+              <tr><th scope="row">Prompt for Claude Code</th><td>The text the developer pastes, with the steps, the branch and how to open the pull request.</td></tr>
+              <tr><th scope="row">Allowed files</th><td>The only files the session may touch.</td></tr>
+              <tr><th scope="row">Forbidden files</th><td>What is not touched. If it must be, the session asks first.</td></tr>
+              <tr><th scope="row">Contract or spec</th><td>The document that rules over the code.</td></tr>
+              <tr><th scope="row">Tests</th><td>What must pass before the pull request opens.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="first-day">
+        <h2>4. A developer's first day</h2>
+        <ol class="prose">
+          <li><strong>Set up your machine.</strong> Install Claude Code, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the two commands above. Never paste a token into a chat, a file or an Issue.</li>
+          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the AI Manager: only they run <code>huddle labels</code>.</li>
+          <li><strong>Take an Issue.</strong> The AI Manager assigns one, or the labels job does. Run <code>/huddle-start &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
+          <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the AI Manager.</li>
+          <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
+        </ol>
+        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the AI Manager's requested changes on its own.</p>
+        <p class="prose">Next: <a href="../how-it-works/">how it works</a>, with the roles, the labels and the reviews.</p>
+      </section>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Huddle is open source, MIT license.</p>
+    <ul>
+      <li><a href="https://github.com/SrProfessional/Huddle">Repository</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/tree/main/docs">Docs</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/releases">Releases</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/blob/main/CHANGELOG.md">Changelog</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>
