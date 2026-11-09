@@ -187,6 +187,10 @@ The Issue template makes every task arrive complete, so anyone's session starts 
 | Contract or spec | The document that rules over the code. |
 | Tests | What must pass before opening the pull request, with its counts. |
 
+A **Design Issue** (its own template and the `design` label) lets a designer do the same from a Claude Code session: the design
+is made with Claude Design, polished only in the chat, and saved in `design/<n>-<slug>/` with a PR when they say «ready»
+(see [Design tasks](docs/team-guide.md#design-tasks)).
+
 ## Why working this way is better
 
 **The decision is the work.** The AI is fast at writing and testing, but it does not know the business, the users or the

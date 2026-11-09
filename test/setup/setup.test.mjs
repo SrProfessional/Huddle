@@ -121,6 +121,6 @@ test('the CLI entry takes flags, works in the current folder and prints a JSON r
   assert.throws(() => execFileSync(process.execPath, [cli, '--platform', 'nope'], { cwd: root, stdio: 'pipe' }));
 }));
 
-test('setup tells the developer that `huddle labels` creates the design label (setup itself never calls the network)', () => inTemp((root) => {
-  for (const answers of [GH, GL]) assert.ok(setup(root, answers).notes.some((n) => /huddle labels/.test(n) && /design/.test(n)), answers.platform);
+test('setup tells the developer that the labels command creates the design label (setup itself never calls the network)', () => inTemp((root) => {
+  for (const answers of [GH, GL]) assert.ok(setup(root, answers).notes.some((n) => /bin\/huddle" labels/.test(n) && /design/.test(n)), answers.platform);
 }));
