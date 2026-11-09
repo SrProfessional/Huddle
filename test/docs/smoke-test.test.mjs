@@ -142,6 +142,6 @@ test('«Areas» step 7 sets Docs to a remaining different from step 5, so the cl
   assert.match(steps[6], /the milestone is closed and stays closed/);
 });
 
-test('the CHANGELOG release header is dated 2026-11-08', () => {
-  assert.ok(readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8').includes('## [0.3.0] - 2026-11-08'));
+test('the CHANGELOG release header is dated 2026-11-09', () => {
+  assert.ok(readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8').includes('## [0.3.0] - 2026-11-09'));
 });

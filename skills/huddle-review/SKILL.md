@@ -34,6 +34,25 @@ Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`)
 
 ## All good
 
-1. Approve with a comment (self-approval may be disabled), then merge with the platform's merge commit and keep the branch
-   (`gh pr merge --merge`; on GitLab merge without removing the source branch).
-2. Confirm the Issue closed. Tell the developer's next step in one line.
+1. Approve with a comment (self-approval may be disabled). Your approval in this session is the AI Manager's approval, so
+   merge it yourself with the platform's merge commit and keep the branch (`gh pr merge --merge`; on GitLab merge without
+   removing the source branch). Do not hand the merge command to the person: never hand over a step you can do.
+2. Confirm the Issue closed (a merged PR/MR; `CLOSED` with `COMPLETED` on GitHub).
+3. **A release PR** (versions and `CHANGELOG.md` at a new version): after the merge, check that every cell of the smoke test is ✔
+   in the PR text. Then, on an up-to-date default branch, tag and publish it yourself: `git tag -a vX.Y.Z -m "Huddle vX.Y.Z"`,
+   `git push origin vX.Y.Z`, and `gh release create vX.Y.Z --notes-file <the version's section of CHANGELOG.md>` (GitLab:
+   `glab release create vX.Y.Z`). If a cell is not ✔, do not tag: say which one.
+4. Ask the AI Manager only for what needs them, as «🙋 Only you» steps: for example a second account, a token, or a
+   permission the platform denied. If a merge or a push is refused (branch protection, a missing permission), stop and
+   ask; never look for another way.
+5. Tell the developer's next step in one line.
+
+## Who does each step
+
+Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,
+and the repo's own tools). If you can, do it and report what you did. Only a step that needs something you cannot have goes to them: a second
+person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must
+approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical
+background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see
+something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those
+🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.

@@ -21,7 +21,11 @@ Only the AI Manager:
 
 - merges into the default branch;
 - touches production, deployments, settings and secrets;
-- sets up the GitLab schedule and the `HUDDLE_TOKEN` variable (see [the GitLab notes](gitlab.md)).
+- creates the GitLab `HUDDLE_TOKEN` variable, which holds a secret (see [the GitLab notes](gitlab.md)).
+
+The AI Manager's session does every step it can: merging, tagging, creating the GitLab schedule and running the smoke test on
+the sandboxes. It asks the person only for what needs them, as numbered «🙋 Only you» steps; see
+[who does each step](team-guide.md#who-does-each-step).
 
 Only the AI Manager's comments count as requests. Anyone else's comment is just a comment.
 

@@ -5,9 +5,20 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-11-08
+## [0.3.0] - 2026-11-09
 
 ### Added
+
+- The session does every step it can, and the steps only a person can do are for-dummies steps (Issue #50;
+  `docs/design.md` §13). Before a session hands a step to the AI Manager or a developer, it checks whether it can do it
+  itself with `gh`, `glab`, git and the sandboxes, and if so does it and reports it. Only a step that needs a second
+  person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action or a
+  denied permission goes to the person, written as numbered «🙋 Only you» steps («🙋 Solo tú» in Spanish): one action per
+  step, a copy block for what is pasted, «You should see:» and «If you see something else:». `/huddle-review` now merges,
+  tags and creates the release itself once its session approved, and asks only for 🙋 steps; `/huddle-issue` marks the
+  steps only a person can do; every skill has a «Who does each step» section and its closing message follows it. The smoke
+  test marks each step «Session» or «🙋 Only you» and the session runs its own steps on the sandboxes; the GitLab
+  `HUDDLE_TOKEN` step is now a 🙋 block, and the team guide and the roles page explain it. Docs and skills tests check it.
 
 - `/huddle-areas`, Claude helps define the project's areas (Issue #42). The skill (AI Manager only) reads the README,
   `CLAUDE.md`, the specs, plans and Issues and always proposes and explains before changing anything: which areas (any
@@ -30,6 +41,27 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   open a new terminal or reload the PATH. An auth failure says «is not logged in» with `gh auth login` / `glab auth login`
   (`--hostname <host>` when `huddle.json` has a host). Any other failure keeps the «is not usable» line. The real runners
   carry the spawn error's `code` on the error they reject with.
+
+### Fixed
+
+Findings of the 0.3.0 smoke test (Issue #52).
+
+- **One «Huddle progress» Issue, even when two runs start seconds apart.** `huddle labels` looks for it with the new adapter
+  operation `findIssuesByTitle`, which reads the database (GitHub: the REST Issues list; GitLab: the list by title), not
+  `gh issue list`, which uses search and indexes a new Issue late. Every run also heals duplicates: the oldest stays, the
+  others get the comment «Duplicate of #N» and are closed (as not planned on GitHub). New adapter operation `closeIssue`.
+- **The progress Issue is only an Issue whose body starts with the marker line and whose title is «Huddle progress».** An
+  Issue that quotes the marker in its text, or a human's Issue with that title, is never rewritten or closed.
+- **Retries on a rate limit and on a server error.** The `gh` and `glab` runners retry a 429 (and «rate limit» answers) and
+  a 5xx, at most 3 tries and 60 s of waiting in all, after the `Retry-After` the CLI prints or 1 s, then 2 s. A POST is
+  never retried on a 5xx (it may have been done). A limit that stays ends with «rate limited, try again in N s» on one
+  line, not a stack. On GitLab one labels run reads `closed_by` once per Issue, not once for the labels and once more for
+  the progress.
+- **GitLab: `huddle areas assign` to a closed milestone sticks.** gitlab.com answers 200 and ignores a closed milestone on an
+  Issue, so `setIssueMilestone` reads the Issue back; if it did not stick, it reopens the milestone, assigns and closes it
+  again (also when the assign fails), says so, and throws a clear error if it still does not stick.
+- `huddle areas check` lists an area with no estimate line once (as «No «Huddle remaining» line»), no longer also as «No
+  Issue and remaining 0».
 
 ## [0.2.0] - 2026-11-07
 

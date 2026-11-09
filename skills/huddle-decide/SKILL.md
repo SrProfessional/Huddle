@@ -30,3 +30,13 @@ Decision: <the chosen option and why, in one or two lines>.
 4. Do not change labels or close anything: the labels job takes `needs decision` off once the answer is there, and the
    developer's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
 5. If the decision changes the Issue's scope, edit the Issue text too, so it stays true.
+
+## Who does each step
+
+Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,
+and the repo's own tools). If you can, do it and report what you did. Only a step that needs something you cannot have goes to them: a second
+person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must
+approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical
+background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see
+something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those
+🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.

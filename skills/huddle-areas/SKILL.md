@@ -46,3 +46,13 @@ No areas yet: do steps 1 to 4 in order. Areas exist: do the check-up (step 5), a
 
 Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" progress` and show the result: it is what the team will see. Do not touch the «Huddle progress» Issue; the labels job
 rewrites it. Never print or paste a token; if a call is refused for lack of permission, stop and say what is missing.
+
+## Who does each step
+
+Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,
+and the repo's own tools). If you can, do it and report what you did. Only a step that needs something you cannot have goes to them: a second
+person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must
+approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical
+background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see
+something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those
+🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.
