@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Huddle: Decision-led development for teams coding with AI</title>
+<meta name="description" content="Huddle is a Claude Code plugin for teams. One AI Manager hands out Issues, each developer's session does one, and nothing is dropped.">
+<link rel="canonical" href="https://srprofessional.github.io/Huddle/">
+<meta name="theme-color" content="#4336d8">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Huddle">
+<meta property="og:title" content="Huddle: Decision-led development for teams coding with AI">
+<meta property="og:description" content="Huddle is a Claude Code plugin for teams. One AI Manager hands out Issues, each developer's session does one, and nothing is dropped.">
+<meta property="og:url" content="https://srprofessional.github.io/Huddle/">
+<meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Huddle: Decision-led development for teams coding with AI">
+<meta name="twitter:description" content="Huddle is a Claude Code plugin for teams. One AI Manager hands out Issues, each developer's session does one, and nothing is dropped.">
+<meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Huddle",
+  "alternateName": "Huddle: Decision-led development for teams coding with AI",
+  "description": "A Claude Code plugin for teams on GitHub and GitLab. One AI Manager hands out Issues, each developer's Claude Code session works on one, and nothing is dropped silently.",
+  "url": "https://srprofessional.github.io/Huddle/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "license": "https://opensource.org/licenses/MIT",
+  "codeRepository": "https://github.com/SrProfessional/Huddle"
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="11" cy="12" r="7" fill="var(--accent)"/><circle cx="21" cy="12" r="7" fill="var(--accent)" fill-opacity="0.55"/><circle cx="16" cy="21" r="7" fill="var(--accent)" fill-opacity="0.8"/></svg>
+      Huddle
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="get-started/">Get started</a>
+      <a href="how-it-works/">How it works</a>
+      <a href="https://github.com/SrProfessional/Huddle">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <div class="wrap">
+      <h1>Decision-led development for teams coding with AI</h1>
+      <p class="lead">Huddle is a Claude Code plugin for teams. One person hands out the tasks, every developer's AI session does one, and the people spend their time deciding and reviewing instead of typing.</p>
+      <div class="actions">
+        <a class="btn" href="get-started/">Get started</a>
+        <a class="btn ghost" href="https://github.com/SrProfessional/Huddle">View on GitHub</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="wrap">
+      <h2>Every task shows where it is</h2>
+      <p class="lead">An Issue moves along five stops. Labels on the Issue say where it is, and they update on their own. Two side roads exist because the AI is allowed to stop and ask.</p>
+      <div class="flow">
+        <svg class="wide" viewBox="0 0 1040 330" role="img" aria-labelledby="flow-title-wide flow-desc-wide">
+          <title id="flow-title-wide">The label flow of an Issue</title>
+          <desc id="flow-desc-wide">An Issue goes from ready to assigned, in progress, in review and merged. From in progress it can go to needs decision and come back once the AI Manager answers. From in review it can go to changes requested from AI Manager and come back to in progress.</desc>
+          <defs>
+            <marker id="arrow-wide" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-arrow"/></marker>
+          </defs>
+          <path class="f-line" d="M100 120H940"/>
+          <g>
+            <circle class="f-node" cx="100" cy="120" r="14"/>
+            <circle class="f-node" cx="320" cy="120" r="14"/>
+            <circle class="f-node" cx="540" cy="120" r="14"/>
+            <circle class="f-node" cx="760" cy="120" r="14"/>
+            <circle class="f-node-end" cx="940" cy="120" r="14"/>
+          </g>
+          <g text-anchor="middle">
+            <text class="f-label" x="100" y="48">ready</text>
+            <text class="f-label" x="320" y="48">assigned</text>
+            <text class="f-label" x="540" y="48">in progress</text>
+            <text class="f-label" x="760" y="48">in review</text>
+            <text class="f-label" x="940" y="48">merged</text>
+            <text class="f-note" x="100" y="78">AI Manager writes it</text>
+            <text class="f-note" x="320" y="78">Given to a developer</text>
+            <text class="f-note" x="540" y="78">A session works on it</text>
+            <text class="f-note" x="760" y="78">A pull request is open</text>
+            <text class="f-note" x="940" y="78">AI Manager merges</text>
+          </g>
+          <path class="f-branch" d="M528 136C510 190 485 205 472 228" marker-end="url(#arrow-wide)"/>
+          <path class="f-branch" d="M400 228C425 200 520 190 534 138" marker-end="url(#arrow-wide)"/>
+          <rect class="f-box" x="335" y="230" width="190" height="44" rx="22"/>
+          <text class="f-branch-label" x="430" y="258" text-anchor="middle">needs decision</text>
+          <text class="f-note" x="430" y="304" text-anchor="middle">It asks, then goes on</text>
+          <path class="f-branch" d="M768 136C785 190 800 205 808 228" marker-end="url(#arrow-wide)"/>
+          <path class="f-branch" d="M640 252C590 250 560 200 548 138" marker-end="url(#arrow-wide)"/>
+          <rect class="f-box" x="640" y="230" width="270" height="44" rx="22"/>
+          <text class="f-branch-label" x="775" y="258" text-anchor="middle">changes requested</text>
+          <text class="f-note" x="775" y="304" text-anchor="middle">The AI Manager asks, the session fixes</text>
+        </svg>
+        <svg class="tall" viewBox="0 0 340 460" role="img" aria-labelledby="flow-title-tall flow-desc-tall">
+          <title id="flow-title-tall">The label flow of an Issue</title>
+          <desc id="flow-desc-tall">An Issue goes from ready to assigned, in progress, in review and merged. From in progress it can go to needs decision and come back once the AI Manager answers. From in review it can go to changes requested from AI Manager and come back to in progress.</desc>
+          <path class="f-line" d="M30 36V420"/>
+          <circle class="f-node" cx="30" cy="36" r="12"/>
+          <circle class="f-node" cx="30" cy="112" r="12"/>
+          <circle class="f-node" cx="30" cy="188" r="12"/>
+          <circle class="f-node" cx="30" cy="316" r="12"/>
+          <circle class="f-node-end" cx="30" cy="418" r="12"/>
+          <text class="f-label" x="62" y="42">ready</text>
+          <text class="f-note" x="62" y="62">Written by the AI Manager</text>
+          <text class="f-label" x="62" y="118">assigned</text>
+          <text class="f-note" x="62" y="138">Given to a developer</text>
+          <text class="f-label" x="62" y="194">in progress</text>
+          <text class="f-note" x="62" y="214">A session works on it</text>
+          <path class="f-branch" d="M30 230H70" marker-end="url(#arrow-tall)"/>
+          <rect class="f-box" x="78" y="224" width="190" height="40" rx="20"/>
+          <text class="f-branch-label" x="173" y="250" text-anchor="middle">needs decision</text>
+          <text class="f-label" x="62" y="322">in review</text>
+          <text class="f-note" x="62" y="342">A pull request is open</text>
+          <path class="f-branch" d="M30 358H70" marker-end="url(#arrow-tall)"/>
+          <rect class="f-box" x="78" y="352" width="220" height="40" rx="20"/>
+          <text class="f-branch-label" x="188" y="378" text-anchor="middle">changes requested</text>
+          <text class="f-label" x="62" y="424">merged</text>
+          <text class="f-note" x="62" y="444">Only the AI Manager merges</text>
+          <defs>
+            <marker id="arrow-tall" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-arrow"/></marker>
+          </defs>
+        </svg>
+      </div>
+      <p class="muted" style="color: var(--board-muted)">Details of every label: <a href="how-it-works/#labels">how it works</a>.</p>
+    </div>
+  </div>
+
+  <section id="problem">
+    <div class="wrap">
+      <h2>Five developers, five Claude Code sessions</h2>
+      <p class="prose">AI tools made writing code cheap. They did not make a team faster on their own. When each person prompts the AI in their own way, each session understands the project differently, and the trouble shows up late, in review or in production.</p>
+      <ul class="problem-list">
+        <li><strong>Who does what</strong>Every task has its own Issue, its own branch and its own files, so two people do not collide.</li>
+        <li><strong>Who decides</strong>When a session meets a choice that is not its to make, it stops and asks the AI Manager, with options and a recommendation.</li>
+        <li><strong>Nothing is dropped</strong>Everything an Issue asks for ends up done, or written down as not done, with the reason.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="steps" class="band">
+    <div class="wrap">
+      <h2>How it works in four steps</h2>
+      <ol class="steps">
+        <li><h3>The AI Manager writes Issues</h3><p>Each task comes with the exact prompt to paste, the files it may touch and the tests that must pass.</p></li>
+        <li><h3>Each developer's session takes one</h3><p>The session reads the Issue, checks what it depends on, and works on its own branch.</p></li>
+        <li><h3>A pull request with tests</h3><p>First the failing test, then the code. The pull request lists the tests it ran, with real counts.</p></li>
+        <li><h3>The AI Manager reviews and merges</h3><p>They answer the questions, ask for changes or merge. Only they merge, and only they touch production.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="platforms">
+    <div class="wrap">
+      <h2>GitHub and GitLab</h2>
+      <p class="prose">Huddle works on github.com and on GitHub Enterprise Server, and on gitlab.com and on a company's own GitLab server. The commands are the same everywhere. Huddle uses the login of <code>gh</code> or <code>glab</code> and never reads or stores a token.</p>
+      <div class="two">
+        <div>
+          <h3>GitHub</h3>
+          <p>A workflow keeps the labels up to date whenever an Issue or a pull request changes.</p>
+        </div>
+        <div>
+          <h3>GitLab</h3>
+          <p>A scheduled pipeline updates the labels every ten minutes. The AI Manager sets up the schedule and one token, once.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="band">
+    <div class="wrap">
+      <h2>Install it in two commands</h2>
+      <p class="prose">Every developer installs the plugin once, on their own machine. You need Claude Code, Node 22 or newer, <code>git</code>, and <code>gh</code> or <code>glab</code>. Run these in a terminal, then open a new Claude Code session:</p>
+      <pre tabindex="0"><code>claude plugin marketplace add SrProfessional/Huddle
+claude plugin install huddle@huddle</code></pre>
+      <p class="prose">Then, in your repo, the AI Manager runs <code>/huddle-setup</code>. The <a href="get-started/">get started guide</a> has every step. Huddle has no runtime dependencies and nothing to <code>npm install</code>.</p>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2>Questions people ask</h2>
+      <details>
+        <summary>What is Huddle?</summary>
+        <p>A team method and a Claude Code plugin. One person, the AI Manager, hands out tasks as Issues. Each developer's Claude Code session works on one task in its own branch, asks when a decision is not its to make, and opens a pull request for review.</p>
+      </details>
+      <details>
+        <summary>How do teams use Claude Code together?</summary>
+        <p>By giving every session the same context and the same rules. The Issue holds the goal, the allowed files and the tests, and the repo's CLAUDE.md holds the rules, so sessions started by different people behave the same way.</p>
+      </details>
+      <details>
+        <summary>Does it work with GitLab?</summary>
+        <p>Yes. It works with GitHub and GitLab, including a self-managed GitLab server. On GitLab the labels update on a pipeline schedule instead of reacting at once.</p>
+      </details>
+      <details>
+        <summary>What does decision-led development mean?</summary>
+        <p>The AI writes, tests and asks. The person decides. Our job is no longer typing code but making good decisions, and a session that cannot go on without one stops and asks instead of guessing.</p>
+      </details>
+      <details>
+        <summary>Does Huddle need a server, an account or a token?</summary>
+        <p>No server and no account. It runs on your machine with Node and the GitHub or GitLab command line you already log in to. The only token is a GitLab CI variable the AI Manager sets up for the label job.</p>
+      </details>
+      <details>
+        <summary>Is it free?</summary>
+        <p>Yes. Huddle is open source under the MIT license, and it has no dependencies and no trackers.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Huddle is open source, MIT license.</p>
+    <ul>
+      <li><a href="https://github.com/SrProfessional/Huddle">Repository</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/tree/main/docs">Docs</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/releases">Releases</a></li>
+      <li><a href="https://github.com/SrProfessional/Huddle/blob/main/CHANGELOG.md">Changelog</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>

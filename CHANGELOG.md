@@ -5,6 +5,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- The Huddle website on GitHub Pages (Issue #56), at `https://srprofessional.github.io/Huddle/`. A static site in `site/`
+  with no build step and no dependencies: home (the problem, the four steps, the label-flow diagram as inline SVG, GitHub
+  and GitLab, the install and a FAQ), «Get started», «How it works» and a 404. Each page has its own title and
+  description, a canonical link, Open Graph and Twitter tags; the home page has JSON-LD `SoftwareApplication`. The site
+  also has `sitemap.xml`, `robots.txt`, a favicon and the 1200 × 630 share image `og.png` with its source in `site/og/`.
+  Light and dark, readable on a phone, keyboard focus visible, no trackers. `.github/workflows/pages.yml` deploys it from
+  `main` when `site/**` changes, and on a manual run, with pinned actions. `test/site/site.test.mjs` checks every page. The
+  README opens with the words people search for and links the website with a badge.
+
 ## [0.3.0] - 2026-11-09
 
 ### Added

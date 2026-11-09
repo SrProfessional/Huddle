@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Huddle share image</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Source+Serif+4:opsz,wght@8..60,400&amp;display=swap">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #14163a;
+    color: #ecedff;
+    font-family: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+    position: relative;
+  }
+  .brand { position: absolute; left: 72px; top: 56px; display: flex; align-items: center; gap: 16px; font-weight: 800; font-size: 40px; letter-spacing: -0.02em; }
+  .brand svg { width: 48px; height: 48px; }
+  h1 { position: absolute; left: 72px; top: 150px; width: 900px; margin: 0; font-weight: 800; font-size: 84px; line-height: 1.02; letter-spacing: -0.03em; }
+  .flow { position: absolute; left: 72px; right: 72px; bottom: 60px; height: 90px; }
+  .flow svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<div class="brand">
+  <svg viewBox="0 0 32 32"><circle cx="11" cy="12" r="7" fill="#a29bff"/><circle cx="21" cy="12" r="7" fill="#a29bff" fill-opacity="0.55"/><circle cx="16" cy="21" r="7" fill="#a29bff" fill-opacity="0.8"/></svg>
+  Huddle
+</div>
+<h1>Decision-led development for teams coding with AI</h1>
+<div class="flow">
+  <svg viewBox="0 0 1056 90">
+    <path d="M14 22H1042" stroke="#3b3f78" stroke-width="4" fill="none"/>
+    <g fill="#14163a" stroke="#ecedff" stroke-width="4">
+      <circle cx="14" cy="22" r="14"/><circle cx="278" cy="22" r="14"/><circle cx="542" cy="22" r="14"/><circle cx="806" cy="22" r="14"/>
+    </g>
+    <circle cx="1042" cy="22" r="14" fill="#a29bff"/>
+    <g font-family="Bricolage Grotesque, Trebuchet MS, sans-serif" font-weight="700" font-size="24" fill="#ecedff">
+      <text x="0" y="68">ready</text><text x="250" y="68">assigned</text><text x="500" y="68">in progress</text><text x="770" y="68">in review</text>
+      <text x="1056" y="68" text-anchor="end" fill="#a29bff">merged</text>
+    </g>
+  </svg>
+</div>
+</body>
+</html>
