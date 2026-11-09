@@ -222,6 +222,39 @@ export function contract({ name, create }) {
     assert.equal(world.milestoneOf(5), 'Shipped');
   });
 
+  t('setIssueMilestone on a closed milestone sticks, and the milestone is closed again afterwards', async ({ adapter, world }) => {
+    // gitlab.com answers 200 and leaves the Issue without a closed milestone; the adapter has to read it back and reopen, assign and close.
+    world.milestone({ title: 'Docs', state: 'closed', closedAt: '2026-09-01T00:00:00Z' });
+    world.issue({ number: 5 });
+    await adapter.setIssueMilestone(5, 'Docs');
+    assert.equal(world.milestoneOf(5), 'Docs');
+    assert.equal((await adapter.listOpenIssues())[0].milestone, 'Docs');
+    assert.equal(world.milestoneState('Docs'), 'closed');
+    assert.equal((await adapter.findMilestone('Docs')).state, 'closed');
+  });
+
+  t('findIssuesByTitle(title) lists the open Issues with exactly that title, from the database and not from search, so one created a moment ago is there', async ({ adapter, world }) => {
+    world.searchLag?.(true); // GitHub: `gh issue list` is search and has not indexed a new Issue yet
+    world.issue({ number: 3, title: 'Huddle progress', body: 'first' });
+    world.issue({ number: 4, title: 'Huddle progress notes', body: 'other title' });
+    world.issue({ number: 6, title: 'Huddle progress', body: 'closed one', state: 'merged' });
+    const created = await adapter.createIssue({ title: 'Huddle progress', body: 'brand new' });
+    world.review({ number: 77 }); // a pull request is not an Issue (GitHub lists both)
+    const found = await adapter.findIssuesByTitle('Huddle progress');
+    assert.deepEqual(found.map((i) => [i.number, i.title, i.body]), [[3, 'Huddle progress', 'first'], [created.number, 'Huddle progress', 'brand new']], 'open, exact title, oldest first');
+    assert.deepEqual(await adapter.findIssuesByTitle('No such title'), []);
+  });
+
+  t('closeIssue(n, { reason }) closes an Issue; «not planned» is the reason on platforms that have one', async ({ adapter, world }) => {
+    world.issue({ number: 7 });
+    world.issue({ number: 8 });
+    await adapter.closeIssue(7, { reason: 'not planned' });
+    await adapter.closeIssue(8);
+    assert.deepEqual([world.stateOf(7), world.stateOf(8)], ['closed', 'closed']);
+    assert.deepEqual((await adapter.listOpenIssues()).map((i) => i.number), []);
+    if (world.closedReason) assert.deepEqual([world.closedReason(7), world.closedReason(8)], ['not_planned', 'completed']);
+  });
+
   t('reviewCommits(n) gives the commit dates of a PR/MR, so the core sees work newer than a request', async ({ adapter, world }) => {
     world.review({ number: 60, commits: ['2026-11-04T09:00:00Z', '2026-11-04T12:00:00Z'] });
     world.review({ number: 61 });

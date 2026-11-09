@@ -110,17 +110,19 @@ test('labels rewrites the progress Issue only when its text changes', async () =
   assert.equal(seen.update, 1, 'the same numbers again: no write');
 });
 
-test('the progress Issue is found by its marker, never by its title', async () => {
+test('the progress Issue is the one whose body starts with the marker and whose title is «Huddle progress»: neither alone is enough', async () => {
   const { seen, wrap } = spy();
   const h = harness({ wrap, setup: (w) => {
     areas(w);
     w.issue({ number: 40, title: 'Huddle progress', body: 'a human wrote this one' });
     w.issue({ number: 41, title: 'Renamed by someone', body: `${MARKER}\nstale text` });
+    w.issue({ number: 42, title: 'Huddle progress', body: `${MARKER}\n# Huddle progress\nstale text` });
   } });
   await run(['labels'], h.ctx);
   assert.deepEqual([seen.create, seen.update], [0, 1]);
-  assert.match(h.world.bodyOf(41), /Content \| 2\/3 \+2 \| 40%/);
+  assert.match(h.world.bodyOf(42), /Content \| 2\/3 \+2 \| 40%/);
   assert.equal(h.world.bodyOf(40), 'a human wrote this one');
+  assert.equal(h.world.bodyOf(41), `${MARKER}\nstale text`);
 });
 
 test('the progress Issue has no «Depends on»: the labels logic gives it no label, and it is not an Issue with «no area»', async () => {

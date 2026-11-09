@@ -219,7 +219,7 @@ for (const [name, gitlab] of [['github', false], ['gitlab', true]]) {
     assert.equal(await run(['areas', 'check', '--json'], h.ctx), 0);
     const data = JSON.parse(h.text());
     assert.deepEqual(data.noArea, { open: [{ number: 8, title: 'CI tooling' }], closed: [{ number: 5, title: 'Old setup' }] });
-    assert.deepEqual([data.missingEstimate, data.malformedEstimate, data.zeroRemaining, data.empty, data.ok], [['Ads'], [], [], ['Ads'], false]); // Ads has no Issue and, with no line, remaining 0
+    assert.deepEqual([data.missingEstimate, data.malformedEstimate, data.zeroRemaining, data.empty, data.ok], [['Ads'], [], [], [], false]); // Ads has no Issue and no line: it is listed once, as a missing estimate (Issue #52, point 4)
 
     const clean = harness({ gitlab, setup: (w) => { w.milestone({ title: 'Content', description: 'Huddle remaining: 2' }); w.issue({ number: 1, title: 'a', milestone: 'Content' }); } });
     assert.equal(await run(['areas', 'check'], clean.ctx), 0);

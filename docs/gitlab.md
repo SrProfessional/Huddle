@@ -95,6 +95,8 @@ Labels change by the schedule, so they can take up to 10 minutes (see [The sched
 | Merging can remove the source branch. | Huddle merges without removing it. |
 | There are no pinned Issues. | The «Huddle progress» Issue is created, but not pinned. Find it in the Issue list by its title, «Huddle progress». |
 | Reading progress costs one call per closed Issue (`closed_by`). | At most 8 `glab` calls run at once. A milestone with 300 closed Issues means 300 calls on every labels run and every session start, so keep finished areas closed: a closed milestone leaves the percentage after 90 days. In the session hook the progress read is dropped after 20 s. |
+| A closed milestone cannot be set on an Issue: GitLab answers «ok» and leaves the Issue as it was. | `huddle areas assign` reads the Issue back; for a closed milestone it reopens it, assigns the Issue, closes it again and says so. |
+| The API limits how many calls you can make (HTTP 429). | `glab` calls are retried on a 429 and on a 5xx, up to 3 tries and 60 s. If it is still limited, `huddle` says «rate limited, try again in N s» and stops; run it again later. |
 | A milestone has no closing date. | The date of its last update stands for it, to decide if it closed in the last 90 days. Only project milestones are read. |
 
 ## Check it

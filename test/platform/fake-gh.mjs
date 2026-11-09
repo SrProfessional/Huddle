@@ -15,6 +15,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // login -> id
   const collaborators = new Set(['SrProfessional', 'ana', 'luis']); // logins with access to the repo
   const calls = [];
+  const failures = []; // { match(args), message, times }: what GitHub answers when it rate limits or breaks (world.failWhen)
+  let searchLag = false; // while true, an Issue created through the API is missing from `gh issue list` (it uses search, which indexes late)
   const merged = [];
   let nextId = 9000;
 
@@ -62,13 +64,16 @@ export function fakeGithub({ project = PROJECT } = {}) {
   function run(args, opts = {}) {
     args = args.map(String);
     calls.push({ args, input: opts.input });
+    const failing = failures.find((f) => f.times > 0 && f.match(args, opts));
+    if (failing) { failing.times -= 1; throw new Error(`gh ${args.join(' ')} failed: ${failing.message}`); }
     const [a, b] = args;
+    const listed = (i) => !(searchLag && i.fresh); // what search can see
     // Every repo-scoped command must name the project, so a wrong or missing -R is caught.
     if (a !== 'api') need(values(args, '-R')[0] === project, args);
 
     if (a === 'issue' && b === 'list' && values(args, '--state')[0] === 'closed') {
       need(values(args, '--json')[0] === 'number,title,labels,milestone', args);
-      return JSON.stringify([...issues.values()].filter((i) => i.state === 'CLOSED').map((i) => ({ number: i.number, title: i.title, labels: i.labels.map((name) => ({ name })), milestone: i.milestone ? { title: i.milestone } : null })));
+      return JSON.stringify([...issues.values()].filter((i) => i.state === 'CLOSED' && listed(i)).map((i) => ({ number: i.number, title: i.title, labels: i.labels.map((name) => ({ name })), milestone: i.milestone ? { title: i.milestone } : null })));
     }
     if (a === 'label' && b === 'list') {
       need(values(args, '--json')[0] === 'name', args);
@@ -76,7 +81,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
     }
     if (a === 'issue' && b === 'list') {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
-      return JSON.stringify([...issues.values()].filter((i) => i.state === 'OPEN').map((i) => ({
+      return JSON.stringify([...issues.values()].filter((i) => i.state === 'OPEN' && listed(i)).map((i) => ({
         number: i.number, title: i.title, body: i.body,
         assignees: i.assignees.map((login) => ({ login })), labels: i.labels.map((name) => ({ name })),
         closedByPullRequestsReferences: i.reviews.map((number) => ({ number })),
@@ -159,6 +164,13 @@ export function fakeGithub({ project = PROJECT } = {}) {
         if (!collaborators.has(decodeURIComponent(m[1]))) throw new Error(`gh ${args.join(' ')} failed: gh: Not Found (HTTP 404)`);
         return '';
       }
+      if (rest === 'issues?state=open&per_page=100' && method === 'GET') {
+        // The REST list reads the database, not the search index: a new Issue is there at once. It also lists pull requests, newest first.
+        need(args.includes('--paginate') && args.includes('--slurp'), args);
+        const rows = [...issues.values()].filter((i) => i.state === 'OPEN').map((i) => ({ number: i.number, title: i.title, body: i.body || null, node_id: `I_${i.number}` }));
+        const prs = [...reviews.values()].filter((r) => r.open && !issues.has(r.number)).map((r) => ({ number: r.number, title: `PR ${r.number}`, body: null, pull_request: { url: 'x' } }));
+        return JSON.stringify([[...rows, ...prs].sort((x, y) => y.number - x.number)]);
+      }
       if (rest === 'milestones?state=all&per_page=100' && method === 'GET') {
         need(args.includes('--paginate') && args.includes('--slurp'), args);
         return JSON.stringify([[...milestones.values()].map((x) => ({ number: x.number, title: x.title, description: x.description || null, state: x.state.toLowerCase() }))]);
@@ -186,21 +198,27 @@ export function fakeGithub({ project = PROJECT } = {}) {
         const b = JSON.parse(opts.input);
         need(typeof b.title === 'string' && typeof b.body === 'string', args);
         const n = nextIssue++;
-        issues.set(n, { number: n, title: b.title, body: b.body, assignees: [], labels: [], state: 'OPEN', closes: [], reviews: [], milestone: null });
+        issues.set(n, { number: n, title: b.title, body: b.body, assignees: [], labels: [], state: 'OPEN', closes: [], reviews: [], milestone: null, fresh: true });
         return JSON.stringify({ number: n, node_id: `I_${n}`, html_url: `https://github.test/${project}/issues/${n}` });
       }
       if ((m = /^issues\/(\d+)$/.exec(rest)) && method === 'PATCH') {
         need(values(args, '--input')[0] === '-', args);
         const it = issueOf(m[1], args);
         const b = JSON.parse(opts.input);
-        for (const k of Object.keys(b)) need(k === 'body' || k === 'title' || k === 'milestone', args);
+        for (const k of Object.keys(b)) need(k === 'body' || k === 'title' || k === 'milestone' || k === 'state' || k === 'state_reason', args);
+        if (b.state !== undefined) {
+          need(b.state === 'closed' && (b.state_reason === undefined || b.state_reason === 'not_planned' || b.state_reason === 'completed'), args);
+          it.state = 'CLOSED';
+          it.closes.push({ pr: null });
+          it.closeReason = b.state_reason ?? 'completed';
+        }
         if ('milestone' in b) {
           // The REST way: the milestone number, any state; null takes the Issue out.
           const ms = b.milestone === null ? null : [...milestones.values()].find((x) => x.number === b.milestone);
           need(b.milestone === null || ms, args);
           it.milestone = ms ? ms.title : null;
         }
-        const { milestone: _ignored, ...fields } = b;
+        const { milestone: _ignored, state: _s, state_reason: _r, ...fields } = b;
         Object.assign(it, fields);
         return JSON.stringify({ number: it.number });
       }
@@ -270,6 +288,18 @@ export function fakeGithub({ project = PROJECT } = {}) {
     isTaken: (id) => comments.get(id).reactions.eyes > 0,
     merged: () => [...merged],
     commandCount: () => calls.length,
+    calls: () => calls.map((c) => ({ ...c })),
+    stateOf: (n) => issues.get(n).state.toLowerCase(),
+    closedReason: (n) => issues.get(n).closeReason ?? null,
+    milestoneState: (title) => milestones.get(title)?.state.toLowerCase(),
+    /** The comments on Issue `n`, in order. */
+    commentsOn: (n) => [...comments.values()].filter((c) => c.issue === n).map((c) => c.body),
+    /** While on, an Issue created through the API is not in `gh issue list` (search lags behind); off, every Issue is. */
+    searchLag(on = true) { searchLag = on; },
+    /** Answer the next `times` calls for which `match(args)` is true with a failure (the text is what gh prints after «failed: »). */
+    failWhen(match, message, times = 1) { failures.push({ match, message, times }); },
+    /** Like GitHub's secondary rate limit: 403/429 with a Retry-After. */
+    rateLimit(times, retryAfter) { failures.push({ match: () => true, message: `gh: You have exceeded a secondary rate limit (HTTP 429)${retryAfter === undefined ? '' : ` Retry-After: ${retryAfter}`}`, times }); },
   };
   return { run, world, project };
 }

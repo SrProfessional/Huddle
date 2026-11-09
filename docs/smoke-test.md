@@ -140,7 +140,8 @@ it on (write the platform in Results). Leave `progress_issue` out of `huddle.jso
    created (no pinned Issues). It has no `ready`, `assigned` or `blocked` label.
 7. [ ] **It is not rewritten when nothing changed.** Note the Issue's «edited» time (GitHub: the «edited» tag of the body;
    GitLab: the «edited» time of the description). Run `huddle labels` again: no second «Huddle progress» Issue appears and
-   the edited time does not move.
+   the edited time does not move. Then run `huddle labels` twice within a few seconds (or let the job and a local run
+   overlap): still one «Huddle progress» Issue, and if you copy it by hand, the next run closes the newer copy with «Duplicate of #N».
 8. [ ] **The session-start line shows the areas.** Open a new developer session in the sandbox clone (CLI, as in section 6).
    Before typing, the visible lines include `Progress: Alpha 25% · Beta 0% · Total 16%` (the order of the areas may
    differ), next to the pending-request line when there is one. VS Code panel: nothing shows until the first message, as
