@@ -40,6 +40,27 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   (`--hostname <host>` when `huddle.json` has a host). Any other failure keeps the «is not usable» line. The real runners
   carry the spawn error's `code` on the error they reject with.
 
+### Fixed
+
+Findings of the 0.3.0 smoke test (Issue #52).
+
+- **One «Huddle progress» Issue, even when two runs start seconds apart.** `huddle labels` looks for it with the new adapter
+  operation `findIssuesByTitle`, which reads the database (GitHub: the REST Issues list; GitLab: the list by title), not
+  `gh issue list`, which uses search and indexes a new Issue late. Every run also heals duplicates: the oldest stays, the
+  others get the comment «Duplicate of #N» and are closed (as not planned on GitHub). New adapter operation `closeIssue`.
+- **The progress Issue is only an Issue whose body starts with the marker line and whose title is «Huddle progress».** An
+  Issue that quotes the marker in its text, or a human's Issue with that title, is never rewritten or closed.
+- **Retries on a rate limit and on a server error.** The `gh` and `glab` runners retry a 429 (and «rate limit» answers) and
+  a 5xx, at most 3 tries and 60 s of waiting in all, after the `Retry-After` the CLI prints or 1 s, then 2 s. A POST is
+  never retried on a 5xx (it may have been done). A limit that stays ends with «rate limited, try again in N s» on one
+  line, not a stack. On GitLab one labels run reads `closed_by` once per Issue, not once for the labels and once more for
+  the progress.
+- **GitLab: `huddle areas assign` to a closed milestone sticks.** gitlab.com answers 200 and ignores a closed milestone on an
+  Issue, so `setIssueMilestone` reads the Issue back; if it did not stick, it reopens the milestone, assigns and closes it
+  again (also when the assign fails), says so, and throws a clear error if it still does not stick.
+- `huddle areas check` lists an area with no estimate line once (as «No «Huddle remaining» line»), no longer also as «No
+  Issue and remaining 0».
+
 ## [0.2.0] - 2026-11-07
 
 ### Added

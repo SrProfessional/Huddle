@@ -283,7 +283,8 @@ it on (write the platform in Results). Leave `progress_issue` out of `huddle.jso
    created (no pinned Issues). It has no `ready`, `assigned` or `blocked` label.
 7. [ ] **Session:** **It is not rewritten when nothing changed.** Note the Issue's «edited» time (GitHub: the «edited» tag of the body;
    GitLab: the «edited» time of the description). Run `huddle labels` again: no second «Huddle progress» Issue appears and
-   the edited time does not move.
+   the edited time does not move. Then run `huddle labels` twice within a few seconds (or let the job and a local run
+   overlap): still one «Huddle progress» Issue, and if you copy it by hand, the next run closes the newer copy with «Duplicate of #N».
 8. [ ] **🙋 Only you:** **The session-start line shows the areas.** Open a new Claude Code window in the sandbox clone and read
    its first lines.
    1. Open a terminal (the window where you type commands) in the sandbox clone and start Claude by pasting this:

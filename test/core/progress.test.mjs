@@ -1,7 +1,7 @@
 // Huddle: the pure progress core (docs/design.md §12). No network: milestones and their Issues go in, numbers and text come out.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MARKER, areaOf, bar, findProgressIssue, issueBody, noAreaCount, percentOf, progressOf, remainingOf, summaryLine, tableText, windowStart } from '../../lib/core/progress.mjs';
+import { MARKER, areaOf, bar, findProgressIssue, findProgressIssues, isProgressIssue, issueBody, noAreaCount, percentOf, progressOf, remainingOf, summaryLine, tableText, windowStart } from '../../lib/core/progress.mjs';
 
 const open = (number) => ({ number, open: true, merged: false });
 const merged = (number) => ({ number, open: false, merged: true });
@@ -90,7 +90,7 @@ test('no area: Issues without a milestone are counted apart and left out of the 
   const issues = [
     { number: 1, milestone: null, body: 'x' },
     { number: 2, milestone: 'Content', body: 'x' },
-    { number: 3, milestone: null, body: `${MARKER}\n# Huddle progress` },
+    { number: 3, title: 'Huddle progress', milestone: null, body: `${MARKER}\n# Huddle progress` },
     { number: 4, body: 'x' },
   ];
   assert.equal(noAreaCount(issues), 2);
@@ -151,11 +151,32 @@ test('issue body starts with the marker, is stable for the same data, and change
   assert.ok(!/^## Depends on/mi.test(body), 'no «Depends on»: the labels logic ignores it');
 });
 
-test('findProgressIssue finds it by the marker in the body, never by the title', () => {
+test('isProgressIssue: the body starts with the marker line AND the title is «Huddle progress»; nothing else is', () => {
+  const ok = { title: 'Huddle progress', body: `${MARKER}\n# Huddle progress\n` };
+  assert.equal(isProgressIssue(ok), true);
+  assert.equal(isProgressIssue({ ...ok, body: `${MARKER}\r\n# Huddle progress\r\n` }), true, 'GitHub may store CRLF');
+  assert.equal(isProgressIssue({ ...ok, body: MARKER }), true, 'the marker alone is a first line');
+  assert.equal(isProgressIssue({ ...ok, title: '  Huddle progress ' }), true, 'surrounding spaces do not matter');
+  assert.equal(isProgressIssue({ ...ok, title: 'Renamed' }), false, 'the marker without the title');
+  assert.equal(isProgressIssue({ ...ok, body: 'a human wrote this' }), false, 'the title without the marker');
+  assert.equal(isProgressIssue({ ...ok, body: `intro\n${MARKER}\n` }), false, 'the marker on a later line');
+  assert.equal(isProgressIssue({ ...ok, body: `text ${MARKER}` }), false, 'the marker inside the first line');
+  assert.equal(isProgressIssue({ ...ok, body: `${MARKER} and more on the line` }), false, 'the first line is the marker and nothing else');
+  assert.equal(isProgressIssue({ ...ok, body: `quote: ${MARKER}\n` }), false);
+  assert.equal(isProgressIssue({ title: 'Huddle progress' }), false, 'no body');
+  assert.equal(isProgressIssue(null), false);
+});
+
+test('findProgressIssues: every open progress Issue, oldest (lowest number) first; findProgressIssue is the oldest', () => {
   const issues = [
+    { number: 9, title: 'Huddle progress', body: `${MARKER}\nnewer` },
     { number: 1, title: 'Huddle progress', body: 'someone else wrote this title' },
-    { number: 2, title: 'Totally other title', body: `${MARKER}\nold text` },
+    { number: 2, title: 'Totally other title', body: `${MARKER}\nrenamed` },
+    { number: 5, title: 'Huddle progress', body: `${MARKER}\nold text` },
+    { number: 7, title: 'H23', body: `it quotes ${MARKER} in its text` },
   ];
-  assert.equal(findProgressIssue(issues).number, 2);
-  assert.equal(findProgressIssue([issues[0]]), null);
+  assert.deepEqual(findProgressIssues(issues).map((i) => i.number), [5, 9]);
+  assert.equal(findProgressIssue(issues).number, 5);
+  assert.equal(findProgressIssue([issues[1]]), null);
+  assert.deepEqual(findProgressIssues([]), []);
 });

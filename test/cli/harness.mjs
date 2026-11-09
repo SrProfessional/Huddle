@@ -17,18 +17,19 @@ export function harness({ config, gitlab = false, file, wrap = (a) => a, sleep =
   const err = [];
   const files = new Map();
   const writes = [];
+  const slept = []; // the waits the adapter asked for (a retry after a rate limit), in ms: none of them really waits
   if (file !== null) files.set('/repo/huddle.json', file ?? JSON.stringify(config));
   const ctx = {
     root: '/repo',
     readFile: (p) => files.get(p.replaceAll('\\', '/')) ?? null,
     writeFile: (p, text) => { files.set(p.replaceAll('\\', '/'), text); writes.push(text); },
-    createPlatform: async (cfg) => wrap(create(cfg, { run: fake.run }), fake),
+    createPlatform: async (cfg) => wrap(create(cfg, { run: fake.run, sleep: async (ms) => { slept.push(ms); await sleep(ms); } }), fake),
     out: (s) => out.push(s),
     err: (s) => err.push(s),
     sleep,
     hookTimeoutMs: 2000,
   };
-  return { ctx, world: fake.world, out, err, writes, huddleJson: () => files.get('/repo/huddle.json'), text: () => out.join('\n'), errText: () => err.join('\n') };
+  return { ctx, world: fake.world, out, err, writes, slept, calls: () => fake.world.calls?.() ?? [], huddleJson: () => files.get('/repo/huddle.json'), text: () => out.join('\n'), errText: () => err.join('\n') };
 }
 
 export const request = (id, extra = {}) => ({ id, author: 'SrProfessional', createdAt: '2026-11-05T10:00:00Z', body: '## Prompt for Claude Code\n\n```text\nDo the thing\n```', ...extra });
