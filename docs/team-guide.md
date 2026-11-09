@@ -103,6 +103,29 @@ and the session continues on the same branch. The session never closes the Issue
 - **Nothing is dropped silently.** Done, or listed under «What was NOT done» with the reason.
 - **Chat in your language; the repo is in English.** Code, comments, commits, PRs, Issues and docs.
 
+## Design tasks
+
+A design task is an Issue written from the **Design** template (`/huddle-issue` picks it when the AI Manager asks for a design).
+It has the label `design`, which `huddle labels` creates when it is missing, and the same sections as a task (so the labels
+job treats it like one: `ready`, `assigned`, `in progress`, `in review`), plus **Screens**, **For whom**, **Visual guide**,
+**Content** (real texts, never lorem ipsum) and **Deliverable**. Its allowed files are always `design/<issue number>-<slug>/`:
+a design task never changes code.
+
+- **The design system.** A project can set one up once, from its repo, with `/design-sync` in Claude Code (an AI Manager
+  step). The session uses it when it exists; otherwise it follows the Issue's visual guide.
+- **Work.** The designer runs `/huddle-start <n>`. The session creates the design with Claude Design and shares the link.
+  Changes are asked for **only in the chat**, never by hand on the canvas. If the session finds a change it did not make, it
+  asks whether to keep it or go back to its own last version.
+- **Ready.** The designer says «ready» and confirms in one line. The session saves `README.md` (link, screens, decisions,
+  round), `design.html` (the page as standalone HTML) and `screens/` (PNGs, desktop and phone) in the folder, opens the PR
+  with `Resolves #N` and the screenshots inline, and ends with the usual closing message.
+- **Review.** `/huddle-review` shows the screenshots, opens `design.html`, and checks the screens, the content, the visual
+  guide, contrast and phone width. It never checks tests. Changes come as the usual «🔁 Changes requested» comment.
+- **Rounds.** Each round is a new commit and adds its decisions to `README.md`: the repo is the history, because Claude
+  Design keeps none.
+- **After the merge,** the review offers the follow-up build Issue «Build <screen> from design #N», with `- #N` under
+  «Depends on» and the `design/` folder as its spec.
+
 ## Why one or two sessions
 
 Many sessions at once slow the machine (each runs tests and builds), split your attention until your answers get rushed,

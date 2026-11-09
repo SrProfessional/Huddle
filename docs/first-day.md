@@ -63,6 +63,28 @@ After the PR is open the session waits in the background. When the AI Manager as
 If you closed Claude Code meanwhile, the next time you open it a hook says there is a pending request and asks if it
 should continue. `huddle pending` lists them.
 
+## If you are a designer
+
+A design task is an Issue like any other, and you work it the same way: from a Claude Code session, with no code. Everything
+happens in the chat.
+
+What to install, once:
+
+1. Claude Code in VS Code (the editor with a chat panel), and a Claude plan that includes Claude Code.
+2. A GitHub account (a GitLab one if your team uses GitLab) that the AI Manager has added to the team.
+3. Huddle, with the two commands of step 1.3 above. Ask the session to run them with you if you are unsure.
+
+How a design task goes:
+
+1. Open the team's repo in VS Code, open Claude Code and run `/huddle-start <n>` with the number of your Issue.
+2. The session builds the design with Claude Design and gives you a link to watch it.
+3. **Ask for every change in the chat, in your own words** («make the button bigger», «use the phone layout for the menu»).
+   Do not change things by hand on the canvas: the session cannot tell what you did there, and it will ask you whether to keep it.
+4. When you are happy, write «ready» (or «listo»). The session asks for a one-line confirmation, then saves the design in
+   the repo (`design/<issue number>-<slug>/`), opens the pull request with the screenshots and tells you what comes next.
+   You do not run any other step.
+5. If the AI Manager asks for changes, keep talking in the same session. Each round is saved as a new commit, so nothing is lost.
+
 ## Do not
 
 - Push to the default branch, or merge your own PR.

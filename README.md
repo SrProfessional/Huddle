@@ -1,10 +1,13 @@
 # Huddle: Decision-led development for teams coding with AI
 
-Huddle is a team method and a Claude Code plugin. One person, the AI Manager, hands out tasks as Issues. Each developer
-pastes the Issue's «Prompt for Claude Code» into a session. The session works on its own branch, stops to ask when a
-decision is not its to make, opens a pull request (a merge request on GitLab) and waits for the review on its own.
+[![Website](https://img.shields.io/badge/website-srprofessional.github.io%2FHuddle-4336d8)](https://srprofessional.github.io/Huddle/)
 
-It works with GitHub and GitLab, including self-managed GitLab.
+Huddle is a Claude Code plugin and a decision-led team workflow for AI coding. One person, the AI Manager, hands out
+tasks as Issues. Each developer pastes the Issue's «Prompt for Claude Code» into a session. The session works on its own
+branch, stops to ask when a decision is not its to make, opens a pull request (a merge request on GitLab) and waits for
+the review on its own.
+
+It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
 > **Status:** pre-release. Version 0.1.0 is not tagged yet (see the [changelog](CHANGELOG.md)). The design is in
 > [docs/design.md](docs/design.md).
@@ -186,6 +189,10 @@ The Issue template makes every task arrive complete, so anyone's session starts 
 | Forbidden files | What is not touched. If it needs to be, the session asks first. |
 | Contract or spec | The document that rules over the code. |
 | Tests | What must pass before opening the pull request, with its counts. |
+
+A **Design Issue** (its own template and the `design` label) lets a designer do the same from a Claude Code session: the design
+is made with Claude Design, polished only in the chat, and saved in `design/<n>-<slug>/` with a PR when they say «ready»
+(see [Design tasks](docs/team-guide.md#design-tasks)).
 
 ## Why working this way is better
 
