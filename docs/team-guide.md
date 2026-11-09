@@ -68,6 +68,25 @@ without it belongs to the session. The rule and the format are in [the design](d
 If a permission is denied or a credential is missing, the session stops and asks, as always: it never looks for another
 way.
 
+## Reporting a bug
+
+A bug has its own Issue type: the Bug template (the Task sections plus a bug block with what happens, how to reproduce,
+evidence, severity, the probable cause and the failing test to write first).
+
+- **A developer, a tester or a client with access** reports it with the **Bug report form** on GitHub, or with the **Bug
+  template** on GitLab (fill only the bug block and add the label `needs triage`: GitLab has no issue forms). A report is
+  labeled `bug` and `needs triage`, and it is not a ready Issue: the labels job never gives it `ready` or an assignee while
+  it has `needs triage`.
+- **The AI Manager** runs `/huddle-bug` with a plain description, a capture or a link, or `/huddle-bug #N` on a raw report.
+  The session investigates without changing anything, looks for duplicates, writes the Bug Issue with a probable cause and
+  the failing test to write first, and waits for the AI Manager's OK before creating it (or before rewriting the report and
+  removing `needs triage`).
+- **Severity** is `blocking` (stops a person or production), `normal` or `minor`. A `blocking` Bug is assigned before every
+  other ready Issue.
+
+`huddle labels` creates the labels `bug` and `needs triage` when they are missing; run it once after `/huddle-setup` so the
+form can apply them.
+
 ## When the session cannot go on
 
 It does not guess. It commits and pushes what is done, comments on the Issue starting with «❓ Decision for the AI

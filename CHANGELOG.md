@@ -24,6 +24,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   Light and dark, readable on a phone, keyboard focus visible, no trackers. `.github/workflows/pages.yml` deploys it from
   `main` when `site/**` changes, and on a manual run, with pinned actions. `test/site/site.test.mjs` checks every page. The
   README opens with the words people search for and links the website with a badge.
+- Bugs are their own Issue type, and the skill `/huddle-bug` writes them (Issue #55). `/huddle-setup` installs a Bug template
+  (`bug.md` on GitHub, `Bug.md` on GitLab: a bug block, then every Task section) and, on GitHub, a Bug report form
+  (`bug-report.yml`) for people who are not the AI Manager. `huddle labels` creates the labels `bug` and `needs triage`.
+  An Issue with `needs triage` never gets `ready` or an assignee, and a `blocking` Bug is assigned before every other ready
+  Issue. `/huddle-bug` (AI Manager only) takes a plain description or `#N` of a raw report, investigates without changing
+  anything, checks duplicates, sets the severity and waits for the AI Manager's OK. The team guide has a «Reporting a bug»
+  section.
 
 ## [0.3.0] - 2026-11-09
 
