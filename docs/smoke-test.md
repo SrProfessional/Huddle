@@ -268,26 +268,26 @@ Found and fixed during the test: H12 (#25), H14 (#29), H15 (#32).
 
 ### Results 0.2.0
 
-Run of: (date, Huddle commit, AI Manager, sandboxes, second account). Fill it in for the parts added in 0.2.0, and copy it
+Run of: 2026-11-08, Huddle commit f55c1f2 (branch h21-release-030), AI Manager SrProfessional through the AI Manager's Claude Code session, sandboxes github.com/SrProfessional/huddle-sandbox and huddle-sandbox-2, gitlab.com/SrProfessional/huddle-sandbox and huddle-sandbox-2 (created for section 11); no second account. Fill it in for the parts added in 0.2.0, and copy it
 into the PR description next to the table above.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|
-| 5.5 Comment by another account | | | |
-| 9. Progress | | | |
-| 10. Team members | | | |
+| 5.5 Comment by another account | not run | not run | needs a second account (🙋 the AI Manager) |
+| 9. Progress | ✘ | ✔ | GitHub ✘ step 6: two «Huddle progress» Issues (#15 by the Actions job, #16 by a local `huddle labels` 12 s later: the open-Issue list comes from GitHub search, which lags). Steps 3–5, 7, 9, 10, 12 ✔ on both (16 %, 12 %, 20 %, «Estimate missing for: Beta»). GitLab: the third `huddle labels` in a few minutes failed with HTTP 429 (no retry). Step 8 not run (needs a new session window, 🙋). Step 11 not testable. |
+| 10. Team members | ✔ (partial) | ✔ (partial) | Steps 1, 2, 3, 7, 8 ✔ with a login that is not a collaborator (`octocat`, `gitlab-bot`). Steps 4–6 and 9 not run: they need the second account to accept an invitation (🙋). |
 | 12. Clean up | | | |
 
 ### Results 0.3.0
 
-Run of: (date, Huddle commit, AI Manager, sandboxes). Fill it in for the parts added in 0.3.0, and copy it into the PR
+Run of: 2026-11-08, Huddle commit f55c1f2 (branch h21-release-030), AI Manager SrProfessional through the AI Manager's Claude Code session, sandboxes github.com/SrProfessional/huddle-sandbox and huddle-sandbox-2, gitlab.com/SrProfessional/huddle-sandbox and huddle-sandbox-2 (created for section 11); no second account. Fill it in for the parts added in 0.3.0, and copy it into the PR
 description next to the tables above.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|
-| 11. Areas: list, skill, set, reuse, dry run | | | |
-| 11. Areas: assign (open, closed, closed area, none), check, progress | | | |
-| 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | | | |
+| 11. Areas: list, skill, set, reuse, dry run | ✔ | ✔ | Steps 1, 3, 4, 5 ✔. Step 2 (the skill) not run: needs a session with the plugin at 0.3.0 installed (🙋). |
+| 11. Areas: assign (open, closed, closed area, none), check, progress | ✔ | ✘ | GitLab ✘ step 7: `huddle areas assign <issue> "Docs"` on a **closed** milestone prints «Done.» but the Issue keeps its old milestone (checked twice). Steps 6, 8, 9, 10 ✔ on both. Note: `check` lists a milestone with no estimate line both as «No «Huddle remaining» line» and «No Issue and remaining 0». |
+| 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | | | |
 
 Write ✔ or ✘ in each cell. Any ✘ blocks the release: open an Issue for it, fix it, and run the whole checklist again on
