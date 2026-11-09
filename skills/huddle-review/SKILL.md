@@ -15,6 +15,20 @@ merge, deploy or change settings; give the review as text and stop.
 3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence;
    no secret, no runtime dependency the rules forbid.
 
+## A design PR (its Issue has the `design` label, and the PR only touches `design/<n>-<slug>/`)
+
+There is no code, so this review never checks tests: do not run them and do not ask for counts. Instead:
+
+1. Show the screenshots of the PR (the files in `screens/`) and open `design.html` in the browser.
+2. Check the design against the Issue: every screen and state under «Screens» is there; the texts are the ones of «Content»
+   (no lorem ipsum); it follows the «Visual guide» (the design system or the guide named there).
+3. Check contrast (text against its background, at least 4.5:1 for normal text) and phone width (nothing cut or scrolling sideways at 375 px).
+4. Check that `README.md` has the artifact link, the screens, the decisions and the round number, and that only `design/<n>-<slug>/` changed.
+5. If something is wrong, ask for changes with the usual «🔁 Changes requested» comment and its `## Prompt for Claude Code` block, as below. Each
+   round is a new commit of the same PR.
+6. If it is good, approve and merge it as in «All good». Then **offer the build Issue**: «Build <screen> from design #N», written with `/huddle-issue`,
+   with `- #N` under «Depends on» and the `design/` folder of the merged PR as its «Contract or spec». Create it only after the AI Manager's OK.
+
 ## Changes needed
 
 Post **the same comment** on the PR/MR and on its Issue (the labels job and the developer's wait read both), starting with the

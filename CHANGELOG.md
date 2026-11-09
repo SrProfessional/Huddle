@@ -7,6 +7,15 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Design Issues, worked in a Claude Code session with Claude Design (Issue #58). A new **Design** Issue template for GitHub
+  (`.github/ISSUE_TEMPLATE/design.md`) and GitLab (`.gitlab/issue_templates/Design.md`), installed by the setup skill, with the
+  `design` label (created by `huddle labels` when missing). It keeps every section the labels job reads, so a Design Issue
+  goes `ready` / `assigned` / `in progress` / `in review` like a task, and adds Screens, For whom, Visual guide, Content and
+  Deliverable; its allowed files are always `design/<issue number>-<slug>/`. `/huddle-issue` writes it; `/huddle-start`
+  creates the design with Claude Design, polishes it only through the chat, and on «ready» saves `README.md`, `design.html`
+  and `screens/` in `design/<n>-<slug>/`, opens the PR and closes, with each round a new commit; `/huddle-review` checks a
+  design PR (screens, content, visual guide, contrast, phone width, never tests) and offers the follow-up «Build <screen>
+  from design #N» Issue. Docs: «If you are a designer» in the first-day guide and «Design tasks» in the team guide.
 - The Huddle website on GitHub Pages (Issue #56), at `https://srprofessional.github.io/Huddle/`. A static site in `site/`
   with no build step and no dependencies: home (the problem, the four steps, the label-flow diagram as inline SVG, GitHub
   and GitLab, the install and a FAQ), «Get started», «How it works» and a 404. Each page has its own title and

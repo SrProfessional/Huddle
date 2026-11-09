@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { dependsOn } from '../../lib/core/issue-status.mjs';
 
 const abs = (rel) => fileURLToPath(new URL(`../../templates/${rel}`, import.meta.url));
 const read = (rel) => readFileSync(abs(rel), 'utf8');
@@ -10,9 +11,11 @@ const read = (rel) => readFileSync(abs(rel), 'utf8');
 const FILES = [
   'CLAUDE.huddle.md',
   'github/ISSUE_TEMPLATE/task.md',
+  'github/ISSUE_TEMPLATE/design.md',
   'github/pull_request_template.md',
   'github/workflows/huddle-labels.yml',
   'gitlab/issue_templates/Task.md',
+  'gitlab/issue_templates/Design.md',
   'gitlab/merge_request_templates/Default.md',
   'gitlab/huddle-labels.gitlab-ci.yml',
 ];
@@ -114,4 +117,36 @@ test('nobody is told to add or remove «changes requested from AI Manager» by h
     }
   }
   assert.match(read('CLAUDE.huddle.md'), /by hand/);
+});
+
+// --- Design Issues (Issue #58) ---
+const DESIGN = [['GitHub', 'github/ISSUE_TEMPLATE/design.md'], ['GitLab', 'gitlab/issue_templates/Design.md']];
+const TASK_SECTIONS = ['## Goal', '## Depends on', '## Branch', '## Prompt for Claude Code', '## Allowed files', '## Contract or spec', '## Tests that must pass', '## Notes'];
+const DESIGN_SECTIONS = ['## Screens', '## For whom', '## Visual guide', '## Content', '## Deliverable'];
+
+for (const [name, file] of DESIGN) {
+  test(`${name} Design template keeps every section the labels job and /huddle-start read, plus the design block`, () => {
+    const lines = read(file).split(/\r?\n/);
+    for (const h of [...TASK_SECTIONS, ...DESIGN_SECTIONS]) assert.ok(lines.includes(h), `${file} lacks "${h}"`);
+    assert.equal(lines.filter((l) => l === '## Depends on').length, 1);
+  });
+
+  test(`${name} Design template: allowed files are always design/<issue number>-<slug>/ and never code`, () => {
+    const text = read(file);
+    assert.match(text, /design\/<issue number>-<slug>\//);
+    assert.match(text, /never changes code/i);
+  });
+
+  test(`${name} Design template asks for real texts, and the labels job reads it as a managed task`, () => {
+    assert.match(read(file), /lorem ipsum/i);
+    assert.deepEqual(dependsOn(read(file)), [], 'it has «## Depends on» (so it is managed) and, by default, no dependency');
+  });
+}
+
+test('GitHub Design template has front matter with the design label', () => {
+  assert.match(read('github/ISSUE_TEMPLATE/design.md'), /^---\nname: Design\nabout: .+\ntitle: .*\nlabels: design\n/);
+});
+
+test('GitLab Design template puts the design label with a quick action (Issue templates have no front matter)', () => {
+  assert.match(read('gitlab/issue_templates/Design.md'), /^\/label ~design$/m);
 });

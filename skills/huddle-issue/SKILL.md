@@ -28,9 +28,16 @@ not, stop and say so.
      and offer them. If the right one does not exist yet, offer to create it. The AI Manager keeps its
      `Huddle remaining: N` line (the Issues still to write in that area) up to date in the milestone description. With no
      milestone the Issue is counted as «no area» and left out of the progress percentages.
+   - **A Design Issue.** When the task is a design (screens, a flow, a visual), write it from the Design template
+     (`.github/ISSUE_TEMPLATE/design.md` or `.gitlab/issue_templates/Design.md`) instead. It has every section above, plus:
+     **Screens** (which screens or states), **For whom** (the user and the moment they are in), **Visual guide** (the project's
+     design system, or the guide or brand file to follow), **Content** (real texts, never lorem ipsum) and **Deliverable** (what «done» means).
+     **Allowed files** are always `design/<issue number>-<slug>/`, and a design Issue never changes code. The prompt must also say that
+     changes are asked for in the chat and never by hand on the canvas, and that «ready» makes the session save the design and open the PR.
 3. Show the draft, with its milestone, and wait for the AI Manager's OK. Create it with `gh issue create --milestone "<title>"`
-   (or `glab issue create --milestone "<title>"`) using the repo from `huddle.json`. Do not add status labels or an
-   assignee: the labels job does that.
+   (or `glab issue create --milestone "<title>"`) using the repo from `huddle.json`; a Design Issue also gets `--label design`
+   (the `design` label exists once `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` has run). Do not add status labels or an
+   assignee: the labels job does that. The issue number is known only after creating it, so edit the Issue once to write it in the allowed files path.
 4. Answer with the Issue link.
 
 ## Who does each step
