@@ -19,6 +19,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const members = new Map([['SrProfessional', 40], ['ana', 30], ['luis', 30]]); // username -> access level (10 Guest, 20 Reporter, 30 Developer, 40 Maintainer)
   const milestones = new Map(); // id -> { id, iid, title, description, state: 'active' | 'closed', updated_at }
   const calls = [];
+  const failures = []; // { match(args), message, times } : answers like gitlab.com when it rate limits or breaks (world.failWhen)
   const merged = [];
   let nextNote = 9000;
   let nextIssue = 900;
@@ -50,6 +51,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     args = args.map(String);
     calls.push({ args, input: opts.input, env: opts.env });
     need(args[0] === 'api', args);
+    const failing = failures.find((f) => f.times > 0 && f.match(args, opts));
+    if (failing) { failing.times -= 1; throw new Error(`glab ${args.join(' ')} failed: ${failing.message}`); }
     // Parse the way `glab api` does: flags, then one endpoint.
     let method = 'GET', paginate = false, hostname = '', inputIsStdin = false, endpoint;
     for (let i = 1; i < args.length; i++) {
@@ -88,7 +91,9 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     }
     if (rest === 'issues' && method === 'GET') {
       need(q.get('state') === 'opened' || q.get('state') === 'closed', args);
-      return pages([...issues.values()].filter((i) => i.state === q.get('state')).map(issueJson), paginate);
+      const search = q.get('search');
+      need(search === null || q.get('in') === 'title', args); // a text search always says where to look
+      return pages([...issues.values()].filter((i) => i.state === q.get('state') && (search === null || i.title.toLowerCase().includes(search.toLowerCase()))).map(issueJson), paginate);
     }
     if (rest === 'issues' && method === 'POST') {
       const b = body();
@@ -113,8 +118,12 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       const ms = milestones.get(Number(m[1]));
       need(ms, args);
       const b = body();
-      need(Object.keys(b).length > 0 && Object.keys(b).every((k) => k === 'description'), args);
-      ms.description = b.description;
+      need(Object.keys(b).length > 0 && Object.keys(b).every((k) => k === 'description' || k === 'state_event'), args);
+      if (b.description !== undefined) ms.description = b.description;
+      if (b.state_event !== undefined) {
+        need(b.state_event === 'activate' || b.state_event === 'close', args);
+        if (!(b.state_event === 'activate' && ms.stuck)) ms.state = b.state_event === 'close' ? 'closed' : 'active'; // `stuck`: a milestone that never reopens (the answer is still a 200)
+      }
       return JSON.stringify(ms);
     }
     if ((m = /^milestones\/(\d+)\/issues$/.exec(rest))) {
@@ -135,8 +144,13 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
         else {
           const ms = milestones.get(b.milestone_id);
           need(ms, args);
-          it.milestone = ms.title;
+          // Like gitlab.com: a closed milestone is not set on an Issue, and the answer is a plain 200, not an error (found by the 0.3.0 smoke test).
+          if (ms.state === 'active') it.milestone = ms.title;
         }
+      }
+      if (b.state_event !== undefined) {
+        need(b.state_event === 'close', args);
+        it.state = 'closed'; // no MR closed it: closed by hand
       }
       for (const l of String(b.add_labels ?? '').split(',').filter(Boolean)) if (!it.labels.includes(l)) { it.labels.push(l); addSystemNote(it.iid, `added ~${l} label`); }
       for (const l of String(b.remove_labels ?? '').split(',').filter(Boolean)) if (it.labels.includes(l)) { it.labels = it.labels.filter((x) => x !== l); addSystemNote(it.iid, `removed ~${l} label`); }
@@ -241,9 +255,9 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       notes.set(id, { id, issue: mr, mr: true, body, created_at: createdAt, author, system: false, eyes: taken });
     },
     // closedAt: GitLab has no closing date on a milestone, so it is the last update, which is what the adapter reads.
-    milestone({ title, description = '', state = 'open', closedAt = null }) {
+    milestone({ title, description = '', state = 'open', closedAt = null, stuck = false }) {
       const id = 300 + milestones.size;
-      milestones.set(id, { id, iid: milestones.size + 1, title, description, state: state === 'open' ? 'active' : 'closed', updated_at: closedAt ?? '2026-11-01T00:00:00Z' });
+      milestones.set(id, { id, iid: milestones.size + 1, title, description, state: state === 'open' ? 'active' : 'closed', updated_at: closedAt ?? '2026-11-01T00:00:00Z', stuck });
     },
     /** A user that exists on GitLab but is no member of the project. */
     user(login) { if (!users.has(login)) users.set(login, users.size + 1); },
@@ -265,6 +279,14 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     isTaken: (id) => notes.get(id).eyes,
     merged: () => [...merged],
     commandCount: () => calls.length,
+    stateOf: (n) => (issues.get(n).state === 'opened' ? 'open' : 'closed'),
+    milestoneState: (title) => ([...milestones.values()].find((x) => x.title === title)?.state === 'active' ? 'open' : 'closed'),
+    /** The human comments on Issue `n`, in order. */
+    commentsOn: (n) => [...notes.values()].filter((x) => x.issue === n && !x.mr && !x.system).map((x) => x.body),
+    /** Answer the next `times` calls for which `match(args)` is true with a failure (the text is what glab prints after «failed: »). */
+    failWhen(match, message, times = 1) { failures.push({ match, message, times }); },
+    /** Like gitlab.com when it rate limits: 429 with a Retry-After. */
+    rateLimit(times, retryAfter) { failures.push({ match: () => true, message: `429 Too Many Requests: Rate limit exceeded${retryAfter === undefined ? '' : ` (Retry-After: ${retryAfter})`}`, times }); },
     // GitLab-only: lets a test look at the system notes the adapter must never return.
     systemNotes: (n) => [...notes.values()].filter((x) => x.issue === n && x.system).length,
     calls: () => calls.map((c) => ({ ...c })),

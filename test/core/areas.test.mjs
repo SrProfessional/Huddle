@@ -50,7 +50,7 @@ test('an explicit purpose replaces the other text, and the remaining line is rew
 test('areasList gives each area its open and merged counts and its remaining, and counts the Issues with no area', () => {
   const result = areasList({
     milestones: [milestone('Content', 'Huddle remaining: 4', [merged(1), merged(2), open(3)]), milestone('Ads', 'Paid.', [])],
-    openIssues: [{ number: 3, title: 'c', milestone: 'Content' }, { number: 8, title: 'tooling', milestone: null }, { number: 9, title: '<!-- huddle:progress -->', body: '<!-- huddle:progress -->', milestone: null }],
+    openIssues: [{ number: 3, title: 'c', milestone: 'Content' }, { number: 8, title: 'tooling', milestone: null }, { number: 9, title: 'Huddle progress', body: '<!-- huddle:progress -->\n# Huddle progress', milestone: null }],
     closedIssues: [{ number: 1, title: 'a', milestone: 'Content' }, { number: 5, title: 'old', milestone: null }],
   });
   assert.deepEqual(result.areas.map((a) => [a.title, a.open, a.merged, a.remaining, a.estimateMissing]), [['Content', 1, 2, 4, false], ['Ads', 0, 0, 0, true]]);
@@ -79,6 +79,14 @@ test('checkOf lists Issues with no area, areas with no estimate, malformed estim
   assert.deepEqual(check.zeroRemaining, ['Done', 'Empty']);
   assert.deepEqual(check.empty, ['Empty']);
   assert.equal(check.ok, false);
+});
+
+test('checkOf lists an area with no estimate line once, even when it also has no Issue', () => {
+  const check = checkOf(areasList({ milestones: [milestone('Ads', 'Paid.', []), milestone('Social', 'Huddle remaining: lots', []), milestone('Empty', 'Huddle remaining: 0', [])] }));
+  assert.deepEqual(check.missingEstimate, ['Ads']);
+  assert.deepEqual(check.malformedEstimate, ['Social']);
+  assert.deepEqual(check.empty, ['Empty'], 'only an area that says 0 and has no Issue');
+  assert.ok(!check.empty.includes('Ads') && !check.empty.includes('Social'));
 });
 
 test('checkOf says ok for a project with every Issue in an area and every estimate written and above 0', () => {
