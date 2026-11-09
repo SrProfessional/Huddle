@@ -7,6 +7,15 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The website home as a parallax scrolling landing page (Issue #61). `site/index.html` tells the story in eight scenes: a hero with
+  depth layers, five sessions that drift apart and snap into order, the pinned label flow (one Issue card travels ready,
+  assigned, in progress, in review and merged and takes both side roads), the four steps scrolling sideways, the two
+  roles, GitHub and GitLab, a terminal that types the install commands with a Copy button, and the FAQ with a final call.
+  Motion comes from GSAP 3.15.0, ScrollTrigger 3.15.0 and Lenis 1.3.27, vendored in `site/vendor/` with their licences
+  (no CDN, no npm dependency) and one deferred script, `site/js/landing.js`. All text stays in the HTML: with no JavaScript
+  or with `prefers-reduced-motion: reduce` the page is a normal readable document, and on a phone the effects are lighter.
+  Only transform and opacity are animated. Lighthouse on the home page, mobile: Accessibility, Best Practices and SEO 100,
+  Performance 95. The site test checks the vendored files, local deferred scripts, the eight scenes and the reduced-motion rule.
 - Design Issues, worked in a Claude Code session with Claude Design (Issue #58). A new **Design** Issue template for GitHub
   (`.github/ISSUE_TEMPLATE/design.md`) and GitLab (`.gitlab/issue_templates/Design.md`), installed by the setup skill, with the
   `design` label (created by `huddle labels` when missing). It keeps every section the labels job reads, so a Design Issue

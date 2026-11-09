@@ -261,15 +261,248 @@ th { font-family: var(--display); font-weight: 700; }
 .site-footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; }
 .site-footer p { margin: 0; }
 
-/* Motion: one quiet entrance for the hero, nothing else moves on its own */
-@media (prefers-reduced-motion: no-preference) {
-  .hero .wrap > * { animation: rise 0.6s ease both; }
-  .hero .wrap > :nth-child(2) { animation-delay: 0.08s; }
-  .hero .wrap > :nth-child(3) { animation-delay: 0.16s; }
+/* ---------- Landing page (Issue #61) ----------
+   The page is complete without the script: every rule below that moves or re-lays-out something is either an
+   animation under prefers-reduced-motion: no-preference, or hangs on a class the script adds (.fx-*). */
+
+body { overflow-x: clip; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
+
+/* Lenis (smooth scroll) needs these few rules; they come from lenis.css 1.3.27 */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+
+/* 1. Hero: three depth layers behind the headline */
+.hero { position: relative; overflow: clip; isolation: isolate; }
+.hero-copy { position: relative; z-index: 1; }
+.hero-layers { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.layer { position: absolute; inset: -12% 0; }
+.layer-grid {
+  background-image: radial-gradient(circle, var(--line) 1.6px, transparent 1.8px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 72% 40%, #000 15%, transparent 72%);
+  mask-image: radial-gradient(ellipse 70% 80% at 72% 40%, #000 15%, transparent 72%);
+}
+.hero-orb { position: absolute; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 42%), var(--accent); }
+.o1 { width: 4.2rem; height: 4.2rem; top: 18%; left: 52%; opacity: 0.9; }
+.o2 { width: 2.2rem; height: 2.2rem; top: 72%; left: 64%; opacity: 0.55; }
+.o3 { width: 9rem; height: 9rem; top: 6%; right: -3rem; opacity: 0.16; }
+.float-card {
+  position: absolute;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  box-shadow: 0 14px 34px -16px rgb(67 54 216 / 0.45);
+  white-space: nowrap;
+}
+.float-card b { color: var(--accent); margin-right: 0.3rem; }
+.fc1 { top: 14%; right: 9%; }
+.fc2 { top: 38%; right: 26%; }
+.fc3 { top: 60%; right: 6%; }
+.fc4 { top: 80%; right: 30%; }
+@media (max-width: 44rem) {
+  .layer-grid { -webkit-mask-image: none; mask-image: none; opacity: 0.6; }
+  .fc2, .fc4, .o1, .o2 { display: none; }
+  .fc1 { top: 4%; right: 4%; opacity: 0.8; }
+  .fc3 { top: auto; bottom: 3%; right: 4%; opacity: 0.8; }
+}
+
+/* 2. The problem: five session orbs */
+#problem { overflow: clip; }
+.orbs {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem 1rem;
+  margin: 2.5rem 0 1rem;
+}
+.orb { display: grid; justify-items: center; gap: 0.2rem; width: 6.6rem; text-align: center; font-family: var(--display); }
+.orb-dot {
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff55, transparent 42%), var(--accent);
+  color: var(--on-accent);
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+.orb:nth-child(2) .orb-dot { background-color: color-mix(in srgb, var(--accent) 82%, var(--surface)); }
+.orb:nth-child(3) .orb-dot { background-color: color-mix(in srgb, var(--accent) 66%, var(--surface)); }
+.orb:nth-child(4) .orb-dot { background-color: color-mix(in srgb, var(--accent) 90%, var(--ink)); }
+.orb:nth-child(5) .orb-dot { background-color: color-mix(in srgb, var(--accent) 74%, var(--ink)); }
+.orb-tag { font-weight: 700; font-size: 0.95rem; }
+.orb-branch { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+.clash {
+  position: absolute;
+  visibility: hidden;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--on-accent);
+  background: var(--ink);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  white-space: nowrap;
+}
+.c1 { left: 24%; top: 0; }
+.c2 { left: 58%; top: 52%; }
+
+/* 3. The label flow: the signature scene. Pinned only when the script says so (.fx-flow). */
+.board-link { color: var(--board-muted); }
+.board .flow { margin-top: 2rem; }
+.flow svg.wide { max-height: 52svh; }
+.f-line-lit { stroke: var(--board-accent); stroke-width: 3; fill: none; transform-box: fill-box; transform-origin: 0 50%; }
+.f-ring { stroke: var(--board-accent); stroke-width: 2.5; }
+.f-bubble rect { fill: var(--board-accent); }
+.f-bubble text { fill: #14163a; font-family: var(--display); font-weight: 700; font-size: 16px; }
+.f-a rect, .f-c rect { fill: var(--board-ink); }
+.f-card rect { fill: #ffffff; stroke: var(--board-accent); stroke-width: 2.5; }
+.f-card text { fill: #14163a; font-family: var(--display); font-weight: 800; font-size: 15px; }
+.f-card { filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.35)); }
+.fx-flow .board { min-height: 100svh; display: flex; align-items: center; padding-block: 1.5rem; }
+.fx-flow .board .wrap { width: min(100% - 2 * var(--gutter), 72rem); }
+.fx-flow .board h2 { margin-bottom: 0.3em; }
+.fx-flow .board .lead { margin-bottom: 0; }
+.fx-flow .board .flow { margin-top: 1rem; }
+.fx-flow .board-link { margin: 0.5rem 0 0; }
+.fx-flow-phone .board { min-height: 0; display: block; padding-block: 2.5rem; }
+.fx-flow-phone .board .flow { min-height: 0; margin-top: 1.5rem; }
+.fx-flow-phone .flow svg.tall { height: min(76svh, 38rem); width: auto; max-width: 100%; aspect-ratio: 340 / 580; margin-inline: auto; }
+.is-active .f-card, .is-active .f-bubble, .is-active .f-line-lit, .is-active .f-ring { will-change: transform, opacity; }
+
+/* 4. Four steps: sideways inside a pinned scene on wide screens, a plain grid everywhere else */
+.progress { display: none; height: 4px; margin-top: 2rem; background: var(--line); border-radius: 2px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
+.fx-h #steps { padding-block: 0; overflow: clip; }
+.fx-h .hpin { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
+.fx-h .htrack { overflow: clip; margin-top: 1.5rem; }
+.fx-h .steps { display: flex; flex-wrap: nowrap; gap: 1.5rem; width: max-content; margin: 0; padding-inline: max(var(--gutter), calc((100vw - 72rem) / 2)); }
+.fx-h .steps li {
+  width: min(25rem, 72vw);
+  min-height: 15rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.6rem;
+}
+.fx-h .progress { display: block; }
+.is-active .steps, .is-active .progress i { will-change: transform; }
+
+/* 5. Two roles */
+.split { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); margin-top: 2.5rem; }
+.role { border-radius: 8px; padding: 1.8rem; }
+.role h3 { margin-bottom: 0.6em; font-size: 1.5rem; }
+.role ul { margin: 0; padding-left: 1.2rem; }
+.role li + li { margin-top: 0.6rem; }
+.role-manager { background: var(--board); color: var(--board-ink); }
+.role-manager h3 { color: var(--board-ink); }
+.role-dev { background: var(--surface); border: 1px solid var(--line); }
+@media (min-width: 48em) {
+  .role-dev { margin-top: 3rem; }
+}
+.is-active .role { will-change: transform; }
+
+/* 6. GitHub and GitLab come together */
+.merge { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem 1.2rem; margin: 2.5rem 0 1rem; }
+.mark {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 5vw, 2.8rem);
+  letter-spacing: -0.03em;
+  padding: 0.2rem 1.1rem 0.3rem;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+.same { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--accent); text-align: center; }
+.is-active .mark, .is-active .same { will-change: transform, opacity; }
+
+/* 7. Install: a terminal that types its own commands */
+.terminal {
+  background: var(--board);
+  color: var(--board-ink);
+  border: 1px solid var(--board-line);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 46rem;
+  margin: 0 0 1.5rem;
+  box-shadow: 0 26px 50px -30px rgb(20 22 58 / 0.7);
+}
+.term-bar { position: relative; display: flex; align-items: center; gap: 0.9rem; height: 2.7rem; padding-inline: 1rem; border-bottom: 1px solid var(--board-line); }
+.dots { display: inline-flex; gap: 0.4rem; }
+.dots i { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--board-line); }
+.dots i:first-child { background: var(--board-accent); }
+.term-title { font-family: var(--display); font-weight: 600; font-size: 0.9rem; color: var(--board-muted); }
+.copy {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.4rem;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--board-ink);
+  background: transparent;
+  border: 1px solid var(--board-line);
+  border-radius: 999px;
+  padding: 0.22rem 0.9rem;
+  cursor: pointer;
+}
+.copy:hover { background: var(--board-line); }
+.terminal :focus-visible { outline-color: var(--board-accent); }
+.terminal pre { background: none; border: 0; border-radius: 0; margin: 0; color: inherit; padding: 1.2rem 1.3rem 1.3rem; }
+.prompt { color: var(--board-accent); user-select: none; }
+.tl { position: relative; display: inline-block; }
+.tl-mask {
+  position: absolute;
+  inset: 0 -0.3ch 0 0;
+  background: var(--board);
+  border-left: 2px solid var(--board-accent);
+  transform: scaleX(0);
+  transform-origin: 100% 50%;
+}
+.is-active .tl-mask { will-change: transform; }
+
+/* 8. Final call */
+.final { margin-top: clamp(3rem, 8vw, 5rem); padding-top: clamp(2.5rem, 6vw, 4rem); border-top: 1px solid var(--line); }
+.final h2 { font-size: clamp(2.2rem, 6vw, 4rem); line-height: 1.02; letter-spacing: -0.03em; max-width: 14ch; }
+.final .btn { font-size: 1.2rem; padding: 0.95rem 1.9rem; }
+.is-active .final .btn { will-change: transform; }
+
+/* Motion. The hero says its words one after the other, then the buttons come in; that part is CSS only, so the
+   headline is on screen at once even if the script never loads. The rest is the script's job. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero h1 .w { display: inline-block; animation: word 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i) * 55ms); }
+  .hero .actions { animation: rise 0.5s ease both; animation-delay: 0.55s; }
+  .hero-layers { animation: layers-in 1.2s ease both; }
+}
+@keyframes word { from { opacity: 0; transform: translateY(0.5em); } to { opacity: 1; transform: none; } }
 @keyframes rise { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
+@keyframes layers-in { from { opacity: 0.2; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   summary::after { transition: none; }
+  .hero h1 .w, .hero .actions, .hero-layers { animation: none; }
+  .deco { animation: none; transition: none; }
+  .tl-mask { display: none; }
 }
