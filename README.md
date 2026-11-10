@@ -9,8 +9,8 @@ the review on its own.
 
 It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** pre-release. Version 0.1.0 is not tagged yet (see the [changelog](CHANGELOG.md)). The design is in
-> [docs/design.md](docs/design.md).
+> **Status:** the latest release is [0.3.0](https://github.com/SrProfessional/Huddle/releases/tag/v0.3.0); what came after
+> it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
 [GitLab notes](docs/gitlab.md)
