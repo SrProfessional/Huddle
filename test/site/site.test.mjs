@@ -412,3 +412,46 @@ test('no link inside the site opens a new tab, and the helper classes exist in t
   assert.match(css, /\.sr-only\s*\{/);
   assert.match(css, /\.ext\s*\{/);
 });
+
+// H28 (Issue #63): the four steps had no side margin on a phone, with reduced motion or without JavaScript, because only
+// the pinned wide-screen rule (.fx-h .steps) gave them one.
+const rulesOf = (css) => [...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}@]+)\{([^{}]*)\}/g)].map((m) => ({ sel: m[1].trim(), body: m[2] }));
+
+test('H28: the plain .steps rule (not under .fx-h) gives the list a side margin that uses --gutter, like .wrap', () => {
+  const css = read('site/style.css');
+  const rules = rulesOf(css);
+  const plain = rules.filter((r) => r.sel.split(',').map((s) => s.trim()).includes('.steps'));
+  assert.ok(plain.length > 0, 'no plain .steps rule');
+  assert.ok(plain.some((r) => /--gutter/.test(r.body) && /(margin-inline|width|padding-inline)/.test(r.body)), 'the plain .steps rule does not use --gutter');
+  assert.match(rules.find((r) => r.sel === '.wrap').body, /--gutter/);
+});
+
+test('H28: every block of a scene outside .wrap (and outside a .deco layer) has a plain rule that uses --gutter', () => {
+  const t = html('index.html');
+  const plainRules = rulesOf(read('site/style.css')).filter((r) => !/\.fx-/.test(r.sel));
+  const VOID = new Set(['meta', 'link', 'img', 'br', 'hr', 'input', 'source', 'path', 'circle', 'rect', 'line', 'use', 'stop']);
+  const PASS_THROUGH = new Set(['hpin', 'htrack']); // pure wrappers: what they hold is what needs the margin
+  const stack = [];
+  const offenders = [];
+  for (const m of t.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9]*)([^>]*?)(\/?)>/g)) {
+    const [, close, name, attrs, selfClose] = m;
+    const tag = name.toLowerCase();
+    if (close) {
+      while (stack.length && stack.pop().tag !== tag);
+      continue;
+    }
+    const classes = ((attrs.match(/class="([^"]*)"/) || [])[1] || '').split(/\s+/).filter(Boolean);
+    const inScene = stack.some((n) => n.tag === 'section');
+    const skipped = stack.some((n) => n.classes.includes('wrap') || n.classes.includes('deco') || n.tag === 'svg');
+    const exempt = classes.includes('wrap') || classes.includes('deco') || classes.some((c) => PASS_THROUGH.has(c));
+    if (inScene && !skipped && !exempt) {
+      const parent = stack[stack.length - 1];
+      if (parent.tag === 'section' || parent.classes.some((c) => PASS_THROUGH.has(c))) {
+        const ok = classes.some((c) => plainRules.some((r) => r.sel.split(',').some((s) => s.trim() === `.${c}`) && /--gutter/.test(r.body)));
+        if (!ok) offenders.push(`<${tag}${classes.length ? ` class="${classes.join(' ')}"` : ''}>`);
+      }
+    }
+    if (!VOID.has(tag) && !selfClose) stack.push({ tag, classes });
+  }
+  assert.deepEqual(offenders, [], `outside .wrap with no --gutter rule: ${offenders.join(', ')}`);
+});

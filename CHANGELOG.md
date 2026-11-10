@@ -41,6 +41,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   anything, checks duplicates, sets the severity and waits for the AI Manager's OK. The team guide has a «Reporting a bug»
   section.
 
+### Fixed
+
+- The four steps on the home page had no side margin on a phone, with `prefers-reduced-motion: reduce` or with JavaScript off
+  (Issue #63): only the pinned wide-screen rule gave the list a margin. The plain `.steps` rule now uses `--gutter` like
+  `.wrap`; the pinned sideways scene is unchanged. The site test checks that rule and that every block of a scene outside
+  `.wrap` has a `--gutter` rule, so the next section cannot repeat the bug.
+
 ## [0.3.0] - 2026-11-09
 
 ### Added
