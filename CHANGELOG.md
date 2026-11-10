@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-09
+
 ### Fixed
 
 - The progress Issue is updated again (Issue #69). Since 0.4.0 the labels job printed «Progress not updated: now.getTime
