@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { run } from '../../lib/cli/run.mjs';
 import { MARKER } from '../../lib/core/progress.mjs';
 import { OPERATIONS } from '../../lib/platform/index.mjs';
-import { harness, request, CONFIG } from './harness.mjs';
+import { harness, request, CONFIG, fakeNow } from './harness.mjs';
 
 const DEPS = (n) => `## Depends on\n\n- #${n}\n`;
 
@@ -60,7 +60,7 @@ test('huddle progress counts closed milestones only for 90 days', async () => {
     w.issue({ number: 1, state: 'merged', milestone: 'Launch' });
     w.issue({ number: 2, state: 'merged', milestone: 'Old beta' });
   } });
-  h.ctx.now = () => new Date('2026-11-06T12:00:00Z');
+  h.ctx.now = fakeNow('2026-11-06T12:00:00Z');
   await run(['progress', '--json'], h.ctx);
   assert.deepEqual(JSON.parse(h.text()).areas.map((a) => a.title), ['Launch']);
 });

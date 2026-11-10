@@ -32,4 +32,10 @@ export function harness({ config, gitlab = false, file, wrap = (a) => a, sleep =
   return { ctx, world: fake.world, out, err, writes, slept, calls: () => fake.world.calls?.() ?? [], huddleJson: () => files.get('/repo/huddle.json'), text: () => out.join('\n'), errText: () => err.join('\n') };
 }
 
-export const request = (id, extra = {}) => ({ id, author: 'SrProfessional', createdAt: '2026-11-05T10:00:00Z', body: '## Prompt for Claude Code\n\n```text\nDo the thing\n```', ...extra });
+/**
+ * The fake clock for `ctx.now`, with the real one's shape (lib/cli/main.mjs: a Date). `at` is a time in ms, a date string, or a function
+ * that returns one (for a clock a test moves). Every test that fakes `ctx.now` goes through here, so the shapes cannot drift (Issue #69).
+ */
+export const fakeNow = (at) => () => new Date(typeof at === 'function' ? at() : at);
+
+export const request =(id, extra = {}) => ({ id, author: 'SrProfessional', createdAt: '2026-11-05T10:00:00Z', body: '## Prompt for Claude Code\n\n```text\nDo the thing\n```', ...extra });

@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- The progress Issue is updated again (Issue #69). Since 0.4.0 the labels job printed «Progress not updated: now.getTime
+  is not a function»: the real `ctx.now()` returned milliseconds for the update notice, while progress expected a Date.
+  `ctx.now()` is now a Date everywhere, the update notice reads its milliseconds, and every test clock comes from one
+  `fakeNow` with the real shape. A new test runs the real context from `lib/cli/main.mjs`.
+
 ## [0.4.0] - 2026-11-09
 
 ### Added
