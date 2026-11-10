@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { run } from '../../lib/cli/run.mjs';
 import { isNewer, parseVersion } from '../../lib/core/update.mjs';
-import { harness } from './harness.mjs';
+import { harness, fakeNow } from './harness.mjs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const T0 = Date.parse('2026-11-10T09:00:00Z');
@@ -32,7 +32,7 @@ function setupUpdate(h, { answer = { tag: 'v0.4.0' }, installed = '0.3.0', clone
   const state = { now };
   const fetch = fakeFetch(answer);
   h.ctx.fetch = fetch;
-  h.ctx.now = () => state.now;
+  h.ctx.now = fakeNow(() => state.now);
   h.ctx.pluginRoot = ROOT;
   h.ctx.updateCachePath = CACHE;
   h.ctx.pluginInstalled = !clone;
