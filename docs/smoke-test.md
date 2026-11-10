@@ -464,6 +464,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.4.1
+
+Run of: 2026-11-09, Huddle `main` with Issues #69 and #70 merged, by the AI Manager's Claude Code session. A patch release: only
+the two fixes were checked; the 0.4.0 table above still holds for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Progress after the `ctx.now` fix (#69) | ✔ | not run | `huddle labels --dry-run` in the Huddle repo: `v0.4.0` ends with «Progress not updated: now.getTime is not a function», `main` does not. A test runs the real context of `lib/cli/main.mjs`. |
+| Setup with an existing labels job (#70) | ✔ | covered by tests | Setup on a copy of SocialCortex's `.github/workflows` wrote no `huddle-labels.yml`, kept `issue-labels.yml` and said it pins v0.2.0. |
+
 ### Results 0.4.0
 
 Run of: 2026-11-09, Huddle `main` with Issues #55, #58, #61, #63 and #65 merged, AI Manager SrProfessional through the AI Manager's Claude Code session, sandboxes github.com/SrProfessional/huddle-sandbox and gitlab.com/SrProfessional/huddle-sandbox; no second account. Fill it in for the parts added in 0.4.0, and copy it into the PR description next to the tables above.
