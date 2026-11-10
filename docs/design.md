@@ -298,3 +298,55 @@ The smoke test marks each step «Session» or «🙋 Only you», and `docs/team-
 
 **Never around a refusal.** If a permission is denied or a credential is missing, the session stops and asks, as always:
 it never looks for another way.
+
+## 14. Bugs
+
+Asked by the AI Manager on 2026-11-09 (Issue #55). A bug has its own Issue type, so it carries what a task does not have:
+evidence, a probable cause and the failing test to write first.
+
+**Two ways a bug comes in.**
+
+- **From the AI Manager.** The AI Manager describes it in plain words, with a capture or a link if there is one, and runs
+  `/huddle-bug`. The session investigates without changing anything: it reads the code, searches for the error text, reads
+  the recent commits of that area, runs the area's tests and reproduces the bug when the repo's own tools can. Then it
+  writes the Bug Issue, shows the draft and creates it after the AI Manager's OK.
+- **From anyone else** (a developer, a tester, a client with access). On GitHub, the person uses the «Bug report» form; on
+  GitLab, the Bug template with the `needs triage` label. A report with `needs triage` is never `ready` and never assigned.
+  The AI Manager runs `/huddle-bug #N`: it rewrites the report into the full Bug Issue, keeps the reporter's text under
+  «Original report» and removes `needs triage`.
+
+**The Bug template.** A bug block first: What happens, What should happen, How to reproduce, Evidence, Severity, Probable
+cause, The failing test to write first. Then every Task section, so the labels job and `/huddle-start` read it like a
+task. Label: `bug`.
+
+**Severity.** `blocking` (it stops a person or production), `normal` or `minor`, written under «Severity». The labels job
+assigns a `blocking` Bug before every other ready Issue.
+
+**Duplicates.** Before writing, `/huddle-bug` searches the open and recently closed Issues for the same symptom. When one
+matches, it offers to add the new evidence there instead.
+
+**Labels.** `bug` and `needs triage` are created by `huddle labels`. They are not status labels and are not renamable. GitHub
+limits a label description to 100 characters, and a test checks every label Huddle creates against that limit.
+
+## 15. Design tasks
+
+Asked by the AI Manager on 2026-11-09 (Issue #58). A designer works a Huddle Issue from a Claude Code session, like a
+developer, and makes the design with Claude Design inside that session.
+
+**The Design template.** Every Task section, plus Screens, For whom, Visual guide, Content (real texts, never lorem ipsum)
+and Deliverable. Its allowed files are always `design/<issue number>-<slug>/`: a Design Issue never changes code. Label:
+`design`, created by `huddle labels`. The labels job treats a Design Issue exactly like a task.
+
+**The flow.**
+
+1. The designer pastes the Issue's prompt. The session creates the design as a Claude Design artifact, with the project's
+   design system when one is set up (`/design-sync`, the AI Manager's step), or else the Issue's visual guide.
+2. **The design is polished only through the chat.** The designer asks for every change in words and never edits the
+   canvas by hand. If the session notices a change it did not make, it says so and asks whether to keep it.
+3. On «ready» and a one-line confirmation, the session saves `README.md` (artifact link, screens, decisions, round),
+   `design.html` and `screens/` (desktop and phone) in `design/<n>-<slug>/`, opens the PR and closes.
+4. `/huddle-review` reviews a design PR without tests: screens, content, visual guide, contrast and phone width. Changes
+   requested are a new round, kept as a new commit. **The repo is the design's history**, because Claude Design has no
+   version history.
+5. After the merge, `/huddle-review` offers the build Issue «Build <screen> from design #N», which depends on the design
+   Issue and takes the `design/` folder as its spec.
