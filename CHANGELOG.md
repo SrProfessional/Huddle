@@ -7,6 +7,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- A notice when a newer Huddle exists, and auto-update (Issue #65). The SessionStart hook compares the installed version
+  (`.claude-plugin/plugin.json` in the plugin folder) with the latest GitHub release (`releases/latest`, unauthenticated,
+  3 s timeout, cached 24 h in Claude Code's data folder). When the release is newer (a pre-release never counts) it prints
+  one block, at most once a day, that tells the session to say it first in the person's language: the two commands, or
+  «pull your clone» when running with `--plugin-dir`, and the link to the release. The AI Manager's block adds «run
+  /huddle-setup on a branch in each repo». Any failure (no network, HTTP error, bad JSON, slow answer) is silent.
+  `huddle doctor` has a `version` line (✔ latest, ⚠ behind with the commands, ⚠ could not check). A new test fails when
+  the newest released section of `CHANGELOG.md` is not the version of `plugin.json`, `package.json` and `marketplace.json`.
+  Docs: «Updating Huddle» in the team guide, and a «turn on auto-update» step (🙋 Only you) in the first-day guide.
+  `/huddle-setup` does not write `autoUpdate` in the project settings: it could not be proven in a sandbox (see the PR).
+
 - The website home as a parallax scrolling landing page (Issue #61). `site/index.html` tells the story in eight scenes: a hero with
   depth layers, five sessions that drift apart and snap into order, the pinned label flow (one Issue card travels ready,
   assigned, in progress, in review and merged and takes both side roads), the four steps scrolling sideways, the two
