@@ -24,6 +24,7 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
 2. It writes `huddle.json`, the Issue and PR/MR templates and the labels job of that platform, and inserts the Huddle block
    in `CLAUDE.md`. It also writes `.claude/settings.json` with the marketplace and the enabled plugin (`extraKnownMarketplaces.huddle` and
    `enabledPlugins["huddle@huddle"]`): it creates the file, or merges those two keys and keeps every other key. Run again later and it replaces only that block; the project's own text and edited templates stay.
+   If the project already runs the labels job under another file name (any workflow, or `.gitlab-ci.yml` and the files it includes, that runs the labels command), setup keeps it and adds no second one; its notes name that file and say when it pins an older Huddle (`HUDDLE_REF`). Updating that pin is a PR the AI Manager's session opens.
    That file is only a helper: it enables the plugin for the project and, in the CLI, registers the marketplace silently after the folder's own trust dialog. It does not install Huddle for anyone.
 3. Read the JSON report. Show the developer `written`, `skipped` and every line of `notes` (GitLab needs a pipeline
    schedule, which the AI Manager's session can create with `glab api`, and the `HUDDLE_TOKEN` variable, a secret that only the

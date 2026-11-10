@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- Setup no longer adds a second labels job (Issue #70). It finds the one a project already runs by what it does (a
+  workflow, or `.gitlab-ci.yml` and the local files it includes, that runs `huddle labels`), keeps it, and says so in its
+  notes. When that job pins an older Huddle in `HUDDLE_REF` (a tag, or a SHA with its tag in a comment), the notes say to
+  update it in a PR; a SHA without a tag gets a note to check it.
+
 ## [0.4.0] - 2026-11-09
 
 ### Added
