@@ -31,6 +31,19 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    `git ls-remote origin`. Labels change by the schedule, so they can take up to 10 minutes: see
    [Huddle on GitLab](gitlab.md#on-the-developers-machine).
 
+   **Turn on auto-update, once.** Claude Code does not update a plugin from a third-party marketplace on its own.
+
+   🙋 Only you
+
+   1. In Claude Code in the CLI, type `/plugin` and press Enter.
+   2. Go to the **Marketplaces** tab and select `huddle`.
+   3. Select **Enable auto-update**.
+   4. Check it: the `huddle` line now says auto-update is enabled. (The VS Code extension has no `/plugin`; there type
+      `/plugins`, or skip this step: Huddle tells you at the start of a session when a newer version exists.)
+
+   After that Claude Code updates Huddle by itself at startup. Even then, a session that starts on a new day with an
+   older Huddle says so, with the two commands to run.
+
 4. Clone the team's repo and open Claude Code in it.
 
    You do not need to clone Huddle. Cloning it is only for people who work on Huddle itself, with

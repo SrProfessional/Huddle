@@ -264,7 +264,29 @@ Removing someone does not touch their open Issues: they keep that assignee until
 
 ## Updating Huddle
 
-Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
+**Why nothing arrives by itself.** Claude Code only sees a new version of a plugin when the `version` in
+`.claude-plugin/plugin.json` changes. New commits on `main` change nothing for anyone: the update arrives with a release,
+whose version number is bumped (a test checks that `CHANGELOG.md`, `plugin.json`, `package.json` and `marketplace.json`
+agree). Claude Code also leaves auto-update off for a plugin from a third-party marketplace.
+
+**The notice.** The first session of the day on a machine whose Huddle is older than the latest GitHub release starts with
+one short block, and Claude says it first in its first answer, in your language: `Huddle <new> is available (you have
+<old>)`, the two commands, and a link to what changed. It looks the release up without a login (so GitLab teams get it
+too), at most once a day, from a small cache in Claude Code's data folder. If there is no network, GitHub answers with an
+error or the answer is slow (3 seconds at most), it says nothing. A pre-release never counts. The AI Manager's notice has
+one more line: after updating, run `/huddle-setup` on a branch in each repo to get the new templates. If you run Huddle
+from a clone (`--plugin-dir`), the notice says to pull your clone.
+
+**Doctor.** `huddle doctor` has a `version` line: ✔ `huddle 0.4.0 (latest)`; ⚠ `huddle 0.3.0, latest is 0.4.0` with the
+two commands; or ⚠ `could not check the latest release` when offline. It is a warning, never a failure.
+
+**Auto-update.** Turn it on once per person: `/plugin` → **Marketplaces** → `huddle` → **Enable auto-update**. The VS Code
+extension uses `/plugins`. `/huddle-setup` does not write `"autoUpdate": true` in the project's `.claude/settings.json`:
+the Claude Code docs only say clearly that managed settings can enforce it for a marketplace, and a project setting was
+not proven to work, so each person turns it on (it is a step in the [first-day guide](first-day.md)). Until then the
+notice above is the safety net.
+
+**The steps.** Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
 of `/plugin` (or run `claude plugin update huddle@huddle`). The VS Code extension has no `/plugin`: in a terminal run
 `claude plugin marketplace update huddle` and `claude plugin update huddle@huddle`. Either way, open a new session after
 the update. If you work from a clone with `--plugin-dir`, pull it
