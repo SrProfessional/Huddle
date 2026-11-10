@@ -294,6 +294,9 @@ body { overflow-x: clip; }
   border: 0;
 }
 
+/* The ↗ after a link that opens another site in a new tab (the words «opens in a new tab» are in .sr-only) */
+.ext { display: inline-block; margin-left: 0.2em; font-family: system-ui, sans-serif; font-size: 0.8em; font-weight: 400; text-decoration: none; }
+
 /* Lenis (smooth scroll) needs these few rules; they come from lenis.css 1.3.27 */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }

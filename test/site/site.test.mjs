@@ -372,3 +372,43 @@ test('H27: the fonts are served from the site itself, with their licences, and p
     assert.match(readFileSync(path.join(site, 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i, `${f}: licence text`);
   }
 });
+
+// ---- Issue #61, review request: links that leave the site open in a new tab, and say so ----
+
+const anchors = (t) => [...t.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].map((m) => ({ attrs: m[1], inner: m[2], tag: m[0] }));
+const hrefOf = (a) => (a.attrs.match(/\shref="([^"]*)"/i) || a.attrs.match(/^href="([^"]*)"/i) || [])[1];
+const isExternal = (href) => /^https?:\/\//i.test(href || '') && !href.startsWith(BASE);
+
+test('every link that leaves the site opens in a new tab, with noopener and a hidden «opens in a new tab»', () => {
+  let count = 0;
+  for (const p of pages) {
+    for (const a of anchors(html(p))) {
+      const href = hrefOf(a);
+      if (!isExternal(href)) continue;
+      count++;
+      assert.match(a.attrs, /\starget="_blank"/, `${p}: ${href} lacks target="_blank"`);
+      const rel = (a.attrs.match(/\srel="([^"]*)"/i) || [])[1] || '';
+      assert.ok(rel.split(/\s+/).includes('noopener'), `${p}: ${href} lacks rel="noopener"`);
+      assert.match(a.inner, /<span class="sr-only">\s*\(opens in a new tab\)<\/span>/, `${p}: ${href} lacks the hidden «(opens in a new tab)»`);
+      if (!/\sclass="[^"]*\bbtn\b/.test(a.attrs) && !/\sclass="[^"]*\bbrand\b/.test(a.attrs)) {
+        assert.match(a.inner, /<span class="ext" aria-hidden="true">↗<\/span>/, `${p}: text link ${href} lacks the aria-hidden ↗ mark`);
+      } else {
+        assert.doesNotMatch(a.inner, /class="ext"/, `${p}: a button must not get the ↗ mark`);
+      }
+    }
+  }
+  assert.ok(count >= 20, `only ${count} external links found`);
+});
+
+test('no link inside the site opens a new tab, and the helper classes exist in the CSS', () => {
+  for (const p of pages) {
+    for (const a of anchors(html(p))) {
+      const href = hrefOf(a);
+      if (!href || isExternal(href) || /^mailto:/i.test(href)) continue;
+      assert.doesNotMatch(a.attrs, /\starget=/, `${p}: internal link ${href} must stay in the same tab`);
+    }
+  }
+  const css = read('site/style.css');
+  assert.match(css, /\.sr-only\s*\{/);
+  assert.match(css, /\.ext\s*\{/);
+});
