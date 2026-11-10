@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-09
+
 ### Added
 
 - A notice when a newer Huddle exists, and auto-update (Issue #65). The SessionStart hook compares the installed version

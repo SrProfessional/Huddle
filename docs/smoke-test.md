@@ -464,6 +464,21 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.4.0
+
+Run of: 2026-11-09, Huddle `main` with Issues #55, #58, #61, #63 and #65 merged, AI Manager SrProfessional through the AI Manager's Claude Code session, sandboxes github.com/SrProfessional/huddle-sandbox and gitlab.com/SrProfessional/huddle-sandbox; no second account. Fill it in for the parts added in 0.4.0, and copy it into the PR description next to the tables above.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Bugs: templates and labels | ✔ | ✔ | Setup installed `bug.md`, `bug-report.yml` and `design.md` (sandbox PR #20). `huddle labels` created `bug`, `needs triage` and `design`. The first run found a ✘: the `needs triage` description was 105 characters and GitHub answered HTTP 422; fixed in PR #57 before the merge. |
+| Bugs: a report with `needs triage` | ✔ | ✔ | A report with `bug` and `needs triage` got no `ready` and no assignee (GitHub #21, GitLab #12). |
+| Bugs: a `blocking` Bug | ✔ | not run | Assigned at once (GitHub #22). That it goes before an older ready task is covered by the tests, not run here. |
+| Bugs: `/huddle-bug` | ✔ | not run | Used by the AI Manager's session to write Issue #63 from a phone capture. |
+| Design Issues: `/huddle-start` with Claude Design, «ready», PR | not run | not run | Needs a session with the plugin at 0.4.0 installed. Run it right after the release (🙋 nothing: the AI Manager's session does it). |
+| Website | ✔ | n/a | Deployed by `pages.yml`; checked live on a phone by the AI Manager; the missing side margin found there was fixed in #63. |
+| Update notice and `doctor` version line | not run | not run | Needs 0.4.0 released: a machine on 0.3.0 or older must see the notice once and `doctor` must show ⚠. Checked right after the release. |
+| 12. Clean up | not run | not run | the sandboxes are kept for the next run |
+
 Write ✔ or ✘ in each cell. Any ✘ blocks the release: open an Issue for it, fix it, and run the whole checklist again on
 the platform that failed.
 
