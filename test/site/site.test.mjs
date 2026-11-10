@@ -245,3 +245,170 @@ test('the README opens with the words people search for, links the site and has 
 test('the CHANGELOG mentions the website under Unreleased', () => {
   assert.match(read('CHANGELOG.md').split('## [0.3.0]')[0], /website/i);
 });
+
+// ---- Issue #61 (H27): the home page as a parallax landing page ----
+
+const strip = (t) => t.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const VENDOR = [
+  ['gsap.min.js', /GSAP 3\.15\.0\b/, '3.15.0'],
+  ['ScrollTrigger.min.js', /ScrollTrigger 3\.15\.0\b/, '3.15.0'],
+  ['lenis.min.js', /var e=`1\.3\.27`/, '1.3.27'],
+];
+
+test('H27: GSAP, ScrollTrigger and Lenis are vendored in site/vendor with a pinned version and a licence', () => {
+  const dir = path.join(site, 'vendor');
+  for (const [file, banner, version] of VENDOR) {
+    const f = path.join(dir, file);
+    assert.ok(existsSync(f), `site/vendor/${file} is missing`);
+    assert.match(readFileSync(f, 'utf8'), banner, `${file}: the version inside the file is not ${version}`);
+  }
+  assert.ok(existsSync(path.join(dir, 'LICENSE-lenis.txt')), 'LICENSE-lenis.txt is missing');
+  assert.match(readFileSync(path.join(dir, 'LICENSE-lenis.txt'), 'utf8'), /MIT License/i);
+  assert.ok(existsSync(path.join(dir, 'LICENSE-gsap.txt')), 'LICENSE-gsap.txt is missing');
+  assert.match(readFileSync(path.join(dir, 'LICENSE-gsap.txt'), 'utf8'), /gsap\.com\/standard-license/);
+  const readme = readFileSync(path.join(dir, 'README.md'), 'utf8');
+  assert.match(readme, /gsap\.com\/standard-license/, 'README must note the GSAP licence');
+  for (const [file, , version] of VENDOR) {
+    assert.match(readme, new RegExp('`' + file.replace(/\./g, '\\.') + '`[^\\n]*' + version.replace(/\./g, '\\.')), `README must pin ${file} to ${version}`);
+  }
+  assert.doesNotMatch(readFileSync(path.join(root, 'package.json'), 'utf8'), /gsap|lenis/i, 'no npm dependency');
+});
+
+test('H27: the home page loads only local scripts, all deferred, and landing.js is the last one', () => {
+  const t = html('index.html');
+  const tags = t.match(/<script\b[^>]*\ssrc="[^"]*"[^>]*>/gi) || [];
+  assert.ok(tags.length >= 4, 'expected gsap, ScrollTrigger, lenis and landing.js');
+  for (const s of tags) {
+    const src = s.match(/\ssrc="([^"]*)"/i)[1];
+    assert.doesNotMatch(src, /^(https?:)?\/\//i, `script from another origin: ${src}`);
+    assert.match(s, /\sdefer\b|type="module"/i, `script is not deferred: ${s}`);
+  }
+  const last = tags[tags.length - 1];
+  assert.match(last, /src="js\/landing\.js"/);
+  assert.match(last, /type="module"/);
+  assert.match(last, /\sdefer\b/);
+  assert.ok(existsSync(path.join(site, 'js', 'landing.js')), 'site/js/landing.js is missing');
+  for (const [file] of VENDOR) assert.ok(tags.some((s) => s.includes(`vendor/${file}`)), `${file} is not loaded`);
+});
+
+test('H27: the home page has the eight scenes, in order, and every scene has its text in the HTML', () => {
+  const t = html('index.html');
+  const order = ['hero', 'problem', 'flow', 'steps', 'roles', 'platforms', 'install', 'faq'];
+  const found = [...t.matchAll(/<(?:section|div)\b[^>]*\sdata-scene="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(found, order);
+  const parts = t.split(/<(?:section|div)\b[^>]*\sdata-scene="/).slice(1);
+  assert.equal(parts.length, 8);
+  parts.forEach((p, i) => {
+    assert.match(p, /<h[12][\s>]/, `scene ${order[i]} has no heading`);
+    assert.ok(strip(p.split(/<footer/)[0]).length >= 150, `scene ${order[i]} has too little text in the HTML`);
+  });
+  for (const s of ['Five developers, five Claude Code sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The AI Manager', "The developer's session"]) {
+    assert.ok(t.includes(s), `missing text «${s}»`);
+  }
+  // the label-flow scene has a text equivalent that names every stop and both side roads
+  const flow = parts[2];
+  assert.match(flow, /<ol[^>]*class="[^"]*road/, 'the label-flow scene needs a text list of the road');
+  for (const l of ['ready', 'assigned', 'in progress', 'in review', 'merged', 'needs decision', 'changes requested']) assert.ok(flow.includes(l), `flow lacks ${l}`);
+  // the two install commands are real text in a <pre>, with a Copy button the script reveals and a live region
+  assert.match(parts[6], /<pre[\s\S]*claude plugin marketplace add SrProfessional\/Huddle[\s\S]*claude plugin install huddle@huddle[\s\S]*<\/pre>/);
+  assert.match(parts[6], /<button[^>]*data-copy[^>]*\shidden\b/, 'Copy button, hidden until the script runs');
+  assert.match(parts[6], /role="status"/, 'a live region to announce Copied');
+  assert.match(parts[7], /class="btn"[^>]*>Get started</, 'closing Get started button');
+});
+
+test('H27: the script never writes copy into the page', () => {
+  const f = path.join(root, 'site', 'js', 'landing.js');
+  assert.ok(existsSync(f), 'site/js/landing.js is missing');
+  const js = readFileSync(f, 'utf8');
+  assert.doesNotMatch(js, /innerHTML|outerHTML|insertAdjacentHTML|document\.write|createTextNode/);
+  const writes = [...js.matchAll(/\.textContent\s*=\s*([^;\n]+)/g)].map((m) => m[1].trim());
+  for (const w of writes) assert.match(w, /^'(Copied|Copy|Could not copy)'$|^''$/, `textContent written with: ${w}`);
+  assert.doesNotMatch(js, /https?:\/\//, 'landing.js must not reach another origin');
+  assert.match(js, /prefers-reduced-motion:\s*reduce/);
+});
+
+test('H27: every decorative layer is aria-hidden', () => {
+  const t = html('index.html');
+  const deco = t.match(/<[a-z0-9]+\b[^>]*\sclass="[^"]*\bdeco\b[^"]*"[^>]*>/gi) || [];
+  assert.ok(deco.length >= 8, `only ${deco.length} decorative layers`);
+  for (const d of deco) assert.match(d, /\saria-hidden="true"/, `decorative layer without aria-hidden: ${d}`);
+  assert.match(t, /<[a-z]+[^>]*\sclass="[^"]*hero-layers[^"]*"[^>]*aria-hidden="true"/, 'hero layers');
+  assert.match(t, /<[a-z]+[^>]*\sclass="[^"]*\borbs\b[^"]*"[^>]*aria-hidden="true"/, 'session orbs');
+});
+
+test('H27: the CSS turns every effect off under prefers-reduced-motion and hides nothing without the script', () => {
+  const css = read('site/style.css');
+  const i = css.indexOf('@media (prefers-reduced-motion: reduce)');
+  assert.ok(i > -1, 'no reduced-motion block');
+  const block = css.slice(i);
+  assert.match(block, /animation:\s*none|animation-duration:\s*0/, 'reduced motion must stop the CSS animations');
+  assert.match(block, /\.deco/, 'reduced motion must settle the decorative layers');
+  // nothing is hidden with opacity 0 in plain CSS except inside @keyframes (the no-JS page is fully visible)
+  const bare = css.replace(/@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, '');
+  for (const m of bare.matchAll(/([^{}]+)\{[^{}]*\bopacity:\s*0\s*[;}]/g)) {
+    assert.match(m[1], /:hover|:focus|\.sr-only|\.copy/, `opacity:0 in plain CSS for «${m[1].trim()}»`);
+  }
+  // will-change is only set on the scene that is active
+  for (const m of css.matchAll(/([^{}]+)\{[^{}]*will-change/g)) assert.match(m[1], /\.is-active/, `will-change outside .is-active: ${m[1].trim()}`);
+  // the other pages do not load the motion scripts
+  for (const p of pages.filter((x) => x !== 'index.html')) assert.doesNotMatch(html(p), /vendor\/|landing\.js/, `${p} should not load the motion scripts`);
+});
+
+test('H27: the fonts are served from the site itself, with their licences, and preloaded (no layout shift from a font swap)', () => {
+  for (const p of pages) {
+    const t = html(p);
+    assert.doesNotMatch(t, /fonts\.googleapis\.com|fonts\.gstatic\.com/, `${p}: loads fonts from another origin`);
+    assert.match(t, /<link rel="preload" href="[^"]*fonts\/bricolage-grotesque-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the display font`);
+    assert.match(t, /<link rel="preload" href="[^"]*fonts\/source-serif-4-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the text font`);
+  }
+  const css = read('site/style.css');
+  assert.match(css, /@font-face\s*\{[^}]*Bricolage Grotesque[^}]*fonts\/bricolage-grotesque-latin\.woff2/);
+  assert.match(css, /@font-face\s*\{[^}]*Source Serif 4[^}]*fonts\/source-serif-4-latin\.woff2/);
+  for (const f of ['bricolage-grotesque-latin.woff2', 'source-serif-4-latin.woff2']) {
+    const b = readFileSync(path.join(site, 'fonts', f));
+    assert.equal(b.subarray(0, 4).toString(), 'wOF2', `${f} is not a woff2 file`);
+  }
+  for (const f of ['OFL-bricolage-grotesque.txt', 'OFL-source-serif-4.txt']) {
+    assert.match(readFileSync(path.join(site, 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i, `${f}: licence text`);
+  }
+});
+
+// ---- Issue #61, review request: links that leave the site open in a new tab, and say so ----
+
+const anchors = (t) => [...t.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].map((m) => ({ attrs: m[1], inner: m[2], tag: m[0] }));
+const hrefOf = (a) => (a.attrs.match(/\shref="([^"]*)"/i) || a.attrs.match(/^href="([^"]*)"/i) || [])[1];
+const isExternal = (href) => /^https?:\/\//i.test(href || '') && !href.startsWith(BASE);
+
+test('every link that leaves the site opens in a new tab, with noopener and a hidden «opens in a new tab»', () => {
+  let count = 0;
+  for (const p of pages) {
+    for (const a of anchors(html(p))) {
+      const href = hrefOf(a);
+      if (!isExternal(href)) continue;
+      count++;
+      assert.match(a.attrs, /\starget="_blank"/, `${p}: ${href} lacks target="_blank"`);
+      const rel = (a.attrs.match(/\srel="([^"]*)"/i) || [])[1] || '';
+      assert.ok(rel.split(/\s+/).includes('noopener'), `${p}: ${href} lacks rel="noopener"`);
+      assert.match(a.inner, /<span class="sr-only">\s*\(opens in a new tab\)<\/span>/, `${p}: ${href} lacks the hidden «(opens in a new tab)»`);
+      if (!/\sclass="[^"]*\bbtn\b/.test(a.attrs) && !/\sclass="[^"]*\bbrand\b/.test(a.attrs)) {
+        assert.match(a.inner, /<span class="ext" aria-hidden="true">↗<\/span>/, `${p}: text link ${href} lacks the aria-hidden ↗ mark`);
+      } else {
+        assert.doesNotMatch(a.inner, /class="ext"/, `${p}: a button must not get the ↗ mark`);
+      }
+    }
+  }
+  assert.ok(count >= 20, `only ${count} external links found`);
+});
+
+test('no link inside the site opens a new tab, and the helper classes exist in the CSS', () => {
+  for (const p of pages) {
+    for (const a of anchors(html(p))) {
+      const href = hrefOf(a);
+      if (!href || isExternal(href) || /^mailto:/i.test(href)) continue;
+      assert.doesNotMatch(a.attrs, /\starget=/, `${p}: internal link ${href} must stay in the same tab`);
+    }
+  }
+  const css = read('site/style.css');
+  assert.match(css, /\.sr-only\s*\{/);
+  assert.match(css, /\.ext\s*\{/);
+});
