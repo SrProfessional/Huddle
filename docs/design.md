@@ -392,3 +392,55 @@ Two sessions that start together may both run it: the second finds nothing or fa
 `fs.realpathSync` and one normal form, case-insensitively on Windows and macOS (their default file systems) and
 case-sensitively on Linux. No shell, no `rm -rf`, no `du`: only `git` and Node's own modules. CI runs the tests on
 `ubuntu-latest`, `macos-latest` and `windows-latest`.
+
+## 17. Updating a repo: `huddle update` and `/huddle-update`
+
+Asked by the AI Manager on 2026-11-11 (Issue #81). `/huddle-setup` is a first-install flow; after a release the only way to
+refresh a repo was to run it again. Updating a repo to the installed Huddle is now one command and, when the new release needs
+an answer the repo does not have yet, only that question.
+
+**What it is.** `/huddle-setup` installs Huddle in a repo for the first time. `/huddle-update` brings an already-set-up repo
+to the installed Huddle version. They share one code path (`lib/setup/index.mjs`); `/huddle-setup` in a repo that already has
+a valid `huddle.json` tells the session to use `/huddle-update` (and, as §14 says, it only refreshes and asks nothing).
+
+**Which version the repo is at.** `huddle.json` has `setup_version` (string, `major.minor.patch`), written by setup and by
+update, never by hand. Absent means «set up before this existed»: it counts as `0.0.0`, so every question that applies is
+asked once. Setup writes it too, except when a question is still pending: then it keeps the old one so the question is not hidden.
+
+**New questions come from a registry.** `lib/setup/questions.mjs` is a list of
+`{ id, since, key, ask, options?, default?, needed(config) }`: `since` is the release that introduced the question, `key` the
+`huddle.json` key its answer is written to, `needed(config)` whether this repo still has to answer it. A question is
+**pending** when `since` is newer than the repo's `setup_version` **and** `needed(config)` is true (the key is not set yet). A
+question never repeats: once its key is in `huddle.json` it is not asked again, whatever the version. The registry is **empty
+in 0.4.x** (no release asks anything yet): the mechanism ships first, and the tests use a fake registry. The first release that
+needs a new answer adds its entry.
+
+**The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
+only files, never the network.
+
+- No flags: refreshes the block of `CLAUDE.md`, the templates and the labels job exactly as setup does (a template the
+  project edited is kept and reported), writes `setup_version`, and prints what changed. Exit 0.
+- Pending questions without answers: it changes **nothing**, prints each question (`--json`: `pendingQuestions: [{ id, key,
+  ask, options, default }]`) and exits **3**, so the skill knows to ask.
+- `--answer key=value` gives an answer (the value is read as JSON when it is, else as text). The key must be one of the
+  pending questions and the value must pass `huddle.schema.json`; any other key is refused, so no secret ever goes in
+  `huddle.json`. When every pending question is answered it refreshes and writes the answers.
+- `--check` writes nothing: `up to date` (exit 0) or what would change and which questions are pending (exit 3). `--dry-run`
+  prints the full change and writes nothing (exit 3 when a question is pending, else 0).
+- No `huddle.json`: it fails (exit 1) and says to run `/huddle-setup`. A bad flag is exit 2.
+
+**The skill `/huddle-update`.** Runs `huddle update --json`. No pending questions: it has already updated; the session reports
+what changed (the block, the templates written, the templates kept because they were edited, the notes) and says to commit it
+on a branch and open a PR/MR. Pending questions: it asks **only those**, in one message, in the developer's language, offering
+the default, then runs `huddle update --answer ...`. It never asks for a token. The AI Manager's session does every step it
+can (§13).
+
+**Where a repo is told it needs it.**
+
+- `huddle doctor` has a `setup` line: ✔ `set up for 0.4.2 (up to date)`; ⚠ `set up for 0.4.1, Huddle is 0.4.2: run
+  /huddle-update on a branch` (when `update --check` would change something or has a question); ✔ with a note when only the
+  version differs and nothing would change. It reads files only.
+- The update notice (`lib/core/update.mjs`) for the AI Manager says `/huddle-update`. The developer's notice is unchanged.
+
+**What it never does.** It never overwrites a template the project edited, never changes a key of `huddle.json` it was not
+given or does not own, never commits, never touches the network.
