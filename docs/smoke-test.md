@@ -464,6 +464,23 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.5.0
+
+Run of: 2026-11-11, Huddle `main` with Issues #79, #81, #83 and #85 merged (commit 9b76545), by the AI Manager's Claude Code session. A minor
+release (a new command and two new skills): only the new parts were checked; the 0.4.2 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| First install writes `setup_version` (#81) | ✔ | covered by tests | `lib/setup/cli.mjs` in an empty folder wrote `huddle.json` with `setup_version` 0.5.0. |
+| `huddle update --check` (#81) | ✔ | covered by tests | Current repo: exit 0 «up to date». Set up for 0.4.2 with nothing to refresh: exit 0. With a stale `CLAUDE.md` block: exit 3 and `Nothing was changed`. |
+| `huddle update` (#81) | ✔ | covered by tests | Refreshed the stale block and wrote `setup_version` 0.5.0: exit 0; a second `--check` says up to date. |
+| `huddle update` refusals (#81) | ✔ | covered by tests | `--answer token=x` → exit 1, «not a pending question» and the value is never echoed; `--bogus` → exit 2 with the usage line. |
+| `huddle update` with a pending question (#81) | covered by tests | covered by tests | The real registry is empty in 0.5.0, so a fake one is used in `test/setup/update.test.mjs` and `test/cli/update-command.test.mjs`: nothing is written and the exit is 3. |
+| `huddle doctor` `setup` line (#81) | covered by tests | covered by tests | The three states (up to date, needs update, only the version differs) are tested with canned status; not run against a live login in this run. |
+| `/huddle-continue` (#83) | covered by tests | covered by tests | The skill is tested as text; how a model follows it in a live session was not run. |
+| Stop labels (#85) | covered by tests | covered by tests | `plan()` and the fake `gh` world: `needs decision` and `changes requested from AI Manager` stand alone, and `in progress` / `in review` come back after the answer. Not run against a live GitHub project in this run. |
+| `/huddle-setup` in a configured repo (#79) | covered by tests | covered by tests | The skill's text and the CLI contract are tested; a live session was not run. |
+
 ### Results 0.4.2
 
 Run of: 2026-11-11, Huddle `main` with Issues #74 and #76 merged (commit bb15c8b), by the AI Manager's Claude Code session. A minor-sized patch

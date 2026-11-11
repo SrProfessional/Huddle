@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-11
+
 ### Added
 
 - `/huddle-continue <n>` (Issue #83): continues an Issue that was already started after the AI Manager answered it (a review or a decision).
