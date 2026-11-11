@@ -53,8 +53,9 @@ huddle/
     huddle-issue/SKILL.md         the AI Manager writes a new Issue from the template
     huddle-review/SKILL.md        the AI Manager reviews a PR/MR and posts the request or merges
     huddle-decide/SKILL.md        the AI Manager answers a «needs decision»
+    huddle-watch/SKILL.md         the AI Manager's session checks every few minutes what waits for it and reviews it
   hooks/hooks.json                SessionStart (startup|resume) -> bin/huddle hook
-  bin/huddle                      one CLI: labels | wait | take | pending | hook | doctor
+  bin/huddle                      one CLI: labels | wait | take | pending | queue | hook | doctor (and progress, areas, team, clean, update)
   lib/
     core/                         pure logic, no network (today: issue-status.mjs, review-requests.mjs)
     platform/
@@ -478,3 +479,65 @@ started (it has a branch), `/huddle-start` says that this is `/huddle-continue` 
 
 **The AI Manager's prompt.** The first line of a «Prompt for Claude Code» comment (`huddle-review`, `huddle-decide`) is now
 `First run /huddle-continue <n>: it marks this request as taken (👀), so the Issue shows «in progress».`
+
+
+## 19. Watching what waits for the AI Manager: `huddle queue` and `/huddle-watch`
+
+Asked on 2026-11-11 (Issue #88). The AI Manager had to tell its session to look at the PRs and questions that wait for it. One
+command now starts a check every few minutes inside the AI Manager's Claude Code session, and a read-only CLI command lists what waits.
+
+**What waits for the AI Manager.** Three cases, taken from the same data `huddle labels` reads (the open Issues, the open non-draft
+PRs/MRs and `requestState`), **not** from the label text, so the answer is right before the labels job runs:
+
+- `review`: an open Issue with an open, non-draft PR/MR whose request state is `null` (the work is done and nobody asked for changes:
+  the «in review» status of `statusOf`). A pending or taken request is the developer's turn, not the AI Manager's.
+- `decision`: an open Issue with the label `needs decision` and request state `null` (nobody answered yet).
+- `triage`: an open Issue with the label `needs triage` (a raw bug report).
+
+Rules that follow from `plan` and `statusOf` (they decide what the labels say, so the queue agrees with them):
+
+- An Issue appears **once**, in this order: `triage`, then `decision`, then `review`. A raw report is never reviewed (`plan` skips it) and a
+  question stops the work, so its PR is not «in review» either.
+- `triage` and `decision` are listed for any open Issue, with or without a «Depends on» section. `review` follows `plan`: an Issue with
+  **no «Depends on» section is not managed** and is never listed for `review`.
+- A closed Issue is never listed. The queue does not look at «Depends on» being merged: a PR for a blocked Issue is still a PR to review.
+
+**`huddle queue [--json]`.** Read-only: it never writes a label, a comment or a file. The pure function
+`waitingFor({ open, openPrs, requests })` in `lib/core/queue.mjs` (`requests`: Issue number to `requestState`, as `plan` takes it) returns
+the items sorted by Issue number. Text output:
+
+```text
+Waiting for the AI Manager:
+  #42  review    PR #51   Add login form
+  #47  decision           Which payment provider?
+  #53  triage             Login page crashes on Safari
+```
+
+or `Nothing is waiting for the AI Manager.` (on GitLab the reference reads `MR !51`). `--json` prints
+`{ "waiting": [{ "issue": 42, "title": "...", "waits": "review", "pr": 51, "head": "<the PR's head commit sha>" }, ...] }`; `pr` and `head`
+only for `review`. `head` comes from the adapter operation `reviewHead(n)` (§7), the head commit sha of PR/MR `n` (GitHub: `gh pr view <n> --json headRefOid`;
+GitLab: `diff_refs.head_sha` of the MR), one call per `review` item. It is best effort: if one cannot be read, that item prints
+`head: null` and one line goes to stderr (`huddle queue: could not read the head of PR #51 (Issue #42): <reason>`), and the exit is still 0.
+Exit 0 when it ran, with or without items; 1 on a platform error, with one clear line; 2 on a bad flag. A repo without `huddle.json`
+gets the same «not configured» error as the other commands.
+
+**The skill `/huddle-watch [interval|off|status]`.** For the AI Manager only: it runs `huddle doctor` first and stops with a clear line
+if the login is not `ai_manager`.
+
+1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). `CronList` first: a job whose prompt starts with
+   `[huddle-watch]` means it is already on, so no second one starts and the skill says when it runs next. Otherwise `CronCreate` a
+   recurring job on a minute that is not :00 or :30 (for example `2-59/5 * * * *`) whose prompt starts with `[huddle-watch]`: run
+   `huddle queue --json`; nothing waits, say nothing; otherwise handle the items one at a time, oldest first.
+2. The first message says that **turning the watch on is the AI Manager's order to review and merge, as if they asked for each review**,
+   what stops it (`/huddle-watch off`, or closing Claude Code, because the job lives only in the session) and that a recurring job
+   expires after 7 days.
+3. **`review`:** `/huddle-review` on that PR with its usual rules: all good, approve and merge; changes needed, the «🔁 Changes
+   requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a failing test, a missing requirement, a
+   merge the platform refuses, a missing permission) the watch says it once, with the reason, and does not try that PR with that `head`
+   again; a new commit changes `head` and makes it a new item.
+4. **`decision` and `triage` are never answered by the watch:** they are the person's decisions. One line per new item, once per Issue.
+5. **Off:** `CronList`, `CronDelete` the `[huddle-watch]` job. Nothing running: it says so. **Status:** on or off, the interval and the next run.
+6. «Who does each step», and every command in the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` form.
+
+**Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
+computer off, starting the watch when a session opens. A job fires only while the session is open and idle.
