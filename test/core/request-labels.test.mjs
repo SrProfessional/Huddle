@@ -67,8 +67,8 @@ test('a PR with a pending request is not «in review»: it has no status label u
   assert.equal(statusOf({ ...base, review: true, request: null }).label, LABELS.review.name);
 });
 
-test('without a PR, a pending request keeps the usual label and a taken one means «in progress»', () => {
-  assert.equal(statusOf({ ...base, started: true, request: 'pending' }).label, LABELS.progress.name);
+test('without a PR, a pending request has no status label (Issue #85: in progress never sits next to changes requested) and a taken one means «in progress»', () => {
+  assert.equal(statusOf({ ...base, started: true, request: 'pending' }).label, null);
   assert.equal(statusOf({ ...base, started: false, request: 'taken' }).label, LABELS.progress.name);
 });
 

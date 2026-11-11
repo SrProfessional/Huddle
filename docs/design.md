@@ -34,6 +34,8 @@ A team method for people who code with Claude Code. The idea behind it:
   AI Manager» comment.
 - The status of each Issue lives in labels: `ready`, `assigned`, `in progress`, `in review`, `blocked`, `needs decision`,
   `changes requested from AI Manager`. A job updates them from each Issue's «Depends on» section.
+  `needs decision` and `changes requested from AI Manager` are stop labels (Issue #85): while one is on, `in progress` and `in review` are off, and the
+  usual status comes back once the request is taken or the question is answered.
 - After opening its PR, the session waits in the background for the AI Manager's review and continues on its own. When
   Claude Code is reopened, a hook says whether a request is pending.
 

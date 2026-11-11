@@ -20,6 +20,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Fixed
 
+- `in progress` and `in review` no longer sit next to `needs decision` or `changes requested from AI Manager` (Issue #85). Those two are stop labels: while one is on, the labels job shows only it, and the usual status comes back by itself once the request is taken or the question is answered. A pending request now has no status label with or without an open PR.
+
 - `/huddle-setup` no longer asks the initial questions again in a repo that already has a valid `huddle.json` (Issue #79). The skill
   now reads `huddle.json` first: a valid file means a refresh that asks nothing (the block and the templates are updated, and the report
   says what changed and which templates were kept because the project edited them); a missing or incomplete file is asked only for the
