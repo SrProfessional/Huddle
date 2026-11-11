@@ -1,6 +1,6 @@
 ---
 name: huddle-start
-description: Use when a developer starts an Issue, continues one that is in progress, or the session opens with a pending request from the AI Manager.
+description: Use when a developer starts an Issue for the first time. To pick one up again after the AI Manager answered it, use huddle-continue.
 ---
 
 # huddle-start
@@ -19,7 +19,7 @@ branch, production or secrets. The rules are in the Huddle block of `CLAUDE.md`;
 6. End with «✅ Issue #N finished» (or «⛔ Issue #N stopped»), the link, the counts, what was not done, the next step. The next step is
    one the session takes, or numbered «🙋 Only you» steps when only the person can do it (see «Who does each step»).
 7. Start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`. When it ends, a review request is
-   pending: go to «Continue» below.
+   pending: the developer runs `/huddle-continue <n>`.
 
 ## A Design Issue (the Issue has the `design` label, or the Design template's «Screens» and «Visual guide» sections)
 
@@ -45,17 +45,16 @@ branch in its own worktree, the `in progress` label). Then:
      the decisions, and «What was NOT done». If a screenshot cannot be taken, say so there; never leave it out silently.
    - Close with the usual message: «✅ Issue #N finished», the link, what was not done (there are no test counts, say «no code, no tests»), the next step.
    - Start the wait in the background as in «Start an Issue».
-5. **Changes requested.** The designer continues in this same session (see «Continue»). Each new round is a new commit, and `README.md`
+5. **Changes requested.** The designer continues in this same session (`/huddle-continue <n>`). Each new round is a new commit, and `README.md`
    gets that round's decisions and its number. The repo keeps the history, since Claude Design has no version history. Republish the same artifact,
    save `design.html` and the `screens/` again, push, then comment «Ready for review again» (no test counts).
 
-## Continue (`/huddle-start`, or the hook said a request is pending)
+## Continuing is `/huddle-continue <n>`
 
-1. Tell the developer which request is pending and ask if you should continue.
-2. If yes, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`. It marks the request 👀 and prints the AI Manager's prompt.
-3. Follow that prompt as if the developer had pasted it; same rules. Only comments by the `ai_manager` login count.
-4. Push, then comment «Ready for review again» with the counts. Do not touch the `changes requested from AI Manager`
-   label: the labels job decides it. Then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>` again.
+`/huddle-start` only starts. To pick an Issue up again after the AI Manager answered it (a review or a decision, or when the hook says
+a request is pending), the developer runs `/huddle-continue <n>`. If `/huddle-start <n>` is run on an Issue that is already started (it
+already has a branch), say that this is `/huddle-continue` and continue it anyway by following that skill, so old prompts that say
+«First run /huddle-start <n>» keep working. Do not start it over.
 
 ## When you cannot go on
 

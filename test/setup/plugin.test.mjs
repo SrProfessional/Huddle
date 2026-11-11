@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const abs = (rel) => fileURLToPath(new URL(`../../${rel}`, import.meta.url));
 const read = (rel) => readFileSync(abs(rel), 'utf8');
-const SKILLS = ['huddle-setup', 'huddle-start', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update'];
+const SKILLS = ['huddle-setup', 'huddle-start', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update', 'huddle-continue'];
 
 const frontmatter = (text) => {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
@@ -56,7 +56,10 @@ test('only the AI Manager merges: review says so, start never merges and uses wa
   const start = read('skills/huddle-start/SKILL.md');
   assert.match(start, /never merge/i);
   assert.match(start, /huddle" wait/);
-  assert.match(start, /huddle" take/);
+  const again = read('skills/huddle-continue/SKILL.md');
+  assert.match(again, /never merge/i);
+  assert.match(again, /huddle" wait/);
+  assert.match(again, /huddle" take/);
 });
 
 test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a team repo has no bin/huddle and no huddle on the PATH', () => {
@@ -71,7 +74,7 @@ test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a
 test('the label is always named in full: «changes requested from AI Manager»', () => {
   for (const name of SKILLS) assert.doesNotMatch(read(`skills/${name}/SKILL.md`), /changes requested(?! from AI Manager)/, name);
   assert.match(read('skills/huddle-review/SKILL.md'), /changes requested from AI Manager/);
-  assert.match(read('skills/huddle-start/SKILL.md'), /changes requested from AI Manager/);
+  assert.match(read('skills/huddle-continue/SKILL.md'), /changes requested from AI Manager/);
 });
 
 test('setup says an empty max open per person means no limit, and gives no default of 2', () => {
@@ -91,7 +94,7 @@ const templateOf = (name) => {
 test('the review and decide prompt templates start with the take step', () => {
   for (const name of ['huddle-review', 'huddle-decide']) {
     const first = templateOf(name).split('\n')[0];
-    assert.match(first, /^First run \/huddle-start <n>: it marks this request as taken \(👀\), so the Issue shows «in progress»\./, name);
+    assert.match(first, /^First run \/huddle-continue <n>: it marks this request as taken \(👀\), so the Issue shows «in progress»\./, name);
   }
 });
 

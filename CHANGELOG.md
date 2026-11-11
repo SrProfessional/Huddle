@@ -7,6 +7,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- `/huddle-continue <n>` (Issue #83): continues an Issue that was already started after the AI Manager answered it (a review or a decision).
+  It enters the Issue's worktree, takes the pending request and follows it, so the developer no longer copies the prompt by hand.
+  `/huddle-start <n>` now only starts (on an Issue that is already started it says so and continues it anyway, so old prompts keep working),
+  and the first line of the AI Manager's prompts says `First run /huddle-continue <n>`. No new CLI command.
+
 - `huddle update` and `/huddle-update` (Issue #81): bring a repo that already has Huddle to the installed version in one step, and ask
   only the questions a new release added. `huddle.json` gets `setup_version`; new questions come from a registry
   (`lib/setup/questions.mjs`, empty in 0.4.x) and are never asked twice. `huddle update [--check] [--dry-run] [--json] [--answer key=value]`

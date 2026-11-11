@@ -76,7 +76,8 @@ test counts, what was not done and your next step. If you do not see it, the ses
 
 After the PR is open the session waits in the background. When the AI Manager asks for changes, it continues on its own.
 If you closed Claude Code meanwhile, the next time you open it a hook says there is a pending request and asks if it
-should continue. `huddle pending` lists them.
+should continue. You can also run `/huddle-continue <n>` yourself: it picks up the AI Manager's answer on Issue `n`, so you
+never copy the prompt by hand. `huddle pending` lists the requests.
 
 ## If you are a designer
 

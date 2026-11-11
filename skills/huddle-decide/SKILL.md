@@ -20,7 +20,7 @@ session never answers its own decision.
 ## Prompt for Claude Code
 
 ```text
-First run /huddle-start <n>: it marks this request as taken (👀), so the Issue shows «in progress».
+First run /huddle-continue <n>: it marks this request as taken (👀), so the Issue shows «in progress».
 Decision: <the chosen option and why, in one or two lines>.
 <what to do now, concrete; end with: push, then comment «Ready for review again» with the counts>
 ```
