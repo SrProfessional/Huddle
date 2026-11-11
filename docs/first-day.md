@@ -4,7 +4,9 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
 
 ## 1. Set up your machine
 
-1. Install Claude Code, Node 22 or newer and `git`.
+1. Install Claude Code, Node 22 or newer and `git`. Then set your language once, in your personal
+   `~/.claude/settings.json` (not in the repo): add `"language": "spanish"` (or your own language). Claude then chats with
+   you in it, even after reading English Issue prompts or Huddle's output; everything written to the repo stays in English.
 2. Install `gh` (GitHub) or `glab` (GitLab) and log in yourself, with `gh auth login` or `glab auth login`. For a
    self-managed GitLab add `--hostname <your server>`. Never paste a token into a chat, a file or an Issue.
 3. Install Huddle once on your machine, whatever the repo commits. In a terminal run, then open a new session:

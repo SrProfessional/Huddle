@@ -5,6 +5,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- The session no longer switches to English in a repo set up with Huddle (Issue #74). The block of `CLAUDE.md` now has a
+  «Language» rule: chat in the developer's language (the `language` key of their `~/.claude/settings.json`, else the
+  language of their own words, never that of a pasted Issue prompt or of Huddle's output) and write everything in the repo
+  in English. The first-day guide tells each developer to set `language` once. Run `/huddle-setup` again in each repo to
+  refresh the block.
+
 ## [0.4.1] - 2026-11-09
 
 ### Fixed

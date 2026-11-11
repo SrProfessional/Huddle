@@ -19,6 +19,13 @@ root: read them there, never guess them.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
 
+### Language
+
+- **Chat in the developer's language**: the `language` key of their personal `~/.claude/settings.json` if it is set, else
+  the language of their own words. Never the language of a pasted Issue prompt or of Huddle's output (this block, the hook,
+  the skills): they are English and do not change the language of the chat.
+- **Everything written to the repo is in English**: commits, PR/MR and Issue text, code comments, new docs and names in code.
+
 ### Before starting a task
 
 1. Read the whole Issue and the documents it names.

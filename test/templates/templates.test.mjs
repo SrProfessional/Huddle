@@ -46,6 +46,21 @@ test('CLAUDE block sits between the v1 markers, once, and refers to huddle.json'
   assert.doesNotMatch(text, /SrProfessional/);
 });
 
+test('the Huddle block has a «Language» rule: chat in the developer\'s language, the repo in English (Issue #74)', () => {
+  const text = read('CLAUDE.huddle.md');
+  const m = text.match(/^###? Language\s*$([\s\S]*?)(?=^###? |<!-- huddle:end)/m);
+  assert.ok(m, 'the block has a «Language» heading');
+  const rule = m[1];
+  assert.match(rule, /developer's language/i, 'chat in the developer\'s language');
+  assert.match(rule, /`language`/, 'names the language key');
+  assert.match(rule, /~\/\.claude\/settings\.json/, 'of the personal settings file');
+  assert.match(rule, /own words/i, 'else the language of their own words');
+  assert.match(rule, /never[^.]*pasted Issue prompt/i, 'never the language of a pasted Issue prompt');
+  assert.match(rule, /Huddle's output/i, 'nor of Huddle\'s output');
+  assert.match(rule, /English/, 'everything written to the repo is in English');
+  for (const w of ['commits', 'Issue', 'comments', 'docs', 'names']) assert.ok(rule.includes(w), `the English list names ${w}`);
+});
+
 for (const [name, file] of [['GitHub', 'github/ISSUE_TEMPLATE/task.md'], ['GitLab', 'gitlab/issue_templates/Task.md']]) {
   test(`${name} Issue template keeps the headings exactly`, () => {
     const lines = read(file).split(/\r?\n/);
