@@ -350,3 +350,45 @@ and Deliverable. Its allowed files are always `design/<issue number>-<slug>/`: a
    version history.
 5. After the merge, `/huddle-review` offers the build Issue «Build <screen> from design #N», which depends on the design
    Issue and takes the `design/` folder as its spec.
+
+## 16. Finished worktrees clean themselves
+
+Asked by the AI Manager on 2026-11-11 (Issue #76). Every Issue's session works in its own worktree in `.claude/worktrees/`
+(an AI Manager's review adds `rev-*` ones), and nothing removed them. In a project with dependencies each carries its own
+`node_modules`, so they filled the disk silently. Huddle now removes the finished ones, on Windows, macOS and Linux.
+
+**The command.** `huddle clean [--dry-run] [--no-fetch] [--quiet]`. It lists the worktrees with
+`git worktree list --porcelain` and removes the ones that pass **every** check below. For each one it prints
+`removed <path>` or `kept <path>: <reason>`. `--dry-run` prints the same and removes nothing; `--quiet` prints nothing (the
+hook). It calls only `git`, never `gh` or `glab`, and needs no login.
+
+**What it removes.** A worktree is removed only when all of these hold; one failed check keeps it:
+
+1. It is under `<main worktree>/.claude/worktrees/`. The main worktree is the first entry of `git worktree list`, not
+   `ctx.root` (inside a worktree, `findRoot` finds the worktree's own `huddle.json`). A worktree anywhere else is never touched.
+2. It is not the main worktree, not the one the command runs in (`cwd` inside it), not locked and not bare.
+3. It has no uncommitted work: `git status --porcelain` is empty (ignored files such as `node_modules` do not count).
+4. Everything in it is merged: its HEAD commit is an ancestor of the default branch (`git merge-base --is-ancestor`). That
+   covers branches and the detached `rev-*` worktrees. The base is `origin/<default_branch>` of `huddle.json`, then
+   `origin/HEAD`, then `origin/master`; when none resolves, **nothing is removed**. A squash merge is not detected, so that
+   worktree stays: the rule errs toward keeping.
+5. It has not been touched for 24 hours (modification time of its HEAD reflog, `<git-dir>/logs/HEAD`). A branch just created
+   from `main` is also an ancestor of `main` and clean; it must not go while a session starts on it.
+
+**Fetch.** Before judging it runs `git fetch origin --quiet` once, best effort and limited to 20 s, because a merge on the
+platform is only visible after a fetch. A failure (offline) is not an error: it judges with what it has. `--no-fetch` skips it.
+
+**How it removes.** `node_modules` first, with `fs.rm` (`recursive`, `force`, `maxRetries`, which copes with Windows file
+locks and deep trees); then `git worktree remove <path>` **without `--force`** (git itself refuses an unclean worktree: a
+second guard); then `git worktree prune`. A failure on one worktree (a file in use, another session) is
+`kept <path>: could not remove: <first line>` and the run goes on. The local branch is **not** deleted.
+
+**Automatic.** The SessionStart hook starts `huddle clean --quiet` as a detached process (`detached`, `stdio: 'ignore'`,
+`windowsHide: true`, `unref()`), so a slow delete never delays or breaks the start of a session, and the hook's output does not
+change. `huddle.json` has `clean_worktrees` (boolean, default `true`); `false` turns the hook off and the command still works.
+Two sessions that start together may both run it: the second finds nothing or fails on a path that is gone, silently.
+
+**Windows, macOS and Linux.** Paths from git (`D:/x`, `/private/var/x`) and from Node (`D:\x`, `/var/x`) are compared after
+`fs.realpathSync` and one normal form, case-insensitively on Windows and macOS (their default file systems) and
+case-sensitively on Linux. No shell, no `rm -rf`, no `du`: only `git` and Node's own modules. CI runs the tests on
+`ubuntu-latest`, `macos-latest` and `windows-latest`.
