@@ -27,6 +27,8 @@ Issue's «Depends on» section and from the comments.
 
 The names can be changed under `labels` in `huddle.json`.
 
+**Stop labels.** `needs decision` and `changes requested from AI Manager` mean the work waits for someone else, so they stand alone: `in progress` (a session is working) and `in review` (the AI Manager is working) are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.
+
 ## Dependencies
 
 An Issue lists what it needs under «Depends on», one `- #N` per line. A dependency counts as merged only when the Issue is

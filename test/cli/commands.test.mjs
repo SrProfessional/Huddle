@@ -346,7 +346,7 @@ test('labels puts «changes requested» on an Issue whose prompt waits, and --dr
   assert.deepEqual(dry.world.labelsOf(5), ['in progress']);
   const h = harness({ setup });
   await run(['labels'], h.ctx);
-  assert.deepEqual(h.world.labelsOf(5), ['in progress', CHANGES]);
+  assert.deepEqual(h.world.labelsOf(5), [CHANGES], 'a pending request: only the stop label shows, «in progress» goes (Issue #85)');
   h.out.length = 0;
   await run(['labels'], h.ctx);
   assert.doesNotMatch(h.text(), new RegExp(CHANGES), 'a second run changes nothing');
@@ -399,14 +399,14 @@ test('labels takes «needs decision» off when the AI Manager answered with a pr
     w.comment(5, request(411, { createdAt: '2026-11-05T10:00:00Z' }));
   } });
   await run(['labels'], h.ctx);
-  assert.deepEqual(h.world.labelsOf(5), ['in progress', CHANGES]);
+  assert.deepEqual(h.world.labelsOf(5), [CHANGES]);
   const waiting = harness({ setup: (w) => {
     w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in progress', 'needs decision'] });
     w.comment(5, request(411, { createdAt: '2026-11-05T08:00:00Z' }));
     w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the AI Manager: which one?' });
   } });
   await run(['labels'], waiting.ctx);
-  assert.deepEqual(waiting.world.labelsOf(5), ['in progress', 'needs decision'], 'the question is newer: it waits for the AI Manager');
+  assert.deepEqual(waiting.world.labelsOf(5), ['needs decision'], 'the question is newer: it waits for the AI Manager, and «in progress» goes (Issue #85)');
 });
 
 test('labels leaves Issues without «Depends on» alone, and uses the renamed labels', async () => {
@@ -415,7 +415,7 @@ test('labels leaves Issues without «Depends on» alone, and uses the renamed la
   assert.deepEqual(unmanaged.world.labelsOf(5), []);
   const renamed = harness({ config: { ...CONFIG, labels: { changes: 'needs-changes' } }, setup: requestWorld((w) => w.comment(5, request(401))) });
   await run(['labels'], renamed.ctx);
-  assert.deepEqual(renamed.world.labelsOf(5), ['in progress', 'needs-changes']);
+  assert.deepEqual(renamed.world.labelsOf(5), ['needs-changes']);
 });
 
 test('hook narrows to the Issue of the branch too', async () => {
