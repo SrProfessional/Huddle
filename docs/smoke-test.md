@@ -464,6 +464,18 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.4.2
+
+Run of: 2026-11-11, Huddle `main` with Issues #74 and #76 merged (commit bb15c8b), by the AI Manager's Claude Code session. A minor-sized patch
+release: only the two changes were checked; the 0.4.1 and 0.4.0 tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Setup writes the «Language» rule (#74) | ✔ | covered by tests | `lib/setup/cli.mjs` in an empty git repo wrote `CLAUDE.md` with the `### Language` section between the markers. The block is the same for both platforms. |
+| `huddle clean --dry-run` on the Huddle repo (#76) | ✔ | covered by tests | 43 linked worktrees: 39 would be removed; kept: one with uncommitted changes, two touched less than 24 hours ago and the current one. Nothing was removed. |
+| `huddle clean` removes a finished worktree (#76) | ✔ | covered by tests | A test with real `git` in a temporary folder (merged, unmerged, dirty and fresh worktrees): only the merged one went, with its `node_modules`. CI runs it on Ubuntu, macOS and Windows, Node 22 and 24: all seven checks of PR #77 passed. |
+| Session-start hook starts `huddle clean` (#76) | ✔ | covered by tests | `huddle hook` in a throwaway repo with a merged, clean, 3-day-old worktree (with a `node_modules`): the hook exited 0 in 0.8 s with no output, and the background process it started removed the worktree. Tests: it starts once, not when `clean_worktrees` is `false`. Not run inside a live Claude Code session. |
+
 ### Results 0.4.1
 
 Run of: 2026-11-09, Huddle `main` with Issues #69 and #70 merged, by the AI Manager's Claude Code session. A patch release: only
