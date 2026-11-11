@@ -210,6 +210,34 @@ about it.
 | See what the labels job would change | `huddle labels --dry-run` |
 | Continue after a request | `/huddle-start`, or answer yes to the hook |
 
+## Old worktrees clean themselves
+
+Every Issue's session works in a folder of its own, a git worktree in `.claude/worktrees/`. In a project with dependencies each
+folder carries its own `node_modules`, and finished ones used to stay forever until the disk was full. Now Huddle removes them.
+It works the same on Windows, macOS and Linux.
+
+**When.** Each time a session starts, in the background: it never slows the start down. You can also run it yourself:
+
+```text
+huddle clean --dry-run
+huddle clean
+```
+
+The first only says what it would do. Each worktree gets a line: `removed <folder>` or `kept <folder>: <why>`.
+
+**What it removes.** Only a worktree under `.claude/worktrees/` that passes every check:
+
+- its work is merged into the default branch (`main` unless `huddle.json` says otherwise);
+- nothing in it is uncommitted;
+- nobody touched it for 24 hours (a branch that was just created is also «merged», and must not go);
+- it is not locked, and it is not the folder the command runs in.
+
+**What it keeps, and why.** Anything unmerged or with unsaved changes, always. A PR that was merged with *squash* is not
+recognised (git cannot see it), so that worktree stays: remove it by hand with `git worktree remove <folder>`. The local branch
+is never deleted. Before judging, it runs `git fetch`; offline, it judges with what it already has.
+
+**Turn it off.** Put `"clean_worktrees": false` in `huddle.json`: the session start stops doing it, and `huddle clean` still works by hand.
+
 ## Installing Huddle
 
 Every developer installs Huddle once on their own machine: in a terminal run `claude plugin marketplace add SrProfessional/Huddle`

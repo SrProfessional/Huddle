@@ -5,6 +5,19 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- Finished worktrees clean themselves (Issue #76). Every Issue's session works in a worktree in `.claude/worktrees/` and nothing
+  removed them, so in a project with dependencies each one kept its own `node_modules` until the disk was full. New command
+  `huddle clean [--dry-run] [--no-fetch] [--quiet]` removes a worktree only when all of this holds: it is under
+  `<main worktree>/.claude/worktrees/`, it is not the current or a locked one, nothing in it is uncommitted, its commit is
+  merged into `origin/<default_branch>`, and it has not been touched for 24 hours. It deletes `node_modules` first (with retries
+  for Windows file locks), then `git worktree remove` without `--force`, then `git worktree prune`; the local branch stays.
+  The SessionStart hook starts it as a detached background process, so a slow delete never delays a session; `"clean_worktrees": false`
+  in `huddle.json` turns that off. Git only (no `gh`/`glab`); squash merges are not detected, so those worktrees stay. Works on Windows,
+  macOS and Linux: paths are compared after `realpath`, case-insensitively on Windows and macOS. CI now runs on all three.
+  Design: `docs/design.md` §16.
+
 ### Fixed
 
 - The session no longer switches to English in a repo set up with Huddle (Issue #74). The block of `CLAUDE.md` now has a
