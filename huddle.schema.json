@@ -17,6 +17,7 @@
     "default_branch": { "type": "string", "minLength": 1 },
     "progress_issue": { "type": "boolean", "description": "false turns off the «Huddle progress» Issue that `huddle labels` keeps up to date. Default: true." },
     "clean_worktrees": { "type": "boolean", "description": "false stops the session start from removing finished worktrees (clean, merged into the default branch, untouched for 24 hours). `huddle clean` still works by hand. Default: true." },
+    "setup_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "The Huddle release this repo was last set up or updated for (major.minor.patch). Written by setup and update, never by hand." },
     "labels": {
       "type": "object",
       "additionalProperties": false,
