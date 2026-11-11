@@ -464,6 +464,17 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.5.1
+
+Run of: 2026-11-11, Huddle `main` with Issue #88 merged (commit 757a441), by the AI Manager's Claude Code session. A minor-sized release (one new command and
+one new skill): only the new parts were checked; the 0.5.0 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| `huddle queue` and `huddle queue --json` (#88) | ✔ | covered by tests | Run live on the Huddle repo with PR #89 open: it listed Issue #88 as `review` with PR #89 and the real head sha (2e0235c), in text and in JSON; it wrote nothing. GitLab: the `reviewHead` contract test with the fake `glab`. |
+| `reviewHead(n)` in the adapters (#88) | ✔ | covered by tests | GitHub through the live `queue` run above; both platforms through the shared contract tests. |
+| `/huddle-watch` on, off and status (#88) | covered by tests | covered by tests | The skill is tested as text (`CronList` before `CronCreate`, no second job, `CronDelete` for off, the 7-day expiry, decisions and triage never answered). It was not run in a live session: the first live use should check that `status` shows the job and `off` removes it. |
+
 ### Results 0.5.0
 
 Run of: 2026-11-11, Huddle `main` with Issues #79, #81, #83 and #85 merged (commit 9b76545), by the AI Manager's Claude Code session. A minor
