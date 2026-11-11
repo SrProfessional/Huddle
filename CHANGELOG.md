@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-11
+
 ### Added
 
 - Finished worktrees clean themselves (Issue #76). Every Issue's session works in a worktree in `.claude/worktrees/` and nothing
