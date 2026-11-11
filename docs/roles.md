@@ -38,7 +38,8 @@ Takes an Issue, works on its own branch and answers what the session asks.
 
 | Does | Skill or command |
 |---|---|
-| Starts or continues an Issue. | `/huddle-start <n>` |
+| Starts an Issue. | `/huddle-start <n>` |
+| Continues an Issue after the AI Manager answered. | `/huddle-continue <n>` |
 | Sees if the AI Manager left a request. | `huddle pending` |
 | Checks the setup. | `huddle doctor` |
 

@@ -38,7 +38,7 @@ heading and a text block:
 ## Prompt for Claude Code
 
 ```text
-First run /huddle-start <n>: it marks this request as taken (👀), so the Issue shows «in progress».
+First run /huddle-continue <n>: it marks this request as taken (👀), so the Issue shows «in progress».
 <what to fix, one item per line, with file and why; end with: push, then comment «Ready for review again» with the counts>
 ```
 ````

@@ -208,7 +208,7 @@ about it.
 | Define or check the areas (AI Manager) | `/huddle-areas`, or `huddle areas check` |
 | Check my setup | `huddle doctor` |
 | See what the labels job would change | `huddle labels --dry-run` |
-| Continue after a request | `/huddle-start`, or answer yes to the hook |
+| Continue after a request | `/huddle-continue <n>`, or answer yes to the hook |
 
 ## Old worktrees clean themselves
 

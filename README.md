@@ -230,7 +230,8 @@ session cannot touch what customers use.
 | `/huddle-update` | AI Manager | Brings a repo that already has Huddle to the installed version: refreshes the block and the templates, and asks only the questions a new release added (see [Updating Huddle](docs/team-guide.md#updating-huddle)). |
 | `/huddle-issue` | AI Manager | Writes a new Issue from the template. |
 | `/huddle-bug` | AI Manager | Turns a bug description, or a raw report labeled `needs triage`, into a ready Bug Issue: investigates without changing anything, checks duplicates, sets the severity. |
-| `/huddle-start <n>` | Developer | Starts or continues Issue `n`. |
+| `/huddle-start <n>` | Developer | Starts Issue `n`. |
+| `/huddle-continue <n>` | Developer | Continues Issue `n` after the AI Manager answered (a review or a decision): takes the pending request and follows it, so you never copy the prompt by hand. |
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
 | `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |

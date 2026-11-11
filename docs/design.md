@@ -46,7 +46,8 @@ huddle/
   .claude-plugin/plugin.json      name, version, description
   skills/
     huddle-setup/SKILL.md         installs Huddle in a repo (asks the platform, host, AI Manager, team)
-    huddle-start/SKILL.md         a developer starts or continues an Issue
+    huddle-start/SKILL.md         a developer starts an Issue
+    huddle-continue/SKILL.md      a developer picks an Issue up again after the AI Manager answered it
     huddle-issue/SKILL.md         the AI Manager writes a new Issue from the template
     huddle-review/SKILL.md        the AI Manager reviews a PR/MR and posts the request or merges
     huddle-decide/SKILL.md        the AI Manager answers a «needs decision»
