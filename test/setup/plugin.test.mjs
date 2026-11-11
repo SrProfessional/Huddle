@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const abs = (rel) => fileURLToPath(new URL(`../../${rel}`, import.meta.url));
 const read = (rel) => readFileSync(abs(rel), 'utf8');
-const SKILLS = ['huddle-setup', 'huddle-start', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug'];
+const SKILLS = ['huddle-setup', 'huddle-start', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update'];
 
 const frontmatter = (text) => {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
@@ -64,7 +64,7 @@ test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a
   for (const name of SKILLS) {
     const rest = read(`skills/${name}/SKILL.md`).replace(full, '<HUDDLE>');
     assert.doesNotMatch(rest, /bin\/huddle/, `${name}: bin/huddle outside the full command`);
-    assert.doesNotMatch(rest, /\bhuddle (wait|take|doctor|labels|pending|hook)\b/, `${name}: bare huddle command`);
+    assert.doesNotMatch(rest, /\bhuddle (wait|take|doctor|labels|pending|hook|update)\b/, `${name}: bare huddle command`);
   }
 });
 

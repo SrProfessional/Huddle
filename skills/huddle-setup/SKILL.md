@@ -9,7 +9,7 @@ Installs Huddle in the repo you are in. Run it from the repo root, on a branch t
 
 ## Look at `huddle.json` first
 
-Before asking anything, look for `huddle.json` in the repo root and read it.
+Before asking anything, look for `huddle.json` in the repo root and read it. A repo that already has a valid one is set up: to bring it to a newer Huddle, use `/huddle-update` (it also asks any question a new release added).
 
 - **It exists and is valid** (a refresh, for example after updating the plugin): **ask nothing**. Everything the questions would ask is already in the file. Go straight to «Do» and run `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs"` with no flags: it reuses the file's answers, replaces the block of `CLAUDE.md` and refreshes the templates. In your report say what changed: the block (updated or not), the templates written, and the templates **kept** because the project edited them (the report's `skipped`), with the one-line way to get the current one.
 - **It does not exist, or it is invalid or incomplete**: ask **only** for what is missing. Run the CLI once with no flags: for a missing file it fails naming each missing field (`"platform" is required`), and for an invalid one it names the field. Ask only the questions below that match those fields, and keep what the file already says.

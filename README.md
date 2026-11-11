@@ -226,7 +226,8 @@ session cannot touch what customers use.
 
 | Command | Who | What it does |
 |---|---|---|
-| `/huddle-setup` | AI Manager | Installs Huddle in a repo, or refreshes its block and templates. |
+| `/huddle-setup` | AI Manager | Installs Huddle in a repo for the first time. |
+| `/huddle-update` | AI Manager | Brings a repo that already has Huddle to the installed version: refreshes the block and the templates, and asks only the questions a new release added (see [Updating Huddle](docs/team-guide.md#updating-huddle)). |
 | `/huddle-issue` | AI Manager | Writes a new Issue from the template. |
 | `/huddle-bug` | AI Manager | Turns a bug description, or a raw report labeled `needs triage`, into a ready Bug Issue: investigates without changing anything, checks duplicates, sets the severity. |
 | `/huddle-start <n>` | Developer | Starts or continues Issue `n`. |
@@ -242,6 +243,7 @@ session cannot touch what customers use.
 | `huddle areas [list \| set \| assign \| check]` | AI Manager | The mechanics behind `/huddle-areas`: lists the areas, creates or updates a milestone, puts an Issue in an area, and reports what needs fixing. Every write prints its change first and has `--dry-run` (see [Define the areas](docs/team-guide.md#define-the-areas-with-huddle-areas)). |
 | `huddle team [add <login> [--anyway] \| remove <login>]` | AI Manager | Lists the team with ✔/✖ for «exists» and «can be assigned», or adds or removes an assignee in `huddle.json` (see [Add or remove someone](docs/team-guide.md#add-or-remove-someone)). |
 | `huddle clean [--dry-run] [--no-fetch]` | Anyone, the hook | Removes the worktrees of finished Issues (clean, merged into the default branch, untouched for 24 hours) with their `node_modules`, so they never fill the disk. Starts by itself when a session opens (see [Old worktrees clean themselves](docs/team-guide.md#old-worktrees-clean-themselves)). |
+| `huddle update [--check] [--dry-run] [--json] [--answer key=value...]` | AI Manager | The mechanics behind `/huddle-update`: refreshes the repo's files and `setup_version` with no login and no network. With a question the repo has not answered it changes nothing and exits 3; `--check` and `--dry-run` write nothing. |
 | `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
 | `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager, the labels and whether each assignee can be assigned. |
 

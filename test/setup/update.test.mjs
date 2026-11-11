@@ -197,3 +197,43 @@ test('setupStatus: up to date, only the version differs, and needs an update', (
 test('setupStatus on a repo without a usable huddle.json answers null', () => inTemp((dir) => {
   assert.equal(setupStatus(dir), null);
 }));
+
+// The skill: the text the session follows.
+
+const readSkill = (name) => readFileSync(new URL(`../../skills/${name}/SKILL.md`, import.meta.url), 'utf8');
+
+test('the update skill runs huddle update --json first, before it asks anything', () => {
+  const text = readSkill('huddle-update');
+  const run = text.search(/huddle"? update --json/);
+  const ask = text.search(/^## Ask/m);
+  assert.ok(run >= 0, 'it runs `huddle update --json`');
+  assert.ok(ask >= 0, 'and has a section for the questions');
+  assert.ok(run < ask, 'the command comes before the questions');
+});
+
+test('the update skill asks only the pending questions, with the default, then answers with --answer', () => {
+  const text = readSkill('huddle-update');
+  assert.match(text, /only (the )?pending/i);
+  assert.match(text, /pendingQuestions/);
+  assert.match(text, /default/i);
+  assert.match(text, /--answer/);
+  assert.match(text, /exit(s)? (code )?3/i);
+});
+
+test('the update skill never asks for a token, and says to commit on a branch and open a PR/MR', () => {
+  const text = readSkill('huddle-update');
+  assert.match(text, /never ask(s)? for a token/i);
+  assert.match(text, /branch/i);
+  assert.match(text, /PR\/MR/);
+});
+
+test('the update skill reports what changed: the block, the templates written and the ones kept', () => {
+  const text = readSkill('huddle-update');
+  assert.match(text, /block/i);
+  assert.match(text, /skipped|kept/i);
+  assert.match(text, /notes/i);
+});
+
+test('the setup skill sends an already-configured repo to /huddle-update', () => {
+  assert.match(readSkill('huddle-setup'), /\/huddle-update/);
+});

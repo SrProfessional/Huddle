@@ -70,7 +70,7 @@ test('hook shows the notice when the latest release is newer, with the two comma
   }
   assert.match(context(h), /first thing in your first answer/i);
   assert.match(context(h), /in (the person's|their) language/i);
-  assert.doesNotMatch(visible(h) + context(h), /huddle-setup/, 'the extra line is for the AI Manager only');
+  assert.doesNotMatch(visible(h) + context(h), /huddle-update/, 'the extra line is for the AI Manager only');
 });
 
 test('hook keeps the pending-request message and adds the notice to it', async () => {
@@ -127,16 +127,16 @@ test('a failed lookup does not hide the notice for a release that is cached', as
   assert.match(visible(h), /Huddle 0\.4\.0 is available/, 'the old answer is better than none');
 });
 
-test('for the AI Manager login the notice adds the /huddle-setup line; a developer does not get it', async () => {
+test('for the AI Manager login the notice adds the /huddle-update line; a developer does not get it', async () => {
   const manager = harness();
   setupUpdate(manager);
   await run(['hook'], manager.ctx);
-  for (const text of [visible(manager), context(manager)]) assert.match(text, /After updating, run \/huddle-setup on a branch in each repo to get the new templates\./);
+  for (const text of [visible(manager), context(manager)]) assert.match(text, /After updating, run \/huddle-update on a branch in each repo to get the new templates and any new questions\./);
   const dev = harness({ wrap: (a) => ({ ...a, me: async () => 'ana' }) });
   setupUpdate(dev);
   await run(['hook'], dev.ctx);
   assert.match(visible(dev), /is available/);
-  assert.doesNotMatch(visible(dev) + context(dev), /huddle-setup/);
+  assert.doesNotMatch(visible(dev) + context(dev), /huddle-update/);
 });
 
 test('running from a clone, the notice says to pull the clone instead of the two commands', async () => {
