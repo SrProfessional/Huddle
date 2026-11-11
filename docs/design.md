@@ -444,3 +444,34 @@ can (§13).
 
 **What it never does.** It never overwrites a template the project edited, never changes a key of `huddle.json` it was not
 given or does not own, never commits, never touches the network.
+
+## 18. Continuing an Issue: `/huddle-continue`
+
+Asked by the AI Manager on 2026-11-11 (Issue #83). A developer who started an Issue with `/huddle-start <n>` and then got an answer
+from the AI Manager (a review or a decision) had to copy the new prompt by hand: `/huddle-start <n>` always started from step 1, and
+the «Continue» flow only ran with no number. «Start» is also the wrong word for picking an Issue up again.
+
+**Two commands, two meanings.** `/huddle-start <n>` starts Issue `n`. `/huddle-continue <n>` continues an Issue that is already
+started: the AI Manager answered a review (`changes requested from AI Manager`) or a decision (`needs decision`), and the session
+picks that answer up. There is no new CLI command: the skill uses `huddle pending` and `huddle take`.
+
+**The skill `/huddle-continue <n>`.**
+
+1. Read the Issue and find its branch (the «Branch» section). If neither a local branch nor `origin/<branch>` exists, the Issue was
+   never started: change nothing and say to run `/huddle-start <n>`.
+2. Enter the Issue's worktree (`.claude/worktrees/<branch>`); if the folder is gone but the branch exists, create it again without
+   `-b`; switch the session into it.
+3. Run `huddle pending <n>`. Nothing pending: say so, change nothing, and offer to wait (`huddle wait <n>`).
+4. Pending: run `huddle take <n>` (it marks the request 👀 and prints the AI Manager's prompt) and follow that prompt with the same
+   rules. Only comments by the `ai_manager` login count. The developer is told which request it is and is **not** asked to paste anything.
+5. Push, comment «Ready for review again» with the real counts (none for a design Issue), never touch the status labels, then start
+   `huddle wait <n>` again.
+6. Close with the usual message («✅ Issue #N finished» or «⛔ Issue #N stopped»), the link, the counts, what was not done and the
+   next step (a step the session takes, or 🙋 steps), as in §13.
+
+**`/huddle-start <n>`** keeps starting. Its «Continue» section becomes a pointer to `/huddle-continue`. If the Issue is already
+started (it has a branch), `/huddle-start` says that this is `/huddle-continue` and continues it anyway, so old prompts that say
+«First run /huddle-start <n>» keep working.
+
+**The AI Manager's prompt.** The first line of a «Prompt for Claude Code» comment (`huddle-review`, `huddle-decide`) is now
+`First run /huddle-continue <n>: it marks this request as taken (👀), so the Issue shows «in progress».`
