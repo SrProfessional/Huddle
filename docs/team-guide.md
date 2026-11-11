@@ -302,11 +302,15 @@ one short block, and Claude says it first in its first answer, in your language:
 <old>)`, the two commands, and a link to what changed. It looks the release up without a login (so GitLab teams get it
 too), at most once a day, from a small cache in Claude Code's data folder. If there is no network, GitHub answers with an
 error or the answer is slow (3 seconds at most), it says nothing. A pre-release never counts. The AI Manager's notice has
-one more line: after updating, run `/huddle-setup` on a branch in each repo to get the new templates. If you run Huddle
+one more line: after updating, run `/huddle-update` on a branch in each repo to get the new templates and any new questions. If you run Huddle
 from a clone (`--plugin-dir`), the notice says to pull your clone.
 
 **Doctor.** `huddle doctor` has a `version` line: ✔ `huddle 0.4.0 (latest)`; ⚠ `huddle 0.3.0, latest is 0.4.0` with the
 two commands; or ⚠ `could not check the latest release` when offline. It is a warning, never a failure.
+
+**Doctor, the repo.** `huddle doctor` also has a `setup` line, read from the repo's files only: ✔ `set up for 0.4.2 (up to date)`;
+⚠ `set up for 0.4.1, Huddle is 0.4.2: run /huddle-update on a branch` when a file would change or a question is pending; ✔ with a
+note when only the version number differs and there is nothing to refresh.
 
 **Auto-update.** Turn it on once per person: `/plugin` → **Marketplaces** → `huddle` → **Enable auto-update**. The VS Code
 extension uses `/plugins`. `/huddle-setup` does not write `"autoUpdate": true` in the project's `.claude/settings.json`:
@@ -318,9 +322,12 @@ notice above is the safety net.
 of `/plugin` (or run `claude plugin update huddle@huddle`). The VS Code extension has no `/plugin`: in a terminal run
 `claude plugin marketplace update huddle` and `claude plugin update huddle@huddle`. Either way, open a new session after
 the update. If you work from a clone with `--plugin-dir`, pull it
-instead. Then run `/huddle-setup` again, on a branch. In a repo that already has a valid `huddle.json` it **asks nothing**: it
-reuses the file, refreshes the block and the templates, and says what changed and which templates it kept because you edited them.
-It asks only for what is missing (a half-written `huddle.json`), and all five questions only on a first install. It replaces only what is between
+instead. Then run `/huddle-update` on a branch (`huddle update` is the command behind it). It reads `setup_version` in `huddle.json`
+(the Huddle release the repo was last set up for), refreshes the block and the templates, writes the new `setup_version`, and says
+what changed and which templates it kept because you edited them. When a release needs an answer your repo does not have yet, it
+asks **only that question**, once, and never again; with no new question it asks nothing. `huddle update --check` tells you what would
+change without writing anything. (`/huddle-setup` is for a first install: in a repo that already has a valid `huddle.json` it asks
+nothing and only refreshes; a half-written `huddle.json` is asked only for what is missing.) It replaces only what is between
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->` in `CLAUDE.md`, so your own rules stay. Edited templates are kept.
 If your repo runs the labels job under its own file name, setup keeps that file, adds no second labels job, and tells you
 when its `HUDDLE_REF` pins an older Huddle: move it to the new tag (or its full commit SHA) in a PR.

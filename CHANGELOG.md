@@ -5,6 +5,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `huddle update` and `/huddle-update` (Issue #81): bring a repo that already has Huddle to the installed version in one step, and ask
+  only the questions a new release added. `huddle.json` gets `setup_version`; new questions come from a registry
+  (`lib/setup/questions.mjs`, empty in 0.4.x) and are never asked twice. `huddle update [--check] [--dry-run] [--json] [--answer key=value]`
+  needs no login and no network, changes nothing and exits 3 while a question is unanswered. `huddle doctor` has a `setup` line, and the
+  update notice for the AI Manager now says `/huddle-update`.
+
 ### Fixed
 
 - `/huddle-setup` no longer asks the initial questions again in a repo that already has a valid `huddle.json` (Issue #79). The skill
