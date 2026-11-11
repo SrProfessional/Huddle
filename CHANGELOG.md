@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-11
+
 ### Added
 
 - `huddle queue [--json]` and `/huddle-watch` (Issue #88): the AI Manager's session checks every few minutes (default 5, from 2 to 60)
