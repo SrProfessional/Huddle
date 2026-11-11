@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- `/huddle-setup` no longer asks the initial questions again in a repo that already has a valid `huddle.json` (Issue #79). The skill
+  now reads `huddle.json` first: a valid file means a refresh that asks nothing (the block and the templates are updated, and the report
+  says what changed and which templates were kept because the project edited them); a missing or incomplete file is asked only for the
+  fields that are missing; a first install still asks all five. The CLI already worked this way; only the skill's text was wrong.
+
 ## [0.4.2] - 2026-11-11
 
 ### Added

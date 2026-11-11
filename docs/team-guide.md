@@ -318,7 +318,9 @@ notice above is the safety net.
 of `/plugin` (or run `claude plugin update huddle@huddle`). The VS Code extension has no `/plugin`: in a terminal run
 `claude plugin marketplace update huddle` and `claude plugin update huddle@huddle`. Either way, open a new session after
 the update. If you work from a clone with `--plugin-dir`, pull it
-instead. Then run `/huddle-setup` again, on a branch. It replaces only what is between
+instead. Then run `/huddle-setup` again, on a branch. In a repo that already has a valid `huddle.json` it **asks nothing**: it
+reuses the file, refreshes the block and the templates, and says what changed and which templates it kept because you edited them.
+It asks only for what is missing (a half-written `huddle.json`), and all five questions only on a first install. It replaces only what is between
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->` in `CLAUDE.md`, so your own rules stay. Edited templates are kept.
 If your repo runs the labels job under its own file name, setup keeps that file, adds no second labels job, and tells you
 when its `HUDDLE_REF` pins an older Huddle: move it to the new tag (or its full commit SHA) in a PR.
