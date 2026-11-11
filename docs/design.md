@@ -515,7 +515,9 @@ Waiting for the AI Manager:
 
 or `Nothing is waiting for the AI Manager.` (on GitLab the reference reads `MR !51`). `--json` prints
 `{ "waiting": [{ "issue": 42, "title": "...", "waits": "review", "pr": 51, "head": "<the PR's head commit sha>" }, ...] }`; `pr` and `head`
-only for `review`. `head` comes from the adapter operation `reviewHead(n)`, which gives the head commit sha of PR/MR `n`; tests use a fake.
+only for `review`. `head` comes from the adapter operation `reviewHead(n)` (§7), the head commit sha of PR/MR `n` (GitHub: `gh pr view <n> --json headRefOid`;
+GitLab: `diff_refs.head_sha` of the MR), one call per `review` item. It is best effort: if one cannot be read, that item prints
+`head: null` and one line goes to stderr (`huddle queue: could not read the head of PR #51 (Issue #42): <reason>`), and the exit is still 0.
 Exit 0 when it ran, with or without items; 1 on a platform error, with one clear line; 2 on a bad flag. A repo without `huddle.json`
 gets the same «not configured» error as the other commands.
 

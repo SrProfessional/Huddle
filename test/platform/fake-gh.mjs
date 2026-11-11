@@ -117,6 +117,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
       return JSON.stringify([...reviews.values()].filter((r) => r.open).map((r) => ({ number: r.number, isDraft: r.draft })));
     }
+    if (a === 'pr' && b === 'view') {
+      need(values(args, '--json')[0] === 'headRefOid', args);
+      const r = reviews.get(Number(args[2]));
+      need(r, args);
+      return JSON.stringify({ headRefOid: r.head });
+    }
     if (a === 'pr' && b === 'merge') {
       need(args.includes('--merge') && !args.includes('--delete-branch'), args);
       const r = reviews.get(Number(args[2]));
@@ -262,7 +268,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const defaults = { open: ['OPEN', []], merged: ['CLOSED', [{ pr: 70, merged: true }]], 'closed-by-hand': ['CLOSED', [{ pr: null }]] }[state];
       issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing], milestone });
     },
-    review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { number, draft, open, branch, commits: [...commits] }); },
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}` }) { reviews.set(number, { number, draft, open, branch, commits: [...commits], head }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       comments.set(id, { id, issue, body, created_at: createdAt, html_url: `https://github.test/${project}/issues/${issue}#c${id}`, user: { login: author }, reactions: { eyes: taken ? 1 : 0 } });
     },

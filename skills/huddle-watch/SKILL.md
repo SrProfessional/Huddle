@@ -26,7 +26,7 @@ An interval is like `5m`: default 5 minutes, allowed 2 to 60.
 - **`review`:** run `/huddle-review` on that PR/MR (the item's `pr`) with its usual rules. All good: approve and merge, as it does today.
   Changes needed: the usual «🔁 Changes requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a test
   fails, a requirement is missing, the platform refuses the merge, a permission is missing), say it once, with the reason, and do **not**
-  try that same PR/MR with that same `head` again. A new commit changes `head` and makes it a new item. Keep the list of
+  try that same PR/MR with that same `head` again. A new commit changes `head` and makes it a new item (a `head` of `null` means it could not be read: use the PR/MR number alone). Keep the list of
   stopped PR/MR + `head` pairs for the session.
 - **`decision` and `triage`:** never answered by the watch: those are the person's decisions. Say one line per new item («#47 waits for your
   decision», «#53 waits for your triage») once per Issue, and leave it.

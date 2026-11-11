@@ -268,6 +268,19 @@ export function contract({ name, create }) {
     assert.equal(pendingRequests({ manager: 'SrProfessional', comments, lastWork: lastWorkAt({ commits: [], comments }) }).length, 1);
   });
 
+  t('reviewHead(n) gives the head commit sha of a PR/MR, so a new commit is told from an old one', async ({ adapter, world }) => {
+    world.review({ number: 60, head: '1111111aaaaaaa' });
+    world.review({ number: 61, head: '2222222bbbbbbb' });
+    assert.equal(await adapter.reviewHead(60), '1111111aaaaaaa');
+    assert.equal(await adapter.reviewHead(61), '2222222bbbbbbb');
+    world.review({ number: 60, head: '3333333ccccccc' }); // a push
+    assert.equal(await adapter.reviewHead(60), '3333333ccccccc');
+  });
+
+  t('reviewHead(n) of a PR/MR that does not exist is an error, not a made-up sha', async ({ adapter }) => {
+    await assert.rejects(() => adapter.reviewHead(999));
+  });
+
   t('issueForBranch(branch) gives the Issue the open PR/MR of that branch resolves, or null', async ({ adapter, world }) => {
     world.issue({ number: 16, reviews: [70] });
     world.issue({ number: 17, reviews: [71] });

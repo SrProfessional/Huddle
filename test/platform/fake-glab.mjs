@@ -204,6 +204,11 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       need(method === 'GET' && r, args);
       return pages(r.commits.map((d) => ({ id: 'abc', committed_date: d, authored_date: '2000-01-01T00:00:00Z' })), paginate);
     }
+    if ((m = /^merge_requests\/(\d+)$/.exec(rest))) {
+      const r = reviews.get(Number(m[1]));
+      need(method === 'GET' && r, args);
+      return JSON.stringify({ ...mrJson(r), sha: r.head, diff_refs: { base_sha: 'base', start_sha: 'start', head_sha: r.head } });
+    }
     if ((m = /^merge_requests\/(\d+)\/merge$/.exec(rest))) {
       const r = reviews.get(Number(m[1]));
       need(method === 'PUT' && r && r.state === 'opened' && !r.draft, args);
@@ -244,7 +249,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       issues.set(number, it);
       addSystemNote(number, `changed title to «${title}»`);
     },
-    review({ number, draft = false, open = true, branch = '', commits = [] }) { reviews.set(number, { iid: number, draft, state: open ? 'opened' : 'closed', branch, commits: [...commits] }); },
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}` }) { reviews.set(number, { iid: number, draft, state: open ? 'opened' : 'closed', branch, commits: [...commits], head }); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       if (!users.has(author)) users.set(author, users.size + 1);
       notes.set(id, { id, issue, mr: false, body, created_at: createdAt, author, system: false, eyes: taken });

@@ -6,16 +6,12 @@ import { harness, request, CONFIG, GITLAB_CONFIG } from './harness.mjs';
 
 const MANAGED = '## Depends on\n\nNone.\n';
 const WRITES = new Set(['setLabels', 'ensureLabels', 'assign', 'merge', 'postComment', 'editComment', 'markTaken', 'createIssue', 'updateIssue', 'closeIssue', 'pinIssue', 'createMilestone', 'updateMilestone', 'setIssueMilestone']);
-const HEADS = { 51: 'a1b2c3d' };
 
-/** The adapter with a fake `reviewHead`, and every write recorded and refused. */
+/** The adapter (its `reviewHead` is the real one, on the fake gh/glab), with every write recorded and refused. */
 function mk(setup, opts = {}) {
   const writes = [];
   const wrap = (adapter) => new Proxy(adapter, {
-    get: (a, op) => {
-      if (op === 'reviewHead') return async (n) => HEADS[n] ?? `head-of-${n}`;
-      return WRITES.has(op) ? async (...args) => { writes.push(op); throw new Error(`queue called ${String(op)}`); } : a[op];
-    },
+    get: (a, op) => (WRITES.has(op) ? async (...args) => { writes.push(op); throw new Error(`queue called ${String(op)}`); } : a[op]),
   });
   const h = harness({ setup, wrap, ...opts });
   h.writes = writes;
@@ -24,7 +20,7 @@ function mk(setup, opts = {}) {
 
 const world = (w) => {
   w.issue({ number: 42, title: 'Add login form', body: MANAGED, assignees: ['ana'], reviews: [51] });
-  w.review({ number: 51 });
+  w.review({ number: 51, head: 'a1b2c3d' });
   w.issue({ number: 47, title: 'Which payment provider?', body: MANAGED, labels: ['needs decision'] });
   w.comment(47, { id: 1, author: 'ana', body: '❓ Decision for the AI Manager: which one?', createdAt: '2026-11-10T10:00:00Z' });
   w.issue({ number: 53, title: 'Login page crashes on Safari', body: 'A raw report', labels: ['bug', 'needs triage'] });
@@ -77,6 +73,32 @@ test('--json prints the items; pr and head only for review', async () => {
       { issue: 53, title: 'Login page crashes on Safari', waits: 'triage' },
     ],
   });
+});
+
+test('if the head of one PR cannot be read, that item has head null, one line says why on stderr, and the queue still exits 0 (best effort)', async () => {
+  const h = mk((w) => {
+    world(w);
+    w.issue({ number: 44, title: 'Second', body: MANAGED, assignees: ['luis'], reviews: [52] });
+    w.review({ number: 52, head: 'b2c3d4e' });
+  }, { wrap: (a) => ({ ...a, reviewHead: async (n) => { if (n === 51) throw new Error('rate limited\nmore'); return a.reviewHead(n); } }) });
+  assert.equal(await run(['queue', '--json'], h.ctx), 0);
+  const waiting = JSON.parse(h.text()).waiting;
+  assert.deepEqual(waiting.filter((x) => x.waits === 'review').map((x) => [x.issue, x.head]), [[42, null], [44, 'b2c3d4e']]);
+  assert.equal(h.errText(), 'huddle queue: could not read the head of PR #51 (Issue #42): rate limited');
+});
+
+test('in text output a head that cannot be read is also one line on stderr, and the list is still printed', async () => {
+  const h = mk(world, { wrap: (a) => ({ ...a, reviewHead: async () => { throw new Error('offline'); } }) });
+  assert.equal(await run(['queue'], h.ctx), 0);
+  assert.match(h.text(), /#42  review    PR #51   Add login form/);
+  assert.match(h.errText(), /could not read the head of PR #51 \(Issue #42\): offline/);
+});
+
+test('the head of each review item is read once, and decision and triage items never ask for one', async () => {
+  const asked = [];
+  const h = mk(world, { wrap: (a) => ({ ...a, reviewHead: async (n) => { asked.push(n); return a.reviewHead(n); } }) });
+  await run(['queue', '--json'], h.ctx);
+  assert.deepEqual(asked, [51]);
 });
 
 test('--json with nothing waiting is an empty list', async () => {
