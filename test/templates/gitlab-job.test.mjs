@@ -39,7 +39,11 @@ function run(env) {
       chmodSync(f, 0o755);
     }
     const script = join(dir, 'job.sh');
-    writeFileSync(script, scriptLines() + '\n');
+    // Shell functions beat any PATH lookup. Git Bash on Windows puts its own /usr/bin (a real curl and a real git) in front of the stub folder,
+    // so the stubs alone never ran there and the job really cloned Huddle. The functions make the stubs win on every system.
+    const logPath = log.replace(/\\/g, '/');
+    const functions = ['curl', 'dpkg', 'git', 'node'].map((name) => `${name}() { echo "${name} $*" >> "${logPath}"; return 0; }`).join('\n');
+    writeFileSync(script, `${functions}\n${scriptLines()}\n`);
     const clean = { PATH: dir + delimiter + process.env.PATH, CI_SERVER_FQDN: 'gitlab.example.com', HUDDLE_REF: 'main', GLAB_VERSION: '1.50.0' };
     const r = spawnSync('sh', [script.replace(/\\/g, '/')], { env: { ...clean, ...env }, encoding: 'utf8' });
     return { status: r.status, out: (r.stdout || '') + (r.stderr || ''), log: existsSync(log) ? readFileSync(log, 'utf8') : '' };

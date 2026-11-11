@@ -16,6 +16,7 @@
     "max_open_per_person": { "type": "integer", "minimum": 1, "description": "Nobody gets more open Issues than this." },
     "default_branch": { "type": "string", "minLength": 1 },
     "progress_issue": { "type": "boolean", "description": "false turns off the «Huddle progress» Issue that `huddle labels` keeps up to date. Default: true." },
+    "clean_worktrees": { "type": "boolean", "description": "false stops the session start from removing finished worktrees (clean, merged into the default branch, untouched for 24 hours). `huddle clean` still works by hand. Default: true." },
     "labels": {
       "type": "object",
       "additionalProperties": false,
