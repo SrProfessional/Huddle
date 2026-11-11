@@ -234,6 +234,7 @@ session cannot touch what customers use.
 | `/huddle-continue <n>` | Developer | Continues Issue `n` after the AI Manager answered (a review or a decision): takes the pending request and follows it, so you never copy the prompt by hand. |
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
+| `/huddle-watch [interval\|status\|off]` | AI Manager | Checks every few minutes (default 5) what waits for the AI Manager and runs `/huddle-review` on each PR/MR that waits. Turning it on is the order to review and merge. It never answers decisions or triages bugs. It stops with `off` or when Claude Code closes, and expires after 7 days. |
 | `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |
 | `/huddle-areas` | AI Manager | Helps define the project's areas (milestones): proposes them, puts Issues in them, estimates what is missing and checks them later. |
 | `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
@@ -244,6 +245,7 @@ session cannot touch what customers use.
 | `huddle areas [list \| set \| assign \| check]` | AI Manager | The mechanics behind `/huddle-areas`: lists the areas, creates or updates a milestone, puts an Issue in an area, and reports what needs fixing. Every write prints its change first and has `--dry-run` (see [Define the areas](docs/team-guide.md#define-the-areas-with-huddle-areas)). |
 | `huddle team [add <login> [--anyway] \| remove <login>]` | AI Manager | Lists the team with ✔/✖ for «exists» and «can be assigned», or adds or removes an assignee in `huddle.json` (see [Add or remove someone](docs/team-guide.md#add-or-remove-someone)). |
 | `huddle clean [--dry-run] [--no-fetch]` | Anyone, the hook | Removes the worktrees of finished Issues (clean, merged into the default branch, untouched for 24 hours) with their `node_modules`, so they never fill the disk. Starts by itself when a session opens (see [Old worktrees clean themselves](docs/team-guide.md#old-worktrees-clean-themselves)). |
+| `huddle queue [--json]` | AI Manager, `/huddle-watch` | Lists what waits for the AI Manager: a PR/MR to review, a `needs decision` question nobody answered, a `needs triage` report. Read-only: it writes no label, comment or file. |
 | `huddle update [--check] [--dry-run] [--json] [--answer key=value...]` | AI Manager | The mechanics behind `/huddle-update`: refreshes the repo's files and `setup_version` with no login and no network. With a question the repo has not answered it changes nothing and exits 3; `--check` and `--dry-run` write nothing. |
 | `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
 | `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager, the labels and whether each assignee can be assigned. |

@@ -211,6 +211,8 @@ about it.
 | Check my setup | `huddle doctor` |
 | See what the labels job would change | `huddle labels --dry-run` |
 | Continue after a request | `/huddle-continue <n>`, or answer yes to the hook |
+| See what waits for the AI Manager | `huddle queue` |
+| Have the AI Manager's session review by itself (AI Manager) | `/huddle-watch`, and `/huddle-watch off` to stop |
 
 ## Old worktrees clean themselves
 

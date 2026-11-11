@@ -5,6 +5,15 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `huddle queue [--json]` and `/huddle-watch` (Issue #88): the AI Manager's session checks every few minutes (default 5, from 2 to 60)
+  what waits for it and runs `/huddle-review` on each PR/MR that waits, which merges when all is good. `huddle queue` is read-only and
+  lists three cases from the platform data, not from label text: a `review` (open non-draft PR/MR, no request), a `decision`
+  (`needs decision`, nobody answered) and a `triage` (`needs triage`). The watch never answers decisions or triages bugs, never retries a
+  stopped review on the same `head`, stops with `/huddle-watch off` or when Claude Code closes, and a recurring job expires after 7 days.
+  Turning it on is the AI Manager's order to review and merge.
+
 ## [0.5.0] - 2026-11-11
 
 ### Added
