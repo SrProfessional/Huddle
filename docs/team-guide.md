@@ -212,6 +212,7 @@ about it.
 | See what the labels job would change | `huddle labels --dry-run` |
 | Continue after a request | `/huddle-continue <n>`, or answer yes to the hook |
 | See what waits for the AI Manager | `huddle queue` |
+| See if a newer Huddle exists (the skills say it too) | `huddle notice` |
 | Have the AI Manager's session review by itself (AI Manager) | `/huddle-watch`, and `/huddle-watch off` to stop |
 
 ## Old worktrees clean themselves
@@ -309,6 +310,17 @@ error or the answer is slow (3 seconds at most), it says nothing. A pre-release 
 one more line: after updating, run `/huddle-update` on a branch in each repo to get the new templates and any new questions. If you run Huddle
 from a clone (`--plugin-dir`), the notice says to pull your clone.
 
+**The notice in the skills.** The session-start notice can miss you: it is shown once a day per machine, and the VS Code extension may
+not show a hook's message at all. So `/huddle-start`, `/huddle-continue` and `/huddle-update` begin with `huddle notice` and Claude says the
+same text in the chat, in your language, as the first thing in its answer, then goes on with your task. The skills keep their own daily
+stamp (`skillShownAt` in the same cache file), so a terminal session that used the hook's notice does not silence them, and they never
+use the hook's day. `huddle notice [--json]` is read-only and needs no login.
+
+**Each project updates on its own.** Huddle is installed per project (`/huddle-setup` writes it in the project's `.claude/settings.json`),
+so update inside each project where Huddle is used: run the two commands from the project's folder, with `--scope project` on
+`claude plugin update`, and open a new session. A project can be on an older version than another; `claude plugin list` shows the
+version of each installation and its scope.
+
 **Doctor.** `huddle doctor` has a `version` line: ✔ `huddle 0.4.0 (latest)`; ⚠ `huddle 0.3.0, latest is 0.4.0` with the
 two commands; or ⚠ `could not check the latest release` when offline. It is a warning, never a failure.
 
@@ -323,8 +335,8 @@ not proven to work, so each person turns it on (it is a step in the [first-day g
 notice above is the safety net.
 
 **The steps.** Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
-of `/plugin` (or run `claude plugin update huddle@huddle`). The VS Code extension has no `/plugin`: in a terminal run
-`claude plugin marketplace update huddle` and `claude plugin update huddle@huddle`. Either way, open a new session after
+of `/plugin` (or run `claude plugin update huddle@huddle --scope project`). The VS Code extension has no `/plugin`: in a terminal run
+`claude plugin marketplace update huddle` and `claude plugin update huddle@huddle --scope project`. Either way, open a new session after
 the update. If you work from a clone with `--plugin-dir`, pull it
 instead. Then run `/huddle-update` on a branch (`huddle update` is the command behind it). It reads `setup_version` in `huddle.json`
 (the Huddle release the repo was last set up for), refreshes the block and the templates, writes the new `setup_version`, and says

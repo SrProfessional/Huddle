@@ -8,6 +8,12 @@ description: Use when a developer starts an Issue for the first time. To pick on
 One task = one Issue = one branch = one PR/MR. You are a developer session: **never merge**, never touch the default
 branch, production or secrets. The rules are in the Huddle block of `CLAUDE.md`; names are in `huddle.json`.
 
+## Version notice (first, always)
+
+Before anything else, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" notice`. It is read-only and needs no login. When it prints text, say that
+text to the person, in their language, as the first thing in your answer, and then go on with the task: the notice never stops the work
+and never asks anything. When it prints nothing, say nothing about versions (it shows at most once a day, so silence is normal).
+
 ## Start an Issue (`/huddle-start <n>`)
 
 1. Read the whole Issue and the documents it names. Follow its «Prompt for Claude Code» block.

@@ -9,6 +9,12 @@ Continues Issue `n`, which was already started, with the AI Manager's latest ans
 touch the default branch, production or secrets. The rules are in the Huddle block of `CLAUDE.md`; names are in `huddle.json`.
 For an Issue that was not started yet, use `/huddle-start <n>`.
 
+## Version notice (first, always)
+
+Before anything else, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" notice`. It is read-only and needs no login. When it prints text, say that
+text to the person, in their language, as the first thing in your answer, and then go on with the task: the notice never stops the work
+and never asks anything. When it prints nothing, say nothing about versions (it shows at most once a day, so silence is normal).
+
 ## Continue an Issue (`/huddle-continue <n>`)
 
 1. Read the Issue and find its branch (the «Branch» section). If neither a local branch nor `origin/<branch>` exists, the Issue was
