@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-11
+
 ### Added
 
 - `huddle notice [--json]` (Issue #91): the «newer Huddle» notice from inside the skills, so it shows in VS Code too. `/huddle-start`,
