@@ -132,6 +132,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       return pages([...issues.values()].filter((i) => i.milestone === ms.title).map(issueJson), paginate);
     }
     if ((m = /^issues\/(\d+)$/.exec(rest))) {
+      // Like the real API: a number that is not an Issue is a 404.
+      if (method === 'GET' && !issues.has(Number(m[1]))) throw new Error(`glab ${args.join(' ')} failed: 404 Not Found`);
       const it = issueOf(m[1], args);
       if (method === 'GET') return JSON.stringify(issueJson(it));
       need(method === 'PUT', args);

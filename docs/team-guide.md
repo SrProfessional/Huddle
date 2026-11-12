@@ -32,7 +32,9 @@ The names can be changed under `labels` in `huddle.json`.
 ## Dependencies
 
 An Issue lists what it needs under «Depends on», one `- #N` per line. A dependency counts as merged only when the Issue is
-closed **and** a merged PR/MR closed it. An Issue closed by hand unblocks nothing.
+closed **and** a merged PR/MR closed it. An Issue closed by hand unblocks nothing. Put a note after the number
+(`- #209 (see PR #407)`): only the `#N` at the start of the line count, and a number that is not an Issue is a warning
+in the labels run, not a failure; that Issue stays `blocked`.
 
 ## How a task goes
 
