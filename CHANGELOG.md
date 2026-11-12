@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-11-11
+
 ### Changed
 
 - The Markdown guides, the `/huddle-setup` skill and the setup report, `huddle doctor` and `huddle update` messages now give both routes

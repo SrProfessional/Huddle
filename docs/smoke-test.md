@@ -464,6 +464,18 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.5.3
+
+Run of: 2026-11-11, Huddle `main` with Issues #94 and #96 merged (commit 04e7020), by the AI Manager's Claude Code session and a developer on a Mac. A patch-sized release (text only: the
+guides, the website, the PDFs and the install and update messages): only the new parts were checked; the 0.5.2 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Install from the VS Code extension with `/plugins` (#96) | ✔ | covered by tests | A developer on a Mac with only the VS Code extension (no `claude` command in the terminal) typed `/plugin` and got «isn't available in this environment»; with `/plugins` they added the marketplace, installed `huddle` with «Install for this project», and Huddle worked in a new session. The platform plays no part. |
+| The guides, the setup skill and the `huddle setup`, `huddle doctor` and `huddle update` messages give both routes (#96) | covered by tests | covered by tests | Tested as text (`test/docs/vscode-plugins.test.mjs`). The CLI commands and `--scope project` are unchanged. |
+| The PDF guides and the website name the 0.5.x commands and the VS Code route (#94) | covered by tests | covered by tests | Tested as text. The PDFs were rebuilt (guide 15 pages, first day 7); nobody looked at every page for cuts. |
+| Updating from VS Code with `/plugins` (#96) | covered by tests | covered by tests | Not run: only the install was tried in a real VS Code. |
+
 ### Results 0.5.2
 
 Run of: 2026-11-11, Huddle `main` with Issue #91 merged (commit fdc18ef), by the AI Manager's Claude Code session. A patch-sized release (one new command and a
