@@ -14,7 +14,7 @@
           </div>
           <div><span class="os-name">VS Code extension</span>
             <p>For people who want to read and edit the code in an editor while working with Claude Code.</p>
-            <p><strong>Install:</strong> VS Code from <code>code.visualstudio.com</code>; then open the extensions panel (<code>Ctrl+Shift+X</code> or <code>Cmd+Shift+X</code>), search for <strong>Claude Code</strong> (by Anthropic) and install it. The extension has no <code>/plugin</code> command: you install Huddle from a terminal in step 4.</p>
+            <p><strong>Install:</strong> VS Code from <code>code.visualstudio.com</code>; then open the extensions panel (<code>Ctrl+Shift+X</code> or <code>Cmd+Shift+X</code>), search for <strong>Claude Code</strong> (by Anthropic) and install it. The extension has no terminal command to type for Huddle: you install it with <code>/plugins</code> in step 4.</p>
           </div>
           <div><span class="os-name">Terminal (CLI)</span>
             <p>For people who already use the command line. It is also the one that shows Huddle's notice the moment a session opens.</p>
@@ -54,11 +54,12 @@
       </li>
       <li>
         <h3>Install the Huddle plugin</h3>
-        <p>Huddle comes as a Claude Code plugin. Each person installs it once on their own computer; committing it to the repository does not install it for you. In a terminal:</p>
+        <p>Huddle comes as a Claude Code plugin. Each person installs it once on their own computer; committing it to the repository does not install it for you. In a terminal (if you use only the VS Code extension, skip these two commands and follow the next paragraph):</p>
         <pre><code>claude plugin marketplace add SrProfessional/Huddle</code></pre>
         <pre><code>claude plugin install huddle@huddle</code></pre>
+        <p><strong>VS Code extension only:</strong> type <code>/plugins</code>, add the marketplace <code>SrProfessional/Huddle</code> in the <strong>Marketplaces</strong> tab, install <code>huddle</code> from the <strong>Plugins</strong> tab with <strong>Install for this project</strong> (not «Install for you»). Each person does this once per clone.</p>
         <p>Then open a new Claude Code session. In the CLI you can also type <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code> instead.</p>
-        <p><strong>Check:</strong> <code class="nowrap">claude plugin list</code> shows <code>huddle@huddle</code> enabled. To update it later, run <code class="nowrap">claude plugin marketplace update huddle</code> and <code class="nowrap">claude plugin update huddle@huddle --scope project</code> from the project's folder, open a new session, and on a branch run <code>/huddle-update</code>: it asks only the questions a new release added.</p>
+        <p><strong>Check:</strong> <code class="nowrap">claude plugin list</code> shows <code>huddle@huddle</code> enabled (in the VS Code extension, <code>/plugins</code> shows it in the <strong>Plugins</strong> tab). To update it later, in VS Code use the same <code>/plugins</code> dialog; otherwise run <code class="nowrap">claude plugin marketplace update huddle</code> and <code class="nowrap">claude plugin update huddle@huddle --scope project</code> from the project's folder, open a new session, and on a branch run <code>/huddle-update</code>: it asks only the questions a new release added.</p>
       </li>
       <li>
         <h3>Set your language (a single message)</h3>

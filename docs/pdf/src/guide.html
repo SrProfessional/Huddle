@@ -178,7 +178,7 @@
       </li>
       <li>
         <h3>Update a project to a new release</h3>
-        <p>Install and update are per project, so do this in each project where Huddle is used. In a terminal, from the project's folder, run <code>claude plugin marketplace update huddle</code> and then <code>claude plugin update huddle@huddle --scope project</code>, and open a new session. Then, on a branch, run <code>/huddle-update</code>: it refreshes the templates and the <code>CLAUDE.md</code> block and asks only the questions a new release added. A project can be on an older version than another; <code>claude plugin list</code> shows each one.</p>
+        <p>Install and update are per project, so do this in each project where Huddle is used. In a terminal, from the project's folder, run <code>claude plugin marketplace update huddle</code> and then <code>claude plugin update huddle@huddle --scope project</code>, and open a new session. Then, on a branch, run <code>/huddle-update</code>: it refreshes the templates and the <code>CLAUDE.md</code> block and asks only the questions a new release added. A project can be on an older version than another; <code>claude plugin list</code> shows each one. In the VS Code extension, which has no <code>claude</code> command in a terminal, type <code>/plugins</code> and use the same dialog to install (<strong>Install for this project</strong>) or update it.</p>
         <p>A newer release is announced in the chat by <code>/huddle-start</code>, <code>/huddle-continue</code> and <code>/huddle-update</code>, at most once a day. <code>huddle notice</code> says the same on demand.</p>
       </li>
     </ol>

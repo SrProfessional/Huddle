@@ -24,6 +24,13 @@ test('first-day.section.html names /huddle-continue and /huddle-update', () => {
   for (const s of ['/huddle-continue', '/huddle-update']) assert.ok(firstDay.includes(s), `first-day.section.html does not name ${s}`);
 });
 
+test('guide.html and first-day.section.html name /plugins and do not say the extension has no /plugin command', () => {
+  for (const [name, t] of [['guide.html', guide], ['first-day.section.html', firstDay]]) {
+    assert.ok(t.includes('/plugins'), `${name} does not name /plugins`);
+    assert.doesNotMatch(t, /has no <code>\/plugin<\/code>|no <code>\/plugin<\/code> command|has no \/plugin|no \/plugin command/, `${name} still says the extension has no /plugin`);
+  }
+});
+
 test('no command is written in a form that does not exist', () => {
   for (const [name, t] of [['guide.html', guide], ['first-day.section.html', firstDay]]) {
     assert.doesNotMatch(t, /huddle watch/, `${name}: «huddle watch» does not exist, it is /huddle-watch`);

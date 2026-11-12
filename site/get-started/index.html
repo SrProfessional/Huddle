@@ -67,7 +67,7 @@
         <p class="prose">Run this once in any terminal, then open a new Claude Code session:</p>
         <pre tabindex="0"><code>claude plugin marketplace add SrProfessional/Huddle
 claude plugin install huddle@huddle</code></pre>
-        <p class="prose">In the Claude Code command line you can type the same as <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code>. The VS Code extension has no <code>/plugin</code>, so use the terminal form there. Huddle has no runtime dependencies, so there is nothing to <code>npm install</code>.</p>
+        <p class="prose">In the Claude Code command line you can type the same as <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code>. The VS Code extension uses <code>/plugins</code> instead of <code>/plugin</code>: type <code>/plugins</code>, add the marketplace <code>SrProfessional/Huddle</code> in the <strong>Marketplaces</strong> tab, install <code>huddle</code> from the <strong>Plugins</strong> tab with <strong>Install for this project</strong> (not «Install for you»), and open a new session. Each person does this once per clone. Huddle has no runtime dependencies, so there is nothing to <code>npm install</code>.</p>
         <p class="prose"><strong>To update later.</strong> Install and update are per project, so repeat this in each project that uses Huddle. From the project's folder run:</p>
         <pre tabindex="0"><code>claude plugin marketplace update huddle
 claude plugin update huddle@huddle --scope project</code></pre>
