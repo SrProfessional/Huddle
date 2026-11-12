@@ -95,7 +95,9 @@ export function fakeGithub({ project = PROJECT } = {}) {
       need(/timelineItems\(itemTypes: ?\[CLOSED_EVENT\], ?last: ?1\)/.test(query) && /closer/.test(query), args);
       const vars = Object.fromEntries(values(args, '-F').map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
       need(vars.owner === project.split('/')[0] && vars.name === project.split('/')[1] && /^\d+$/.test(vars.number ?? ''), args);
-      const it = issueOf(vars.number, args);
+      // Like the real GraphQL: a number that is not an Issue (a PR, a typo, a deleted Issue) fails with this text.
+      const it = issues.get(Number(vars.number));
+      if (!it) throw new Error(`gh ${args.join(' ')} failed: gh: Could not resolve to an Issue with the number of ${vars.number}.`);
       const last = it.closes.at(-1);
       const nodes = last ? [{ __typename: 'ClosedEvent', closer: last.pr === null ? null : { __typename: 'PullRequest', number: last.pr, merged: last.merged } }] : [];
       return JSON.stringify({ data: { repository: { issue: { state: it.state, timelineItems: { nodes } } } } });

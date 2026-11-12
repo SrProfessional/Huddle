@@ -14,6 +14,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   will not work until it is edited to `/huddle-play <n>`. The `huddle` CLI, the labels and `/huddle-watch` are unchanged. The release that
   carries it is 0.6.0.
 
+### Fixed
+
+- `huddle labels` no longer fails for the whole repo because of one «Depends on» line (Issue #99). A line now means the Issues it starts
+  with (`- #209 (migration 071, PR #407: …)` depends on #209 only); a `#N` in the note after them is ignored. A number that is not an
+  Issue (a PR/MR, a typo, a deleted Issue) keeps the Issue `blocked` and prints one warning naming the Issue and the number; the other
+  Issues still get their labels. A real failure (login, network, rate limit) still stops the run. **Behaviour change:** the run of
+  numbers ends at the first word that is not «and», so `- #12 and also #13` loses #13: put one `- #N` per line.
+
 ## [0.5.3] - 2026-11-11
 
 ### Changed
