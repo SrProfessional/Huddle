@@ -39,7 +39,7 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the de
    person can create: give them the «🙋 Only you» steps of docs/gitlab.md, «The HUDDLE_TOKEN step»).
 4. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` and show the result. If it reports a missing label, run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` (the AI Manager's login only).
-5. Tell the AI Manager to send every developer the two install commands, to run once on their machine in a terminal, then open a new session: `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`.
+5. Tell the AI Manager to send every developer both install routes, to do once on their machine, then open a new session. With the `claude` command, in a terminal: `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`. With only the VS Code extension (it puts no `claude` command in the terminal): type `/plugins`, add the marketplace `SrProfessional/Huddle` and install `huddle` with **Install for this project** (not «Install for you»).
 6. Tell the developer, in one line: the areas of the project are its milestones, and each area's percentage counts the
    Issues still to write, which the AI Manager states on a line of the milestone description, for example `Huddle remaining: 4`
    (see `huddle progress`).

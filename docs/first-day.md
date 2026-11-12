@@ -9,7 +9,7 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    you in it, even after reading English Issue prompts or Huddle's output; everything written to the repo stays in English.
 2. Install `gh` (GitHub) or `glab` (GitLab) and log in yourself, with `gh auth login` or `glab auth login`. For a
    self-managed GitLab add `--hostname <your server>`. Never paste a token into a chat, a file or an Issue.
-3. Install Huddle once on your machine, whatever the repo commits. In a terminal run, then open a new session:
+3. Install Huddle once on your machine, whatever the repo commits. If you have the `claude` command (the CLI), run this in a terminal, then open a new session:
 
    ```text
    claude plugin marketplace add SrProfessional/Huddle
@@ -17,7 +17,10 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    ```
 
    In the CLI the same works as `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`.
-   The VS Code extension has no `/plugin`, so use the terminal form.
+   If you use only the VS Code extension, it puts no `claude` command in the terminal: type `/plugins`, add the marketplace
+   `SrProfessional/Huddle` in the **Marketplaces** tab, and install `huddle` from the **Plugins** tab with **Install for this
+   project** (not «Install for you»). Each person does this once per clone. Then open a new session. The same dialog
+   updates it later.
 
    The team's repo may commit a `.claude/settings.json` snippet. It is only a helper: it enables the plugin for the
    project and, in the CLI, registers the marketplace silently, only after the trust dialog of that folder itself. If a
@@ -40,8 +43,8 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    1. In Claude Code in the CLI, type `/plugin` and press Enter.
    2. Go to the **Marketplaces** tab and select `huddle`.
    3. Select **Enable auto-update**.
-   4. Check it: the `huddle` line now says auto-update is enabled. (The VS Code extension has no `/plugin`; there type
-      `/plugins`, or skip this step: Huddle tells you at the start of a session when a newer version exists.)
+   4. Check it: the `huddle` line now says auto-update is enabled. (In the VS Code extension type
+      `/plugins` instead of `/plugin`, or skip this step: Huddle tells you at the start of a session when a newer version exists.)
 
    After that Claude Code updates Huddle by itself at startup. Even then, a session that starts on a new day with an
    older Huddle says so, with the two commands to run.

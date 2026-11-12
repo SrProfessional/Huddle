@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Changed
 
+- The Markdown guides, the `/huddle-setup` skill and the setup report, `huddle doctor` and `huddle update` messages now give both routes
+  (Issue #96): the terminal commands for people who have `claude`, and `/plugins` (**Install for this project**) for people who use only the VS Code
+  extension. They no longer say the extension «has no `/plugin`» and stop there.
 - The PDF guides and the website now name the 0.5.x commands (Issue #94): `/huddle-update` and the per-project update steps
   (`--scope project`), `/huddle-continue`, `/huddle-watch` and `huddle queue`, the daily notice (`huddle notice`) and the stop labels. They also give the VS Code route (`/plugins`, «Install for this project»), which the extension needs because it has no `/plugin` command.
 

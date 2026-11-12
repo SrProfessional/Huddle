@@ -32,8 +32,8 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
 
 1. [ ] **Session:** **Install the plugin from the marketplace**, in the AI Manager session. In a terminal run
    `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (the CLI also has
-   `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`; the VS Code extension has no
-   `/plugin`). `claude plugin list` (or `/plugin`) shows `huddle` enabled at the version under test (0.1.0, 0.2.0 for
+   `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`; in the VS Code extension, type
+   `/plugins` and install `huddle` with **Install for this project**). `claude plugin list` (or `/plugin`) shows `huddle` enabled at the version under test (0.1.0, 0.2.0 for
    sections 9 and 10, or 0.3.0 for section 11), and `/huddle-setup` is available. A plugin installed during a session shows up in the next one: if
    `/huddle-setup` is missing, the session says so and writes a 🙋 step asking the person to open a new Claude Code window.
    Before anything else it checks `gh auth status` (or `glab auth status`): if not logged in, it asks the person to log in
