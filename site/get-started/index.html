@@ -71,7 +71,7 @@ claude plugin install huddle@huddle</code></pre>
         <p class="prose"><strong>To update later.</strong> Install and update are per project, so repeat this in each project that uses Huddle. From the project's folder run:</p>
         <pre tabindex="0"><code>claude plugin marketplace update huddle
 claude plugin update huddle@huddle --scope project</code></pre>
-        <p class="prose">Open a new session, then run <code>/huddle-update</code> on a branch: it refreshes the templates and the <code>CLAUDE.md</code> block and asks only the questions a new release added. A project can be on an older version than another. <code>/huddle-start</code>, <code>/huddle-continue</code> and <code>/huddle-update</code> tell you in the chat when a newer release exists, at most once a day.</p>
+        <p class="prose">Open a new session, then run <code>/huddle-update</code> on a branch: it refreshes the templates and the <code>CLAUDE.md</code> block and asks only the questions a new release added. A project can be on an older version than another. <code>/huddle-play</code> and <code>/huddle-update</code> tell you in the chat when a newer release exists, at most once a day.</p>
       </section>
 
       <section id="setup">
@@ -112,7 +112,7 @@ claude plugin update huddle@huddle --scope project</code></pre>
         <ol class="prose">
           <li><strong>Set up your machine.</strong> Install Claude Code, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the two commands above. Never paste a token into a chat, a file or an Issue.</li>
           <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the AI Manager: only they run <code>huddle labels</code>.</li>
-          <li><strong>Take an Issue.</strong> The AI Manager assigns one, or the labels job does. Run <code>/huddle-start &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
+          <li><strong>Take an Issue.</strong> The AI Manager assigns one, or the labels job does. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
           <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the AI Manager.</li>
           <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
         </ol>

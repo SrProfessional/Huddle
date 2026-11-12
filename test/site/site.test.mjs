@@ -456,10 +456,10 @@ test('H28: every block of a scene outside .wrap (and outside a .deco layer) has 
   assert.deepEqual(offenders, [], `outside .wrap with no --gutter rule: ${offenders.join(', ')}`);
 });
 
-test('how-it-works names /huddle-watch and /huddle-continue; get-started names the update steps (Issue #94)', () => {
+test('how-it-works names /huddle-watch and /huddle-play; get-started names the update steps (Issue #94)', () => {
   const how = html('how-it-works/index.html');
   const start = html('get-started/index.html');
-  for (const s of ['/huddle-watch', '/huddle-continue']) assert.ok(how.includes(s), `how-it-works does not name ${s}`);
+  for (const s of ['/huddle-watch', '/huddle-play']) assert.ok(how.includes(s), `how-it-works does not name ${s}`);
   for (const s of ['/huddle-update', '--scope project']) assert.ok(start.includes(s), `get-started does not name ${s}`);
   assert.ok(start.includes('/plugins'), 'get-started does not name /plugins');
   for (const t of [how, start]) {

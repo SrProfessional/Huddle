@@ -19,8 +19,8 @@ test('/huddle-issue writes a design task from the Design template, with the desi
   assert.match(t, /--label design/);
 });
 
-test('/huddle-start works a Design Issue: Claude Design, polish only in the chat, ready, then saves, opens the PR and closes', () => {
-  const t = flat('skills/huddle-start/SKILL.md');
+test('/huddle-play works a Design Issue: Claude Design, polish only in the chat, ready, then saves, opens the PR and closes', () => {
+  const t = flat('skills/huddle-play/SKILL.md');
   assert.match(t, /Design Issue/);
   assert.match(t, /Claude Design/);
   assert.match(t, /design artifact/i);
@@ -41,8 +41,8 @@ test('/huddle-start works a Design Issue: Claude Design, polish only in the chat
   assert.match(t, /no version history|has no version history/i);
 });
 
-test('/huddle-start keeps a design Issue away from code and tests', () => {
-  const t = flat('skills/huddle-start/SKILL.md');
+test('/huddle-play keeps a design Issue away from code and tests', () => {
+  const t = flat('skills/huddle-play/SKILL.md');
   assert.match(t, /never change[s]? code|no code/i);
   assert.match(t, /no tests|not run tests|there are no tests/i);
 });

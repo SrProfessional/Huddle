@@ -111,7 +111,7 @@ About five minutes, in the repo you want to run with Huddle. You are the AI Mana
 4. Run `huddle doctor`. It should show ✔ for the file, the login, the AI Manager and the labels. If a label is missing,
    run `huddle labels` once.
 5. Commit, push and open a PR with the setup files. Merge it: you are the only one who merges.
-6. Write the first task with `/huddle-issue`. The developer opens Claude Code in their clone and runs `/huddle-start <n>`
+6. Write the first task with `/huddle-issue`. The developer opens Claude Code in their clone and runs `/huddle-play <n>`
    with the Issue number (or pastes the «Prompt for Claude Code» of the Issue).
 
 Next: [the first day](docs/first-day.md).
@@ -231,8 +231,7 @@ session cannot touch what customers use.
 | `/huddle-update` | AI Manager | Brings a repo that already has Huddle to the installed version: refreshes the block and the templates, and asks only the questions a new release added (see [Updating Huddle](docs/team-guide.md#updating-huddle)). |
 | `/huddle-issue` | AI Manager | Writes a new Issue from the template. |
 | `/huddle-bug` | AI Manager | Turns a bug description, or a raw report labeled `needs triage`, into a ready Bug Issue: investigates without changing anything, checks duplicates, sets the severity. |
-| `/huddle-start <n>` | Developer | Starts Issue `n`. |
-| `/huddle-continue <n>` | Developer | Continues Issue `n` after the AI Manager answered (a review or a decision): takes the pending request and follows it, so you never copy the prompt by hand. |
+| `/huddle-play <n>` | Developer | Works on Issue `n`. An Issue with no branch is started; an Issue already started is continued after the AI Manager answered (a review or a decision): it takes the pending request and follows it, so you never copy the prompt by hand. |
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
 | `/huddle-watch [interval\|status\|off]` | AI Manager | Checks every few minutes (default 5) what waits for the AI Manager and runs `/huddle-review` on each PR/MR that waits. Turning it on is the order to review and merge. It never answers decisions or triages bugs. It stops with `off` or when Claude Code closes, and expires after 7 days. |
@@ -248,7 +247,7 @@ session cannot touch what customers use.
 | `huddle clean [--dry-run] [--no-fetch]` | Anyone, the hook | Removes the worktrees of finished Issues (clean, merged into the default branch, untouched for 24 hours) with their `node_modules`, so they never fill the disk. Starts by itself when a session opens (see [Old worktrees clean themselves](docs/team-guide.md#old-worktrees-clean-themselves)). |
 | `huddle queue [--json]` | AI Manager, `/huddle-watch` | Lists what waits for the AI Manager: a PR/MR to review, a `needs decision` question nobody answered, a `needs triage` report. Read-only: it writes no label, comment or file. |
 | `huddle update [--check] [--dry-run] [--json] [--answer key=value...]` | AI Manager | The mechanics behind `/huddle-update`: refreshes the repo's files and `setup_version` with no login and no network. With a question the repo has not answered it changes nothing and exits 3; `--check` and `--dry-run` write nothing. |
-| `huddle notice [--json]` | Anyone, the skills | Says the «newer Huddle» notice when a newer release exists and the skills have not shown it in 24 hours (its own stamp, apart from the hook's). `/huddle-start`, `/huddle-continue` and `/huddle-update` begin with it, so it shows in VS Code too. Read-only, no login, always exit 0. |
+| `huddle notice [--json]` | Anyone, the skills | Says the «newer Huddle» notice when a newer release exists and the skills have not shown it in 24 hours (its own stamp, apart from the hook's). `/huddle-play` and `/huddle-update` begin with it, so it shows in VS Code too. Read-only, no login, always exit 0. |
 | `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
 | `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager, the labels and whether each assignee can be assigned. |
 

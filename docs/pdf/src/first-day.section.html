@@ -84,12 +84,12 @@
       <li>
         <h3>Take your first Issue</h3>
         <p>Find the Issue assigned to you (label <code>assigned</code>), or type <code class="nowrap">gh issue list --assignee @me</code>. In Claude Code type:</p>
-        <pre><code>/huddle-start N</code></pre>
+        <pre><code>/huddle-play N</code></pre>
         <p>with the Issue's number instead of <code>N</code>. It checks that the Issue's dependencies are merged, creates your branch in a folder of its own, marks the Issue <code>in progress</code> and starts the Issue's prompt. Answer its questions calmly: that is where your work is.</p>
       </li>
       <li>
         <h3>When the AI Manager asks for changes</h3>
-        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the AI Manager leaves a request, the session tells you and asks whether to continue: say yes. You can also type <code class="nowrap">/huddle-continue N</code> yourself, with the Issue's number: <code>/huddle-start N</code> only starts an Issue. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
+        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the AI Manager leaves a request, the session tells you and asks whether to continue: say yes. You can also type <code class="nowrap">/huddle-play N</code> again yourself, with the Issue's number: it picks up the AI Manager's answer. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
       </li>
     </ol>
   </section>

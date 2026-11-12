@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const abs = (rel) => fileURLToPath(new URL(`../../${rel}`, import.meta.url));
 const read = (rel) => readFileSync(abs(rel), 'utf8');
-const SKILLS = ['huddle-setup', 'huddle-start', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update', 'huddle-continue', 'huddle-watch'];
+const SKILLS = ['huddle-setup', 'huddle-play', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update', 'huddle-watch'];
 
 const frontmatter = (text) => {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
@@ -30,7 +30,8 @@ for (const name of SKILLS) {
     const fm = frontmatter(text);
     assert.equal(fm.name, name);
     assert.match(fm.description, /^Use when /);
-    assert.ok(text.split('\n').length <= 90, 'keep it short');
+    // huddle-play is the old start and continue skills in one (the Design flow moved in unchanged), so it gets 100 lines.
+    assert.ok(text.split('\n').length <= (name === 'huddle-play' ? 100 : 90), 'keep it short');
     assert.doesNotMatch(text, /socialcortex|docs\/equipo|scripts\/huddle/i);
   });
 }
@@ -53,13 +54,10 @@ test('review and decide post «## Prompt for Claude Code» on the PR/MR and on i
 
 test('only the AI Manager merges: review says so, start never merges and uses wait/take', () => {
   assert.match(read('skills/huddle-review/SKILL.md'), /AI Manager/);
-  const start = read('skills/huddle-start/SKILL.md');
-  assert.match(start, /never merge/i);
-  assert.match(start, /huddle" wait/);
-  const again = read('skills/huddle-continue/SKILL.md');
-  assert.match(again, /never merge/i);
-  assert.match(again, /huddle" wait/);
-  assert.match(again, /huddle" take/);
+  const play = read('skills/huddle-play/SKILL.md');
+  assert.match(play, /never merge/i);
+  assert.match(play, /huddle" wait/);
+  assert.match(play, /huddle" take/);
 });
 
 test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a team repo has no bin/huddle and no huddle on the PATH', () => {
@@ -74,7 +72,7 @@ test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a
 test('the label is always named in full: «changes requested from AI Manager»', () => {
   for (const name of SKILLS) assert.doesNotMatch(read(`skills/${name}/SKILL.md`), /changes requested(?! from AI Manager)/, name);
   assert.match(read('skills/huddle-review/SKILL.md'), /changes requested from AI Manager/);
-  assert.match(read('skills/huddle-continue/SKILL.md'), /changes requested from AI Manager/);
+  assert.match(read('skills/huddle-play/SKILL.md'), /changes requested from AI Manager/);
 });
 
 test('setup says an empty max open per person means no limit, and gives no default of 2', () => {
@@ -94,7 +92,7 @@ const templateOf = (name) => {
 test('the review and decide prompt templates start with the take step', () => {
   for (const name of ['huddle-review', 'huddle-decide']) {
     const first = templateOf(name).split('\n')[0];
-    assert.match(first, /^First run \/huddle-continue <n>: it marks this request as taken \(👀\), so the Issue shows «in progress»\./, name);
+    assert.match(first, /^First run \/huddle-play <n>: it marks this request as taken \(👀\), so the Issue shows «in progress»\./, name);
   }
 });
 

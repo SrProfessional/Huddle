@@ -65,7 +65,7 @@ most questions you will have.
 ## 3. Take your first Issue
 
 1. The AI Manager assigns you an Issue, or the labels job does: it carries `assigned` and your name.
-2. Open Claude Code in the repo and run `/huddle-start <n>`. You can also paste the «Prompt for Claude Code» block of the
+2. Open Claude Code in the repo and run `/huddle-play <n>`. You can also paste the «Prompt for Claude Code» block of the
    Issue.
 3. The session reads the Issue, checks that what it depends on is merged, creates its own branch in a worktree and adds
    the `in progress` label. If a dependency is not merged, it stops: that is correct, wait for it.
@@ -79,7 +79,7 @@ test counts, what was not done and your next step. If you do not see it, the ses
 
 After the PR is open the session waits in the background. When the AI Manager asks for changes, it continues on its own.
 If you closed Claude Code meanwhile, the next time you open it a hook says there is a pending request and asks if it
-should continue. You can also run `/huddle-continue <n>` yourself: it picks up the AI Manager's answer on Issue `n`, so you
+should continue. You can also run `/huddle-play <n>` yourself: it picks up the AI Manager's answer on Issue `n`, so you
 never copy the prompt by hand. `huddle pending` lists the requests.
 
 ## If you are a designer
@@ -95,7 +95,7 @@ What to install, once:
 
 How a design task goes:
 
-1. Open the team's repo in VS Code, open Claude Code and run `/huddle-start <n>` with the number of your Issue.
+1. Open the team's repo in VS Code, open Claude Code and run `/huddle-play <n>` with the number of your Issue.
 2. The session builds the design with Claude Design and gives you a link to watch it.
 3. **Ask for every change in the chat, in your own words** («make the button bigger», «use the phone layout for the menu»).
    Do not change things by hand on the canvas: the session cannot tell what you did there, and it will ask you whether to keep it.
