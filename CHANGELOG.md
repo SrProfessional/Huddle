@@ -5,6 +5,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- `/huddle-update` updates everything with one command (Issue #104). It updates the plugin (`claude plugin marketplace update huddle` and
+  `claude plugin update huddle@huddle --scope project`), refreshes the project's files in a worktree and branch of its own
+  (`huddle-update-<version>`) with the **new** version's templates, asks only the pending questions, opens the PR, and ends by telling
+  the person to type `/reload-plugins` (terminal and VS Code); «restart Claude Code» is the fallback. The person no longer switches branch
+  or opens a terminal. `newPluginRoot` in `lib/core/update.mjs` finds the new version's folder. Every text that said «open a new session»
+  after installing or updating the plugin now says `/reload-plugins`, with a restart as the fallback. The first update to a version that has
+  this skill is done the old way, because the installed `/huddle-update` is the old one; from then on it is one command. The release that
+  carries it is 0.7.0.
+
 ## [0.6.0] - 2026-11-12
 
 ### Changed

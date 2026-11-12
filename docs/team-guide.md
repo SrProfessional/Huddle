@@ -247,7 +247,7 @@ is never deleted. Before judging, it runs `git fetch`; offline, it judges with w
 
 ## Installing Huddle
 
-Every developer installs Huddle once on their own machine, then opens a new session. With the `claude` command, in a terminal run
+Every developer installs Huddle once on their own machine, then types `/reload-plugins` in the open session (or restarts Claude Code if the skills do not show up). With the `claude` command, in a terminal run
 `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (in the CLI, `/plugin marketplace add ...`
 and `/plugin install ...` work too). With only the VS Code extension, which puts no `claude` command in the terminal, type `/plugins`,
 add the marketplace `SrProfessional/Huddle` in the **Marketplaces** tab and install `huddle` from the **Plugins** tab with **Install for
@@ -311,7 +311,7 @@ one short block, and Claude says it first in its first answer, in your language:
 <old>)`, the two commands, and a link to what changed. It looks the release up without a login (so GitLab teams get it
 too), at most once a day, from a small cache in Claude Code's data folder. If there is no network, GitHub answers with an
 error or the answer is slow (3 seconds at most), it says nothing. A pre-release never counts. The AI Manager's notice has
-one more line: after updating, run `/huddle-update` on a branch in each repo to get the new templates and any new questions. If you run Huddle
+one more line: after updating, run `/huddle-update` in each repo to get the new templates and any new questions. If you run Huddle
 from a clone (`--plugin-dir`), the notice says to pull your clone.
 
 **The notice in the skills.** The session-start notice can miss you: it is shown once a day per machine, and the VS Code extension may
@@ -322,14 +322,14 @@ use the hook's day. `huddle notice [--json]` is read-only and needs no login.
 
 **Each project updates on its own.** Huddle is installed per project (`/huddle-setup` writes it in the project's `.claude/settings.json`),
 so update inside each project where Huddle is used: run the two commands from the project's folder, with `--scope project` on
-`claude plugin update`, and open a new session. A project can be on an older version than another; `claude plugin list` shows the
+`claude plugin update`, and type `/reload-plugins` (restart Claude Code if the new skills do not show up). A project can be on an older version than another; `claude plugin list` shows the
 version of each installation and its scope.
 
 **Doctor.** `huddle doctor` has a `version` line: ✔ `huddle 0.4.0 (latest)`; ⚠ `huddle 0.3.0, latest is 0.4.0` with the
 two commands; or ⚠ `could not check the latest release` when offline. It is a warning, never a failure.
 
 **Doctor, the repo.** `huddle doctor` also has a `setup` line, read from the repo's files only: ✔ `set up for 0.4.2 (up to date)`;
-⚠ `set up for 0.4.1, Huddle is 0.4.2: run /huddle-update on a branch` when a file would change or a question is pending; ✔ with a
+⚠ `set up for 0.4.1, Huddle is 0.4.2: run /huddle-update` when a file would change or a question is pending; ✔ with a
 note when only the version number differs and there is nothing to refresh.
 
 **Auto-update.** Turn it on once per person: `/plugin` → **Marketplaces** → `huddle` → **Enable auto-update**. The VS Code
@@ -338,12 +338,15 @@ the Claude Code docs only say clearly that managed settings can enforce it for a
 not proven to work, so each person turns it on (it is a step in the [first-day guide](first-day.md)). Until then the
 notice above is the safety net.
 
-**The steps.** Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
-of `/plugin` (or run `claude plugin update huddle@huddle --scope project`). In the VS Code extension, which puts no `claude` command in
-the terminal, use `/plugins`: the same dialog that installed Huddle updates it. With the `claude` command you can also run
-`claude plugin marketplace update huddle` and `claude plugin update huddle@huddle --scope project` in a terminal. Either way, open a new session after
-the update. If you work from a clone with `--plugin-dir`, pull it
-instead. Then run `/huddle-update` on a branch (`huddle update` is the command behind it). It reads `setup_version` in `huddle.json`
+**One command: `/huddle-update`.** It does everything, in this order: the version notice; the plugin (`claude plugin marketplace update huddle`
+then `claude plugin update huddle@huddle --scope project`, run for you); the project's files, in a worktree and a branch of their own
+(`huddle-update-<version>`), using the **new** version's templates, so you never change branch; the pending questions; and the PR.
+It ends by telling you to type `/reload-plugins` in the open session (in the terminal and in VS Code); if the new skills do not show up, restart
+Claude Code (close `claude` and open it again; in VS Code, «Developer: Reload Window» or close VS Code and open it again). If the `claude`
+command cannot be run from the session (for example in the VS Code extension, which puts none in the terminal), it still refreshes the files with the Huddle
+that is installed and tells you to update the plugin with `/plugins` or the terminal commands, and then run `/huddle-update` again. By hand, the same plugin update is `/plugin marketplace update huddle` and the Installed tab of `/plugin`, or the two terminal commands. If you work from
+a clone with `--plugin-dir`, pull it instead. The first update to a version that has this skill is done the old way (your installed
+`/huddle-update` is the old one); from then on it is one command. `huddle update` is the command behind it. It reads `setup_version` in `huddle.json`
 (the Huddle release the repo was last set up for), refreshes the block and the templates, writes the new `setup_version`, and says
 what changed and which templates it kept because you edited them. When a release needs an answer your repo does not have yet, it
 asks **only that question**, once, and never again; with no new question it asks nothing. `huddle update --check` tells you what would

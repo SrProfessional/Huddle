@@ -9,7 +9,7 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    you in it, even after reading English Issue prompts or Huddle's output; everything written to the repo stays in English.
 2. Install `gh` (GitHub) or `glab` (GitLab) and log in yourself, with `gh auth login` or `glab auth login`. For a
    self-managed GitLab add `--hostname <your server>`. Never paste a token into a chat, a file or an Issue.
-3. Install Huddle once on your machine, whatever the repo commits. If you have the `claude` command (the CLI), run this in a terminal, then open a new session:
+3. Install Huddle once on your machine, whatever the repo commits. If you have the `claude` command (the CLI), run this in a terminal, then type `/reload-plugins` in your open session (if the Huddle skills do not show up, restart Claude Code):
 
    ```text
    claude plugin marketplace add SrProfessional/Huddle
@@ -19,8 +19,8 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    In the CLI the same works as `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`.
    If you use only the VS Code extension, it puts no `claude` command in the terminal: type `/plugins`, add the marketplace
    `SrProfessional/Huddle` in the **Marketplaces** tab, and install `huddle` from the **Plugins** tab with **Install for this
-   project** (not «Install for you»). Each person does this once per clone. Then open a new session. The same dialog
-   updates it later.
+   project** (not «Install for you»). Each person does this once per clone. Then type `/reload-plugins` (or restart Claude Code). The same dialog
+   updates it later, and `/huddle-update` does it for you in one command.
 
    The team's repo may commit a `.claude/settings.json` snippet. It is only a helper: it enables the plugin for the
    project and, in the CLI, registers the marketplace silently, only after the trust dialog of that folder itself. If a

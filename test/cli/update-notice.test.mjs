@@ -131,7 +131,7 @@ test('for the AI Manager login the notice adds the /huddle-update line; a develo
   const manager = harness();
   setupUpdate(manager);
   await run(['hook'], manager.ctx);
-  for (const text of [visible(manager), context(manager)]) assert.match(text, /After updating, run \/huddle-update on a branch in each repo to get the new templates and any new questions\./);
+  for (const text of [visible(manager), context(manager)]) assert.match(text, /After updating, run \/huddle-update in each repo to get the new templates and any new questions\./);
   const dev = harness({ wrap: (a) => ({ ...a, me: async () => 'ana' }) });
   setupUpdate(dev);
   await run(['hook'], dev.ctx);

@@ -47,14 +47,14 @@ for them (see [the settings snippet](#the-settings-snippet-is-a-helper)). You ne
   **GitLab:** the [`glab`](https://gitlab.com/gitlab-org/cli) CLI, logged in with `glab auth login`
   (add `--hostname gitlab.example.com` for a self-managed server).
 
-Install the plugin from its marketplace, once, then open a new session. If you have the `claude` command (the CLI), run this in a terminal:
+Install the plugin from its marketplace, once, then type `/reload-plugins` (if the Huddle skills do not show up, restart Claude Code). If you have the `claude` command (the CLI), run this in a terminal:
 
 ```text
 claude plugin marketplace add SrProfessional/Huddle
 claude plugin install huddle@huddle
 ```
 
-In the Claude Code CLI you can run the same as `/plugin` commands, then open a new session:
+In the Claude Code CLI you can run the same as `/plugin` commands, then type `/reload-plugins` (or restart Claude Code):
 
 ```text
 /plugin marketplace add SrProfessional/Huddle
@@ -228,7 +228,7 @@ session cannot touch what customers use.
 | Command | Who | What it does |
 |---|---|---|
 | `/huddle-setup` | AI Manager | Installs Huddle in a repo for the first time. |
-| `/huddle-update` | AI Manager | Brings a repo that already has Huddle to the installed version: refreshes the block and the templates, and asks only the questions a new release added (see [Updating Huddle](docs/team-guide.md#updating-huddle)). |
+| `/huddle-update` | AI Manager | One command to update Huddle in a project: updates the plugin, refreshes the block and the templates in a worktree and branch of its own, asks only the questions a new release added, opens the PR, and ends with `/reload-plugins` (see [Updating Huddle](docs/team-guide.md#updating-huddle)). |
 | `/huddle-issue` | AI Manager | Writes a new Issue from the template. |
 | `/huddle-bug` | AI Manager | Turns a bug description, or a raw report labeled `needs triage`, into a ready Bug Issue: investigates without changing anything, checks duplicates, sets the severity. |
 | `/huddle-play <n>` | Developer | Works on Issue `n`. An Issue with no branch is started; an Issue already started is continued after the AI Manager answered (a review or a decision): it takes the pending request and follows it, so you never copy the prompt by hand. |

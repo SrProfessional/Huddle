@@ -160,7 +160,7 @@ test('doctor: setup is up to date', async () => {
 
 test('doctor: setup needs an update', async () => {
   const line = await doctorLine({ state: 'needs', setupVersion: '0.4.1', installed: '0.4.2', pending: [], changed: ['CLAUDE.md'] });
-  assert.equal(line, '⚠ setup: set up for 0.4.1, Huddle is 0.4.2: run /huddle-update on a branch');
+  assert.equal(line, '⚠ setup: set up for 0.4.1, Huddle is 0.4.2: run /huddle-update');
 });
 
 test('doctor: only the version differs, nothing would change', async () => {
