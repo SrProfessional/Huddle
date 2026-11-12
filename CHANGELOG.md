@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-12
+
 ### Changed
 
 - **Breaking:** `/huddle-play <n>` replaces `/huddle-start` and `/huddle-continue` (Issue #100). One command to work on an Issue: with no

@@ -464,6 +464,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.6.0
+
+Run of: 2026-11-12, Huddle `main` with Issues #99 and #100 merged (commit cb332ce), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.5.3 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| `/huddle-play <n>` replaces `/huddle-start` and `/huddle-continue` (#100) | covered by tests | covered by tests | The skill is tested as text: the notice first, no branch starts the Issue, a branch continues it (`huddle pending`, `huddle take`), the Design flow, and the two old skills gone. Not run in a live session: how a model follows the merged skill. The rest of the steps in this document type `/huddle-play`. |
+| The review and decide prompts say «First run /huddle-play <n>» (#100) | covered by tests | covered by tests | Tested as text. An Issue or a review comment written before 0.6.0 that says `/huddle-start <n>` will not work until it is edited. |
+| `huddle labels` with a PR number in «Depends on» (#99) | covered by tests | covered by tests | Tested with the fake platforms: `- #12 (see PR #34)` depends on #12 only; a number that is not an Issue keeps the Issue `blocked`, prints one warning and the run exits 0; a login or network failure still exits non-zero. Not run against a real GitHub or GitLab. |
+
 ### Results 0.5.3
 
 Run of: 2026-11-11, Huddle `main` with Issues #94 and #96 merged (commit 04e7020), by the AI Manager's Claude Code session and a developer on a Mac. A patch-sized release (text only: the
