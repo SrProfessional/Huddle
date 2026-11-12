@@ -80,6 +80,7 @@ test('the CLI commands the docs name are in bin/huddle (checked against its usag
 test('the /huddle-* skills the docs name exist in skills/', () => {
   let seen = 0;
   for (const f of DOCS) {
+    if (f === 'CHANGELOG.md') continue; // the history keeps the names the commands had at the time
     for (const m of read(f).matchAll(/(?<![\w./-])\/(huddle-[a-z]+)(?![\w.-])/g)) { // a slash command, not a path such as workflows/huddle-labels.yml
       seen += 1;
       assert.ok(skills.includes(m[1]), `${f}: /${m[1]} is not a skill`);

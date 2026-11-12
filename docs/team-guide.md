@@ -38,7 +38,7 @@ closed **and** a merged PR/MR closed it. An Issue closed by hand unblocks nothin
 
 1. The AI Manager writes the Issue (`/huddle-issue`).
 2. The labels job assigns it when it is ready.
-3. The developer runs `/huddle-start <n>`. The session works test first, touching only the allowed files.
+3. The developer runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
 4. It opens the PR/MR with `Closes #N`, the real test counts and «What was NOT done», and ends with «✅ Issue #N finished».
 5. CI runs the tests. The AI Manager reviews (`/huddle-review`): either requests changes or merges.
 6. A request comes as a comment with a `## Prompt for Claude Code` heading. The session picks it up (`huddle take <n>`),
@@ -115,7 +115,7 @@ a design task never changes code.
 
 - **The design system.** A project can set one up once, from its repo, with `/design-sync` in Claude Code (an AI Manager
   step). The session uses it when it exists; otherwise it follows the Issue's visual guide.
-- **Work.** The designer runs `/huddle-start <n>`. The session creates the design with Claude Design and shares the link.
+- **Work.** The designer runs `/huddle-play <n>`. The session creates the design with Claude Design and shares the link.
   Changes are asked for **only in the chat**, never by hand on the canvas. If the session finds a change it did not make, it
   asks whether to keep it or go back to its own last version.
 - **Ready.** The designer says «ready» and confirms in one line. The session saves `README.md` (link, screens, decisions,
@@ -210,7 +210,7 @@ about it.
 | Define or check the areas (AI Manager) | `/huddle-areas`, or `huddle areas check` |
 | Check my setup | `huddle doctor` |
 | See what the labels job would change | `huddle labels --dry-run` |
-| Continue after a request | `/huddle-continue <n>`, or answer yes to the hook |
+| Continue after a request | `/huddle-play <n>`, or answer yes to the hook |
 | See what waits for the AI Manager | `huddle queue` |
 | See if a newer Huddle exists (the skills say it too) | `huddle notice` |
 | Have the AI Manager's session review by itself (AI Manager) | `/huddle-watch`, and `/huddle-watch off` to stop |
@@ -313,7 +313,7 @@ one more line: after updating, run `/huddle-update` on a branch in each repo to 
 from a clone (`--plugin-dir`), the notice says to pull your clone.
 
 **The notice in the skills.** The session-start notice can miss you: it is shown once a day per machine, and the VS Code extension may
-not show a hook's message at all. So `/huddle-start`, `/huddle-continue` and `/huddle-update` begin with `huddle notice` and Claude says the
+not show a hook's message at all. So `/huddle-play` and `/huddle-update` begin with `huddle notice` and Claude says the
 same text in the chat, in your language, as the first thing in its answer, then goes on with your task. The skills keep their own daily
 stamp (`skillShownAt` in the same cache file), so a terminal session that used the hook's notice does not silence them, and they never
 use the hook's day. `huddle notice [--json]` is read-only and needs no login.

@@ -9,7 +9,7 @@ const guide = src('guide.html');
 const firstDay = src('first-day.section.html');
 
 test('guide.html names the 0.5.x commands and the per-project update', () => {
-  for (const s of ['/huddle-update', '/huddle-continue', '/huddle-watch', 'huddle queue', 'huddle notice', '--scope project',
+  for (const s of ['/huddle-update', '/huddle-play', '/huddle-watch', 'huddle queue', 'huddle notice', '--scope project',
     'claude plugin marketplace update huddle', 'claude plugin update huddle@huddle']) {
     assert.ok(guide.includes(s), `guide.html does not name ${s}`);
   }
@@ -20,8 +20,8 @@ test('guide.html says the stop labels stand alone and that watching is the order
   assert.match(guide, /order to merge/);
 });
 
-test('first-day.section.html names /huddle-continue and /huddle-update', () => {
-  for (const s of ['/huddle-continue', '/huddle-update']) assert.ok(firstDay.includes(s), `first-day.section.html does not name ${s}`);
+test('first-day.section.html names /huddle-play and /huddle-update', () => {
+  for (const s of ['/huddle-play', '/huddle-update']) assert.ok(firstDay.includes(s), `first-day.section.html does not name ${s}`);
 });
 
 test('guide.html and first-day.section.html name /plugins and do not say the extension has no /plugin command', () => {

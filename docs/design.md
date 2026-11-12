@@ -48,8 +48,7 @@ huddle/
   .claude-plugin/plugin.json      name, version, description
   skills/
     huddle-setup/SKILL.md         installs Huddle in a repo (asks the platform, host, AI Manager, team)
-    huddle-start/SKILL.md         a developer starts an Issue
-    huddle-continue/SKILL.md      a developer picks an Issue up again after the AI Manager answered it
+    huddle-play/SKILL.md          a developer starts an Issue, or picks it up again after the AI Manager answered it
     huddle-issue/SKILL.md         the AI Manager writes a new Issue from the template
     huddle-review/SKILL.md        the AI Manager reviews a PR/MR and posts the request or merges
     huddle-decide/SKILL.md        the AI Manager answers a «needs decision»
@@ -320,7 +319,7 @@ evidence, a probable cause and the failing test to write first.
   «Original report» and removes `needs triage`.
 
 **The Bug template.** A bug block first: What happens, What should happen, How to reproduce, Evidence, Severity, Probable
-cause, The failing test to write first. Then every Task section, so the labels job and `/huddle-start` read it like a
+cause, The failing test to write first. Then every Task section, so the labels job and `/huddle-play` read it like a
 task. Label: `bug`.
 
 **Severity.** `blocking` (it stops a person or production), `normal` or `minor`, written under «Severity». The labels job
@@ -449,36 +448,34 @@ can (§13).
 **What it never does.** It never overwrites a template the project edited, never changes a key of `huddle.json` it was not
 given or does not own, never commits, never touches the network.
 
-## 18. Continuing an Issue: `/huddle-continue`
+## 18. One command to work on an Issue: `/huddle-play`
 
-Asked by the AI Manager on 2026-11-11 (Issue #83). A developer who started an Issue with `/huddle-start <n>` and then got an answer
-from the AI Manager (a review or a decision) had to copy the new prompt by hand: `/huddle-start <n>` always started from step 1, and
-the «Continue» flow only ran with no number. «Start» is also the wrong word for picking an Issue up again.
+Asked by the AI Manager on 2026-11-11 (Issues #83 and #100). Issue #83 split the work in two commands: one to start an Issue and
+one to pick it up again after the AI Manager answered. Two names for «work on this Issue» confuse people (which
+one do I type now?), and the session already knows the answer: an Issue with no branch is started, an Issue with its branch and a request
+waiting is continued. So there is one command, `/huddle-play <n>`. The two old commands no longer exist: no alias, no
+deprecated copy. This is a breaking change for the person who types, so the release that carries it is 0.6.0. An Issue or a review comment
+written before it that names the old commands has to be edited. There is no new CLI command: the skill uses `huddle pending` and `huddle take`.
 
-**Two commands, two meanings.** `/huddle-start <n>` starts Issue `n`. `/huddle-continue <n>` continues an Issue that is already
-started: the AI Manager answered a review (`changes requested from AI Manager`) or a decision (`needs decision`), and the session
-picks that answer up. There is no new CLI command: the skill uses `huddle pending` and `huddle take`.
+**The skill `/huddle-play <n>`.** After the version notice (§20), it reads the Issue and finds its branch (the «Branch» section), and decides:
 
-**The skill `/huddle-continue <n>`.**
+1. **Neither a local branch nor `origin/<branch>` exists:** the Issue was never started. It checks «Depends on», creates the branch in a
+   worktree of its own, adds `in progress`, runs the tests, works with TDD, opens the PR/MR, closes with the usual message and starts
+   `huddle wait <n>` in the background. A Design Issue keeps its own flow (§15).
+2. **The branch exists:** the Issue was started. It enters the Issue's worktree (`.claude/worktrees/<branch>`; if the folder is gone but the
+   branch exists, it creates it again without `-b`) and switches the session into it. It runs `huddle pending <n>`. Nothing pending: it says so,
+   changes nothing, and offers to wait (`huddle wait <n>`). Pending: it runs `huddle take <n>` (it marks the request 👀 and prints the AI
+   Manager's prompt) and follows that prompt with the same rules. Only comments by the `ai_manager` login count. The developer is told which
+   request it is and is **not** asked to paste anything. It pushes, comments «Ready for review again» with the real counts (none for a design
+   Issue), never touches the status labels, and starts `huddle wait <n>` again.
+3. It closes with the usual message («✅ Issue #N finished» or «⛔ Issue #N stopped»), the link, the counts, what was not done and the next
+   step (a step the session takes, or 🙋 steps), as in §13. «When you cannot go on» and «Who does each step» stay as they are.
 
-1. Read the Issue and find its branch (the «Branch» section). If neither a local branch nor `origin/<branch>` exists, the Issue was
-   never started: change nothing and say to run `/huddle-start <n>`.
-2. Enter the Issue's worktree (`.claude/worktrees/<branch>`); if the folder is gone but the branch exists, create it again without
-   `-b`; switch the session into it.
-3. Run `huddle pending <n>`. Nothing pending: say so, change nothing, and offer to wait (`huddle wait <n>`).
-4. Pending: run `huddle take <n>` (it marks the request 👀 and prints the AI Manager's prompt) and follow that prompt with the same
-   rules. Only comments by the `ai_manager` login count. The developer is told which request it is and is **not** asked to paste anything.
-5. Push, comment «Ready for review again» with the real counts (none for a design Issue), never touch the status labels, then start
-   `huddle wait <n>` again.
-6. Close with the usual message («✅ Issue #N finished» or «⛔ Issue #N stopped»), the link, the counts, what was not done and the
-   next step (a step the session takes, or 🙋 steps), as in §13.
+Nothing else about the flow changes: `huddle pending`, `huddle take`, `huddle wait`, the labels and the review prompts stay as they are. Only
+the name the person types changes.
 
-**`/huddle-start <n>`** keeps starting. Its «Continue» section becomes a pointer to `/huddle-continue`. If the Issue is already
-started (it has a branch), `/huddle-start` says that this is `/huddle-continue` and continues it anyway, so old prompts that say
-«First run /huddle-start <n>» keep working.
-
-**The AI Manager's prompt.** The first line of a «Prompt for Claude Code» comment (`huddle-review`, `huddle-decide`) is now
-`First run /huddle-continue <n>: it marks this request as taken (👀), so the Issue shows «in progress».`
+**The AI Manager's prompt.** The first line of a «Prompt for Claude Code» comment (`huddle-review`, `huddle-decide`) is
+`First run /huddle-play <n>: it marks this request as taken (👀), so the Issue shows «in progress».`
 
 
 ## 19. Watching what waits for the AI Manager: `huddle queue` and `/huddle-watch`
@@ -559,7 +556,7 @@ unreadable version or a lookup that fails print nothing); 2 on a bad flag. `--js
 nothing newer exists. When a newer release exists but was already shown today, `show` is false, `latest` is that release and `text` is
 `null`. The only file it writes is the update cache.
 
-**The skills.** `/huddle-start`, `/huddle-continue` and `/huddle-update` begin with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" notice` (the full
+**The skills.** `/huddle-play` and `/huddle-update` begin with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" notice` (the full
 form). When it prints text, the session says it to the person, in their language, as the first thing in its answer, and then goes on with
 the task: the notice never stops the work and never asks anything. When it prints nothing, the session says nothing about versions.
 

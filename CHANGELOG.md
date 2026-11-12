@@ -5,6 +5,15 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `/huddle-play <n>` replaces `/huddle-start` and `/huddle-continue` (Issue #100). One command to work on an Issue: with no
+  branch the session starts it (dependencies, branch in its own worktree, TDD, PR/MR), with a branch it continues it (`huddle pending`,
+  `huddle take`, «Ready for review again»). A Design Issue keeps its own flow. `/huddle-start` and `/huddle-continue` no longer exist: no
+  alias, no deprecated copy. An Issue or a review comment written before this release that says `/huddle-start <n>` or `/huddle-continue <n>`
+  will not work until it is edited to `/huddle-play <n>`. The `huddle` CLI, the labels and `/huddle-watch` are unchanged. The release that
+  carries it is 0.6.0.
+
 ## [0.5.3] - 2026-11-11
 
 ### Changed

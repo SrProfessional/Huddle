@@ -140,7 +140,7 @@ const TASK_SECTIONS = ['## Goal', '## Depends on', '## Branch', '## Prompt for C
 const DESIGN_SECTIONS = ['## Screens', '## For whom', '## Visual guide', '## Content', '## Deliverable'];
 
 for (const [name, file] of DESIGN) {
-  test(`${name} Design template keeps every section the labels job and /huddle-start read, plus the design block`, () => {
+  test(`${name} Design template keeps every section the labels job and /huddle-play read, plus the design block`, () => {
     const lines = read(file).split(/\r?\n/);
     for (const h of [...TASK_SECTIONS, ...DESIGN_SECTIONS]) assert.ok(lines.includes(h), `${file} lacks "${h}"`);
     assert.equal(lines.filter((l) => l === '## Depends on').length, 1);

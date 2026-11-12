@@ -65,7 +65,7 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
       ```
    4. Tell the AI Manager's session what you saw.
 
-   You should see: a list of checks, and the `plugin` line starts with ✔. Typing `/huddle` shows `/huddle-start` in the
+   You should see: a list of checks, and the `plugin` line starts with ✔. Typing `/huddle` shows `/huddle-play` in the
    suggestions.
    If you see something else: copy the whole list, paste it to the AI Manager's session, and do nothing else.
 6. [ ] **🙋 Only you:** **GitLab only:** create the project token and save it as a variable. A token (a long password that
@@ -116,7 +116,7 @@ These steps happen in the developer window of section 1, step 5. If you closed i
    1. Click the developer's Claude Code window to bring it to the front.
    2. Paste the line below and press Enter (the session replaces `<B>` with the number of Issue B):
       ```text
-      /huddle-start <B>
+      /huddle-play <B>
       ```
    3. Tell the AI Manager's session what the window said.
 
@@ -125,7 +125,7 @@ These steps happen in the developer window of section 1, step 5. If you closed i
 2. [ ] **🙋 Only you:** Ask the developer window to start Issue A.
    1. In the same window, paste the line below and press Enter (the session replaces `<A>` with the number of Issue A):
       ```text
-      /huddle-start <A>
+      /huddle-play <A>
       ```
    2. If the window asks you something with yes or no, read it and answer in your own words, or tell the session what it
       asked.
@@ -249,12 +249,12 @@ These steps happen in the developer window of section 1, step 5. If you closed i
 2. [ ] **Session:** B is no longer `blocked`: it is `ready`, or `assigned` to the developer.
 3. [ ] **Session:** Control: create Issue **C** depending on a third Issue **D**, then close D **by hand** with the
    platform's normal «Close issue» (on GitHub, closed as completed), with no PR/MR. After `huddle labels`, C is still
-   `blocked`, so `/huddle-start <C>` would refuse it.
+   `blocked`, so `/huddle-play <C>` would refuse it.
 4. [ ] **🙋 Only you:** Ask the developer window to start Issue B, which now works.
    1. Click the developer's Claude Code window to bring it to the front.
    2. Paste the line below and press Enter (the session replaces `<B>` with the number of Issue B):
       ```text
-      /huddle-start <B>
+      /huddle-play <B>
       ```
 
    You should see: the window starts working on B, with no «stopped» message.

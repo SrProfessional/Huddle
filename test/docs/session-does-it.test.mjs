@@ -59,8 +59,8 @@ test('huddle-issue marks the steps only a person can do with «🙋» and leaves
     assert.ok(t.includes(needle), `huddle-issue is missing «${needle}»`);
 });
 
-test('huddle-start closes with the next step as a session action or as 🙋 steps', () => {
-  const t = read('skills/huddle-start/SKILL.md').replace(/\s+/g, ' ');
+test('huddle-play closes with the next step as a session action or as 🙋 steps', () => {
+  const t = read('skills/huddle-play/SKILL.md').replace(/\s+/g, ' ');
   assert.match(t, /the next step[^.]*(🙋|Only you)/i);
 });
 
@@ -81,7 +81,7 @@ test('the smoke test says who does each step: «Session» or «🙋 Only you», 
 test('the steps that need a second account or a new Claude Code window are 🙋', () => {
   const text = (heading) => smoke.match(new RegExp(`^## ${heading}\\r?\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm'))[1];
   const mine = (heading) => personSteps(text(heading)).join('\n');
-  assert.match(mine('3\\. Start'), /\/huddle-start/);
+  assert.match(mine('3\\. Start'), /\/huddle-play/);
   assert.match(mine('5\\. A review request taken by a waiting session'), /second account/);
   assert.match(mine('6\\. The hook on reopen'), /new Claude Code window/i);
   assert.match(mine('1\\. Setup'), /HUDDLE_TOKEN/);
