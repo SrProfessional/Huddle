@@ -245,9 +245,11 @@ is never deleted. Before judging, it runs `git fetch`; offline, it judges with w
 
 ## Installing Huddle
 
-Every developer installs Huddle once on their own machine: in a terminal run `claude plugin marketplace add SrProfessional/Huddle`
-and `claude plugin install huddle@huddle`, then open a new session (in the CLI, `/plugin marketplace add ...` and
-`/plugin install ...` work too). The AI Manager sends these two commands to each developer after `/huddle-setup`.
+Every developer installs Huddle once on their own machine, then opens a new session. With the `claude` command, in a terminal run
+`claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (in the CLI, `/plugin marketplace add ...`
+and `/plugin install ...` work too). With only the VS Code extension, which puts no `claude` command in the terminal, type `/plugins`,
+add the marketplace `SrProfessional/Huddle` in the **Marketplaces** tab and install `huddle` from the **Plugins** tab with **Install for
+this project** (not «Install for you»), once per clone. The AI Manager sends both routes to each developer after `/huddle-setup`.
 
 The `.claude/settings.json` snippet that setup writes is only a helper. It enables the plugin for the project and, in the
 CLI, registers the marketplace silently, only after the trust dialog of that folder itself. When a parent folder is already
@@ -265,8 +267,8 @@ Only the AI Manager changes the team (see [the roles](roles.md)). Adding a perso
    not, Huddle can never assign them an Issue, and it stays `ready`.
 2. **Their login is in `assignees`** in `huddle.json`, merged through a PR/MR like any change.
 3. **Their machine is ready.** `gh` (or `glab`) is logged in with `gh auth login` (or `glab auth login`), and the plugin is
-   installed once with the two terminal commands: `claude plugin marketplace add SrProfessional/Huddle` and
-   `claude plugin install huddle@huddle`. On GitLab, Git must also use `glab` to push (see [the GitLab notes](gitlab.md)).
+   installed once, with the two terminal commands `claude plugin marketplace add SrProfessional/Huddle` and
+   `claude plugin install huddle@huddle`, or with `/plugins` in the VS Code extension (**Install for this project**). On GitLab, Git must also use `glab` to push (see [the GitLab notes](gitlab.md)).
 
 **The easy way: `/huddle-team`.** It asks add or remove and the login, runs the command below, commits `huddle.json` on a
 new branch and opens a PR/MR called «Team: add `<login>`». It never merges and never commits to the default branch. At the
@@ -335,8 +337,9 @@ not proven to work, so each person turns it on (it is a step in the [first-day g
 notice above is the safety net.
 
 **The steps.** Refresh the marketplace listing with `/plugin marketplace update huddle`, then update the plugin from the Installed tab
-of `/plugin` (or run `claude plugin update huddle@huddle --scope project`). The VS Code extension has no `/plugin`: in a terminal run
-`claude plugin marketplace update huddle` and `claude plugin update huddle@huddle --scope project`. Either way, open a new session after
+of `/plugin` (or run `claude plugin update huddle@huddle --scope project`). In the VS Code extension, which puts no `claude` command in
+the terminal, use `/plugins`: the same dialog that installed Huddle updates it. With the `claude` command you can also run
+`claude plugin marketplace update huddle` and `claude plugin update huddle@huddle --scope project` in a terminal. Either way, open a new session after
 the update. If you work from a clone with `--plugin-dir`, pull it
 instead. Then run `/huddle-update` on a branch (`huddle update` is the command behind it). It reads `setup_version` in `huddle.json`
 (the Huddle release the repo was last set up for), refreshes the block and the templates, writes the new `setup_version`, and says

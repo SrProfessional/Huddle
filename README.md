@@ -47,8 +47,7 @@ for them (see [the settings snippet](#the-settings-snippet-is-a-helper)). You ne
   **GitLab:** the [`glab`](https://gitlab.com/gitlab-org/cli) CLI, logged in with `glab auth login`
   (add `--hostname gitlab.example.com` for a self-managed server).
 
-Install the plugin from its marketplace. Run this once in any terminal (it is the way that works in the CLI and in the
-VS Code extension), then open a new session:
+Install the plugin from its marketplace, once, then open a new session. If you have the `claude` command (the CLI), run this in a terminal:
 
 ```text
 claude plugin marketplace add SrProfessional/Huddle
@@ -62,7 +61,9 @@ In the Claude Code CLI you can run the same as `/plugin` commands, then open a n
 /plugin install huddle@huddle
 ```
 
-The VS Code extension has no `/plugin`, so use the terminal form there.
+If you use only the VS Code extension, it puts no `claude` command in the terminal: type `/plugins` instead, add the
+marketplace `SrProfessional/Huddle` in the **Marketplaces** tab, and install `huddle` from the **Plugins** tab with
+**Install for this project** (not «Install for you»). Each person does this once per clone. The same dialog updates it.
 
 ### The settings snippet is a helper
 
