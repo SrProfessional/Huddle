@@ -58,7 +58,7 @@
         <pre><code>claude plugin marketplace add SrProfessional/Huddle</code></pre>
         <pre><code>claude plugin install huddle@huddle</code></pre>
         <p>Then open a new Claude Code session. In the CLI you can also type <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code> instead.</p>
-        <p><strong>Check:</strong> <code class="nowrap">claude plugin list</code> shows <code>huddle@huddle</code> enabled. To update it later, run <code class="nowrap">claude plugin marketplace update huddle</code> and open a new session.</p>
+        <p><strong>Check:</strong> <code class="nowrap">claude plugin list</code> shows <code>huddle@huddle</code> enabled. To update it later, run <code class="nowrap">claude plugin marketplace update huddle</code> and <code class="nowrap">claude plugin update huddle@huddle --scope project</code> from the project's folder, open a new session, and on a branch run <code>/huddle-update</code>: it asks only the questions a new release added.</p>
       </li>
       <li>
         <h3>Set your language (a single message)</h3>
@@ -88,7 +88,7 @@
       </li>
       <li>
         <h3>When the AI Manager asks for changes</h3>
-        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the AI Manager leaves a request, the session tells you and asks whether to continue: say yes. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
+        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the AI Manager leaves a request, the session tells you and asks whether to continue: say yes. You can also type <code class="nowrap">/huddle-continue N</code> yourself, with the Issue's number: <code>/huddle-start N</code> only starts an Issue. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
       </li>
     </ol>
   </section>

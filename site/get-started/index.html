@@ -68,6 +68,10 @@
         <pre tabindex="0"><code>claude plugin marketplace add SrProfessional/Huddle
 claude plugin install huddle@huddle</code></pre>
         <p class="prose">In the Claude Code command line you can type the same as <code>/plugin marketplace add SrProfessional/Huddle</code> and <code>/plugin install huddle@huddle</code>. The VS Code extension has no <code>/plugin</code>, so use the terminal form there. Huddle has no runtime dependencies, so there is nothing to <code>npm install</code>.</p>
+        <p class="prose"><strong>To update later.</strong> Install and update are per project, so repeat this in each project that uses Huddle. From the project's folder run:</p>
+        <pre tabindex="0"><code>claude plugin marketplace update huddle
+claude plugin update huddle@huddle --scope project</code></pre>
+        <p class="prose">Open a new session, then run <code>/huddle-update</code> on a branch: it refreshes the templates and the <code>CLAUDE.md</code> block and asks only the questions a new release added. A project can be on an older version than another. <code>/huddle-start</code>, <code>/huddle-continue</code> and <code>/huddle-update</code> tell you in the chat when a newer release exists, at most once a day.</p>
       </section>
 
       <section id="setup">
