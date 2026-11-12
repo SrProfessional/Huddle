@@ -464,6 +464,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.7.0
+
+Run of: 2026-11-12, Huddle `main` with Issue #104 merged (commit 6ab7530), by the AI Manager's Claude Code session and the AI Manager by hand. Only the new part was checked; the 0.6.0 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Applying an updated plugin with `/reload-plugins` (#104) | ✔ | covered by tests | Run by the AI Manager on real projects, in two rounds: a session already open on an older Huddle, `claude plugin update huddle@huddle --scope project` run from a second terminal, then `/reload-plugins` typed in the open session, and `/huddle-play` appeared in the command list. Done in the Claude Code terminal and in the VS Code extension (where `/reload-plugins` exists and was enough; «Developer: Reload Window» was not needed). The platform plays no part. |
+| `/huddle-update` does everything with one command (#104) | covered by tests | covered by tests | The skill is tested as text: the six steps in order (notice, the plugin, the files in a worktree of its own with the new version's folder, the pending questions, the PR, the last line with `/reload-plugins` and the restart fallback), and `newPluginRoot` with POSIX and Windows paths. **Not run end to end**: the live test covered `claude plugin update` and `/reload-plugins`, not the new skill itself. Not run on macOS or Linux. |
+| The texts say `/reload-plugins`, not «open a new session», after installing or updating (#104) | covered by tests | covered by tests | A test walks the guides, skills, PDF sources, site and messages. Two lines of this document (steps 1 and 5 of section 1) still say «open a new Claude Code window»; they are about checking the install as another person. |
+
 ### Results 0.6.0
 
 Run of: 2026-11-12, Huddle `main` with Issues #99 and #100 merged (commit cb332ce), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.5.3 and older tables below still hold for the rest.

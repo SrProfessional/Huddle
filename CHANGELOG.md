@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-12
+
 ### Changed
 
 - `/huddle-update` updates everything with one command (Issue #104). It updates the plugin (`claude plugin marketplace update huddle` and
