@@ -21,7 +21,7 @@
       </li>
       <li>
         <div><span class="who">Developer</span><h3>Starts it with one command</h3>
-        <p><code>/huddle-start N</code> checks that every dependency is merged, creates the branch in a folder of its own, marks the Issue <code>in progress</code> and runs its prompt. There is no need to explain the project: <code>CLAUDE.md</code> already gives the session the context.</p></div>
+        <p><code>/huddle-start N</code> checks that every dependency is merged, creates the branch in a folder of its own, marks the Issue <code>in progress</code> and runs its prompt. There is no need to explain the project: <code>CLAUDE.md</code> already gives the session the context. <code>/huddle-start N</code> only starts; once the AI Manager has answered a review or a decision, <code>/huddle-continue N</code> continues the Issue.</p></div>
       </li>
       <li class="human">
         <div><span class="who">Developer · this is where the value is</span><h3>Answers the AI's questions and decides</h3>
@@ -37,7 +37,7 @@
       </li>
       <li>
         <div><span class="who">AI Manager</span><h3>Reviews: asks for changes or merges</h3>
-        <p>With <code>/huddle-review</code>, the AI Manager either comments a request with a «Prompt for Claude Code» block, which the waiting session takes by itself (marking it 👀), or approves and merges. A merged PR closes the Issue and unblocks the ones that depend on it. Anything that touches production or secrets is done only by the AI Manager.</p></div>
+        <p>With <code>/huddle-review</code>, the AI Manager either comments a request with a «Prompt for Claude Code» block, which the waiting session takes by itself (marking it 👀), or approves and merges. A merged PR closes the Issue and unblocks the ones that depend on it. Anything that touches production or secrets is done only by the AI Manager. To have its session check by itself what waits, the AI Manager runs <code>/huddle-watch</code> (see «For the AI Manager»).</p></div>
       </li>
     </ol>
   </section>
@@ -102,6 +102,7 @@
       <dt><code>needs decision</code></dt><dd>The session asked the AI Manager a question and stopped.</dd>
       <dt><code>changes requested from AI Manager</code></dt><dd>A review request is waiting for the session to take it.</dd>
     </dl>
+    <p><strong>The stop labels.</strong> <code>needs decision</code> and <code>changes requested from AI Manager</code> mean the work waits for someone else, so they stand alone: <code>in progress</code> and <code>in review</code> are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.</p>
   </section>
 
   <section aria-labelledby="progress">
@@ -160,7 +161,7 @@
 
   <section aria-labelledby="team">
     <span class="eyebrow">For the AI Manager</span>
-    <h2 id="team">Setting up a project and adding people</h2>
+    <h2 id="team">Setting up, adding people, watching and updating</h2>
     <ol class="steps">
       <li>
         <h3>Put Huddle in the repository</h3>
@@ -170,6 +171,15 @@
       <li>
         <h3>Add someone to the team</h3>
         <p>Invite them to the repository (GitHub: <em>Settings, Collaborators</em>; GitLab: <em>Manage, Members</em>, role Developer). Then run <code>/huddle-team</code>: it checks that the login can be assigned, adds it to <code>assignees</code> in <code>huddle.json</code> through a PR, and gives you the message to send them with the install steps. <code>huddle team</code> lists the team and shows who cannot be assigned yet. Once that PR is merged, Huddle assigns them <code>ready</code> Issues.</p>
+      </li>
+      <li>
+        <h3>Let the session review by itself</h3>
+        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the AI Manager's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it.</p>
+      </li>
+      <li>
+        <h3>Update a project to a new release</h3>
+        <p>Install and update are per project, so do this in each project where Huddle is used. In a terminal, from the project's folder, run <code>claude plugin marketplace update huddle</code> and then <code>claude plugin update huddle@huddle --scope project</code>, and open a new session. Then, on a branch, run <code>/huddle-update</code>: it refreshes the templates and the <code>CLAUDE.md</code> block and asks only the questions a new release added. A project can be on an older version than another; <code>claude plugin list</code> shows each one. In the VS Code extension, which has no <code>claude</code> command in a terminal, type <code>/plugins</code> and use the same dialog to install (<strong>Install for this project</strong>) or update it.</p>
+        <p>A newer release is announced in the chat by <code>/huddle-start</code>, <code>/huddle-continue</code> and <code>/huddle-update</code>, at most once a day. <code>huddle notice</code> says the same on demand.</p>
       </li>
     </ol>
   </section>

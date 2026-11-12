@@ -5,6 +5,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- The PDF guides and the website now name the 0.5.x commands (Issue #94): `/huddle-update` and the per-project update steps
+  (`--scope project`), `/huddle-continue`, `/huddle-watch` and `huddle queue`, the daily notice (`huddle notice`) and the stop labels. They also give the VS Code route (`/plugins`, «Install for this project»), which the extension needs because it has no `/plugin` command.
+
 ## [0.5.2] - 2026-11-11
 
 ### Added
