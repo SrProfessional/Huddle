@@ -8,6 +8,12 @@ description: Use when a repo that already has Huddle set up must be brought to t
 Brings the repo you are in to the installed Huddle. Run it from the repo root, on a branch that is not the default branch. A repo
 with no `huddle.json` has not been set up: use `/huddle-setup` instead.
 
+## Version notice (first, always)
+
+Before anything else, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" notice`. It is read-only and needs no login. When it prints text, say that
+text to the person, in their language, as the first thing in your answer, and then go on with the task: the notice never stops the work
+and never asks anything. When it prints nothing, say nothing about versions (it shows at most once a day, so silence is normal).
+
 ## Run the command first
 
 Run, in the repo root, before you ask anything:

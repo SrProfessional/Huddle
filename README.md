@@ -247,6 +247,7 @@ session cannot touch what customers use.
 | `huddle clean [--dry-run] [--no-fetch]` | Anyone, the hook | Removes the worktrees of finished Issues (clean, merged into the default branch, untouched for 24 hours) with their `node_modules`, so they never fill the disk. Starts by itself when a session opens (see [Old worktrees clean themselves](docs/team-guide.md#old-worktrees-clean-themselves)). |
 | `huddle queue [--json]` | AI Manager, `/huddle-watch` | Lists what waits for the AI Manager: a PR/MR to review, a `needs decision` question nobody answered, a `needs triage` report. Read-only: it writes no label, comment or file. |
 | `huddle update [--check] [--dry-run] [--json] [--answer key=value...]` | AI Manager | The mechanics behind `/huddle-update`: refreshes the repo's files and `setup_version` with no login and no network. With a question the repo has not answered it changes nothing and exits 3; `--check` and `--dry-run` write nothing. |
+| `huddle notice [--json]` | Anyone, the skills | Says the «newer Huddle» notice when a newer release exists and the skills have not shown it in 24 hours (its own stamp, apart from the hook's). `/huddle-start`, `/huddle-continue` and `/huddle-update` begin with it, so it shows in VS Code too. Read-only, no login, always exit 0. |
 | `huddle hook` | Claude Code | Runs when a session starts and says if a request is pending, and the progress in one line. |
 | `huddle doctor` | Anyone | Checks `huddle.json`, the login, the AI Manager, the labels and whether each assignee can be assigned. |
 

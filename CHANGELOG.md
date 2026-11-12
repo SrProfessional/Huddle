@@ -5,6 +5,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `huddle notice [--json]` (Issue #91): the «newer Huddle» notice from inside the skills, so it shows in VS Code too. `/huddle-start`,
+  `/huddle-continue` and `/huddle-update` begin with it and say its text in the chat, in the person's language, then go on with the task.
+  It is read-only, needs no login, always exits 0 and keeps its own daily stamp (`skillShownAt`) apart from the hook's `shownAt`.
+
+### Changed
+
+- The update steps (notice, `huddle doctor`, team guide) now say `claude plugin update huddle@huddle --scope project`: Huddle is
+  installed per project and `claude plugin list` shows one entry per scope, so each project is updated on its own.
+
 ## [0.5.1] - 2026-11-11
 
 ### Added

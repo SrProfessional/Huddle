@@ -55,7 +55,7 @@ huddle/
     huddle-decide/SKILL.md        the AI Manager answers a «needs decision»
     huddle-watch/SKILL.md         the AI Manager's session checks every few minutes what waits for it and reviews it
   hooks/hooks.json                SessionStart (startup|resume) -> bin/huddle hook
-  bin/huddle                      one CLI: labels | wait | take | pending | queue | hook | doctor (and progress, areas, team, clean, update)
+  bin/huddle                      one CLI: labels | wait | take | pending | queue | hook | doctor (and progress, areas, team, clean, update, notice)
   lib/
     core/                         pure logic, no network (today: issue-status.mjs, review-requests.mjs)
     platform/
@@ -541,3 +541,35 @@ if the login is not `ai_manager`.
 
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
 computer off, starting the watch when a session opens. A job fires only while the session is open and idle.
+
+## 20. The version notice inside the skills: `huddle notice`
+
+Asked on 2026-11-11 (Issue #91). The SessionStart hook's «newer Huddle» notice (§17's update cache, Issue #65) is shown at most once every
+24 hours per machine, and only where the client shows the hook's message. A terminal session can use up the day's notice, and a VS Code
+session then shows nothing. A skill runs in the chat, so what it says is seen in every client.
+
+**`huddle notice [--json]`.** Read-only, and it needs no login. It uses the same release lookup as the hook (`latestRelease`: cached for a
+day, 3 seconds at most) and the same text (`noticeText`, with the AI Manager's extra line when `isManager()` says so, as the hook asks it:
+only when there is something to show; with no `huddle.json` or no login nobody is the AI Manager). It prints the text when a newer
+release exists **and** the skills have not shown it in the last 24 hours; otherwise it prints nothing. It keeps its own timestamp,
+`skillShownAt`, in the same cache file: it never reads or writes the hook's `shownAt`, and the hook never reads `skillShownAt`, so the two
+cannot use each other's day. The pure function is `skillNotice(ctx, isManager)` in `lib/core/update.mjs`. It always exits 0 (offline, an
+unreadable version or a lookup that fails print nothing); 2 on a bad flag. `--json` prints
+`{ "show": true|false, "installed": "...", "latest": "...", "text": "..." }`; `latest` and `text` are `null` when `show` is false and
+nothing newer exists. When a newer release exists but was already shown today, `show` is false, `latest` is that release and `text` is
+`null`. The only file it writes is the update cache.
+
+**The skills.** `/huddle-start`, `/huddle-continue` and `/huddle-update` begin with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" notice` (the full
+form). When it prints text, the session says it to the person, in their language, as the first thing in its answer, and then goes on with
+the task: the notice never stops the work and never asks anything. When it prints nothing, the session says nothing about versions.
+
+**The update steps (checked 2026-11-11).** `claude plugin update --help` has `-s, --scope <scope>` (`user`, `project`, `local`, `managed`;
+default: auto-detect), and `claude plugin list` shows one `huddle@huddle` entry per scope, each with its own version (a machine can
+hold a user install and several project installs at once, on different versions). `/huddle-setup` installs Huddle **per project** (the
+marketplace and `enabledPlugins` in the project's `.claude/settings.json`), so the update names that scope: `updateSteps` and the
+`version` line of `huddle doctor` say `claude plugin update huddle@huddle --scope project`, run inside the project.
+`claude plugin marketplace update` has no scope. The team guide says: update inside each project where Huddle is used, open a new
+session, and that a project can be on an older version than another.
+
+**Not here:** the hook's own notice (unchanged), a skill that runs the update by itself, a `doctor` line about several installations, and
+finding out why the hook's notice does not show in VS Code.
