@@ -464,6 +464,18 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.5.2
+
+Run of: 2026-11-11, Huddle `main` with Issue #91 merged (commit fdc18ef), by the AI Manager's Claude Code session. A patch-sized release (one new command and a
+change in the update steps): only the new parts were checked; the 0.5.1 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| `huddle notice` and `huddle notice --json` (#91) | ✔ | covered by tests | Run live on a clone of the PR branch with the installed version equal to the latest release: `--json` printed `show: false` and nothing in text mode, exit 0; `--bogus` exited 2 with the usage line. The platform plays no part: the command needs no login. |
+| `huddle notice` shows a newer release once a day (#91) | covered by tests | covered by tests | Tested with a fake release lookup and clock: it shows, it does not show again within 24 hours, it shows even when the hook's `shownAt` is today, and it writes only `skillShownAt`. Not run against a real newer release. |
+| `/huddle-start`, `/huddle-continue`, `/huddle-update` say the notice first (#91) | covered by tests | covered by tests | The skills are tested as text. Whether the notice shows in VS Code was not run: it needs a session in VS Code with the plugin at 0.5.2 and an older one to compare. |
+| Update steps say `--scope project` (#91) | covered by tests | covered by tests | `claude plugin update --help` lists the scopes (user, project, local, managed); the steps were not run against a project-scoped install in this run. |
+
 ### Results 0.5.1
 
 Run of: 2026-11-11, Huddle `main` with Issue #88 merged (commit 757a441), by the AI Manager's Claude Code session. A minor-sized release (one new command and
