@@ -6,13 +6,13 @@ import { fileURLToPath } from 'node:url';
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(`../../${rel}`, import.meta.url)), 'utf8');
 
-test('README Install and the first-day guide give the terminal form, for the VS Code extension, then a new session', () => {
+test('README Install and the first-day guide give the terminal form, for the VS Code extension, then /reload-plugins', () => {
   for (const file of ['README.md', 'docs/first-day.md']) {
     const t = read(file);
     assert.match(t, /VS Code/, file);
     assert.match(t, /claude plugin marketplace add SrProfessional\/Huddle/, file);
     assert.match(t, /claude plugin install huddle@huddle/, file);
-    assert.match(t, /new session/i, file);
+    assert.match(t, /\/reload-plugins/, file);
   }
 });
 
@@ -22,7 +22,7 @@ test('the team guide «Updating Huddle» gives the terminal form too', () => {
   assert.match(section, /VS Code/);
   assert.match(section, /claude plugin marketplace update huddle/);
   assert.match(section, /claude plugin update huddle@huddle/);
-  assert.match(section, /new session/i);
+  assert.match(section, /\/reload-plugins/);
 });
 
 test('no doc says an Issue counts as merged because it was «closed as completed»', () => {

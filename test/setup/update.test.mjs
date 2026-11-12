@@ -205,7 +205,7 @@ const readSkill = (name) => readFileSync(new URL(`../../skills/${name}/SKILL.md`
 test('the update skill runs huddle update --json first, before it asks anything', () => {
   const text = readSkill('huddle-update');
   const run = text.search(/huddle"? update --json/);
-  const ask = text.search(/^## Ask/m);
+  const ask = text.search(/^## (4\. )?(Ask|Questions)/m);
   assert.ok(run >= 0, 'it runs `huddle update --json`');
   assert.ok(ask >= 0, 'and has a section for the questions');
   assert.ok(run < ask, 'the command comes before the questions');

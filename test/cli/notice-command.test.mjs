@@ -94,7 +94,7 @@ test('the AI Manager\'s extra line only for the AI Manager; a failed login is a 
   const mgr = mk({ me: 'SrProfessional' });
   await run(['notice'], mgr.h.ctx);
   assert.match(mgr.h.text(), /Huddle 0\.4\.0 is available/);
-  assert.match(mgr.h.text(), /run \/huddle-update on a branch/);
+  assert.match(mgr.h.text(), /run \/huddle-update in each repo/);
   const out = mk({ me: new Error('not logged in') });
   assert.equal(await run(['notice'], out.h.ctx), 0);
   assert.match(out.h.text(), /is available/);

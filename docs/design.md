@@ -438,10 +438,24 @@ on a branch and open a PR/MR. Pending questions: it asks **only those**, in one 
 the default, then runs `huddle update --answer ...`. It never asks for a token. The AI Manager's session does every step it
 can (§13).
 
+**One command (Issue #104).** `/huddle-update` does the whole update, so the person does not switch branch, open a terminal or run a
+second command. Order: (1) the version notice; (2) the plugin: `claude plugin marketplace update huddle`, then `claude plugin update
+huddle@huddle --scope project`, run in the project (if `claude` cannot be run from the session it goes on with the installed Huddle and
+says to update with `/plugins` or the terminal and run `/huddle-update` again); (3) the files, in a worktree and branch of their own,
+`huddle-update-<version>` from the up-to-date default branch, entered with `EnterWorktree`, running `huddle update --json` from the
+**new** version's folder (a sibling of `${CLAUDE_PLUGIN_ROOT}`, found by `newPluginRoot` in `lib/core/update.mjs`), because the session
+still has the old skills loaded; (4) the pending questions, as before; (5) the PR/MR, which a developer's session never merges; (6) the
+last line: `/reload-plugins` applies the new version in the open session, in the terminal and in VS Code. It was tried on a real project:
+`claude plugin update` from a second terminal, then `/reload-plugins` in the open session, and the skill added by the new version showed
+up, in both. «Restart Claude Code» (and «Developer: Reload Window» in VS Code) is the fallback only. A plugin updated from the `/plugins`
+dialog applying by itself was not tried, so no text says it. `huddle update` itself does not change. The first update to a version
+that has this skill is done the old way, since the installed `/huddle-update` is the old one. Texts never say «open a new session» after an
+install or an update; a test walks the docs, the skills, the site and the CLI strings for it.
+
 **Where a repo is told it needs it.**
 
 - `huddle doctor` has a `setup` line: ✔ `set up for 0.4.2 (up to date)`; ⚠ `set up for 0.4.1, Huddle is 0.4.2: run
-  /huddle-update on a branch` (when `update --check` would change something or has a question); ✔ with a note when only the
+  /huddle-update` (when `update --check` would change something or has a question); ✔ with a note when only the
   version differs and nothing would change. It reads files only.
 - The update notice (`lib/core/update.mjs`) for the AI Manager says `/huddle-update`. The developer's notice is unchanged.
 

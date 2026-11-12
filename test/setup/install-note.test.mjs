@@ -17,7 +17,7 @@ test('the setup report tells the AI Manager to send every developer the two inst
     assert.ok(note, 'a note about every developer');
     assert.match(note, /claude plugin marketplace add SrProfessional\/Huddle/);
     assert.match(note, /claude plugin install huddle@huddle/);
-    assert.match(note, /new session/i);
+    assert.match(note, /\/reload-plugins/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
