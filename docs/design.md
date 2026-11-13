@@ -100,6 +100,7 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
   "assignees": ["ana", "luis"],
   "max_open_per_person": 2,
   "default_branch": "main",
+  "staging_branch": "staging",
   "labels": { "changes": "changes requested from AI Manager" }
 }
 ```
@@ -107,6 +108,9 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
 - `platform`: `github` or `gitlab`.
 - `host`: empty means github.com or gitlab.com.
 - `project`: `owner/repo` on GitHub, or the project path (groups allowed) on GitLab.
+- `default_branch`: the branch Issues are merged into (default `main`).
+- `staging_branch`: optional; the branch where changes are tested before they go to the default branch. Absent or `""` means none
+  (today's behaviour). Stored and validated only for now; see §21.
 - `labels`: optional renames. The defaults are the seven labels of §3.
 
 `bin/huddle doctor` checks the setup: the file is valid, `gh`/`glab` is logged in to that host, the labels exist, and the
@@ -416,7 +420,7 @@ asked once. Setup writes it too, except when a question is still pending: then i
 **pending** when `since` is newer than the repo's `setup_version` **and** `needed(config)` is true (the key is not set yet). A
 question never repeats: once its key is in `huddle.json` it is not asked again, whatever the version. The registry is **empty
 in 0.4.x** (no release asks anything yet): the mechanism ships first, and the tests use a fake registry. The first release that
-needs a new answer adds its entry.
+needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21).
 
 **The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
 only files, never the network.
@@ -584,3 +588,43 @@ session, and that a project can be on an older version than another.
 
 **Not here:** the hook's own notice (unchanged), a skill that runs the update by itself, a `doctor` line about several installations, and
 finding out why the hook's notice does not show in VS Code.
+
+## 21. A staging branch: first staging, then production
+
+Asked by the AI Manager on 2026-11-13 (Issue #109, the first of four). Some teams test every change in a staging (or QA)
+branch before it reaches the default branch. Huddle learns that flow in four Issues that go out together in one release
+(0.8.0), because the first alone would ask a question that nothing uses yet.
+
+**The flow, in short** (read this before H47 to H49):
+
+1. `huddle.json` names the branch: `staging_branch`. With it set, an Issue's PR/MR targets the staging branch, not the default one.
+2. An Issue is **done** when its PR/MR is merged into staging. `huddle land` closes it (the «Closes #N» link only fires on the
+   default branch, so Huddle closes the Issue itself).
+3. A **«tested in staging» marker** says that what is in staging was tried. It is required before the AI Manager releases staging
+   to the default branch with `/huddle-release`.
+4. With `staging_branch` unset (absent or `""`), every behaviour stays exactly as it is today.
+
+**What each Issue builds.**
+
+| Issue | Builds | State |
+|---|---|---|
+| H46 (#109) | The key `staging_branch`: stored, validated, asked by `/huddle-setup` and `/huddle-update`. Nothing reads it for behaviour. | this Issue |
+| H47 | The adapters: open a PR/MR against a given base. | next |
+| H48 | The flow: `huddle land`. | next |
+| H49 | The «tested in staging» marker and `/huddle-release`. | next |
+
+**The key (H46).** `staging_branch` is an optional string in `huddle.json` and `huddle.schema.json`.
+
+- Absent or `""` means no staging branch. `""` is how «none» is written as an answer (like `host`), so it passes the schema.
+- `loadConfig` returns it normalised: `staging_branch: ''` when absent or empty, otherwise the name.
+- It must differ from `default_branch`: `huddle.json: "staging_branch" must not be the same as "default_branch"`.
+- It must be a plain branch name: no spaces, no leading `-` (it will be passed on the command line as `--base`), no `..`, not
+  ending in `/` or `.lock`. The error names the field.
+
+**Asked.** `/huddle-setup` asks, after the default branch: «Does the project have a staging (or QA) branch where changes are
+tested before they go to <default branch>? Give its name, or none.» (`--staging-branch`; `none` is written as `""`). Running setup
+again keeps an answer already given. `/huddle-update` asks it of a repo that has no `staging_branch` key (§17: id
+`staging-branch`, `since: 0.8.0`, default `""`); a repo that answers «none» gets `"staging_branch": ""`, so it is not asked again.
+
+**Not in H46:** any use of the key, the `doctor` checks, the PR templates, a label, a new skill. The question is registered with
+`since: '0.8.0'`; if H46 had to go out alone, it would stay out of `QUESTIONS` until the release.

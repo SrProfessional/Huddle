@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `staging_branch` in `huddle.json` (Issue #109, the first of four for the «first staging, then production» flow, `docs/design.md` §21).
+  An optional branch name; absent or `""` means none. It must differ from `default_branch` and be a plain branch name. `/huddle-setup`
+  asks for it (`--staging-branch`), and `/huddle-update` asks it once of repos that have no such key (question `staging-branch`,
+  since 0.8.0). It is only stored and validated: nothing behaves differently yet.
+
 ## [0.7.0] - 2026-11-12
 
 ### Changed
