@@ -242,3 +242,25 @@ test('real git: only the merged, clean and old worktree is removed, with its nod
     fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5 });
   }
 });
+
+// docs/design.md §21: with a staging branch an Issue is finished when it is merged there, so that is the base `clean` judges by.
+test('clean with a staging branch judges merged against origin/<staging>, not the default branch', async () => {
+  const { h, r } = setup({ names: ['done'], base: 'origin/staging' }, { ...CONFIG, staging_branch: 'staging' });
+  assert.equal(await run(['clean'], h.ctx), 0);
+  assert.match(h.text(), new RegExp(`removed ${wtPath('done')}`));
+  assert.equal(r.gitCalls(['merge-base'])[0].args.at(-1), 'origin/staging');
+  assert.ok(!r.calls.some((c) => c.args?.at(-1) === 'origin/main^{commit}'), 'the default branch is not even looked at');
+});
+
+test('clean with a staging branch that does not exist keeps everything instead of judging by the default branch', async () => {
+  const { h, r } = setup({ names: ['done'], base: 'origin/main' }, { ...CONFIG, staging_branch: 'staging' });
+  assert.equal(await run(['clean'], h.ctx), 0);
+  assert.equal(r.gitCalls(['worktree', 'remove']).length, 0);
+  assert.match(h.text(), /kept/);
+});
+
+test('clean without a staging branch still judges by origin/<default branch>', async () => {
+  const { h, r } = setup({ names: ['done'] });
+  assert.equal(await run(['clean'], h.ctx), 0);
+  assert.equal(r.gitCalls(['merge-base'])[0].args.at(-1), 'origin/main');
+});
