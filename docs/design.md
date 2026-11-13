@@ -542,10 +542,16 @@ if the login is not `ai_manager`.
 1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). `CronList` first: a job whose prompt starts with
    `[huddle-watch]` means it is already on, so no second one starts and the skill says when it runs next. Otherwise `CronCreate` a
    recurring job on a minute that is not :00 or :30 (for example `2-59/5 * * * *`) whose prompt starts with `[huddle-watch]`: run
-   `huddle queue --json`; nothing waits, say nothing; otherwise handle the items one at a time, oldest first.
+   `huddle queue --json`; nothing waits, say nothing; otherwise handle the items one at a time, oldest first. **Check now (Issue #107):**
+   right after `CronCreate`, in the same turn, the session runs `huddle queue --json` once and handles what it lists as a tick does
+   (step 3 and 4). The same list is shared with the ticks (the stopped PR/MR + `head` pairs), so a PR that stopped now is not tried again at
+   the next tick. Unlike a tick, the first check is not silent when nothing waits: it says «Nothing is waiting for the AI Manager.», so the
+   person sees that it ran. A job fires only while the session is idle, so the first check and a tick never overlap, and `huddle queue`
+   reads the Issues and PRs fresh each time, so a tick that comes due during a long review finds the reviewed item already gone. The
+   cron job alone fires at the next matching minute plus a fixed delay of up to half the interval, which is why the first check is not left to it.
 2. The first message says that **turning the watch on is the AI Manager's order to review and merge, as if they asked for each review**,
-   what stops it (`/huddle-watch off`, or closing Claude Code, because the job lives only in the session) and that a recurring job
-   expires after 7 days.
+   what stops it (`/huddle-watch off`, or closing Claude Code, because the job lives only in the session), that a recurring job
+   expires after 7 days, and that the first check runs now and the next ones at the interval.
 3. **`review`:** `/huddle-review` on that PR with its usual rules: all good, approve and merge; changes needed, the «🔁 Changes
    requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a failing test, a missing requirement, a
    merge the platform refuses, a missing permission) the watch says it once, with the reason, and does not try that PR with that `head`
@@ -609,7 +615,7 @@ branch before it reaches the default branch. Huddle learns that flow in four Iss
 | Issue | Builds | State |
 |---|---|---|
 | H46 (#109) | The key `staging_branch`: stored, validated, asked by `/huddle-setup` and `/huddle-update`. Nothing reads it for behaviour. | this Issue |
-| H47 | The adapters: open a PR/MR against a given base. | next |
+| H47 | The adapters understand staging: they read the Issue link from the PR/MR body, give the «merged into staging» evidence, `branchExists`, and the `doctor` checks. | next |
 | H48 | The flow: `huddle land`. | next |
 | H49 | The «tested in staging» marker and `/huddle-release`. | next |
 
