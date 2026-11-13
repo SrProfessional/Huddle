@@ -135,7 +135,15 @@ All network access goes through one interface. The core never calls `gh` or `gla
 | `findIssuesByTitle(title)` → open Issues with that title, oldest first | REST `GET /repos/:o/:r/issues?state=open` (pull requests dropped) | `GET /projects/:id/issues?state=opened&search=…&in=title`, exact title kept |
 | `closeIssue(n, { reason })` | `PATCH /issues/:n` `state=closed`, `state_reason` `not_planned` or `completed` | `PUT /issues/:iid` `state_event=close` |
 | `setIssueMilestone(n, title\|null)` → `{ reopened }` | `PATCH /issues/:n` `milestone` | `PUT /issues/:iid` `milestone_id`, read back; a closed milestone is reopened, assigned and closed again |
+| `branchExists(name)` → boolean | `gh api repos/:o/:r/branches/:name`; only «Not Found» is `false`, any other failure is thrown | `GET /repository/branches/:name`; only a 404 is `false`, any other failure is thrown |
+| with `staging_branch` set (§21): `reviews`, `reviewsClosing(n)`, `issueForBranch(branch)` | the open PRs into staging whose body closes the Issue (one `gh pr list --base <staging>` per run) join `closedByPullRequestsReferences`; `issueForBranch` also reads the body of a PR into staging | `GET /issues/:iid/related_merge_requests` replaces `closed_by` (same one call per Issue, same `memo`); an MR is kept when it targets staging or the default branch and its description closes the Issue; `issueForBranch` reads the description of an MR into staging |
+| with `staging_branch` set (§21): `issueState(n)` and `listMilestones()` `merged` | today's rule **or** a merged PR whose base is staging and whose body closes the Issue (a second, aliased `CROSS_REFERENCED_EVENT` timeline in the same GraphQL query) | today's rule **or** a merged MR into staging whose description closes the Issue (the same `related_merge_requests` read) |
 | every call | retried on 429 (and 5xx except a POST), at most 3 tries and 60 s (`lib/platform/retry.mjs`) | same |
+
+**The staging rule.** With `staging_branch` unset (`""`), the table above is exact: the same calls with the same arguments, the same
+results. With it set, an Issue is «merged» when it is closed **and** (today's rule **or** a merged PR/MR whose base is the staging
+branch and whose body closes it). A PR into staging that only mentions `#N` does not count, nor does a PR into any other base, nor
+an Issue closed by hand with no such PR. The link is read by the pure function `closesIn` (§21).
 
 Things that work differently on GitLab, and what Huddle does about them:
 
@@ -614,8 +622,8 @@ branch before it reaches the default branch. Huddle learns that flow in four Iss
 
 | Issue | Builds | State |
 |---|---|---|
-| H46 (#109) | The key `staging_branch`: stored, validated, asked by `/huddle-setup` and `/huddle-update`. Nothing reads it for behaviour. | this Issue |
-| H47 | The adapters understand staging: they read the Issue link from the PR/MR body, give the «merged into staging» evidence, `branchExists`, and the `doctor` checks. | next |
+| H46 (#109) | The key `staging_branch`: stored, validated, asked by `/huddle-setup` and `/huddle-update`. Nothing reads it for behaviour. | done |
+| H47 (#111) | The adapters understand staging: they read the Issue link from the PR/MR body, give the «merged into staging» evidence, `branchExists`, and the `doctor` check. | done |
 | H48 | The flow: `huddle land`. | next |
 | H49 | The «tested in staging» marker and `/huddle-release`. | next |
 
@@ -634,3 +642,31 @@ again keeps an answer already given. `/huddle-update` asks it of a repo that has
 
 **Not in H46:** any use of the key, the `doctor` checks, the PR templates, a label, a new skill. The question is registered with
 `since: '0.8.0'`; if H46 had to go out alone, it would stay out of `QUESTIONS` until the release.
+
+**How the link is read (H47, #111).** GitHub and GitLab link a PR/MR to an Issue, and close it, only when it targets the **default**
+branch. A PR into staging gets no link at all (GitHub: «the keywords are ignored, no links are created»), so with `staging_branch`
+set the adapters read the link themselves. Without it, nothing changes: the same calls, the same results.
+
+- **`closesIn(text, project)`** (`lib/core/closes.mjs`, pure). The Issue numbers a PR/MR body closes with the platform keywords
+  (`close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, `resolved`, any case) followed by `#N`, or
+  `owner/repo#N` when that is this project. A bare `#N` is a mention, not a link. Anything inside an HTML comment, a fenced code
+  block or inline code is ignored (the templates carry `Closes #N` hints there). No duplicates, ascending.
+- **«Merged».** `merged = closed AND (today's rule OR a merged PR/MR whose base is staging_branch and whose body closes #N)`. It is a
+  union, so existing projects and hotfixes straight into the default branch keep working. An Issue closed by hand with no such PR is
+  not merged.
+- **GitHub.** `issueState` and `listMilestones` add a second, aliased timeline (`CROSS_REFERENCED_EVENT`) to the query they already
+  send and apply the rule exactly per Issue (a further page is read when an Issue is mentioned by more than 100 PRs). `reviews` and
+  `reviewsClosing` add the open PRs into staging whose body closes the Issue: one `gh pr list --base <staging> --state open` per
+  run, not per Issue. `issueForBranch` reads the body of the open PR of that branch when its base is staging.
+- **GitLab.** `GET /issues/:iid/related_merge_requests` replaces `closed_by`: it lists the MRs that mention the Issue with their
+  target branch, description and state. One is kept when its target is staging or the default branch and its description closes the
+  Issue. The cost is the same (one call per Issue, through the same `memo` between `beginRun()` and `endRun()`). `issueForBranch`
+  reads the description of an MR into staging instead of `closes_issues`.
+- **`branchExists(name)`** (new operation): whether the remote has the branch. Only «not found» is `false`; any other failure is thrown.
+- **`huddle doctor`**, with `staging_branch` set, adds one line: ✔ «branch X exists on the remote», or ✖ with the fix (create it, or
+  run `/huddle-update` to change the answer). A failed lookup (offline) is a ⚠. Unset, the doctor prints what it always printed.
+
+**What the tests cannot confirm** (no real platform in them; the AI Manager checks it on a throwaway repo with a staging branch
+before the release): that GitHub creates a `CROSS_REFERENCED_EVENT` for a PR into a non-default base; that GitLab's
+`related_merge_requests` lists an MR into a non-default branch and needs the «Closes #N» in the description; a self-managed GitLab with
+a custom closing pattern; the size of the milestones query with the PR bodies.
