@@ -121,8 +121,14 @@ export function fakeGithub({ project = PROJECT } = {}) {
       return JSON.stringify({ data: { repository: { issue: { state: it.state, timelineItems: { nodes }, ...(/CROSS_REFERENCED_EVENT/.test(query) ? { xrefs: xrefsOf(it.number) } : {}) } } } });
     }
     if (a === 'issue' && b === 'view') {
-      const it = issueOf(args[2], args);
       const fields = values(args, '--json')[0];
+      if (fields === 'labels') {
+        // Like gh: a number that is not an Issue fails with this text.
+        const found = issues.get(Number(args[2]));
+        if (!found) throw new Error(`gh ${args.join(' ')} failed: GraphQL: Could not resolve to an issue or pull request with the number of ${args[2]}. (repository.issue)`);
+        return JSON.stringify({ labels: found.labels.map((name) => ({ name })) });
+      }
+      const it = issueOf(args[2], args);
       if (fields === 'closedByPullRequestsReferences') return JSON.stringify({ closedByPullRequestsReferences: it.reviews.map((number) => ({ number })) });
       need(false, args);
     }

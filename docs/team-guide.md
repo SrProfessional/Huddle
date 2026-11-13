@@ -15,6 +15,10 @@ paste into Claude Code, so every session starts with the same goal, limits and t
 The status of an Issue lives in its labels. Nobody sets them by hand: the labels job (`huddle labels`) does, from each
 Issue's «Depends on» section and from the comments.
 
+`huddle labels --issue <n>` does the same for one Issue (and, when it is closed, for the Issues that wait for it), so a session can
+keep the board right at the moments that matter without reading the whole repo. Only the AI Manager's login assigns; the full
+`huddle labels` stays the safety net for what nobody's session saw, such as a PR merged from a phone.
+
 | Label | Meaning |
 |---|---|
 | `ready` | Everything it depends on is merged. Waiting for someone. |
@@ -212,6 +216,7 @@ about it.
 | Define or check the areas (AI Manager) | `/huddle-areas`, or `huddle areas check` |
 | Check my setup | `huddle doctor` |
 | See what the labels job would change | `huddle labels --dry-run` |
+| Update the labels of one Issue only | `huddle labels --issue <n>` |
 | Continue after a request | `/huddle-play <n>`, or answer yes to the hook |
 | See what waits for the AI Manager | `huddle queue` |
 | See if a newer Huddle exists (the skills say it too) | `huddle notice` |
