@@ -29,3 +29,25 @@ test('label renames override only the named defaults', () => {
   assert.equal(names.ready, 'ready');
   assert.equal(names.review, 'in review');
 });
+
+// Issue #109, docs/design.md §21: staging_branch is stored and validated; nothing reads it for behaviour yet.
+const BASE = { platform: 'github', project: 'a/b', ai_manager: 'sr' };
+test('staging_branch: absent and "" both load as "", a valid name loads, a project with no key loads as before', () => {
+  assert.equal(load(BASE).staging_branch, '');
+  assert.equal(load({ ...BASE, staging_branch: '' }).staging_branch, '');
+  assert.equal(load({ ...BASE, staging_branch: 'staging' }).staging_branch, 'staging');
+  assert.equal(load({ ...BASE, staging_branch: 'release/qa-1' }).staging_branch, 'release/qa-1');
+  const { staging_branch, ...rest } = load(BASE);
+  assert.deepEqual(rest, { host: '', assignees: [], default_branch: 'main', ...BASE });
+});
+test('staging_branch must differ from default_branch', () => {
+  assert.throws(() => load({ ...BASE, staging_branch: 'main' }), /huddle\.json: "staging_branch" must not be the same as "default_branch"/);
+  assert.throws(() => load({ ...BASE, default_branch: 'develop', staging_branch: 'develop' }), /"staging_branch" must not be the same as "default_branch"/);
+  assert.equal(load({ ...BASE, default_branch: 'develop', staging_branch: 'main' }).staging_branch, 'main');
+});
+test('staging_branch must be a plain branch name, and the error names the field', () => {
+  for (const bad of ['my staging', '-staging', '--base', 'a..b', 'staging/', 'staging.lock', 'qa\tx']) {
+    assert.throws(() => load({ ...BASE, staging_branch: bad }), /"staging_branch"/, bad);
+  }
+  assert.throws(() => load({ ...BASE, staging_branch: 5 }), /"staging_branch" must be of type string/);
+});

@@ -22,13 +22,14 @@ Before asking anything, look for `huddle.json` in the repo root and read it. A r
 3. **Project:** `owner/repo` on GitHub, the project path (groups allowed) on GitLab. Offer the one from `git remote get-url origin`.
 4. **AI Manager:** the login of the one person who hands out Issues, answers decisions, reviews and merges, for example `SrProfessional`. Offer the login of the developer running the setup: `gh api user --jq .login` on GitHub, `glab api user` (the `username` field) on GitLab. If that command fails, ask without an offer.
 5. **Team:** the logins of the developers who get Issues, separated by commas, for example `SrProfessional, Santiago123`. Optional: max open Issues per person (empty = no limit), default branch.
+6. **Staging branch:** «Does the project have a staging (or QA) branch where changes are tested before they go to <default branch>? Give its name, or none.» Pass the answer as `--staging-branch <name>` (`none` is stored as `""`). If `huddle.json` already has the key, keep it and do not ask again. Stored only for now: nothing uses it yet.
 
 Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the developer to log in themselves and stop.
 
 ## Do
 
 1. Run, in the repo root (leave out the flags for answers that were left empty; with a valid `huddle.json` give no flags at all):
-   `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs" --platform <p> --host <h> --project <x> --ai-manager <login> --assignees a,b`
+   `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs" --platform <p> --host <h> --project <x> --ai-manager <login> --assignees a,b --staging-branch <name|none>`
 2. It writes `huddle.json`, the Issue and PR/MR templates and the labels job of that platform, and inserts the Huddle block
    in `CLAUDE.md`. It also writes `.claude/settings.json` with the marketplace and the enabled plugin (`extraKnownMarketplaces.huddle` and
    `enabledPlugins["huddle@huddle"]`): it creates the file, or merges those two keys and keeps every other key. Run again later and it replaces only that block; the project's own text and edited templates stay.

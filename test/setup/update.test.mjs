@@ -1,5 +1,5 @@
 // Issue #81, docs/design.md §17: `huddle update` brings a set-up repo to the installed version and asks only the questions the repo has not answered.
-// The real registry is empty in 0.4.x, so these tests use a fake one.
+// These tests use a fake registry; the real one (staging-branch, 0.8.0) is covered in staging-branch.test.mjs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSync, statSync } from 'node:fs';
@@ -10,7 +10,7 @@ import { update, setupStatus } from '../../lib/setup/update.mjs';
 import { QUESTIONS, pendingQuestions, compareVersions } from '../../lib/setup/questions.mjs';
 
 const INSTALLED = JSON.parse(readFileSync(new URL('../../.claude-plugin/plugin.json', import.meta.url), 'utf8')).version;
-const ANSWERS = { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana', 'luis'], max_open_per_person: 2 };
+const ANSWERS = { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana', 'luis'], max_open_per_person: 2, staging_branch: '' }; // staging_branch answered: the real registry's 0.8.0 question is not pending
 const Q = { id: 'progress-issue', since: INSTALLED, key: 'progress_issue', ask: 'Keep the «Huddle progress» Issue up to date?', options: [true, false], default: true, needed: (c) => c.progress_issue === undefined };
 const REGISTRY = [Q];
 
@@ -33,8 +33,8 @@ const snapshot = (dir, rel = '') => Object.fromEntries(readdirSync(path.join(dir
 const oldRepo = (dir, old = '0.4.1') => { setup(dir, ANSWERS); writeConfig(dir, { setup_version: old }); };
 const spoilBlock = (dir) => writeFileSync(path.join(dir, 'CLAUDE.md'), readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8').replace('Language', 'Idioma'));
 
-test('the real registry is empty in 0.4.x: no release asks anything yet', () => {
-  assert.deepEqual(QUESTIONS, []);
+test('the real registry has only the staging-branch question (0.8.0); the rest of this file uses a fake one', () => {
+  assert.deepEqual(QUESTIONS.map((q) => q.id), ['staging-branch']);
 });
 
 test('compareVersions orders major.minor.patch numerically', () => {

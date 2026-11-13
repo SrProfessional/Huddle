@@ -299,6 +299,12 @@ cannot be assigned.
 
 Removing someone does not touch their open Issues: they keep that assignee until the AI Manager reassigns them.
 
+## A staging branch (stored, not used yet)
+
+`huddle.json` can name a staging (or QA) branch, `staging_branch`, where changes would be tested before they go to the default
+branch. `/huddle-setup` and `/huddle-update` ask for it; answer `none` if there is none (it is stored as `""`). For now it only
+stores the name: nothing in Huddle behaves differently yet. The flow that will use it is in `docs/design.md`, section 21.
+
 ## Updating Huddle
 
 **Why nothing arrives by itself.** Claude Code only sees a new version of a plugin when the `version` in
