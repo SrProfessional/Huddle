@@ -118,6 +118,13 @@ Labels change by the schedule, so they can take up to 10 minutes (see [The sched
 | The API limits how many calls you can make (HTTP 429). | `glab` calls are retried on a 429 and on a 5xx, up to 3 tries and 60 s. If it is still limited, `huddle` says «rate limited, try again in N s» and stops; run it again later. |
 | A milestone has no closing date. | The date of its last update stands for it, to decide if it closed in the last 90 days. Only project milestones are read. |
 
+## With a staging branch
+
+When `huddle.json` has a `staging_branch`, an MR into it does not close its Issue: GitLab closes an Issue only for an MR into the
+default branch, and it does not link the two. Huddle reads the link itself, from the MR description (`Closes #N`, `Fixes #N`,
+`Resolves #N`; not inside a comment or a code block), using the Issue's `related_merge_requests`. Put the keyword in the description,
+not only in a commit. A self-managed server with a custom closing pattern is not read: Huddle uses the keywords above.
+
 ## Check it
 
 1. `huddle doctor`: all ✔.

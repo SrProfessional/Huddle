@@ -11,6 +11,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   An optional branch name; absent or `""` means none. It must differ from `default_branch` and be a plain branch name. `/huddle-setup`
   asks for it (`--staging-branch`), and `/huddle-update` asks it once of repos that have no such key (question `staging-branch`,
   since 0.8.0). It is only stored and validated: nothing behaves differently yet.
+- The adapters understand a staging branch (Issue #111, the second of four, `docs/design.md` §7 and §21). With `staging_branch` set,
+  GitHub and GitLab no longer lose a PR/MR into staging, which the platforms never link to its Issue: Huddle reads the link from the
+  PR/MR body (new pure `closesIn`, `lib/core/closes.mjs`: the closing keywords with `#N`, ignoring HTML comments and code), so the
+  `in review` label, the watch queue, the review comments and `huddle wait` keep working. An Issue counts as merged when it is closed
+  and today's rule holds **or** a merged PR/MR into staging closes it. New adapter operation `branchExists(name)`, and `huddle doctor`
+  checks that the staging branch exists on the remote (only when it is set). With it unset, every call and result is unchanged.
 
 ### Changed
 

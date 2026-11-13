@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { contract } from './contract.mjs';
 import { fakeGithub } from './fake-gh.mjs';
@@ -6,12 +7,64 @@ import { createGithub } from '../../lib/platform/github.mjs';
 import { createPlatform } from '../../lib/platform/index.mjs';
 
 // Every test here uses the in-memory fake; none can start a real `gh` (the fake throws on a command it does not know).
-const create = () => {
+const create = ({ staging } = {}) => {
   const { run, world, project } = fakeGithub();
-  return { adapter: createGithub({ project }, { run }), world };
+  return { adapter: createGithub({ project, ...(staging === undefined ? {} : { staging_branch: staging }) }, { run }), world };
 };
 
 contract({ name: 'github', create });
+
+// What a fixed run sends today, one entry per call: the first arguments and a hash of everything (arguments, input, environment).
+// With no staging branch (absent or ''), a change to any call, or an extra one, fails this test (Issue #111).
+const GOLDEN_CALLS = [
+  'issue list -R bcfbdfb204', 'api graphql -f aa66fb3f44', 'api graphql -f d478d437ab', 'api graphql -f da4ee470ef', 'issue view 1 d9866861d6',
+  'pr list -R f318c160ba', 'pr list -R 365bbee0a1', 'api graphql -f 1917c9befd', 'api graphql -f 3d537fd1bf', 'api graphql -f cd4dd441a1',
+];
+const fingerprint = (c) => `${c.args.slice(0, 3).join(' ')} ${createHash('sha256').update(JSON.stringify([c.args, c.input ?? null, c.env ?? null])).digest('hex').slice(0, 10)}`;
+
+for (const [label, config] of [['staging_branch absent', {}], ['staging_branch ""', { staging_branch: '' }]]) {
+  test(`[github] ${label}: the calls of every read are exactly today's`, async () => {
+    const { run, world, project } = fakeGithub();
+    const adapter = createGithub({ project, ...config }, { run });
+    world.milestone({ title: 'Content' });
+    world.issue({ number: 1, reviews: [60] });
+    world.issue({ number: 2, state: 'merged', milestone: 'Content' });
+    world.issue({ number: 3, state: 'closed-by-hand', milestone: 'Content' });
+    world.issue({ number: 4, milestone: 'Content' });
+    world.review({ number: 60, branch: 'b' });
+    await adapter.listOpenIssues();
+    for (const n of [2, 3, 4]) await adapter.issueState(n);
+    await adapter.reviewsClosing(1);
+    await adapter.issueForBranch('b');
+    await adapter.openReviews();
+    await adapter.listMilestones({ since: '2026-08-08T00:00:00.000Z' });
+    assert.deepEqual(world.calls().map(fingerprint), GOLDEN_CALLS);
+  });
+}
+
+test('[github] with a staging branch the reads that need the link send one more call per run, never one per Issue', async () => {
+  const { run, world, project } = fakeGithub();
+  const adapter = createGithub({ project, staging_branch: 'staging' }, { run });
+  for (let n = 1; n <= 5; n++) world.issue({ number: n, labels: [], body: `Issue ${n}` });
+  world.review({ number: 80, base: 'staging', branch: 'h1', body: 'Closes #1' });
+  const before = world.commandCount();
+  await adapter.listOpenIssues();
+  const calls = world.calls().slice(before);
+  assert.deepEqual(calls.map((c) => c.args.slice(0, 2).join(' ')), ['issue list', 'pr list'], 'the Issue list and one list of the open PRs into staging');
+  const list = calls[1].args;
+  assert.deepEqual(list.slice(list.indexOf('--base')), ['--base', 'staging', '--state', 'open', '--limit', '1000', '--json', 'number,isDraft,body,headRefName']);
+});
+
+test('[github] with a staging branch the branch of an Issue PR is read from the body only when its base is staging', async () => {
+  const { run, world, project } = fakeGithub();
+  const adapter = createGithub({ project, staging_branch: 'staging' }, { run });
+  world.issue({ number: 5 });
+  world.review({ number: 80, base: 'main', branch: 'h5', body: 'Closes #5' }); // base main: the platform's own link counts, not the body
+  assert.equal(await adapter.issueForBranch('h5'), null, 'the fake has no platform link for it');
+  world.issue({ number: 6, reviews: [81] });
+  world.review({ number: 81, base: 'main', branch: 'h6', body: '' });
+  assert.equal(await adapter.issueForBranch('h6'), 6, 'the platform\'s link still answers');
+});
 
 test('[github] the commands carry the project and the host, and nothing is sent twice', async () => {
   const seen = [];

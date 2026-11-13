@@ -271,6 +271,42 @@ test('doctor checks the AI Manager on the platform', async () => {
   assert.match(flaky.text(), /⚠ ai_manager.*network down/);
 });
 
+// --- a staging branch (Issue #111): the doctor checks that it exists on the remote ---
+
+const ALL_LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+
+for (const gitlab of [false, true]) {
+  const platform = gitlab ? 'gitlab' : 'github';
+  const base = gitlab ? GITLAB_CONFIG : CONFIG;
+  test(`doctor (${platform}) with a staging branch: ✔ when the remote has it`, async () => {
+    const h = harness({ gitlab, config: { ...base, staging_branch: 'staging' }, wrap: (a, fake) => { fake.world.branch('staging'); return { ...a, listLabels: async () => ALL_LABELS }; } });
+    assert.equal(await run(['doctor'], h.ctx), 0);
+    assert.match(h.text(), /✔ staging: branch staging exists on the remote/);
+  });
+
+  test(`doctor (${platform}) with a staging branch: ✖ with the fix when the remote lacks it`, async () => {
+    const h = harness({ gitlab, config: { ...base, staging_branch: 'staging' }, wrap: (a) => ({ ...a, listLabels: async () => ALL_LABELS }) });
+    assert.equal(await run(['doctor'], h.ctx), 1);
+    assert.match(h.text(), /✖ staging: branch staging not found on the remote.*create it.*\/huddle-update/);
+  });
+
+  test(`doctor (${platform}) with a staging branch: a failed lookup is a ⚠, never a verdict`, async () => {
+    const h = harness({ gitlab, config: { ...base, staging_branch: 'staging' }, wrap: (a) => ({ ...a, listLabels: async () => ALL_LABELS, branchExists: async () => { throw new Error('network down'); } }) });
+    assert.equal(await run(['doctor'], h.ctx), 0);
+    assert.match(h.text(), /⚠ staging:.*not checked.*network down/);
+  });
+
+  test(`doctor (${platform}) without a staging branch prints no staging line and never asks for the branch`, async () => {
+    for (const config of [base, { ...base, staging_branch: '' }]) {
+      let asked = 0;
+      const h = harness({ gitlab, config, wrap: (a) => ({ ...a, listLabels: async () => ALL_LABELS, branchExists: async () => { asked++; return true; } }) });
+      assert.equal(await run(['doctor'], h.ctx), 0);
+      assert.doesNotMatch(h.text(), /staging/);
+      assert.equal(asked, 0);
+    }
+  });
+}
+
 test('take passes the number of the Issue or PR where the request lives to markTaken', async () => {
   const calls = [];
   const h = harness({ wrap: (a) => ({ ...a, markTaken: async (n, id) => { calls.push([n, id]); return a.markTaken(n, id); } }), setup: (w) => {
