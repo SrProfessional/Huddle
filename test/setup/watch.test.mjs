@@ -105,3 +105,46 @@ test('the docs say what the watch is and where it stops', () => {
   assert.match(read('README.md'), /huddle queue/);
   assert.match(read('CHANGELOG.md').split('## [0.5.0]')[0], /huddle queue[\s\S]*\/huddle-watch|\/huddle-watch[\s\S]*huddle queue/);
 });
+
+// Issue #107: the first check runs right away, in the same turn.
+const onSection = (text) => text.split(/## Each item/)[0];
+
+test('on: the order is CronList, then CronCreate, then an immediate queue --json check', () => {
+  const t = onSection(flat(WATCH));
+  const list = t.indexOf('CronList');
+  const create = t.indexOf('CronCreate');
+  const check = t.search(/Check now/);
+  const queue = t.indexOf(`${HUDDLE} queue --json`, check);
+  assert.ok(list >= 0 && create > list, 'CronList before CronCreate');
+  assert.ok(check > create, 'the check now comes after CronCreate');
+  assert.ok(queue > check, 'the immediate queue --json comes after «Check now»');
+});
+
+test('the immediate check handles the items as a tick does and shares the stopped list', () => {
+  const t = flat(WATCH);
+  assert.match(t, /Check now:.*?as a tick does/);
+  assert.match(t, /«Each item»/);
+  assert.match(t, /same list is shared with the ticks/i);
+  assert.match(t, /not tried again at the next tick/i);
+});
+
+test('the first check says «Nothing is waiting for the AI Manager.» but a tick stays silent when nothing waits', () => {
+  const t = flat(WATCH);
+  assert.match(t, /Nothing is waiting for the AI Manager\./);
+  assert.match(t, /unlike a tick/i);
+  assert.match(t, /if nothing waits, say nothing and stop/i);
+});
+
+test('the first message says the first check runs now and the next ones at the interval', () => {
+  assert.match(flat(WATCH), /first check runs now and the next ones at the interval/i);
+});
+
+test('§19 says the same as the skill about the first check', () => {
+  const d = flat('docs/design.md');
+  const s19 = d.slice(d.indexOf('## 19. Watching'), d.indexOf('## 20.'));
+  assert.match(s19, /Check now/);
+  assert.match(s19, /Nothing is waiting for the AI Manager\./);
+  assert.match(s19, /unlike a tick/i);
+  assert.match(s19, /first check runs now and the next ones at the interval/i);
+  assert.match(s19, /not tried again at the next tick/i);
+});

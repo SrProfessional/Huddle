@@ -19,7 +19,11 @@ An interval is like `5m`: default 5 minutes, allowed 2 to 60.
    otherwise handle the items one at a time, oldest first, as «Each item» below.
 3. Your first message says plainly: **turning the watch on is the AI Manager's order to review and merge, as if they asked for each
    review.** It stops with `/huddle-watch off`, or by closing Claude Code, because the job lives only in the session. A recurring job
-   expires after 7 days: run `/huddle-watch` again then.
+   expires after 7 days: run `/huddle-watch` again then. Add that the first check runs now and the next ones at the interval.
+4. **Check now:** in the same turn, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` once and handle what it lists exactly as a
+   tick does («Each item» below). The same list is shared with the ticks (the stopped PR/MR + `head` pairs), so a PR stopped now is not
+   tried again at the next tick. Unlike a tick, the first check is not silent when nothing waits: say one line,
+   «Nothing is waiting for the AI Manager.», so the person sees that it ran.
 
 ## Each item
 

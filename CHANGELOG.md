@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- `/huddle-watch` checks what waits as soon as it is turned on (Issue #107). After creating the job it runs `huddle queue --json` once in
+  the same turn and handles the items as a tick does, instead of waiting for the first tick (which could come up to about 7 minutes later
+  for a 5-minute watch). Unlike a tick, the first check says «Nothing is waiting for the AI Manager.» when nothing waits. The ticks, `off`,
+  `status` and the interval do not change.
+
 ## [0.7.0] - 2026-11-12
 
 ### Changed
