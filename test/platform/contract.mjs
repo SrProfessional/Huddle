@@ -3,7 +3,7 @@
 //   contract({ name: 'github', create })
 //
 // `create()` returns a fresh `{ adapter, world }`:
-//   - `adapter`: the adapter under test, wired to a fake `gh`/`glab` runner.
+//   - `adapter`: the adapter under test, wired to a fake `gh`/`glab` runner. `create({ staging: 'name' })` gives one whose huddle.json has `staging_branch`.
 //   - `world`: that fake's neutral side, the same methods for every platform (see test/platform/fake-gh.mjs):
 //       issue({ number, title, body, assignees, labels, state: 'open' | 'merged' | 'closed-by-hand', reviews })
 //       review({ number, draft, open })      comment(issueNumber, { id, author, body, createdAt, taken })
@@ -23,6 +23,7 @@ const body = (deps) => `## Goal\n\nSomething.\n\n## Depends on\n\n${deps}\n\n## 
 
 export function contract({ name, create }) {
   const t = (title, fn) => test(`[${name}] ${title}`, () => fn(create()));
+  const staged = (title, fn) => test(`[${name}] staging: ${title}`, () => fn(create({ staging: 'staging' })));
 
   t('offers every operation of the interface', ({ adapter }) => {
     for (const op of OPERATIONS) assert.equal(typeof adapter[op], 'function', op);
@@ -369,5 +370,121 @@ export function contract({ name, create }) {
     assert.equal(world.commentBody(201), 'one');
     assert.equal(world.isTaken(201), true);
     assert.equal(world.isTaken(202), false);
+  });
+
+  // --- a staging branch (Issue #111, docs/design.md §21): the adapters read the Issue link from the PR/MR body ---
+
+  staged('«merged» is today\'s rule or a merged PR/MR into staging whose body closes the Issue', async ({ adapter, world }) => {
+    world.issue({ number: 5, state: 'closed-by-hand' });
+    world.review({ number: 80, base: 'staging', merged: true, body: 'Closes #5' });
+    world.issue({ number: 6, state: 'closed-by-hand' }); // closed by hand, no PR
+    world.issue({ number: 7, state: 'closed-by-hand' });
+    world.review({ number: 81, base: 'staging', merged: true, body: 'Related to #7' }); // only a mention
+    world.issue({ number: 8, state: 'closed-by-hand' });
+    world.review({ number: 82, base: 'release', merged: true, body: 'Closes #8' }); // another base
+    world.issue({ number: 9, state: 'merged' }); // today's rule: a merged PR/MR into the default branch
+    world.issue({ number: 10, state: 'closed-by-hand' });
+    world.review({ number: 83, base: 'staging', body: 'Closes #10' }); // not merged yet
+    world.issue({ number: 11, state: 'closed-by-hand' });
+    world.review({ number: 84, base: 'staging', open: false, body: 'Closes #11' }); // closed without merging
+    world.issue({ number: 12, state: 'closed-by-hand' });
+    world.review({ number: 85, base: 'staging', merged: true, body: '<!-- Closes #12 -->\nWrite `Closes #12` in the body' }); // a template hint
+    world.issue({ number: 13, state: 'open' }); // an open Issue is never merged, even with a merged staging PR
+    world.review({ number: 86, base: 'staging', merged: true, body: 'Closes #13' });
+    const states = Object.fromEntries(await Promise.all([5, 6, 7, 8, 9, 10, 11, 12, 13].map(async (n) => [n, await adapter.issueState(n)])));
+    assert.deepEqual(Object.fromEntries(Object.entries(states).map(([n, s]) => [n, s.merged])), { 5: true, 6: false, 7: false, 8: false, 9: true, 10: false, 11: false, 12: false, 13: false });
+    assert.deepEqual([states[5].open, states[13].open], [false, true]);
+    const issues = new Map([[5, states[5]]]);
+    assert.equal(statusOf({ deps: [5], assigned: false, issues }).label, LABELS.ready.name, 'a dependency landed in staging unblocks');
+  });
+
+  staged('«merged» reads every PR/MR that mentions the Issue, not only the first page', async ({ adapter, world }) => {
+    world.issue({ number: 5, state: 'closed-by-hand' });
+    for (const number of [90, 91, 92, 93, 94]) world.review({ number, base: 'staging', body: `See #5 (${number})` });
+    world.review({ number: 95, base: 'staging', merged: true, body: 'Fixes #5' }); // the sixth: after two full pages
+    assert.deepEqual(await adapter.issueState(5), { open: false, merged: true });
+  });
+
+  staged('an open PR/MR into staging that closes the Issue is in `reviews`, in reviewsClosing and in issueForBranch', async ({ adapter, world }) => {
+    world.issue({ number: 5, body: body('- None'), assignees: ['ana'], labels: ['assigned'] });
+    world.issue({ number: 6, body: body('- None'), assignees: ['luis'], labels: ['assigned'] });
+    world.issue({ number: 7 });
+    world.issue({ number: 8, reviews: [87] }); // also a PR into the default branch, linked by the platform
+    world.review({ number: 80, base: 'staging', branch: 'h5-thing', body: '## What\n\nCloses #5' });
+    world.review({ number: 81, base: 'staging', branch: 'h6-draft', draft: true, body: 'Fixes #6' });
+    world.review({ number: 82, base: 'staging', branch: 'h7-mention', body: 'Related to #7' }); // a mention is no link
+    world.review({ number: 86, base: 'staging', branch: 'h8-staging', body: 'Closes #8' });
+    world.review({ number: 87, base: 'main', branch: 'h8-main', body: 'Closes #8' });
+    const open = Object.fromEntries((await adapter.listOpenIssues()).map((i) => [i.number, [...i.reviews].sort((a, b) => a - b)]));
+    assert.deepEqual(open, { 5: [80], 6: [81], 7: [], 8: [86, 87] }, 'no duplicates, today\'s link kept');
+    assert.deepEqual(await adapter.reviewsClosing(5), [80]);
+    assert.deepEqual((await adapter.reviewsClosing(8)).sort((a, b) => a - b), [86, 87]);
+    assert.deepEqual(await adapter.reviewsClosing(7), []);
+    assert.equal(await adapter.issueForBranch('h5-thing'), 5);
+    assert.equal(await adapter.issueForBranch('h6-draft'), 6);
+    assert.equal(await adapter.issueForBranch('h7-mention'), null);
+    assert.equal(await adapter.issueForBranch('nobody'), null);
+    // The core sees what it saw before: a PR into staging puts the Issue in review, a draft does not.
+    const openPrs = new Set(await adapter.openReviews());
+    const changes = plan({ open: await adapter.listOpenIssues(), issues: new Map(), openPrs });
+    assert.equal(changes.find((p) => p.number === 5).add, LABELS.review.name);
+    assert.equal(changes.find((p) => p.number === 6), undefined);
+  });
+
+  staged('a merged or closed PR/MR into staging is not the open PR of its branch, and a PR into the default branch is as today', async ({ adapter, world }) => {
+    world.issue({ number: 5 });
+    world.review({ number: 80, base: 'staging', branch: 'h5-old', merged: true, body: 'Closes #5' });
+    world.review({ number: 81, base: 'staging', branch: 'h5-closed', open: false, body: 'Closes #5' });
+    assert.deepEqual([...await adapter.openReviews()], []);
+    assert.equal(await adapter.issueForBranch('h5-old'), null);
+    assert.equal(await adapter.issueForBranch('h5-closed'), null);
+    world.issue({ number: 6, reviews: [60] });
+    world.review({ number: 60, branch: 'h6', body: 'Closes #6' });
+    assert.deepEqual((await adapter.listOpenIssues()).find((i) => i.number === 6).reviews, [60]);
+    assert.equal(await adapter.issueForBranch('h6'), 6);
+  });
+
+  staged('listMilestones: «merged» follows the same rule', async ({ adapter, world }) => {
+    world.milestone({ title: 'Content' });
+    world.issue({ number: 1, milestone: 'Content', state: 'merged' });
+    world.issue({ number: 2, milestone: 'Content', state: 'closed-by-hand' });
+    world.review({ number: 80, base: 'staging', merged: true, body: 'Closes #2' });
+    world.issue({ number: 3, milestone: 'Content', state: 'closed-by-hand' });
+    world.review({ number: 81, base: 'staging', merged: true, body: 'Part of #3' });
+    world.issue({ number: 4, milestone: 'Content', state: 'closed-by-hand' });
+    world.issue({ number: 5, milestone: 'Content' });
+    for (const number of [91, 92, 93]) world.review({ number, base: 'staging', body: `See #6 ${number}` });
+    world.issue({ number: 6, milestone: 'Content', state: 'closed-by-hand' });
+    world.review({ number: 94, base: 'staging', merged: true, body: 'Resolves #6' }); // behind more than one page of mentions
+    const [content] = await adapter.listMilestones({ since: '2026-08-08T00:00:00.000Z' });
+    assert.deepEqual(content.issues.map((i) => [i.number, i.open, i.merged]).sort((a, b) => a[0] - b[0]), [
+      [1, false, true], [2, false, true], [3, false, false], [4, false, false], [5, true, false], [6, false, true],
+    ]);
+  });
+
+  t('without a staging branch nothing is read from the body: a PR/MR into another branch links nothing', async ({ adapter, world }) => {
+    world.issue({ number: 5, state: 'closed-by-hand' });
+    world.review({ number: 80, base: 'staging', merged: true, body: 'Closes #5' });
+    world.issue({ number: 6 });
+    world.review({ number: 81, base: 'staging', branch: 'h6', body: 'Closes #6' });
+    assert.deepEqual(await adapter.issueState(5), { open: false, merged: false });
+    assert.deepEqual((await adapter.listOpenIssues())[0].reviews, []);
+    assert.deepEqual(await adapter.reviewsClosing(6), []);
+    assert.equal(await adapter.issueForBranch('h6'), null);
+  });
+
+  t('branchExists(name) is true for a branch of the remote, false for «not found», and any other failure is thrown', async ({ adapter, world }) => {
+    world.branch('staging');
+    world.branch('release/1.0');
+    assert.equal(await adapter.branchExists('main'), true);
+    assert.equal(await adapter.branchExists('staging'), true);
+    assert.equal(await adapter.branchExists('release/1.0'), true, 'a slash is part of the name');
+    assert.equal(await adapter.branchExists('nope'), false);
+    assert.equal(await adapter.branchExists('release/2.0'), false);
+    world.failWhen((args) => args.some((a) => /branches/.test(a)), 'HTTP 403 Forbidden: this token cannot read branches');
+    await assert.rejects(() => adapter.branchExists('staging'), /403/);
+    world.failWhen((args) => args.some((a) => /branches/.test(a)), 'dial tcp: lookup api: no such host (offline)');
+    await assert.rejects(() => adapter.branchExists('staging'), /offline/);
+    assert.equal(await adapter.branchExists('staging'), true, 'the failure was one call: the next one is answered');
   });
 }

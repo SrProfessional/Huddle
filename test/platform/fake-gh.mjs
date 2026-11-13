@@ -9,7 +9,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const milestones = new Map(); // title -> { number, title, description, state: 'OPEN' | 'CLOSED', closedAt, updatedAt }
   const pinned = [];
   let nextIssue = 900;
-  const reviews = new Map(); // number -> { number, draft, open }
+  const reviews = new Map(); // number -> { number, draft, open, merged, branch, base, body }
+  const branches = new Set(['main']); // the branches that exist on the remote
   const comments = new Map(); // id -> { ...GitHub comment, issue }
   const repoLabels = new Map(); // name -> { color, description }
   const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // login -> id
@@ -28,6 +29,17 @@ export function fakeGithub({ project = PROJECT } = {}) {
   // The milestone queries of the adapter: pages of milestones (newest update first), each with a page of its Issues and the last close of each.
   const MILESTONE_PAGE = 2;
   const ISSUE_PAGE = 2;
+  const XREF_PAGE = 2;
+  // The PRs that mention Issue `n` (a CROSS_REFERENCED_EVENT), whatever their base and whatever the keyword: GitHub links on any mention.
+  const mentions = (body, n) => new RegExp(`#${n}(?!\\w)`).test(body ?? '');
+  const xrefsOf = (n, after) => {
+    const all = [...reviews.values()].filter((r) => mentions(r.body, n)).sort((x, y) => x.number - y.number);
+    const start = Number(after ?? 0);
+    const nodes = all.slice(start, start + XREF_PAGE).map((r) => ({ source: { __typename: 'PullRequest', number: r.number, state: r.open ? 'OPEN' : r.merged ? 'MERGED' : 'CLOSED', merged: r.merged, isDraft: r.draft, baseRefName: r.base, body: r.body, mergedAt: r.merged ? '2026-11-10T00:00:00Z' : null } }));
+    // An Issue that mentions it is a cross reference too, and it has no PR fields: the adapter must skip it.
+    if (start === 0) nodes.unshift({ source: { __typename: 'Issue' } });
+    return { pageInfo: { hasNextPage: start + XREF_PAGE < all.length, endCursor: String(start + XREF_PAGE) }, nodes };
+  };
   function graphql(args) {
     const query = values(args, '-f').find((x) => x.startsWith('query=')) ?? '';
     const vars = Object.fromEntries([...values(args, '-f'), ...values(args, '-F')].filter((x) => !x.startsWith('query=')).map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
@@ -38,7 +50,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const nodes = all.slice(start, start + ISSUE_PAGE).map((it) => {
         const last = it.closes.at(-1);
         const closes = last ? [{ __typename: 'ClosedEvent', closer: last.pr === null ? null : { __typename: 'PullRequest', number: last.pr, merged: last.merged } }] : [];
-        return { number: it.number, state: it.state, timelineItems: { nodes: closes } };
+        return { number: it.number, state: it.state, timelineItems: { nodes: closes }, ...(/CROSS_REFERENCED_EVENT/.test(query) ? { xrefs: xrefsOf(it.number) } : {}) };
       });
       return { pageInfo: { hasNextPage: start + ISSUE_PAGE < all.length, endCursor: String(start + ISSUE_PAGE) }, nodes };
     };
@@ -89,18 +101,24 @@ export function fakeGithub({ project = PROJECT } = {}) {
       })));
     }
     if (a === 'api' && b === 'graphql' && /milestones\(|node\(id|pinIssue/.test(values(args, '-f').find((x) => x.startsWith('query=')) ?? '')) return graphql(args);
+    if (a === 'api' && b === 'graphql' && /\$after: String\) \{ repository\(owner: \$owner, name: \$name\) \{ issue\(number: \$number\)/.test(values(args, '-f').find((x) => x.startsWith('query=')) ?? '')) {
+      // The next page of the PRs that mention one Issue (the first page came with the Issue).
+      const vars = Object.fromEntries([...values(args, '-F'), ...values(args, '-f').filter((x) => !x.startsWith('query='))].map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
+      need(vars.owner === project.split('/')[0] && vars.name === project.split('/')[1] && /^\d+$/.test(vars.number ?? '') && issues.has(Number(vars.number)) && vars.after, args);
+      return JSON.stringify({ data: { repository: { issue: { xrefs: xrefsOf(Number(vars.number), vars.after) } } } });
+    }
     if (a === 'api' && b === 'graphql') {
       // The one query issueState sends: the Issue state plus its last CLOSED_EVENT and who closed it.
       const query = values(args, '-f').find((x) => x.startsWith('query=')) ?? '';
       need(/timelineItems\(itemTypes: ?\[CLOSED_EVENT\], ?last: ?1\)/.test(query) && /closer/.test(query), args);
-      const vars = Object.fromEntries(values(args, '-F').map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
+      const vars = Object.fromEntries([...values(args, '-F'), ...values(args, '-f').filter((x) => !x.startsWith('query='))].map((x) => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]));
       need(vars.owner === project.split('/')[0] && vars.name === project.split('/')[1] && /^\d+$/.test(vars.number ?? ''), args);
       // Like the real GraphQL: a number that is not an Issue (a PR, a typo, a deleted Issue) fails with this text.
       const it = issues.get(Number(vars.number));
       if (!it) throw new Error(`gh ${args.join(' ')} failed: gh: Could not resolve to an Issue with the number of ${vars.number}.`);
       const last = it.closes.at(-1);
       const nodes = last ? [{ __typename: 'ClosedEvent', closer: last.pr === null ? null : { __typename: 'PullRequest', number: last.pr, merged: last.merged } }] : [];
-      return JSON.stringify({ data: { repository: { issue: { state: it.state, timelineItems: { nodes } } } } });
+      return JSON.stringify({ data: { repository: { issue: { state: it.state, timelineItems: { nodes }, ...(/CROSS_REFERENCED_EVENT/.test(query) ? { xrefs: xrefsOf(it.number) } : {}) } } } });
     }
     if (a === 'issue' && b === 'view') {
       const it = issueOf(args[2], args);
@@ -109,11 +127,20 @@ export function fakeGithub({ project = PROJECT } = {}) {
       need(false, args);
     }
     if (a === 'pr' && b === 'list' && args.includes('--head')) {
-      need(values(args, '--state')[0] === 'open' && values(args, '--json')[0] === 'number,closingIssuesReferences', args);
+      // Without a staging branch the fields are exactly today's; with one, the base and the body come too (the link is read from the body).
+      const fields = values(args, '--json')[0];
+      need(values(args, '--state')[0] === 'open' && (fields === 'number,closingIssuesReferences' || fields === 'number,closingIssuesReferences,baseRefName,body'), args);
       const head = values(args, '--head')[0];
       return JSON.stringify([...reviews.values()].filter((r) => r.open && r.branch === head).map((r) => ({
         number: r.number, closingIssuesReferences: [...issues.values()].filter((i) => i.reviews.includes(r.number)).map((i) => ({ number: i.number })),
+        ...(fields.includes('body') ? { baseRefName: r.base, body: r.body } : {}),
       })));
+    }
+    if (a === 'pr' && b === 'list' && args.includes('--base')) {
+      // The open PRs into one base, with their bodies, in one call: the adapter parses the links itself.
+      need(values(args, '--state')[0] === 'open' && values(args, '--limit')[0] === '1000' && values(args, '--json')[0] === 'number,isDraft,body,headRefName', args);
+      const base = values(args, '--base')[0];
+      return JSON.stringify([...reviews.values()].filter((r) => r.open && r.base === base).map((r) => ({ number: r.number, isDraft: r.draft, body: r.body, headRefName: r.branch })));
     }
     if (a === 'pr' && b === 'list') {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
@@ -130,6 +157,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const r = reviews.get(Number(args[2]));
       need(r && r.open && !r.draft, args);
       r.open = false;
+      r.merged = true;
       merged.push(r.number);
       return '';
     }
@@ -173,6 +201,11 @@ export function fakeGithub({ project = PROJECT } = {}) {
         need(method === 'GET', args);
         if (!collaborators.has(decodeURIComponent(m[1]))) throw new Error(`gh ${args.join(' ')} failed: gh: Not Found (HTTP 404)`);
         return '';
+      }
+      if ((m = /^branches\/(.+)$/.exec(rest))) {
+        need(method === 'GET', args);
+        if (!branches.has(m[1].split('/').map(decodeURIComponent).join('/'))) throw new Error(`gh ${args.join(' ')} failed: gh: Branch not found (HTTP 404)`);
+        return JSON.stringify({ name: m[1] });
       }
       if (rest === 'issues?state=open&per_page=100' && method === 'GET') {
         // The REST list reads the database, not the search index: a new Issue is there at once. It also lists pull requests, newest first.
@@ -270,7 +303,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
       const defaults = { open: ['OPEN', []], merged: ['CLOSED', [{ pr: 70, merged: true }]], 'closed-by-hand': ['CLOSED', [{ pr: null }]] }[state];
       issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing], milestone });
     },
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}` }) { reviews.set(number, { number, draft, open, branch, commits: [...commits], head }); },
+    // base: the branch the PR targets; body: its text; merged: it was merged (so it is not open).
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false }) {
+      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, commits: [...commits], head });
+    },
+    /** A branch that exists on the remote (`main` always does). */
+    branch(name) { branches.add(name); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       comments.set(id, { id, issue, body, created_at: createdAt, html_url: `https://github.test/${project}/issues/${issue}#c${id}`, user: { login: author }, reactions: { eyes: taken ? 1 : 0 } });
     },

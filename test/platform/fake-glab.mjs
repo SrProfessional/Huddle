@@ -12,7 +12,8 @@ export const PAGE_SIZE = 2;
 
 export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const issues = new Map(); // iid -> { iid, title, description, assignees[login], labels[], state, reviews[], hand }
-  const reviews = new Map(); // iid -> { iid, draft, state: 'opened' | 'closed' | 'merged' }
+  const reviews = new Map(); // iid -> { iid, draft, state: 'opened' | 'closed' | 'merged', branch, base, body }
+  const branches = new Set(['main']); // the branches that exist on the remote
   const notes = new Map(); // id -> { id, issue, body, created_at, author, system, eyes }
   const labels = new Map(); // id -> { id, name, color, description }
   const users = new Map([['SrProfessional', 1], ['ana', 2], ['luis', 3]]); // username -> id
@@ -38,7 +39,10 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const addSystemNote = (issue, body) => notes.set(nextNote, { id: nextNote++, issue, mr: false, body, created_at: '2026-11-01T00:00:00Z', author: 'SrProfessional', system: true, eyes: false });
   const user = (login) => ({ id: users.get(login), username: login, name: login });
   const noteJson = (n) => ({ id: n.id, body: n.body, created_at: n.created_at, author: user(n.author), system: n.system, noteable_iid: n.issue, noteable_type: n.mr ? 'MergeRequest' : 'Issue' });
-  const mrJson = (r) => ({ iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}`, source_branch: r.branch ?? '' });
+  const mrJson = (r) => ({
+    iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}`, source_branch: r.branch ?? '',
+    target_branch: r.base ?? 'main', description: r.body ?? '', merge_commit_sha: r.state === 'merged' ? `merge${r.iid}` : null,
+  });
   const issueJson = (i) => ({
     iid: i.iid, title: i.title, description: i.description, state: i.state,
     labels: [...i.labels], assignees: i.assignees.map(user), assignee: i.assignees[0] ? user(i.assignees[0]) : null,
@@ -165,6 +169,19 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       return JSON.stringify(issueJson(it));
     }
     if ((m = /^issues\/(\d+)\/closed_by$/.exec(rest))) return JSON.stringify(closers(issueOf(m[1], args)).map(mrJson));
+    if ((m = /^issues\/(\d+)\/related_merge_requests$/.exec(rest))) {
+      // Every MR that mentions the Issue (whatever its target and whatever the keyword), and those that close it: GitLab says which only through the text.
+      need(method === 'GET', args);
+      const n = issueOf(m[1], args).iid;
+      const related = new Map(closers(issues.get(n)).map((r) => [r.iid, r]));
+      for (const r of reviews.values()) if (new RegExp(`#${n}(?!\w)`).test(r.body ?? '')) related.set(r.iid, r);
+      return pages([...related.values()].sort((x, y) => x.iid - y.iid).map(mrJson), paginate);
+    }
+    if ((m = /^repository\/branches\/(.+)$/.exec(rest))) {
+      need(method === 'GET', args);
+      if (!branches.has(decodeURIComponent(m[1]))) throw new Error(`glab ${args.join(' ')} failed: 404 Branch Not Found`);
+      return JSON.stringify({ name: decodeURIComponent(m[1]) });
+    }
     // Notes live under their own kind: issues/:iid/notes for an Issue, merge_requests/:iid/notes for an MR. The two numberings are separate.
     if ((m = /^(issues|merge_requests)\/(\d+)\/notes$/.exec(rest))) {
       const mr = m[1] === 'merge_requests';
@@ -245,13 +262,18 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       // GitLab has no «closed as completed»: an Issue counts as merged only because a merged MR closes it.
       if (state === 'merged' && !it.reviews.length) {
         const iid = 10000 + number;
-        reviews.set(iid, { iid, draft: false, state: 'merged', commits: [] });
+        reviews.set(iid, { iid, draft: false, state: 'merged', commits: [], base: 'main', body: `Closes #${number}` });
         it.reviews.push(iid);
       }
       issues.set(number, it);
       addSystemNote(number, `changed title to «${title}»`);
     },
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}` }) { reviews.set(number, { iid: number, draft, state: open ? 'opened' : 'closed', branch, commits: [...commits], head }); },
+    // base: the branch the MR targets; body: its description; merged: it was merged (so it is not open).
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false }) {
+      reviews.set(number, { iid: number, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head });
+    },
+    /** A branch that exists on the remote (`main` always does). */
+    branch(name) { branches.add(name); },
     comment(issue, { id, author, body, createdAt, taken = false }) {
       if (!users.has(author)) users.set(author, users.size + 1);
       notes.set(id, { id, issue, mr: false, body, created_at: createdAt, author, system: false, eyes: taken });
