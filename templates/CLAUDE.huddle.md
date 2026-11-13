@@ -7,8 +7,8 @@ root: read them there, never guess them.
 
 ### Rules
 
-1. **Never work on or push to the default branch.** One task = one Issue = one branch from an up-to-date default branch =
-   one PR (MR on GitLab). Only the AI Manager (`ai_manager` in `huddle.json`) merges. A developer's session never merges.
+1. **Never work on or push to the default branch.** One task = one Issue = one branch from an up-to-date default branch
+   (or the staging branch when `huddle.json` has one) = one PR (MR on GitLab) against that branch. Only the AI Manager (`ai_manager` in `huddle.json`) merges. A developer's session never merges.
 2. Touch only the Issue's **allowed files**. If you need another one, stop and ask the AI Manager.
 3. **TDD**: first the failing test (run it and see it fail), then the code. Report the commands you ran with their real counts.
 4. **Do not drop requirements silently.** Everything the Issue asks for ends up done or listed under «What was NOT done»
@@ -31,7 +31,8 @@ root: read them there, never guess them.
 1. Read the whole Issue and the documents it names.
 2. Check each Issue under «Depends on». It counts as merged only if it is closed **and** a merged PR/MR closed it. If one
    is not, change nothing and end with «⛔ Issue #N stopped: waiting for #X».
-3. Create the branch in a worktree of its own (the Issue's prompt says how), then add the `in progress` label to the Issue
+3. With a staging branch in `huddle.json` (`staging_branch`), the work goes into it and Huddle closes the Issue when the PR/MR is merged there (`huddle land`); the PR keeps `Closes #N`.
+   Create the branch in a worktree of its own (the Issue's prompt says how), then add the `in progress` label to the Issue
    (the name may be renamed under `labels` in `huddle.json`).
 4. Run the tests before changing anything, to know the previous failures.
 

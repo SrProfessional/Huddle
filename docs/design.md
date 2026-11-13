@@ -136,6 +136,8 @@ All network access goes through one interface. The core never calls `gh` or `gla
 | `closeIssue(n, { reason })` | `PATCH /issues/:n` `state=closed`, `state_reason` `not_planned` or `completed` | `PUT /issues/:iid` `state_event=close` |
 | `setIssueMilestone(n, title\|null)` → `{ reopened }` | `PATCH /issues/:n` `milestone` | `PUT /issues/:iid` `milestone_id`, read back; a closed milestone is reopened, assigned and closed again |
 | `branchExists(name)` → boolean | `gh api repos/:o/:r/branches/:name`; only «Not Found» is `false`, any other failure is thrown | `GET /repository/branches/:name`; only a 404 is `false`, any other failure is thrown |
+| `reviewInfo(n)` → `{ number, merged, base, body }` (§21) | `gh pr view <n> --json number,state,baseRefName,body,mergedAt`; an unknown number is the `notFound` flag | `GET /merge_requests/:iid` (`state`, `target_branch`, `description`); a 404 is the `notFound` flag |
+| `mergedReviews(base, { limit })` → `[{ number, base, body, mergedAt }]` (§21) | `gh pr list --state merged --base <base> --limit <limit>`, sorted by `mergedAt`, newest first | `GET /merge_requests?state=merged&target_branch=<base>&order_by=updated_at&sort=desc`, sorted by `merged_at` |
 | with `staging_branch` set (§21): `reviews`, `reviewsClosing(n)`, `issueForBranch(branch)` | the open PRs into staging whose body closes the Issue (one `gh pr list --base <staging>` per run) join `closedByPullRequestsReferences`; `issueForBranch` also reads the body of a PR into staging | `GET /issues/:iid/related_merge_requests` replaces `closed_by` (same one call per Issue, same `memo`); an MR is kept when it targets staging or the default branch and its description closes the Issue; `issueForBranch` reads the description of an MR into staging |
 | with `staging_branch` set (§21): `issueState(n)` and `listMilestones()` `merged` | today's rule **or** a merged PR whose base is staging and whose body closes the Issue (a second, aliased `CROSS_REFERENCED_EVENT` timeline in the same GraphQL query) | today's rule **or** a merged MR into staging whose description closes the Issue (the same `related_merge_requests` read) |
 | every call | retried on 429 (and 5xx except a POST), at most 3 tries and 60 s (`lib/platform/retry.mjs`) | same |
@@ -156,7 +158,7 @@ Things that work differently on GitLab, and what Huddle does about them:
    up is a step for the AI Manager, described in the guide.
 4. **Self-approval** may be disabled on GitLab, as on GitHub. The AI Manager approves with a comment, then merges.
 5. **Notes include system notes** («added label …»). The adapter drops them before the core sees them.
-6. **The «Closes #N» link** works on both, but on GitLab only for MRs into the default branch. The MR template uses `Closes #N`.
+6. **The «Closes #N» link** works on both, but on GitLab only for MRs into the default branch. The MR template uses `Closes #N`. With a staging branch (§21) neither platform links a PR/MR into it, so `huddle land` closes the Issue.
 
 **The shared contract test:** one suite of scenarios (pending request, request already taken, dependency merged or closed
 by hand, draft review, renamed label…) runs against both adapters. Each adapter gets canned `gh`/`glab` responses, so the
@@ -385,7 +387,7 @@ hook). It calls only `git`, never `gh` or `glab`, and needs no login.
 3. It has no uncommitted work: `git status --porcelain` is empty (ignored files such as `node_modules` do not count).
 4. Everything in it is merged: its HEAD commit is an ancestor of the default branch (`git merge-base --is-ancestor`). That
    covers branches and the detached `rev-*` worktrees. The base is `origin/<default_branch>` of `huddle.json`, then
-   `origin/HEAD`, then `origin/master`; when none resolves, **nothing is removed**. A squash merge is not detected, so that
+   `origin/HEAD`, then `origin/master`; when none resolves, **nothing is removed**. With `staging_branch` set (§21) the base is `origin/<staging_branch>` and nothing else: an Issue's work is finished when it is merged into staging, and a fallback to the default branch would remove work that has not reached staging. A squash merge is not detected, so that
    worktree stays: the rule errs toward keeping.
 5. It has not been touched for 24 hours (modification time of its HEAD reflog, `<git-dir>/logs/HEAD`). A branch just created
    from `main` is also an ancestor of `main` and clean; it must not go while a session starts on it.
@@ -624,7 +626,7 @@ branch before it reaches the default branch. Huddle learns that flow in four Iss
 |---|---|---|
 | H46 (#109) | The key `staging_branch`: stored, validated, asked by `/huddle-setup` and `/huddle-update`. Nothing reads it for behaviour. | done |
 | H47 (#111) | The adapters understand staging: they read the Issue link from the PR/MR body, give the «merged into staging» evidence, `branchExists`, and the `doctor` check. | done |
-| H48 | The flow: `huddle land`. | next |
+| H48 (#114) | The flow: branches start from staging, PRs target it, `huddle land` closes the Issue when its PR is merged there, the labels job warns about one that is still open, `huddle clean` judges by staging. | done |
 | H49 | The «tested in staging» marker and `/huddle-release`. | next |
 
 **The key (H46).** `staging_branch` is an optional string in `huddle.json` and `huddle.schema.json`.
@@ -665,6 +667,31 @@ set the adapters read the link themselves. Without it, nothing changes: the same
 - **`branchExists(name)`** (new operation): whether the remote has the branch. Only «not found» is `false`; any other failure is thrown.
 - **`huddle doctor`**, with `staging_branch` set, adds one line: ✔ «branch X exists on the remote», or ✖ with the fix (create it, or
   run `/huddle-update` to change the answer). A failed lookup (offline) is a ⚠. Unset, the doctor prints what it always printed.
+
+**The flow (H48, #114).** With `staging_branch` set, an Issue's work goes **into staging**, and the Issue is **done when its PR/MR is merged there**.
+Unset, nothing below applies and every command, text and call stays as it was.
+
+- **Where branches start and where PRs go.** The Issue's branch starts from the up-to-date staging branch and its PR/MR is opened **against** it,
+  with `Closes #N` in the body (`/huddle-play`). `/huddle-issue` writes «from an up-to-date <staging> (the default branch when there is no staging)».
+  `/huddle-review` refuses to merge an Issue PR whose base is not staging: it asks for it to be retargeted.
+- **Two adapter operations** (both platforms, §7). `reviewInfo(n) -> { number, merged, base, body }` (GitHub `gh pr view <n> --json number,state,baseRefName,body,mergedAt`;
+  GitLab the MR: `state`, `target_branch`, `description`; an unknown number carries the `notFound` flag of #99). `mergedReviews(base, { limit }) ->
+  [{ number, base, body, mergedAt }]`: the merged PRs/MRs into `base`, newest merge first, at most `limit` (default 50); the warning below uses it, and so will H49's release list.
+- **`huddle land <pr> [--check]`.** AI Manager only (`adapter.me()` is `ai_manager`; otherwise «only the AI Manager lands a PR», exit 1). With no
+  `staging_branch`: «no staging branch is set: nothing to land», exit 1. `--check` changes nothing: it prints `ok: PR #<pr> (base <staging>) closes #<n>, #<m>`
+  or the first problem and exits 1 (the PR does not target staging, its body has no closing keyword, or an Issue it names is not an Issue); a PR still open is fine
+  for `--check`. Without `--check` the PR must be **merged** and its base must be staging, else it refuses with the reason. Then, for each Issue `closesIn(body)`
+  names: if it is open, `closeIssue(n, { reason: 'completed' })` and «closed #<n>»; if it is closed, «#<n> was already closed». So it is idempotent, never
+  reopens, and never touches an Issue the PR does not name. All the Issues are looked up before the first is closed. Exit 0 when it ran, 1 on a refusal or a
+  platform error (one line), 2 on a bad argument. `/huddle-review` runs `land <pr> --check` before the merge and `land <pr>` right after it, then the labels pass.
+- **The labels job warns, it does not close.** In the full `huddle labels` run, for each open Issue that a PR from `mergedReviews(staging)` closes, one line:
+  `warning: #<n> is open but PR #<p>, merged into <staging>, closes it: run huddle land <p>, or it was reopened on purpose`. It never closes an Issue by itself,
+  so an Issue reopened after a failed test in staging stays open.
+- **`huddle clean`.** Its base for «merged into» is `origin/<staging_branch>` (§16), so the worktree of an Issue merged into staging is cleaned.
+- **Meta PRs** (setup, update, team) keep targeting the default branch: they change the repo's Huddle files, not an Issue's work, and have no Issue to land.
+
+**Not in H48:** the «tested in staging» marker, `/huddle-release`, the release PR from staging to the default branch and the back-merge of a hotfix (H49), and the
+real-platform checks above.
 
 **What the tests cannot confirm** (no real platform in them; the AI Manager checks it on a throwaway repo with a staging branch
 before the release): that GitHub creates a `CROSS_REFERENCED_EVENT` for a PR into a non-default base; that GitLab's

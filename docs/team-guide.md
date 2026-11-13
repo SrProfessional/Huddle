@@ -299,11 +299,18 @@ cannot be assigned.
 
 Removing someone does not touch their open Issues: they keep that assignee until the AI Manager reassigns them.
 
-## A staging branch (stored, not used yet)
+## A staging branch
 
-`huddle.json` can name a staging (or QA) branch, `staging_branch`, where changes would be tested before they go to the default
-branch. `/huddle-setup` and `/huddle-update` ask for it; answer `none` if there is none (it is stored as `""`). For now it only
-stores the name: nothing in Huddle behaves differently yet. The flow that will use it is in `docs/design.md`, section 21.
+`huddle.json` can name a staging (or QA) branch, `staging_branch`, where changes are tested before they go to the default branch.
+`/huddle-setup` and `/huddle-update` ask for it; answer `none` if there is none (it is stored as `""`).
+
+With one set, the work of an Issue goes **into staging**: the session starts the branch from the up-to-date staging branch and opens
+the PR/MR against it, still writing `Closes #N`. The Issue is **done when that PR/MR is merged into staging**. GitHub and GitLab only
+close an Issue when its PR merges into the default branch, so Huddle closes it itself: right after the merge, the AI Manager's
+session runs `huddle land <pr>` (`huddle land <pr> --check` first looks without changing anything). It is safe to run twice. If an Issue
+is still open although its PR was merged into staging, `huddle labels` says so with one line; it never closes the Issue by itself,
+so an Issue you reopened on purpose after a failed test in staging stays open. Old worktrees are cleaned once their work is merged
+into staging. Setup, update and team PRs keep going to the default branch. With no staging branch, none of this changes.
 
 ## Updating Huddle
 

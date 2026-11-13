@@ -27,9 +27,9 @@ Read the Issue and find its branch (the «Branch» section). Then:
 1. Read the whole Issue and the documents it names. Follow its «Prompt for Claude Code» block.
 2. Check each Issue under «Depends on»: it counts only if it is closed **and** a merged PR/MR closed it. If one is not, change
    nothing and end with «⛔ Issue #N stopped: waiting for #X».
-3. Create the branch in a worktree of its own, as the Issue says, and add the `in progress` label.
+3. Create the branch in a worktree of its own, as the Issue says, and add the `in progress` label. With `staging_branch` set in `huddle.json`, the branch starts from the up-to-date staging branch (`origin/<staging_branch>`), not from the default branch; without it, from the up-to-date default branch.
 4. Run the tests before changing anything. Then work with TDD, touching only the allowed files.
-5. Open the PR/MR with `Closes #N`, using the template: what changed, the real test counts, **What was NOT done**.
+5. Open the PR/MR with `Closes #N`, using the template (with `staging_branch` set, open it **against** the staging branch; Huddle closes the Issue when it is merged there): what changed, the real test counts, **What was NOT done**.
 6. End with «✅ Issue #N finished» (or «⛔ Issue #N stopped»), the link, the counts, what was not done, the next step. The next step is
    one the session takes, or numbered «🙋 Only you» steps when only the person can do it (see «Who does each step»).
 7. Start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`. When it ends, a review request is
