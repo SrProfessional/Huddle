@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-14
+
 ### Added
 
 - Issues change only through a session, and the board repairs itself when a session opens (Issue #125, H54; `docs/design.md` §22 and §23). The rule: every change to an Issue

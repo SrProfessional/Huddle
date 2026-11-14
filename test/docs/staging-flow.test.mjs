@@ -66,6 +66,8 @@ test('the design, the team guide, the README and the changelog describe land, th
   assert.match(design, /staging/);
   assert.match(flat('docs/team-guide.md'), /huddle land/);
   assert.match(read('README.md'), /\| `huddle land <pr> \[--check\]` \|/);
-  const unreleased = read('CHANGELOG.md').split('\n## [')[1];
-  assert.match(unreleased, /huddle land/);
+  // Under «Unreleased» until the release that carries it (0.8.0), then in that release's section: everything above 0.7.0.
+  const log = read('CHANGELOG.md');
+  const since = log.slice(log.indexOf('## [Unreleased]'), log.indexOf('## [0.7.0]'));
+  assert.match(since, /huddle land/);
 });

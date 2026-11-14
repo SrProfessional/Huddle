@@ -464,6 +464,24 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.8.0
+
+Run of: 2026-11-14, Huddle `main` with Issues #107 to #125 merged (commit 3030bfe), by the AI Manager's Claude Code session, on two throwaway projects with a `staging` branch: one on GitHub and one on GitLab (gitlab.com). Only the new parts were checked; the 0.7.0 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| A PR/MR into staging: the link, `in review`, the queue (#111) | ✔ | ✔ | Real platforms. A PR/MR into staging has no link of its own (GitHub `closingIssuesReferences` empty; GitLab `closed_by` and `closes_issues` empty) and the Issue stays open after the merge; Huddle reads GitHub's cross-reference event and GitLab's `related_merge_requests`. The Issue got `in review` and showed in `huddle queue`. |
+| `huddle land`, dependents unblocked, `huddle clean` base (#114) | ✔ | ✔ | `land --check`, `land` (closed the Issue), `land` again («was already closed»); the Issue that depended on it went from `blocked` to assigned. `huddle clean` against staging: covered by tests. |
+| `huddle tested`, `huddle release`, `release open`, the release PR/MR (#115) | ✔ | ✔ | `release open` refused the untested Issue, passed after `huddle tested`, opened the PR/MR from staging into `main` with plain `#N`; after merging it, `huddle release` said nothing is left. A commit straight to `main` gave the `default-ahead` warning. `--untested --reason`, the `testers` list and the stray-commits warning: covered by tests. |
+| The progress Issue with a staging branch (#119) | ✔ | covered by tests | Found in this run: the milestone query was over GitHub's 500,000-node limit; fixed, and re-run on the real project with a milestone: the progress Issue was created and counted the Issue landed through staging as merged. |
+| `/huddle-release` (the skill) (#115) | covered by tests | covered by tests | Tested as text. Not run in a session: it needs the plugin at 0.8.0. |
+| `huddle labels --issue <n>` (#113) | ✔ | covered by tests | Run on the real project for a closed Issue: no change left to make, exit 0. The cases with changes: covered by tests. |
+| The sessions run `labels --issue` at each step; the watch runs `labels` first (#120) | covered by tests | covered by tests | The skills are tested as text. Not run in a session. |
+| The board repairs itself on session start, `--no-assign` (#125) | ✔ | covered by tests | Real GitHub, Windows: a wrong label was put on an Issue by hand, `huddle hook` was run, and within seconds the label was right; the next hook said «Huddle corrected 1 label(s): something changed outside a session.». Not run on macOS, Linux or GitLab. |
+| `labels_job`: `sessions` by default, `hourly`, `events` (#121, #125) | covered by tests | covered by tests | The `hourly` files were rendered and read by eye (GitHub: schedule and manual run only; GitLab: `schedule` and `web` rules). No cloud run: the test account had no Actions minutes left. |
+| `/huddle-watch` checks at once when turned on (#107) | covered by tests | covered by tests | The skill is tested as text. Not run live with a PR waiting. |
+| `staging_branch` asked by setup and update (#109) | covered by tests | covered by tests | `huddle doctor` showed «staging: branch staging exists on the remote» on both real projects. |
+
 ### Results 0.7.0
 
 Run of: 2026-11-12, Huddle `main` with Issue #104 merged (commit 6ab7530), by the AI Manager's Claude Code session and the AI Manager by hand. Only the new part was checked; the 0.6.0 and older tables below still hold for the rest.
