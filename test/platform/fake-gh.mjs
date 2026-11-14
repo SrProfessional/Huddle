@@ -9,6 +9,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const milestones = new Map(); // title -> { number, title, description, state: 'OPEN' | 'CLOSED', closedAt, updatedAt }
   const pinned = [];
   let nextIssue = 900;
+  let nextPr = 700; // the number of the next PR opened through the API (openReview)
+  const openedPrs = [];
   const reviews = new Map(); // number -> { number, draft, open, merged, branch, base, body }
   const branches = new Set(['main']); // the branches that exist on the remote
   const comments = new Map(); // id -> { ...GitHub comment, issue }
@@ -162,11 +164,11 @@ export function fakeGithub({ project = PROJECT } = {}) {
     }
     if (a === 'pr' && b === 'list' && values(args, '--state')[0] === 'merged') {
       // The merged PRs into one base, in the order GitHub lists them (by creation, newest first): the adapter sorts by mergedAt itself.
-      need(values(args, '--json')[0] === 'number,baseRefName,body,mergedAt' && values(args, '--base').length === 1, args);
+      need(values(args, '--json')[0] === 'number,baseRefName,body,mergedAt,mergeCommit' && values(args, '--base').length === 1, args);
       const base = values(args, '--base')[0];
       const limit = Number(values(args, '--limit')[0]);
       return JSON.stringify([...reviews.values()].filter((r) => r.merged && r.base === base).sort((x, y) => y.number - x.number).slice(0, limit)
-        .map((r) => ({ number: r.number, baseRefName: r.base, body: r.body, mergedAt: r.mergedAt })));
+        .map((r) => ({ number: r.number, baseRefName: r.base, body: r.body, mergedAt: r.mergedAt, mergeCommit: { oid: `merge${r.number}` } })));
     }
     if (a === 'pr' && b === 'merge') {
       need(args.includes('--merge') && !args.includes('--delete-branch'), args);
@@ -217,6 +219,15 @@ export function fakeGithub({ project = PROJECT } = {}) {
         need(method === 'GET', args);
         if (!collaborators.has(decodeURIComponent(m[1]))) throw new Error(`gh ${args.join(' ')} failed: gh: Not Found (HTTP 404)`);
         return '';
+      }
+      if (rest === 'pulls' && method === 'POST') {
+        need(values(args, '--input')[0] === '-', args);
+        const b = JSON.parse(opts.input);
+        need(['title', 'head', 'base', 'body'].every((k) => typeof b[k] === 'string'), args);
+        const number = nextPr++;
+        reviews.set(number, { number, draft: false, open: true, merged: false, branch: b.head, base: b.base, body: b.body, commits: [], head: `head${number}`, mergedAt: null });
+        openedPrs.push({ number, base: b.base, head: b.head, title: b.title, body: b.body });
+        return JSON.stringify({ number, html_url: `https://github.test/${project}/pull/${number}` });
       }
       if ((m = /^branches\/(.+)$/.exec(rest))) {
         need(method === 'GET', args);
@@ -351,6 +362,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
     commentBody: (id) => comments.get(id)?.body,
     isTaken: (id) => comments.get(id).reactions.eyes > 0,
     merged: () => [...merged],
+    /** The PRs opened through `openReview`, in order. */
+    opened: () => openedPrs.map((p) => ({ ...p })),
     commandCount: () => calls.length,
     calls: () => calls.map((c) => ({ ...c })),
     stateOf: (n) => issues.get(n).state.toLowerCase(),
