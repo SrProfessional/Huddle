@@ -23,20 +23,21 @@ Before asking anything, look for `huddle.json` in the repo root and read it. A r
 4. **AI Manager:** the login of the one person who hands out Issues, answers decisions, reviews and merges, for example `SrProfessional`. Offer the login of the developer running the setup: `gh api user --jq .login` on GitHub, `glab api user` (the `username` field) on GitLab. If that command fails, ask without an offer.
 5. **Team:** the logins of the developers who get Issues, separated by commas, for example `SrProfessional, Santiago123`. Optional: max open Issues per person (empty = no limit), default branch.
 6. **Staging branch:** «Does the project have a staging (or QA) branch where changes are tested before they go to <default branch>? Give its name, or none.» Pass the answer as `--staging-branch <name>` (`none` is stored as `""`). If `huddle.json` already has the key, keep it and do not ask again. Stored only for now: nothing uses it yet.
+7. **Cloud labels job:** «How should the cloud labels job run? sessions (the sessions keep the labels right, no cloud job), hourly (a safety net once an hour, recommended), or events (on every Issue, PR and comment: it uses a lot of CI minutes).» Pass the answer as `--labels-job <sessions|hourly|events>`. If `huddle.json` already has `labels_job`, keep it and do not ask again. With `sessions` setup writes no labels job file.
 
 Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the developer to log in themselves and stop.
 
 ## Do
 
 1. Run, in the repo root (leave out the flags for answers that were left empty; with a valid `huddle.json` give no flags at all):
-   `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs" --platform <p> --host <h> --project <x> --ai-manager <login> --assignees a,b --staging-branch <name|none>`
+   `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs" --platform <p> --host <h> --project <x> --ai-manager <login> --assignees a,b --staging-branch <name|none> --labels-job <sessions|hourly|events>`
 2. It writes `huddle.json`, the Issue and PR/MR templates and the labels job of that platform, and inserts the Huddle block
    in `CLAUDE.md`. It also writes `.claude/settings.json` with the marketplace and the enabled plugin (`extraKnownMarketplaces.huddle` and
    `enabledPlugins["huddle@huddle"]`): it creates the file, or merges those two keys and keeps every other key. Run again later and it replaces only that block; the project's own text and edited templates stay.
    If the project already runs the labels job under another file name (any workflow, or `.gitlab-ci.yml` and the files it includes, that runs the labels command), setup keeps it and adds no second one; its notes name that file and say when it pins an older Huddle (`HUDDLE_REF`). Updating that pin is a PR the AI Manager's session opens.
    That file is only a helper: it enables the plugin for the project and, in the CLI, registers the marketplace silently after the folder's own trust dialog. It does not install Huddle for anyone.
 3. Read the JSON report. Show the developer `written`, `skipped` and every line of `notes` (GitLab needs a pipeline
-   schedule, which the AI Manager's session can create with `glab api`, and the `HUDDLE_TOKEN` variable, a secret that only the
+   schedule unless `labels_job` is `sessions`: its interval is a project setting, not in the file, with the cron `17 * * * *` for `hourly` and `*/10 * * * *` for `events`. The AI Manager's session creates or updates it with `glab api` (`/projects/:id/pipeline_schedules`), or gives the «🙋 Only you» steps if it cannot, and the `HUDDLE_TOKEN` variable, a secret that only the
    person can create: give them the «🙋 Only you» steps of docs/gitlab.md, «The HUDDLE_TOKEN step»).
 4. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` and show the result. If it reports a missing label, run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` (the AI Manager's login only).

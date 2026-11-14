@@ -113,6 +113,7 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
 - `default_branch`: the branch Issues are merged into (default `main`).
 - `staging_branch`: optional; the branch where changes are tested before they go to the default branch. Absent or `""` means none
   (today's behaviour). Stored and validated only for now; see §21.
+- `labels_job`: optional; how the cloud labels job runs: `sessions`, `hourly` (the default when absent) or `events`. See §23.
 - `labels`: optional renames. The defaults are the seven labels of §3.
 
 `bin/huddle doctor` checks the setup: the file is valid, `gh`/`glab` is logged in to that host, the labels exist, and the
@@ -433,7 +434,7 @@ asked once. Setup writes it too, except when a question is still pending: then i
 **pending** when `since` is newer than the repo's `setup_version` **and** `needed(config)` is true (the key is not set yet). A
 question never repeats: once its key is in `huddle.json` it is not asked again, whatever the version. The registry is **empty
 in 0.4.x** (no release asks anything yet): the mechanism ships first, and the tests use a fake registry. The first release that
-needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21).
+needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21) and `labels-job` (`since: 0.8.0`, §23).
 
 **The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
 only files, never the network.
@@ -800,3 +801,41 @@ or an Issue closed on the web are caught by the next full `huddle labels`.
 
 **Cost on GitLab.** `listOpenIssues` reads `closed_by` once per open Issue, and the scoped run still lists the open Issues to find the
 dependents of a closed `n`. A lighter read is possible if it proves too heavy; it is not part of this command.
+
+## 23. The cloud labels job is a safety net: `labels_job` in `huddle.json`
+
+Until 0.7 the labels job ran on **every** Issue, PR and comment event plus every 30 minutes (GitHub), or on every MR pipeline plus a
+10-minute schedule (GitLab). On a private repo that was more than 1,000 runs in 13 days, enough to use up a small project's included CI
+minutes, and when the minutes run out nobody's labels are updated. Since §22 the sessions keep the labels right themselves, so the cloud
+job stops being the engine and becomes a cheap safety net, and each project chooses how much of it to run.
+
+**The setting.** `labels_job` in `huddle.json` and `huddle.schema.json`: an optional string, one of
+
+| Value | What runs in the cloud |
+| --- | --- |
+| `sessions` | Nothing. The sessions (§22) keep the labels right. `/huddle-setup` writes no labels job file. |
+| `hourly` | **The default when the key is absent.** The job runs once an hour and on a manual run, and on nothing else. It catches what no session handled (a merge from a phone). |
+| `events` | As before: every event, plus the schedule. For a project that wants the labels to follow the platform at once and has the minutes for it. |
+
+`loadConfig` returns it normalised (`'hourly'` when absent). Any other value is refused naming the field (`huddle.json: "labels_job" must be one of sessions, hourly, events`).
+
+**Why `hourly` is the default.** The sessions do the work; the job only covers what they miss, so once an hour is enough and it is about
+24 runs a day instead of hundreds. The price: when nobody has a session open, a label can be up to an hour old (a PR merged from a phone,
+a label removed by hand, an Issue closed on the web). A project that cannot live with that picks `events`; one that has no use for the job picks `sessions`.
+
+**One template per platform, three renderings.** `templates/github/workflows/huddle-labels.yml` and `templates/gitlab/huddle-labels.gitlab-ci.yml`
+are the `events` rendering, exactly as before. `/huddle-setup` and `huddle update` choose the triggers from the setting when they write the
+file (`lib/setup/labels-job.mjs`, `renderLabelsJob`), so the three modes are renderings of the same file and cannot drift. The `permissions`, the
+`concurrency` group, the pinned `HUDDLE_REF` and the steps are the same in every rendering.
+
+- **GitHub.** `events`: today's `on:` block. `hourly`: `schedule: - cron: '17 * * * *'` (a minute that is not :00 or :30, where the platform is busiest) plus `workflow_dispatch`, and nothing else. `sessions`: no file.
+- **GitLab.** `events`: today's `rules` (the schedule and `merge_request_event`). `hourly`: the `schedule` rule and a `web` rule (a manual run). `sessions`: no file, and no `include` in `.gitlab-ci.yml`.
+- **On GitLab the interval is a project setting**, not in the file (CI/CD > Schedules). The file's comment says to set the cron `17 * * * *` for `hourly` and `*/10 * * * *` for `events`. The AI Manager's session creates or updates the schedule with `glab api` (`/projects/:id/pipeline_schedules`); when it cannot, it gives a «🙋 Only you» step (§13).
+- **A file the project edited is kept**, as always: it is reported as `skipped` with the way to get the new one. A file that is any rendering of ours (today's template, or another mode's) is **not** an edit: it is refreshed to the mode asked. Moving to `sessions` never deletes a file: the report says to delete it in a PR.
+- The report adds one line, `Labels job: <mode>. …`, that says what the setting asks for.
+
+**Asked.** `/huddle-setup` asks after the staging question (§21): «How should the cloud labels job run? sessions (the sessions keep the labels right, no cloud job), hourly (a safety net once an hour, recommended), or events (on every Issue, PR and comment: it uses a lot of CI minutes).» (`--labels-job`). `/huddle-update` asks it once of a repo with no `labels_job` key (question `labels-job`, `since: 0.8.0`, §17), and `huddle update` refreshes the file when the answer changes the triggers. An answer given before is kept when setup runs again.
+
+**`huddle doctor`.** One line, `labels job: <mode>`; with `sessions` it says that nothing runs in the cloud and the sessions keep the labels right.
+
+**What does not change.** `huddle labels` itself, the pinned `HUDDLE_REF` of a project (refreshing the file only changes the triggers; moving the pin is a PR the AI Manager's session opens), and the real cron of a GitLab project (the AI Manager sets it).

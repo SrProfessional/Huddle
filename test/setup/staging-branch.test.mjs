@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const CLI = fileURLToPath(new URL('../../lib/setup/cli.mjs', import.meta.url));
 
-const ANSWERS = { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana'] };
+const ANSWERS = { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana'], labels_job: 'hourly' };
 const INSTALLED = JSON.parse(readFileSync(new URL('../../.claude-plugin/plugin.json', import.meta.url), 'utf8')).version;
 const inTemp = (fn) => {
   const dir = mkdtempSync(path.join(tmpdir(), 'huddle-staging-'));
@@ -59,8 +59,8 @@ test('an answer given before is kept when setup runs again, and an unknown key i
 }));
 
 test('the registry has the staging-branch question', () => {
-  assert.equal(QUESTIONS.length, 1);
-  const q = QUESTIONS[0];
+  assert.ok(QUESTIONS.length >= 1);
+  const q = QUESTIONS.find((x) => x.id === 'staging-branch');
   assert.deepEqual([q.id, q.key, q.default, q.since], ['staging-branch', 'staging_branch', '', '0.8.0']);
   assert.match(q.ask, /staging \(or QA\) branch/);
   assert.match(q.ask, /or none/);

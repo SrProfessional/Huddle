@@ -7,6 +7,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- `labels_job` in `huddle.json`: the cloud labels job is a safety net and each project chooses how much of it runs (Issue #121, H52, the second of two; `docs/design.md` §23).
+  `sessions` (no cloud job), `hourly` (**the new default** when the key is absent: once an hour and on a manual run) or `events` (every event, as before).
+  One template per platform, rendered for the mode by `/huddle-setup` and `huddle update` (GitHub: the `on:` block; GitLab: the `rules`; `sessions` writes no file). On GitLab the
+  interval is a project setting (cron `17 * * * *` for `hourly`, `*/10 * * * *` for `events`), told in the file's comment, the report and the skills. New question `labels-job`
+  (`since: 0.8.0`), flag `--labels-job`, and a `labels job: <mode>` line in `huddle doctor`. An unedited labels file of any mode is refreshed to the mode asked; an edited one is kept and reported.
+  **Behaviour change:** a repo with no `labels_job` key now gets `hourly` the next time its labels file is refreshed, instead of the every-event job it had.
+
 - The sessions keep the labels right themselves (Issue #120, H51, the first of two; `docs/design.md` §22 and §19). `huddle-play`, `huddle-review` and `huddle-decide` run
   `huddle labels --issue <n>` at each step an Issue changes state, and `huddle-watch` runs the full `huddle labels` before `huddle queue --json` in each tick and in the
   first check. Best effort: a failure is one line and never blocks. A developer's session never assigns. The `CLAUDE.md` block says who runs it and that nobody edits a
