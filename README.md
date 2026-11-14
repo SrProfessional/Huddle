@@ -9,7 +9,7 @@ the review on its own.
 
 It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** the latest release is [0.8.0](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.0); what came after
+> **Status:** the latest release is [0.8.1](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.1); what came after
 > it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
@@ -106,8 +106,8 @@ About five minutes, in the repo you want to run with Huddle. You are the AI Mana
    `git switch -c huddle-setup`.
 2. Run `/huddle-setup`. It asks for the platform (`github`), the host (empty for github.com), the project (`owner/repo`),
    the login of the AI Manager and the logins of the developers.
-3. It writes `huddle.json`, the Issue and PR templates, the labels workflow (`.github/workflows/huddle-labels.yml`) and
-   the Huddle block of `CLAUDE.md`. Nothing outside the markers of that block is touched.
+3. It writes `huddle.json`, the Issue and PR templates and the Huddle block of `CLAUDE.md`. There is no cloud labels job:
+   the sessions keep the labels right. Nothing outside the markers of that block is touched.
 4. Run `huddle doctor`. It should show ✔ for the file, the login, the AI Manager and the labels. If a label is missing,
    run `huddle labels` once.
 5. Commit, push and open a PR with the setup files. Merge it: you are the only one who merges.
@@ -118,21 +118,19 @@ Next: [the first day](docs/first-day.md).
 
 ## Quickstart for GitLab
 
-The same five minutes, plus two steps only the AI Manager can do, because GitLab CI does not react to Issue events and the
-CI job token cannot edit Issues.
+The same five minutes. With no cloud labels job (the default) there is nothing extra to do on GitLab.
 
 1. Open Claude Code in the project with the plugin loaded and create a branch: `git switch -c huddle-setup`.
 2. Run `/huddle-setup`. Answer `gitlab`, the host (empty for gitlab.com, or for example `gitlab.example.com`), the project
    path (groups allowed, such as `team/app`), the AI Manager and the developers.
-3. It writes `huddle.json`, `.gitlab/issue_templates/Task.md`, `.gitlab/merge_request_templates/Default.md` and
-   `huddle-labels.gitlab-ci.yml`, and inserts the Huddle block in `CLAUDE.md`. Add
-   `include: local: huddle-labels.gitlab-ci.yml` to your `.gitlab-ci.yml`.
+3. It writes `huddle.json`, `.gitlab/issue_templates/Task.md` and `.gitlab/merge_request_templates/Default.md`, and
+   inserts the Huddle block in `CLAUDE.md`.
 4. Run `huddle doctor`, then `huddle labels` if a label is missing.
-5. **Create the schedule:** CI/CD > Schedules, cron `17 * * * *` (only when `labels_job` is `hourly`; `*/10 * * * *` for `events`; the default, `sessions`, needs no schedule), on the
-   default branch. The schedule is what updates the labels from the cloud, so on GitLab a label can take up to 10 minutes (with `events`; up to an hour with `hourly`) to change,
-   also after a push, when no session has fixed it first. The sessions keep the labels right themselves; the interval is a project setting, not in the file.
-6. **Create the token:** a project access token with the `api` scope, stored as the masked, protected CI variable
-   `HUDDLE_TOKEN`.
+5. **The schedule:** none by default. The sessions keep the labels right, so there is no cloud labels job and no schedule. Only a project that
+   wrote a `labels_job` other than `sessions` in `huddle.json` by hand needs one: see [the GitLab guide](docs/gitlab.md#the-schedule). With
+   such a job, a label it fixes can take up to 10 minutes to change, also after a push, when no session has fixed it first.
+6. **The token:** also only for a hand-written cloud job: a project access token with the `api` scope, stored as the masked,
+   protected CI variable `HUDDLE_TOKEN`.
 7. Commit, push and open a merge request. Merge it.
 
 Steps 5 and 6 in detail, and everything about self-managed servers: [docs/gitlab.md](docs/gitlab.md).

@@ -79,12 +79,13 @@ claude plugin install huddle@huddle</code></pre>
         <pre tabindex="0"><code>git switch -c huddle-setup</code></pre>
         <ol class="prose">
           <li>Run <code>/huddle-setup</code>. It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the AI Manager and the logins of the developers.</li>
-          <li>It writes <code>huddle.json</code>, the Issue and pull request templates, the job that keeps the labels up to date, and the Huddle block of <code>CLAUDE.md</code>. Nothing outside that block is touched.</li>
+          <li>It also asks whether the project has a staging branch where changes are tested first (<code>staging_branch</code>); answer none if not.</li>
+          <li>It writes <code>huddle.json</code>, the Issue and pull request templates and the Huddle block of <code>CLAUDE.md</code>. There is no cloud job: the sessions keep the labels right. Nothing outside that block is touched.</li>
           <li>Run <code>huddle doctor</code>. You want a check mark on the file, the login, the AI Manager and the labels. If a label is missing, run <code>huddle labels</code> once.</li>
           <li>Commit, push and open a pull request with the setup files. Merge it. The AI Manager is the only one who merges.</li>
         </ol>
         <div class="note">
-          <p><strong>On GitLab</strong>, two more steps are only the AI Manager's: a pipeline schedule with the cron <code>*/10 * * * *</code> on the default branch, and a project access token with the <code>api</code> scope stored as the masked, protected CI variable <code>HUDDLE_TOKEN</code>. Labels can take up to ten minutes to change. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/gitlab.md" target="_blank" rel="noopener">GitLab notes<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> explain both in detail.</p>
+          <p><strong>On GitLab</strong> the steps are the same, with nothing extra to set up. <strong>With a staging branch</strong>, Issue branches start from it and their pull requests target it; the AI Manager closes the Issue with <code>huddle land</code>, marks it tested there with <code>huddle tested</code>, and runs <code>/huddle-release</code> to take staging to the default branch once everything in it was tested. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/gitlab.md" target="_blank" rel="noopener">GitLab notes<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> cover self-managed servers.</p>
         </div>
       </section>
 
@@ -111,7 +112,7 @@ claude plugin install huddle@huddle</code></pre>
         <ol class="prose">
           <li><strong>Set up your machine.</strong> Install Claude Code, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the two commands above. Never paste a token into a chat, a file or an Issue.</li>
           <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the AI Manager: only they run <code>huddle labels</code>.</li>
-          <li><strong>Take an Issue.</strong> The AI Manager assigns one, or the labels job does. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
+          <li><strong>Take an Issue.</strong> The AI Manager's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
           <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the AI Manager.</li>
           <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
         </ol>

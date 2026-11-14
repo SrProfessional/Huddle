@@ -12,17 +12,17 @@ paste into Claude Code, so every session starts with the same goal, limits and t
 
 ## The seven labels
 
-The status of an Issue lives in its labels. Nobody sets them by hand: the labels job (`huddle labels`) does, from each
-Issue's «Depends on» section and from the comments.
+The status of an Issue lives in its labels. Nobody sets them by hand: `huddle labels` does, run by the sessions, from each
+Issue's «Depends on» section and from the comments. There is no cloud labels job by default.
 
 `huddle labels --issue <n>` does the same for one Issue (and, when it is closed, for the Issues that wait for it), so a session can
 keep the board right at the moments that matter without reading the whole repo. Only the AI Manager's login assigns; the full
 `huddle labels` stays the safety net for what nobody's session saw, such as a PR merged from a phone.
 
 The sessions run that command themselves at each step (a developer's session when it starts, opens the PR, stops for a decision or
-pushes a fix; the AI Manager's session when it requests changes, answers or merges), so the labels are right within seconds, with or
-without the cloud job. It needs permission to edit labels on the repo, which a developer's session already has, since the same
-session adds `in progress`. If it fails, the session says one line and goes on; the cloud job or the next session catches up.
+pushes a fix; the AI Manager's session when it requests changes, answers or merges), so the labels are right within seconds, with no
+cloud job. It needs permission to edit labels on the repo, which a developer's session already has, since the same
+session adds `in progress`. If it fails, the session says one line and goes on; the next session catches up.
 
 | Label | Meaning |
 |---|---|
@@ -48,7 +48,7 @@ in the labels run, not a failure; that Issue stays `blocked`.
 ## How a task goes
 
 1. The AI Manager writes the Issue (`/huddle-issue`).
-2. The labels job assigns it when it is ready.
+2. `huddle labels`, run by the AI Manager's session, assigns it when it is ready.
 3. The developer runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
 4. It opens the PR/MR with `Closes #N`, the real test counts and «What was NOT done», and ends with «✅ Issue #N finished».
 5. CI runs the tests. The AI Manager reviews (`/huddle-review`): either requests changes or merges.
@@ -88,7 +88,7 @@ evidence, severity, the probable cause and the failing test to write first).
 
 - **A developer, a tester or a client with access** reports it with the **Bug report form** on GitHub, or with the **Bug
   template** on GitLab (fill only the bug block and add the label `needs triage`: GitLab has no issue forms). A report is
-  labeled `bug` and `needs triage`, and it is not a ready Issue: the labels job never gives it `ready` or an assignee while
+  labeled `bug` and `needs triage`, and it is not a ready Issue: `huddle labels` never gives it `ready` or an assignee while
   it has `needs triage`.
 - **The AI Manager** runs `/huddle-bug` with a plain description, a capture or a link, or `/huddle-bug #N` on a raw report.
   The session investigates without changing anything, looks for duplicates, writes the Bug Issue with a probable cause and
@@ -209,7 +209,7 @@ percentage is `merged ÷ (total + remaining)`, rounded down to a whole number.
 You see it in three places:
 
 1. `huddle progress` prints the table, with a text bar, and the total. `huddle progress --json` prints the data.
-2. A **«Huddle progress» Issue**, created by the labels job and rewritten after each run, only when its text changes. On
+2. A **«Huddle progress» Issue**, created by `huddle labels` and rewritten after each run, only when its text changes. On
    GitHub it is pinned. It has no «Depends on», so the labels logic ignores it. Set `"progress_issue": false` in
    `huddle.json` to turn it off.
 3. One line when a session opens, for example `Progress: Content 60% · Social networks 100% · Ads 0% · Total 53%`.
@@ -228,7 +228,7 @@ about it.
 | See how far each area has come | `huddle progress` |
 | Define or check the areas (AI Manager) | `/huddle-areas`, or `huddle areas check` |
 | Check my setup | `huddle doctor` |
-| See what the labels job would change | `huddle labels --dry-run` |
+| See what `huddle labels` would change | `huddle labels --dry-run` |
 | Update the labels of one Issue only | `huddle labels --issue <n>` |
 | Continue after a request | `/huddle-play <n>`, or answer yes to the hook |
 | See what waits for the AI Manager | `huddle queue` |
@@ -403,6 +403,6 @@ asks **only that question**, once, and never again; with no new question it asks
 change without writing anything. (`/huddle-setup` is for a first install: in a repo that already has a valid `huddle.json` it asks
 nothing and only refreshes; a half-written `huddle.json` is asked only for what is missing.) It replaces only what is between
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->` in `CLAUDE.md`, so your own rules stay. Edited templates are kept.
-**How much of the cloud labels job runs** is the `labels_job` setting in `huddle.json`: `sessions` (the default and the recommended one: no cloud job and no CI minutes, the sessions keep the labels right), `hourly` (a safety net once an hour, for a team where changes may happen outside a session: a label can be up to an hour old when nobody has a session open) or `events` (on every Issue, PR and comment: it uses many CI minutes). To change it, ask the AI Manager to run `/huddle-setup` again with the new answer (or edit `huddle.json` and run `/huddle-update`): the labels file is rewritten for the new mode unless you edited it.
+**There is no cloud labels job to choose.** The sessions keep the labels right and the board repairs itself when a session opens, so setup writes no labels job and uses no CI minutes; it does not ask about it. A team that wants a cloud run anyway (it uses CI minutes) can write `"labels_job": "hourly"` or `"events"` in `huddle.json` by hand and run `/huddle-update`.
 If your repo runs the labels job under its own file name, setup keeps that file, adds no second labels job, and tells you
 when its `HUDDLE_REF` pins an older Huddle: move it to the new tag (or its full commit SHA) in a PR.

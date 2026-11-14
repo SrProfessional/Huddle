@@ -53,6 +53,7 @@
         <li><a href="#areas">Areas and progress</a></li>
         <li><a href="#decisions">Decisions</a></li>
         <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#staging">Staging</a></li>
         <li><a href="#only-you">Only you</a></li>
       </ul>
     </div>
@@ -76,7 +77,8 @@
 
       <section id="labels">
         <h2>Labels</h2>
-        <p class="prose">The status of an Issue lives in its labels. Nobody sets them by hand: a job does, from each Issue's «Depends on» section and from its comments.</p>
+        <p class="prose">The status of an Issue lives in its labels. Nobody sets them by hand: the sessions do, with <code>huddle labels</code>, from each Issue's «Depends on» section and from its comments. There is no cloud job and it uses no CI minutes.</p>
+        <p class="prose">Every change to an Issue goes through a Huddle session: creating it, editing it, closing it, reopening it and merging its pull request. Still fine by hand on the website: reading and commenting, the bug report form, and a tester's «✅ Tested in staging» comment. It is a rule, not a lock: if someone breaks it, the next session that opens repairs the board by itself.</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Label</th><th scope="col">Meaning</th></tr></thead>
@@ -116,6 +118,11 @@
         <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The AI Manager reviews with <code>/huddle-review</code> and either merges or asks for changes.</p>
         <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». If Claude Code was closed meanwhile, a hook says on the next start that a request is pending. Either way, <code>/huddle-play &lt;n&gt;</code> picks the Issue up again after the AI Manager answered a review or a decision.</p>
         <p class="prose">The AI Manager can also let their session do the checking: <code>/huddle-watch</code> looks every few minutes at what waits and reviews it (<code>/huddle-watch status</code> and <code>/huddle-watch off</code> do what they say). Turning it on is the order to merge what it approves. Decisions and bug triage stay with the person, and <code>huddle queue</code> lists what waits.</p>
+      </section>
+
+      <section id="staging">
+        <h2>Staging</h2>
+        <p class="prose">A project can test changes on a staging branch before they reach the default branch: set <code>staging_branch</code> in <code>huddle.json</code> (setup asks for it). Issue branches then start from staging and their pull requests target it. The AI Manager closes each Issue with <code>huddle land</code> once it is merged there, marks it tested with <code>huddle tested</code> after trying it in staging, and runs <code>/huddle-release</code>, which opens and merges the pull request from staging into the default branch only when every Issue in it was tested. Without a staging branch nothing changes.</p>
       </section>
 
       <section id="only-you">
