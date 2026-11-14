@@ -238,6 +238,7 @@ session cannot touch what customers use.
 | `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |
 | `/huddle-areas` | AI Manager | Helps define the project's areas (milestones): proposes them, puts Issues in them, estimates what is missing and checks them later. |
 | `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
+| `huddle labels --issue <n> [--dry-run]` | AI Manager, developers | The same for one Issue (and, when it is closed, the Issues that wait for it); only the AI Manager assigns. |
 | `huddle wait <n>` | Session | Waits in the background for the AI Manager's request on Issue `n`. |
 | `huddle take <n>` | Session | Marks the pending request 👀 and prints its prompt. |
 | `huddle pending [n]` | Anyone | Lists the requests nobody has done yet. |

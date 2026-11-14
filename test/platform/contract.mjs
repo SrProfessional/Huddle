@@ -153,6 +153,16 @@ export function contract({ name, create }) {
     assert.deepEqual(Object.keys(world.repoLabels()).sort(), (await adapter.listLabels()).sort());
   });
 
+  t('issueLabels(n) gives the label names of one Issue in any state, and flags a number that is not an Issue as notFound (Issue #113)', async ({ adapter, world }) => {
+    world.issue({ number: 1, labels: ['in review', 'bug'] });
+    world.issue({ number: 2, state: 'merged', labels: ['ready'] });
+    world.issue({ number: 3 });
+    assert.deepEqual((await adapter.issueLabels(1)).sort(), ['bug', 'in review']);
+    assert.deepEqual(await adapter.issueLabels(2), ['ready']);
+    assert.deepEqual(await adapter.issueLabels(3), []);
+    await assert.rejects(adapter.issueLabels(999), (e) => e.notFound === true);
+  });
+
   t('listClosedIssues() gives closed Issues (merged or by hand) with their label names, never open ones; the core cleans them', async ({ adapter, world }) => {
     world.issue({ number: 1, labels: ['in review'] }); // open: not listed
     world.issue({ number: 2, state: 'merged', labels: ['in review', 'changes requested from AI Manager', 'bug'] });

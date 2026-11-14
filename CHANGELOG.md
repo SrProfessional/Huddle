@@ -7,6 +7,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- `huddle labels --issue <n> [--dry-run]` (Issue #113, the first of two; the skills and the labels job template that use it are H51,
+  `docs/design.md` §22). The labels of one Issue instead of the whole repo: for an open `n`, `n` alone; for a closed `n`, the open
+  Issues that wait for it plus the cleanup of `n`. It assigns only when the caller is the AI Manager, never reads the comments of an
+  Issue outside the scope and never creates labels. New adapter operation `issueLabels(n)`. Without `--issue` nothing changes.
 - `staging_branch` in `huddle.json` (Issue #109, the first of four for the «first staging, then production» flow, `docs/design.md` §21).
   An optional branch name; absent or `""` means none. It must differ from `default_branch` and be a plain branch name. `/huddle-setup`
   asks for it (`--staging-branch`), and `/huddle-update` asks it once of repos that have no such key (question `staging-branch`,
