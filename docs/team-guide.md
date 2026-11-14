@@ -19,6 +19,11 @@ Issue's «Depends on» section and from the comments.
 keep the board right at the moments that matter without reading the whole repo. Only the AI Manager's login assigns; the full
 `huddle labels` stays the safety net for what nobody's session saw, such as a PR merged from a phone.
 
+The sessions run that command themselves at each step (a developer's session when it starts, opens the PR, stops for a decision or
+pushes a fix; the AI Manager's session when it requests changes, answers or merges), so the labels are right within seconds, with or
+without the cloud job. It needs permission to edit labels on the repo, which a developer's session already has, since the same
+session adds `in progress`. If it fails, the session says one line and goes on; the cloud job or the next session catches up.
+
 | Label | Meaning |
 |---|---|
 | `ready` | Everything it depends on is merged. Waiting for someone. |

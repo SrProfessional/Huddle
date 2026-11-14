@@ -15,15 +15,21 @@ An interval is like `5m`: default 5 minutes, allowed 2 to 60.
 1. Run `CronList`. If a job whose prompt starts with `[huddle-watch]` is there, the watch is already on: do **not** start a second one;
    say it is on, its interval and when it runs next, and stop.
 2. Otherwise `CronCreate` a recurring job on a minute that is not :00 or :30 (for 5 minutes, `2-59/5 * * * *`) whose prompt starts with
-   `[huddle-watch]` and says: run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json`; if nothing waits, say nothing and stop;
+   `[huddle-watch]` and says: first run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json`; if nothing waits, say nothing and stop;
    otherwise handle the items one at a time, oldest first, as «Each item» below.
 3. Your first message says plainly: **turning the watch on is the AI Manager's order to review and merge, as if they asked for each
    review.** It stops with `/huddle-watch off`, or by closing Claude Code, because the job lives only in the session. A recurring job
    expires after 7 days: run `/huddle-watch` again then. Add that the first check runs now and the next ones at the interval.
-4. **Check now:** in the same turn, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` once and handle what it lists exactly as a
+4. **Check now:** in the same turn, first run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` once, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` once and handle what it lists exactly as a
    tick does («Each item» below). The same list is shared with the ticks (the stopped PR/MR + `head` pairs), so a PR stopped now is not
    tried again at the next tick. Unlike a tick, the first check is not silent when nothing waits: say one line,
    «Nothing is waiting for the AI Manager.», so the person sees that it ran.
+
+## The labels pass (before the queue, in each tick and in the first check)
+
+The full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` is local and free, unlike the cloud job, so the board is right every few minutes even for
+what nobody's session handled (a merge from a phone). It is best effort: if it fails, say one line with the reason, at most once per tick, and
+the queue is read anyway; it never stops or blocks the watch and never asks anything. Docs/design.md §19 and §22.
 
 ## Each item
 

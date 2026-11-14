@@ -553,9 +553,11 @@ if the login is not `ai_manager`.
 
 1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). `CronList` first: a job whose prompt starts with
    `[huddle-watch]` means it is already on, so no second one starts and the skill says when it runs next. Otherwise `CronCreate` a
-   recurring job on a minute that is not :00 or :30 (for example `2-59/5 * * * *`) whose prompt starts with `[huddle-watch]`: run
+   recurring job on a minute that is not :00 or :30 (for example `2-59/5 * * * *`) whose prompt starts with `[huddle-watch]`: first
+   run the full `huddle labels` (Issue #120, §22: it is local and free, unlike the cloud job, so the board is right every few minutes even
+   for what nobody's session handled; a failure is reported once per tick at most, in one line, and the queue is read anyway), then run
    `huddle queue --json`; nothing waits, say nothing; otherwise handle the items one at a time, oldest first. **Check now (Issue #107):**
-   right after `CronCreate`, in the same turn, the session runs `huddle queue --json` once and handles what it lists as a tick does
+   right after `CronCreate`, in the same turn, the session runs the full `huddle labels` and then `huddle queue --json` once and handles what it lists as a tick does
    (step 3 and 4). The same list is shared with the ticks (the stopped PR/MR + `head` pairs), so a PR that stopped now is not tried again at
    the next tick. Unlike a tick, the first check is not silent when nothing waits: it says «Nothing is waiting for the AI Manager.», so the
    person sees that it ran. A job fires only while the session is idle, so the first check and a tick never overlap, and `huddle queue`
@@ -744,8 +746,8 @@ The full `huddle labels` reads the whole repo: every open Issue, their dependenc
 of closed Issues. Run by a cloud job on every Issue, PR and comment event, that costs more included minutes than a small private repo
 has, and when the minutes run out nobody's labels are updated. `huddle labels --issue <n> [--dry-run]` is the same job narrowed to
 one Issue, so the session that moves an Issue (start, PR opened, stopped for a decision, merged) can keep the board right by itself,
-with no cloud run for each event. The skills and the labels job template that call it are the next Issue (H51); this section is only
-the command.
+with no cloud run for each event. The skills call it (Issue #120, H51, «who runs it and when» below); the labels job template that
+makes the cloud job a cheap safety net is H52.
 
 **`n` must be a positive integer.** `--issue` with no value, a non-number or `0` prints the usage and exits 2. Without `--issue`
 nothing changes: the full run reads and does what it always did.
@@ -773,6 +775,24 @@ today (fewest open Issues, the cap `max_open_per_person`) only when the login of
 labels (the full run does; `huddle doctor` reports a missing one), or touch the project's other Issues. With `--dry-run` it prints
 what it would do and changes nothing. It prints the lines the full run prints for what it changes, then `N label change(s).` Exit 0
 when it ran, 1 on a platform error (login, network, rate limit) with one clear line, 2 on a bad argument.
+
+**Who runs it and when (Issue #120, H51).** In every skill the command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`, `n` the
+Issue of the work. It is **best effort**: if it fails (no permission to edit labels, the platform is unreachable) the session says one line
+with the reason and goes on; it never stops or blocks the task and never asks the person anything. The cloud job, or the next session,
+catches up.
+
+| Session | Skill | Runs `labels --issue <n>` right after |
+| --- | --- | --- |
+| Developer | `huddle-play` | the branch is created and `in progress` added; `huddle take` marks a request; the PR/MR is opened; it stops for a decision (after `needs decision` and the «❓ Decision for the AI Manager» comment); a fix is pushed and «Ready for review again» commented |
+| AI Manager | `huddle-review` | «🔁 Changes requested» is posted; the merge (with a staging branch, `huddle land <pr>` first), when the Issue is closed |
+| AI Manager | `huddle-decide` | the answer is posted (the command takes `needs decision` off) |
+| AI Manager | `huddle-watch` | not per Issue: the full `huddle labels` runs before `huddle queue --json` in each tick and in the first check (§19) |
+
+A developer's session never assigns (`--issue` with an open Issue does not) and never edits a Huddle label by hand: the command computes
+them. For a closed `n` (after the merge) it recomputes the Issues that wait for it and assigns the ones that come out ready, which only the
+AI Manager's login does. The `/huddle-setup` and `/huddle-update` block in `CLAUDE.md` says the same. **The cloud job is the safety net**,
+unchanged by this Issue (its template and triggers are H52): both can run at once, since the command computes from the current state and
+changes nothing that is already right.
 
 **The full run stays the safety net.** A session only handles the events it sees. A PR merged from a phone, a label removed by hand
 or an Issue closed on the web are caught by the next full `huddle labels`.

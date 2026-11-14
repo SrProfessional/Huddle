@@ -7,6 +7,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The sessions keep the labels right themselves (Issue #120, H51, the first of two; `docs/design.md` §22 and §19). `huddle-play`, `huddle-review` and `huddle-decide` run
+  `huddle labels --issue <n>` at each step an Issue changes state, and `huddle-watch` runs the full `huddle labels` before `huddle queue --json` in each tick and in the
+  first check. Best effort: a failure is one line and never blocks. A developer's session never assigns. The `CLAUDE.md` block says who runs it and that nobody edits a
+  Huddle label by hand; the cloud job is the safety net (its template is H52).
+
 - The «tested in staging» marker and `/huddle-release` (Issue #115, the last of four, `docs/design.md` §21). With `staging_branch` set, nothing goes to the default branch until
   every Issue in staging was tested there. `huddle tested <issue>` (AI Manager only) posts the comment `✅ Tested in staging` and adds the label `tested in staging`; a login in the new
   optional `testers` list may write the same comment by hand. The evidence is the comment, valid only when newer than the Issue's last staging merge (a fix after the test invalidates it);

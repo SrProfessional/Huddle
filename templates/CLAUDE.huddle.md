@@ -46,8 +46,16 @@ If the work cannot go on without a decision, commit and push what is done. Then 
 
 The AI Manager's requests come as comments with a `## Prompt for Claude Code` heading and a text block. Only comments by
 the `ai_manager` login in `huddle.json` count. After pushing the changes, comment «Ready for review again» with the counts.
-The label `changes requested from AI Manager` is decided by the labels job from the comments and the new commits: nobody
+The label `changes requested from AI Manager` is decided from the comments and the new commits: nobody
 puts it or takes it off by hand.
+
+### The labels
+
+A session keeps the board right itself with `huddle labels --issue <n>` (`n` the Issue of the work), at these steps: a developer's
+session after it adds `in progress` (and after `take`), after it opens the PR/MR, after it stops for a decision and after it pushes a fix
+and comments «Ready for review again»; the AI Manager's session after it requests changes, answers a decision and merges. It is best
+effort: if it fails, say one line with the reason and go on, it never blocks the task. Never edit a Huddle label by hand: the command
+computes them. A developer's session never assigns. The cloud labels job is only a safety net for what no session saw.
 
 ### The AI Manager role
 
