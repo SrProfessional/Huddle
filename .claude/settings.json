@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "huddle": {
+      "source": {
+        "source": "github",
+        "repo": "SrProfessional/Huddle"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "huddle@huddle": true
+  }
+}
