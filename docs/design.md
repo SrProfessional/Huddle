@@ -115,7 +115,8 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
 - `default_branch`: the branch Issues are merged into (default `main`).
 - `staging_branch`: optional; the branch where changes are tested before they go to the default branch. Absent or `""` means none
   (today's behaviour). Stored and validated only for now; see §21.
-- `labels_job`: optional; how the cloud labels job runs: `sessions`, `hourly` (the default when absent) or `events`. See §23.
+- `labels_job`: optional; how the cloud labels job runs: `sessions` (the default when absent), `hourly` or `events`. Never asked:
+  only written by hand. See §23.
 - `labels`: optional renames. The defaults are the seven labels of §3.
 
 `bin/huddle doctor` checks the setup: the file is valid, `gh`/`glab` is logged in to that host, the labels exist, and the
@@ -436,7 +437,8 @@ asked once. Setup writes it too, except when a question is still pending: then i
 **pending** when `since` is newer than the repo's `setup_version` **and** `needed(config)` is true (the key is not set yet). A
 question never repeats: once its key is in `huddle.json` it is not asked again, whatever the version. The registry is **empty
 in 0.4.x** (no release asks anything yet): the mechanism ships first, and the tests use a fake registry. The first release that
-needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21) and `labels-job` (`since: 0.8.0`, §23).
+needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21). 0.8.0 also asked `labels-job` (§23); Issue #130
+removed it, so it is never pending again.
 
 **The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
 only files, never the network.
@@ -854,9 +856,8 @@ job stops being the engine and becomes a cheap safety net, and each project choo
 
 **Why `sessions` is the default (Issue #125, H54).** One rule makes the cloud job unnecessary: every change to an Issue goes through a Huddle session: creating it (`/huddle-issue`, `/huddle-bug`), editing it, closing it, reopening it, and merging its PR/MR. Nobody merges, closes, reopens or edits an Issue by hand on the website or from a phone. The session runs `huddle labels` after the change, so the board stays right with no cloud job. (§22). With every
 change made from a session, the sessions keep the board right with no cloud run and no CI minutes, and a change someone makes on the website against the
-rule is repaired by the next session that opens (§22). `hourly` stays as a choice for a team where changes may happen outside a session (about 24
-runs a day; a label can be up to an hour old when nobody has a session open) and `events` for a project that wants the labels to follow the platform at
-once and has the minutes for it.
+rule is repaired by the next session that opens (§22). `hourly` (about 24 runs a day) and `events` remain only as values written by hand,
+for a team that wants a cloud run anyway and has the CI minutes for it; they are not asked (see «Not asked» below).
 
 **One template per platform, three renderings.** `templates/github/workflows/huddle-labels.yml` and `templates/gitlab/huddle-labels.gitlab-ci.yml`
 are the `events` rendering, exactly as before. `/huddle-setup` and `huddle update` choose the triggers from the setting when they write the
@@ -866,10 +867,16 @@ file (`lib/setup/labels-job.mjs`, `renderLabelsJob`), so the three modes are ren
 - **GitHub.** `events`: today's `on:` block. `hourly`: `schedule: - cron: '17 * * * *'` (a minute that is not :00 or :30, where the platform is busiest) plus `workflow_dispatch`, and nothing else. `sessions`: no file.
 - **GitLab.** `events`: today's `rules` (the schedule and `merge_request_event`). `hourly`: the `schedule` rule and a `web` rule (a manual run). `sessions`: no file, and no `include` in `.gitlab-ci.yml`.
 - **On GitLab the interval is a project setting**, not in the file (CI/CD > Schedules). The file's comment says to set the cron `17 * * * *` for `hourly` and `*/10 * * * *` for `events`. The AI Manager's session creates or updates the schedule with `glab api` (`/projects/:id/pipeline_schedules`); when it cannot, it gives a «🙋 Only you» step (§13).
-- **A file the project edited is kept**, as always: it is reported as `skipped` with the way to get the new one. A file that is any rendering of ours (today's template, or another mode's) is **not** an edit: it is refreshed to the mode asked. Moving to `sessions` never deletes a file: the report names the file, says it can go because the sessions keep the labels, and says to delete it in a PR; a repo that wants to keep its cloud job answers `hourly` or `events`.
+- **A file the project edited is kept**, as always: it is reported as `skipped` with the way to get the new one. A file that is any rendering of ours (today's template, or another mode's) is **not** an edit: it is refreshed to the mode asked. Moving to `sessions` never deletes a file: the report names the file, says it can go because the sessions keep the labels, and says to delete it in a PR; a repo that wants to keep its cloud job sets `"labels_job": "hourly"` (or `"events"`) in `huddle.json` by hand.
 - The report adds one line, `Labels job: <mode>. …`, that says what the setting asks for.
 
-**Asked.** `/huddle-setup` asks after the staging question (§21): «How should the cloud labels job run? sessions (recommended: the sessions keep the labels right, no cloud job and no CI minutes), hourly (a safety net once an hour, for a team where changes may happen outside a session), or events (every Issue, PR and comment event: it uses a lot of CI minutes).» (`--labels-job`). `/huddle-update` asks it once of a repo with no `labels_job` key (question `labels-job`, `since: 0.8.0`, §17), and `huddle update` refreshes the file when the answer changes the triggers. An answer given before is kept when setup runs again.
+**Not asked (Issue #130).** 0.8.0 asked this in `/huddle-setup` and once in `/huddle-update` (question `labels-job`). It is asked no
+more: every repo gets `sessions` with no question, and setup and update do not write the key. The reason: the safety net `hourly` gave is
+already there for free. The session-start repair (§22) recomputes every label from the real state each time a session opens, locally and
+with no CI minutes; the only thing `hourly` adds is a repair while nobody has a session open, which nobody needs, since nobody is working
+then. Asking would only offer a person a choice that costs quota. `hourly` and `events` keep working when written by hand in `huddle.json`
+(the schema, the renderings, `huddle doctor` and `lib/setup/cli.mjs --labels-job`, for scripts, are unchanged), and a value already in
+`huddle.json` is kept. No skill or guide offers them.
 
 **`huddle doctor`.** One line, `labels job: <mode>`; with `sessions` it says that nothing runs in the cloud and the sessions keep the labels right.
 

@@ -227,14 +227,10 @@ for (const gitlab of [false, true]) {
 
 // --- the default -----------------------------------------------------------------------------------------------------------------------
 
-test('with no key loadConfig gives sessions, and the setup default and question say the same', () => {
+test('with no key loadConfig gives sessions, and nothing asks about it (Issue #130)', () => {
   assert.equal(loadConfig('/r', () => JSON.stringify({ platform: 'github', project: 'a/b', ai_manager: 'boss' })).labels_job, 'sessions');
   assert.equal(DEFAULT_LABELS_JOB, 'sessions');
-  const q = QUESTIONS.find((x) => x.id === 'labels-job');
-  assert.equal(q.default, 'sessions');
-  assert.match(q.ask, /sessions \(recommended: the sessions keep the labels right, no cloud job and no CI minutes\)/);
-  assert.match(q.ask, /hourly \(a safety net once an hour, for a team where changes may happen outside a session\)/);
-  assert.match(q.ask, /events \(every Issue, PR and comment event: it uses a lot of CI minutes\)/);
+  assert.ok(!QUESTIONS.some((x) => x.key === 'labels_job'));
   assert.match(doc('huddle.schema.json'), /sessions \(default when absent\)/);
 });
 
@@ -263,7 +259,8 @@ test('a repo that still has the cloud job file is told which file can go and why
   assert.match(notes, /\.github\/workflows\/huddle-labels\.yml is still there/);
   assert.match(notes, /the sessions keep the labels/);
   assert.match(notes, /delete it in a PR/);
-  assert.match(notes, /hourly or events/);
+  assert.match(notes, /"labels_job": "hourly" in huddle\.json/);
+  assert.doesNotMatch(notes, /question/);
 }));
 
 test('hourly and events still render as before when asked for', () => inTemp((dir) => {
@@ -271,6 +268,6 @@ test('hourly and events still render as before when asked for', () => inTemp((di
   assert.equal(readFileSync(path.join(dir, '.github/workflows/huddle-labels.yml'), 'utf8'), readFileSync(fileURLToPath(new URL('../../templates/github/workflows/huddle-labels.yml', import.meta.url)), 'utf8'));
 }));
 
-test('the update registry asks the labels_job question with sessions as the default', () => {
-  assert.equal(QUESTIONS.find((x) => x.id === 'labels-job').default, 'sessions');
+test('the update registry has no labels_job question (Issue #130)', () => {
+  assert.equal(QUESTIONS.find((x) => x.id === 'labels-job'), undefined);
 });

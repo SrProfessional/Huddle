@@ -59,10 +59,9 @@ answered. One message, in the developer's language, one line per question: its `
 Then run `node "<new folder>/bin/huddle" update --json --answer <key>=<value>` with one `--answer` for each question (a value is read as
 JSON when it is JSON: `true`, `3`, else text). It writes the answers and refreshes the repo. If it refuses a key, show why.
 
-The `labels-job` question (`labels_job`: `sessions`, `hourly` or `events`, default `sessions`) is asked once of a repo that has no such key; the
-answer rewrites the triggers of the labels job file unless the project edited it (then it is in `skipped`). On GitLab the interval is a
-project setting, not in the file: after the PR, set the schedule in CI/CD > Schedules to the cron `17 * * * *` for `hourly` or `*/10 * * * *`
-for `events` (the AI Manager's session can do it with `glab api`; if it cannot, give the «🙋 Only you» steps), and delete it for `sessions`.
+How the labels are kept is never asked: the sessions keep them right, with no cloud job and no CI minutes. When a cloud labels job
+file is left from an older version, a line of `notes` names it: delete it in this same PR, and on GitLab also delete the pipeline schedule
+in CI/CD > Schedules (the AI Manager's session can do it with `glab api`; if it cannot, give the «🙋 Only you» steps).
 
 ## 5. The PR
 
