@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { setup } from '../../lib/setup/index.mjs';
 import { update } from '../../lib/setup/update.mjs';
-import { QUESTIONS, pendingQuestions, describe } from '../../lib/setup/questions.mjs';
+import { QUESTIONS, pendingQuestions } from '../../lib/setup/questions.mjs';
 import { loadConfig } from '../../lib/cli/config.mjs';
 import { run } from '../../lib/cli/run.mjs';
 import { harness, CONFIG } from '../cli/harness.mjs';
@@ -172,53 +172,65 @@ test('--labels-job works on the command line', () => {
   }
 });
 
-test('the question is in the registry, since 0.8.0, needed only while the key is absent', () => {
-  const q = QUESTIONS.find((x) => x.id === 'labels-job');
-  assert.ok(q);
-  assert.equal(q.key, 'labels_job');
-  assert.equal(q.default, 'sessions');
-  assert.equal(q.since, '0.8.0');
-  assert.equal(q.needed({}), true);
-  assert.equal(q.needed({ labels_job: 'sessions' }), false);
-  assert.match(describe(q).ask, /sessions/);
-  assert.match(describe(q).ask, /hourly/);
-  assert.match(describe(q).ask, /events/);
-  assert.deepEqual(pendingQuestions({ setup_version: '0.7.0' }).map((x) => x.id).filter((id) => id === 'labels-job'), ['labels-job']);
+test('Issue #130: labels_job is not a question any more: the registry never asks it, whatever the setup_version', () => {
+  assert.equal(QUESTIONS.find((x) => x.id === 'labels-job' || x.key === 'labels_job'), undefined);
+  for (const c of [{}, { setup_version: '0.7.0' }, { setup_version: '0.0.0' }]) assert.ok(!pendingQuestions(c).some((q) => q.key === 'labels_job'), JSON.stringify(c));
 });
 
-/** A repo set up under 0.7.0: no staging_branch and no labels_job. */
+/** A repo set up under 0.7.0: no staging_branch and no labels_job, with the every-event labels file of that time. */
 const oldRepo = (dir, platform = GH) => { setup(dir, { ...platform, staging_branch: '', labels_job: 'events' }); patch(dir, { setup_version: '0.7.0' }, ['staging_branch', 'labels_job']); };
 
-test('update: a repo with no labels_job has the question pending once; answering writes it and refreshes the file', () => inTemp((dir) => {
+test('update: a 0.7.0 repo with no labels_job is asked only the staging branch; huddle.json gets no labels_job key and the old file is named for deletion', () => inTemp((dir) => {
   oldRepo(dir);
-  const first = update(dir, { answers: { staging_branch: '' } });
+  const first = update(dir, {});
   assert.equal(first.status, 'questions');
-  assert.deepEqual(first.pendingQuestions.map((q) => q.id), ['labels-job']);
-  const done = update(dir, { answers: { staging_branch: '', labels_job: 'hourly' } });
+  assert.deepEqual(first.pendingQuestions.map((q) => q.id), ['staging-branch']);
+  const done = update(dir, { answers: { staging_branch: '' } });
   assert.equal(done.status, 'updated');
-  assert.equal(readConfig(dir).labels_job, 'hourly');
-  assert.doesNotMatch(read(dir, GH_FILE), /issue_comment:/);
-  assert.ok(done.changed.includes(GH_FILE));
-  const again = update(dir, { check: true });
-  assert.equal(again.status, 'up-to-date');
-  assert.deepEqual(again.pendingQuestions, []);
+  assert.ok(!('labels_job' in readConfig(dir)), 'the default is not written');
+  assert.ok(done.notes.some((n) => n.includes(GH_FILE) && /delete it in a PR/.test(n)));
+  assert.throws(() => update(dir, { answers: { labels_job: 'hourly' } }), /not a pending question/);
 }));
 
-test('update: an edited labels file is kept and reported when the answer changes the triggers', () => inTemp((dir) => {
+test('update: a fresh repo with no labels_job writes no labels job file', () => inTemp((dir) => {
+  setup(dir, { ...GH, staging_branch: '' });
+  patch(dir, { setup_version: '0.7.0' }, ['staging_branch']);
+  update(dir, { answers: { staging_branch: '' } });
+  assert.ok(!existsSync(path.join(dir, GH_FILE)));
+  assert.ok(!('labels_job' in readConfig(dir)));
+}));
+
+test('update: a hand-written hourly keeps rendering, and an edited labels file is kept and reported', () => inTemp((dir) => {
   oldRepo(dir);
+  patch(dir, { labels_job: 'hourly' });
+  update(dir, { answers: { staging_branch: '' } });
+  assert.doesNotMatch(read(dir, GH_FILE), /issue_comment:/);
   const mine = `${read(dir, GH_FILE)}# ours\n`;
   writeFileSync(path.join(dir, GH_FILE), mine);
-  const done = update(dir, { answers: { staging_branch: '', labels_job: 'hourly' } });
+  patch(dir, { labels_job: 'events' });
+  const again = setup(dir, {});
   assert.equal(read(dir, GH_FILE), mine);
-  assert.ok(done.skipped.includes(GH_FILE));
+  assert.ok(again.skipped.includes(GH_FILE));
 }));
 
-test('update: answering for the GitLab file rewrites the rules', () => inTemp((dir) => {
+test('update: a hand-written hourly on GitLab rewrites the rules', () => inTemp((dir) => {
   oldRepo(dir, GL);
-  update(dir, { answers: { staging_branch: '', labels_job: 'hourly' } });
+  patch(dir, { labels_job: 'hourly' });
+  update(dir, { answers: { staging_branch: '' } });
   assert.match(read(dir, GL_FILE), /\$CI_PIPELINE_SOURCE == "web"/);
   assert.doesNotMatch(read(dir, GL_FILE).replace(/^\s*#.*$/gm, ''), /merge_request_event/);
 }));
+
+test('the setup and update skills do not ask about the labels job and do not offer hourly or events', () => {
+  for (const rel of ['skills/huddle-setup/SKILL.md', 'skills/huddle-update/SKILL.md']) {
+    const text = readFileSync(fileURLToPath(new URL(`../../${rel}`, import.meta.url)), 'utf8');
+    assert.doesNotMatch(text, /How should the cloud labels job run/, rel);
+    assert.doesNotMatch(text, /--labels-job/, rel);
+    assert.doesNotMatch(text, /labels-job/, rel);
+    assert.doesNotMatch(text, /\bhourly\b/, rel);
+    assert.doesNotMatch(text, /\bevents\b/, rel);
+  }
+});
 
 // --- doctor ----------------------------------------------------------------------------------------------------------------------------
 

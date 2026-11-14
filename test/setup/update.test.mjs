@@ -33,8 +33,8 @@ const snapshot = (dir, rel = '') => Object.fromEntries(readdirSync(path.join(dir
 const oldRepo = (dir, old = '0.4.1') => { setup(dir, ANSWERS); writeConfig(dir, { setup_version: old }); };
 const spoilBlock = (dir) => writeFileSync(path.join(dir, 'CLAUDE.md'), readFileSync(path.join(dir, 'CLAUDE.md'), 'utf8').replace('Language', 'Idioma'));
 
-test('the real registry has only the 0.8.0 questions (staging-branch, labels-job); the rest of this file uses a fake one', () => {
-  assert.deepEqual(QUESTIONS.map((q) => q.id), ['staging-branch', 'labels-job']);
+test('the real registry has only the staging-branch question (labels-job left in Issue #130); the rest of this file uses a fake one', () => {
+  assert.deepEqual(QUESTIONS.map((q) => q.id), ['staging-branch']);
 });
 
 test('compareVersions orders major.minor.patch numerically', () => {
