@@ -59,12 +59,17 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
 Run `huddle doctor`. You want ✔ on `plugin`, `huddle.json`, `login`, `ai_manager` and `labels`. If `login` fails, read the line: «`gh`/`glab` is not installed or not on the PATH of this terminal» comes with the install command for your system (on Windows, then open a new terminal, or reload the PATH in PowerShell as the line shows); «is not logged in» comes with the step, `gh auth login` or `glab auth login` (with `--hostname <host>` on a self-managed server). If
 `labels` fails, tell the AI Manager: only they run `huddle labels`.
 
+**Every change to an Issue goes through a Huddle session**: creating it, editing it, closing it, reopening it and merging
+its pull request. The session runs `huddle labels` after the change, so the board stays right. Still fine by hand on the
+website: reading and commenting, the bug report form, and a tester's «✅ Tested in staging» comment. It is a rule, not a
+lock: if someone breaks it, the next session that opens repairs the board by itself.
+
 Read `CLAUDE.md` (the Huddle block holds the rules) and [the team guide](team-guide.md). They take ten minutes and answer
 most questions you will have.
 
 ## 3. Take your first Issue
 
-1. The AI Manager assigns you an Issue, or the labels job does: it carries `assigned` and your name.
+1. The AI Manager's session assigns you an Issue (`huddle labels` does it when the Issue is ready): it carries `assigned` and your name.
 2. Open Claude Code in the repo and run `/huddle-play <n>`. You can also paste the «Prompt for Claude Code» block of the
    Issue.
 3. The session reads the Issue, checks that what it depends on is merged, creates its own branch in a worktree and adds

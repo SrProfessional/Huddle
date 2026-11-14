@@ -22,7 +22,7 @@ Before asking anything, look for `huddle.json` in the repo root and read it. A r
 3. **Project:** `owner/repo` on GitHub, the project path (groups allowed) on GitLab. Offer the one from `git remote get-url origin`.
 4. **AI Manager:** the login of the one person who hands out Issues, answers decisions, reviews and merges, for example `SrProfessional`. Offer the login of the developer running the setup: `gh api user --jq .login` on GitHub, `glab api user` (the `username` field) on GitLab. If that command fails, ask without an offer.
 5. **Team:** the logins of the developers who get Issues, separated by commas, for example `SrProfessional, Santiago123`. Optional: max open Issues per person (empty = no limit), default branch.
-6. **Staging branch:** «Does the project have a staging (or QA) branch where changes are tested before they go to <default branch>? Give its name, or none.» Pass the answer as `--staging-branch <name>` (`none` is stored as `""`). If `huddle.json` already has the key, keep it and do not ask again. Stored only for now: nothing uses it yet.
+6. **Staging branch:** «Does the project have a staging (or QA) branch where changes are tested before they go to <default branch>? Give its name, or none.» Pass the answer as `--staging-branch <name>` (`none` is stored as `""`). If `huddle.json` already has the key, keep it and do not ask again. With it set, Issue branches start from staging, their PRs/MRs target it, and `/huddle-release` takes staging to the default branch (docs/design.md §21).
 
 Do not ask how the labels are kept: the sessions keep them right and the board repairs itself when a session opens, so setup writes no
 cloud labels job and uses no CI minutes. A `labels_job` already in `huddle.json` is kept as it is.

@@ -24,9 +24,9 @@ Only the AI Manager:
 - merges into the default branch (and so releases staging to it);
 - marks an Issue as tested in staging (a `testers` login may too, by hand; a developer never does);
 - touches production, deployments, settings and secrets;
-- creates the GitLab `HUDDLE_TOKEN` variable, which holds a secret (see [the GitLab notes](gitlab.md)).
+- only when the project wrote a cloud labels job by hand on GitLab: creates its `HUDDLE_TOKEN` variable, which holds a secret (see [the GitLab notes](gitlab.md)). By default there is none.
 
-The AI Manager's session does every step it can: merging, tagging, creating the GitLab schedule and running the smoke test on
+The AI Manager's session does every step it can: merging, tagging, creating the GitLab schedule when a project has a cloud labels job, and running the smoke test on
 the sandboxes. It asks the person only for what needs them, as numbered «🙋 Only you» steps; see
 [who does each step](team-guide.md#who-does-each-step).
 
@@ -48,7 +48,7 @@ Takes an Issue, works on its own branch and answers what the session asks.
 A developer's session never merges, never touches the default branch, production or secrets, and touches only the
 Issue's allowed files. If something does not fit, it stops and asks.
 
-**Load:** one or two active Issues per person. `max_open_per_person` in `huddle.json` makes the labels job respect that.
+**Load:** one or two active Issues per person. `max_open_per_person` in `huddle.json` makes `huddle labels` respect that when it assigns.
 
 ## Issues change only through a session
 
