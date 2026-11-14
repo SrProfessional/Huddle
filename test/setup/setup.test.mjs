@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { setup } from '../../lib/setup/index.mjs';
 import { loadConfig } from '../../lib/cli/config.mjs';
+import { renderLabelsJob } from '../../lib/setup/labels-job.mjs';
 
 const tpl = (rel) => readFileSync(fileURLToPath(new URL(`../../templates/${rel}`, import.meta.url)), 'utf8');
 const temp = () => mkdtempSync(path.join(tmpdir(), 'huddle-setup-'));
@@ -30,7 +31,7 @@ test('GitHub: writes a valid huddle.json and the GitHub templates, and no GitLab
   assert.equal(read(root, '.github/ISSUE_TEMPLATE/task.md'), tpl('github/ISSUE_TEMPLATE/task.md'));
   assert.equal(read(root, '.github/ISSUE_TEMPLATE/design.md'), tpl('github/ISSUE_TEMPLATE/design.md'));
   assert.equal(read(root, '.github/pull_request_template.md'), tpl('github/pull_request_template.md'));
-  assert.equal(read(root, '.github/workflows/huddle-labels.yml'), tpl('github/workflows/huddle-labels.yml'));
+  assert.equal(read(root, '.github/workflows/huddle-labels.yml'), renderLabelsJob('github', tpl('github/workflows/huddle-labels.yml'), 'hourly')); // hourly is the default (docs/design.md §23)
   assert.equal(existsSync(path.join(root, '.gitlab')), false);
   assert.equal(existsSync(path.join(root, 'huddle-labels.gitlab-ci.yml')), false);
   assert.ok(r.written.includes('huddle.json'));
@@ -46,7 +47,7 @@ test('GitLab: writes the GitLab templates, the CI job and an .gitlab-ci.yml that
   assert.equal(read(root, '.gitlab/issue_templates/Task.md'), tpl('gitlab/issue_templates/Task.md'));
   assert.equal(read(root, '.gitlab/issue_templates/Design.md'), tpl('gitlab/issue_templates/Design.md'));
   assert.equal(read(root, '.gitlab/merge_request_templates/Default.md'), tpl('gitlab/merge_request_templates/Default.md'));
-  assert.equal(read(root, 'huddle-labels.gitlab-ci.yml'), tpl('gitlab/huddle-labels.gitlab-ci.yml'));
+  assert.equal(read(root, 'huddle-labels.gitlab-ci.yml'), renderLabelsJob('gitlab', tpl('gitlab/huddle-labels.gitlab-ci.yml'), 'hourly'));
   assert.match(read(root, '.gitlab-ci.yml'), /include:\s*\n\s*- local: huddle-labels\.gitlab-ci\.yml/);
   assert.equal(existsSync(path.join(root, '.github')), false);
   assert.ok(r.notes.some((n) => /schedule/i.test(n)) && r.notes.some((n) => /HUDDLE_TOKEN/.test(n)));

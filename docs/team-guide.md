@@ -395,5 +395,6 @@ asks **only that question**, once, and never again; with no new question it asks
 change without writing anything. (`/huddle-setup` is for a first install: in a repo that already has a valid `huddle.json` it asks
 nothing and only refreshes; a half-written `huddle.json` is asked only for what is missing.) It replaces only what is between
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->` in `CLAUDE.md`, so your own rules stay. Edited templates are kept.
+**How much of the cloud labels job runs** is the `labels_job` setting in `huddle.json`: `sessions` (no cloud job: the sessions keep the labels right), `hourly` (the default: a safety net once an hour, for what nobody's session handled, so a label can be up to an hour old when nobody has a session open) or `events` (on every Issue, PR and comment: it uses many CI minutes). To change it, ask the AI Manager to run `/huddle-setup` again with the new answer (or edit `huddle.json` and run `/huddle-update`): the labels file is rewritten for the new mode unless you edited it.
 If your repo runs the labels job under its own file name, setup keeps that file, adds no second labels job, and tells you
 when its `HUDDLE_REF` pins an older Huddle: move it to the new tag (or its full commit SHA) in a PR.

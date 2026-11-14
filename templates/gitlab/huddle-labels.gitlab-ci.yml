@@ -1,10 +1,12 @@
 # Huddle: keeps the status labels of the Issues up to date from each «Depends on» section.
 # Copied by `huddle-setup`; add `include: local: huddle-labels.gitlab-ci.yml` to .gitlab-ci.yml.
 #
-# GitLab CI does not react to Issue events, so this job runs on a pipeline schedule and on every MR pipeline.
-# GitLab has no CI trigger for comments, so after a comment or after a push the label can take up to 10 minutes to change:
-# the schedule is what updates the labels.
-# Create the schedule in CI/CD > Schedules, with the cron `*/10 * * * *`, on the default branch.
+# GitLab CI does not react to Issue events, so this job runs on a pipeline schedule (and on an MR pipeline in the `events` mode,
+# or on a manual run in the `hourly` mode: see `labels_job` in huddle.json, docs/design.md §23).
+# GitLab has no CI trigger for comments, so after a comment or after a push the label can take up to 10 minutes to change
+# (up to an hour in the `hourly` mode): the schedule is what updates the labels.
+# The interval is a project setting on GitLab, not in this file. Set it in CI/CD > Schedules, on the default branch:
+# the cron `17 * * * *` for `hourly` (the default), and `*/10 * * * *` for `events`.
 #
 # It needs a token: the job token cannot edit Issues. The AI Manager creates a project access token with the `api` scope
 # and stores it as the CI variable HUDDLE_TOKEN (masked and protected). This file only reads the variable; the job

@@ -32,16 +32,23 @@ differs in a few places. Everything on this page except the first section is don
 
 ## The schedule
 
-GitLab CI does not react to Issue events, so the labels job runs on a schedule and on every merge request pipeline (the merge request ones only skip, see below).
+GitLab CI does not react to Issue events, so the labels job runs on a schedule. With `labels_job: "events"` it also runs on every merge request pipeline (the merge request ones only skip, see below); with the default `hourly` it runs on the schedule and on a manual run (`web`); with `sessions` there is no job file at all (see [How often it runs](#how-often-it-runs)).
 It runs in the `test` stage, which GitLab always defines, so it works in a project with no other CI.
 
 1. Add to your `.gitlab-ci.yml`: `include: local: huddle-labels.gitlab-ci.yml`.
 2. Go to **CI/CD > Schedules > New schedule**.
-3. Cron: `*/10 * * * *`. Target branch: the default branch. Leave it active.
+3. Cron: `17 * * * *` (the default `hourly` mode) or `*/10 * * * *` (the `events` mode). Target branch: the default branch. Leave it active.
 
 The schedule is what changes the labels. A comment does not start a pipeline, and the merge request pipelines do not
 have the token (see below), so on GitLab a label can take up to 10 minutes to change, also after a push to a merge
-request.
+request. With the default `hourly` mode a label can be up to an hour old when nobody has a session open.
+
+## How often it runs
+
+`labels_job` in `huddle.json` picks the mode: `sessions` (no cloud job), `hourly` (the default) or `events`. **On GitLab the interval is a
+project setting, not part of `huddle-labels.gitlab-ci.yml`.** To change the mode: run `/huddle-setup` with the new answer (or edit `huddle.json` and run
+`/huddle-update`), then change the cron of the schedule in **CI/CD > Schedules** to `17 * * * *` for `hourly` or `*/10 * * * *` for `events`; for `sessions`
+delete the schedule and the `include` line. The AI Manager's session can do the schedule with `glab api`; if it cannot, it gives you the steps.
 
 ## The HUDDLE_TOKEN step
 
@@ -100,7 +107,7 @@ the [smoke test](smoke-test.md).
    and check it with `git ls-remote origin`: it must answer with no prompt. (For a self-managed host, use that host
    instead of `gitlab.com`.)
 
-Labels change by the schedule, so they can take up to 10 minutes (see [The schedule](#the-schedule)).
+Labels change by the schedule, so they can take up to an hour in the default mode, 10 minutes with `events` (see [The schedule](#the-schedule)).
 
 ## What works differently
 

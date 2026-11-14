@@ -37,7 +37,7 @@ test('staging_branch: absent and "" both load as "", a valid name loads, a proje
   assert.equal(load({ ...BASE, staging_branch: '' }).staging_branch, '');
   assert.equal(load({ ...BASE, staging_branch: 'staging' }).staging_branch, 'staging');
   assert.equal(load({ ...BASE, staging_branch: 'release/qa-1' }).staging_branch, 'release/qa-1');
-  const { staging_branch, ...rest } = load(BASE);
+  const { staging_branch, labels_job, ...rest } = load(BASE);
   assert.deepEqual(rest, { host: '', assignees: [], default_branch: 'main', ...BASE });
 });
 test('staging_branch must differ from default_branch', () => {
