@@ -106,8 +106,8 @@ About five minutes, in the repo you want to run with Huddle. You are the AI Mana
    `git switch -c huddle-setup`.
 2. Run `/huddle-setup`. It asks for the platform (`github`), the host (empty for github.com), the project (`owner/repo`),
    the login of the AI Manager and the logins of the developers.
-3. It writes `huddle.json`, the Issue and PR templates, the labels workflow (`.github/workflows/huddle-labels.yml`) and
-   the Huddle block of `CLAUDE.md`. Nothing outside the markers of that block is touched.
+3. It writes `huddle.json`, the Issue and PR templates and the Huddle block of `CLAUDE.md`. There is no cloud labels job:
+   the sessions keep the labels right. Nothing outside the markers of that block is touched.
 4. Run `huddle doctor`. It should show ✔ for the file, the login, the AI Manager and the labels. If a label is missing,
    run `huddle labels` once.
 5. Commit, push and open a PR with the setup files. Merge it: you are the only one who merges.

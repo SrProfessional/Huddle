@@ -33,7 +33,7 @@
       </li>
       <li>
         <div><span class="who">The platform</span><h3>Automatic tests and labels</h3>
-        <p>The project's CI runs its tests. Huddle's labels job moves each Issue through <code>ready</code>, <code>assigned</code>, <code>in progress</code>, <code>in review</code> and <code>blocked</code>, from its «Depends on» and its PR. Nobody moves those labels by hand.</p></div>
+        <p>The project's CI runs its tests. Each session runs <code>huddle labels</code> after the change it makes, which moves each Issue through <code>ready</code>, <code>assigned</code>, <code>in progress</code>, <code>in review</code> and <code>blocked</code>, from its «Depends on» and its PR. Nobody moves those labels by hand, and there is no cloud job.</p></div>
       </li>
       <li>
         <div><span class="who">AI Manager</span><h3>Reviews: asks for changes or merges</h3>
@@ -92,7 +92,8 @@
   <section aria-labelledby="labels">
     <span class="eyebrow">Labels</span>
     <h2 id="labels">Where each Issue stands, at a glance</h2>
-    <p>Huddle's labels job updates these on every change (on GitLab, by a schedule every 10 minutes). Filter the Issue list by a label to see, for example, everything waiting for review.</p>
+    <p>The sessions update these right after each change, the same way on GitHub and GitLab, with no CI minutes. Filter the Issue list by a label to see, for example, everything waiting for review.</p>
+    <p><strong>Every change to an Issue goes through a Huddle session</strong>: creating it, editing it, closing it, reopening it and merging its PR. Still fine by hand on the website: reading and commenting, the bug report form, and a tester's «✅ Tested in staging» comment. It is a rule, not a lock: if someone breaks it, the next session that opens repairs the board by itself.</p>
     <dl class="glossary">
       <dt><code>ready</code></dt><dd>Its dependencies are merged and nobody has it yet.</dd>
       <dt><code>assigned</code></dt><dd>Someone has it but has not started.</dd>
@@ -110,7 +111,7 @@
     <h2 id="progress">How far each area has come</h2>
     <p>Each area of the project (for example «Content», «Social networks», «Ads») is a milestone, and each Issue belongs to one. The AI Manager writes in each milestone's description how many Issues are still missing, on a line <code>Huddle remaining: N</code>. Huddle then shows, per area and in total, the merged Issues over all the work the area will need:</p>
     <ul>
-      <li>in a pinned «Huddle progress» Issue that the labels job keeps up to date;</li>
+      <li>in a pinned «Huddle progress» Issue that <code>huddle labels</code> keeps up to date;</li>
       <li>with <code>huddle progress</code> (ask Claude Code «run huddle progress»);</li>
       <li>in one line when a session opens, for example <code>Content 76% · Social networks 55% · Ads 0% · Total 58%</code>.</li>
     </ul>
@@ -165,8 +166,9 @@
     <ol class="steps">
       <li>
         <h3>Put Huddle in the repository</h3>
-        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the AI Manager and the team, then writes <code>huddle.json</code>, the Issue and PR templates, the labels job, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor». If its <code>login</code> line says «gh is not installed or not on the PATH» (or <code>glab</code>), the tool is missing from that terminal: it gives the install command, and on Windows you open a new terminal afterwards. «Is not logged in» is a different message, with <code>gh auth login</code> or <code>glab auth login</code> as the fix.</p>
-        <p><strong>On GitLab</strong> two more things, only by you: a project access token with the <code>api</code> scope stored as the masked and protected CI variable <code>HUDDLE_TOKEN</code>, and a pipeline schedule <code>*/10 * * * *</code> on the default branch. Never paste the token in a chat or a file.</p>
+        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the AI Manager and the team, and whether there is a staging branch, then writes <code>huddle.json</code>, the Issue and PR templates, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor». If its <code>login</code> line says «gh is not installed or not on the PATH» (or <code>glab</code>), the tool is missing from that terminal: it gives the install command, and on Windows you open a new terminal afterwards. «Is not logged in» is a different message, with <code>gh auth login</code> or <code>glab auth login</code> as the fix.</p>
+        <p><strong>On GitLab</strong> the steps are the same, with nothing extra to set up: the sessions keep the labels right.</p>
+        <p><strong>With a staging branch</strong> (<code>staging_branch</code> in <code>huddle.json</code>), Issue branches start from staging and their PRs target it. After merging one there, run <code>huddle land</code> to close its Issue; after trying it in staging, <code>huddle tested</code>. When everything in staging was tested, <code>/huddle-release</code> opens and merges the PR from staging into the default branch.</p>
       </li>
       <li>
         <h3>Add someone to the team</h3>
