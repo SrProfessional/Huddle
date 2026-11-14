@@ -697,3 +697,45 @@ real-platform checks above.
 before the release): that GitHub creates a `CROSS_REFERENCED_EVENT` for a PR into a non-default base; that GitLab's
 `related_merge_requests` lists an MR into a non-default branch and needs the «Closes #N» in the description; a self-managed GitLab with
 a custom closing pattern; the size of the milestones query with the PR bodies.
+
+## 22. The labels of one Issue: `huddle labels --issue <n>`
+
+The full `huddle labels` reads the whole repo: every open Issue, their dependencies, the comments of each managed Issue and the list
+of closed Issues. Run by a cloud job on every Issue, PR and comment event, that costs more included minutes than a small private repo
+has, and when the minutes run out nobody's labels are updated. `huddle labels --issue <n> [--dry-run]` is the same job narrowed to
+one Issue, so the session that moves an Issue (start, PR opened, stopped for a decision, merged) can keep the board right by itself,
+with no cloud run for each event. The skills and the labels job template that call it are the next Issue (H51); this section is only
+the command.
+
+**`n` must be a positive integer.** `--issue` with no value, a non-number or `0` prints the usage and exits 2. Without `--issue`
+nothing changes: the full run reads and does what it always did.
+
+**The scope.** What the run reads and changes:
+
+- `n` is **open**: `n` alone. It never assigns, and the «Huddle progress» Issue is not touched.
+- `n` is **closed**: the open Issues that list `#n` under «Depends on» (found in the list of open Issues the full run already reads),
+  plus `n` itself for its own cleanup. It assigns what comes out `ready`, and rewrites the progress Issue (a merge moves the
+  percentages).
+- `n` is **not an Issue** (a PR/MR number, a typo, a deleted Issue): one line on stderr, exit 1, nothing changed.
+- `n` is open and has **no «Depends on»** section (not managed by Huddle): one line, nothing changed, exit 0.
+
+**What it does for the Issues in scope, with the code of the full run** (restricted, not copied): reads the state of their
+dependencies and nothing else; reads where the AI Manager's requests stand (comments and commits of the scope only); sets the status
+labels and the two request labels with the same rules; when `n` is closed, takes its stale Huddle labels off. For that cleanup the
+adapter has one more operation, `issueLabels(n)`, which reads the labels of one Issue in any state, so the list of closed Issues is
+not read. The Issues are found with the same «Depends on» parser.
+
+**Only the AI Manager assigns.** With `n` closed, the run assigns a `ready`, unassigned Issue of the scope by the same rule as
+today (fewest open Issues, the cap `max_open_per_person`) only when the login of the caller (`adapter.me()`) is `ai_manager` in
+`huddle.json`. For anyone else it prints «assignment skipped: only the AI Manager assigns» and goes on with the labels.
+
+**What it never does.** Read the comments of an Issue outside the scope, change the label of an Issue outside the scope, create
+labels (the full run does; `huddle doctor` reports a missing one), or touch the project's other Issues. With `--dry-run` it prints
+what it would do and changes nothing. It prints the lines the full run prints for what it changes, then `N label change(s).` Exit 0
+when it ran, 1 on a platform error (login, network, rate limit) with one clear line, 2 on a bad argument.
+
+**The full run stays the safety net.** A session only handles the events it sees. A PR merged from a phone, a label removed by hand
+or an Issue closed on the web are caught by the next full `huddle labels`.
+
+**Cost on GitLab.** `listOpenIssues` reads `closed_by` once per open Issue, and the scoped run still lists the open Issues to find the
+dependents of a closed `n`. A lighter read is possible if it proves too heavy; it is not part of this command.

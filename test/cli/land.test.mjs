@@ -181,4 +181,22 @@ for (const gitlab of [false, true]) {
     await run(['labels'], empty.ctx);
     assert.deepEqual(empty.calls().map((c) => c.args), h.calls().map((c) => c.args), 'an empty staging_branch is the same as none');
   });
+
+  // Issue #116: the scoped run reads only its scope and makes no extra call, so the warning (one more call, mergedReviews) is for the full run only.
+  const managed = (w) => {
+    w.issue({ number: 20, title: 'Managed', body: '## Depends on\n\n- None\n', labels: ['ready'] });
+    w.review({ number: 30, base: 'staging', merged: true, body: 'Closes #20' });
+  };
+  const readsMerged = (h) => h.calls().some((c) => /--state merged|state=merged/.test(c.args.join(' ')));
+
+  test(`[${kind}] a scoped labels run with a staging branch makes no mergedReviews call; the full run still warns`, async () => {
+    const scoped = harness({ gitlab, config, setup: managed });
+    assert.equal(await run(['labels', '--issue', '20'], scoped.ctx), 0);
+    assert.equal(readsMerged(scoped), false, 'no merged-review read in a scoped run');
+    assert.doesNotMatch(scoped.text(), /warning: #20 is open but PR/);
+    const full = harness({ gitlab, config, setup: managed });
+    assert.equal(await run(['labels'], full.ctx), 0);
+    assert.equal(readsMerged(full), true);
+    assert.match(full.text(), /warning: #20 is open but PR #30, merged into staging, closes it: run huddle land 30/);
+  });
 }
