@@ -3,7 +3,12 @@
   "platform": "github",
   "project": "SrProfessional/Huddle",
   "ai_manager": "SrProfessional",
-  "assignees": ["SrProfessional"],
+  "assignees": [
+    "SrProfessional"
+  ],
   "max_open_per_person": 5,
-  "default_branch": "main"
+  "default_branch": "main",
+  "staging_branch": "staging",
+  "labels_job": "sessions",
+  "setup_version": "0.8.0"
 }
