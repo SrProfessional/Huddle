@@ -317,6 +317,25 @@ is still open although its PR was merged into staging, `huddle labels` says so w
 so an Issue you reopened on purpose after a failed test in staging stays open. Old worktrees are cleaned once their work is merged
 into staging. Setup, update and team PRs keep going to the default branch. With no staging branch, none of this changes.
 
+### Tested in staging, then the release
+
+Nothing goes from staging to production until the AI Manager has seen that **every Issue in staging was tested there**.
+
+- **Who marks.** Only the AI Manager, with `huddle tested <issue>` (their session runs it when they say the Issue was tested). It writes the comment
+  `✅ Tested in staging` on the Issue and puts the label `tested in staging`. Someone else may do it by hand, writing exactly that comment in the web page, **only** if their login is
+  in `testers` in `huddle.json`. A developer's comment never counts.
+- **What the mark means.** It is the comment that counts, not the label. A mark is valid only if it is **newer than the last time the Issue's PR/MR was merged into staging**: if
+  the Issue is reopened and fixed again, the old mark stops counting by itself, and the label is taken off.
+- **The release.** The AI Manager runs `/huddle-release`. It lists what is in staging and not yet in production, asks about every Issue without a valid mark, runs the project's
+  own clean check (a fresh copy of staging, a clean install, the tests; it asks if the project has not written down how), shows the list and waits for the AI Manager's OK. Then it
+  opens the PR/MR from staging into the default branch, and merges it with a **merge commit** only when the AI Manager says so in the same chat. `huddle release` shows the list
+  without changing anything.
+- **Two warnings.** If staging received commits that belong to no listed Issue (a hotfix, a back-merge), the AI Manager must confirm them. If the default branch is **ahead** of staging
+  (a hotfix went straight to production), a back-merge PR/MR from the default branch into staging comes first, and the release does not open until it is merged.
+- **An Issue that was not tested** can go out only if the AI Manager gives the reason (`--untested <n> --reason "<why>"`); the reason is written in the PR/MR.
+- **Protect the staging branch** on GitHub or GitLab (branch protection): Huddle does not stop a developer from merging into it. The label is cosmetic by design; the release trusts
+  only the comments of the AI Manager and the `testers`.
+
 ## Updating Huddle
 
 **Why nothing arrives by itself.** Claude Code only sees a new version of a plugin when the `version` in

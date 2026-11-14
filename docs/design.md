@@ -36,6 +36,8 @@ A team method for people who code with Claude Code. The idea behind it:
   `changes requested from AI Manager`. A job updates them from each Issue's «Depends on» section.
   `needs decision` and `changes requested from AI Manager` are stop labels (Issue #85): while one is on, `in progress` and `in review` are off, and the
   usual status comes back once the request is taken or the question is answered.
+- With a staging branch (§21) there is one more label, `tested in staging`. It is not a status label: it is not renamable, `closedCleanup` leaves it on closed Issues, the labels job
+  only removes it from an **open** Issue, and `huddle land` removes it when it lands a PR. It shows a comment (the evidence); the gate never reads the label.
 - After opening its PR, the session waits in the background for the AI Manager's review and continues on its own. When
   Claude Code is reopened, a hook says whether a request is pending.
 
@@ -627,7 +629,7 @@ branch before it reaches the default branch. Huddle learns that flow in four Iss
 | H46 (#109) | The key `staging_branch`: stored, validated, asked by `/huddle-setup` and `/huddle-update`. Nothing reads it for behaviour. | done |
 | H47 (#111) | The adapters understand staging: they read the Issue link from the PR/MR body, give the «merged into staging» evidence, `branchExists`, and the `doctor` check. | done |
 | H48 (#114) | The flow: branches start from staging, PRs target it, `huddle land` closes the Issue when its PR is merged there, the labels job warns about one that is still open, `huddle clean` judges by staging. | done |
-| H49 | The «tested in staging» marker and `/huddle-release`. | next |
+| H49 (#115) | The «tested in staging» marker, `huddle tested`, `huddle release`, the gate and `/huddle-release`. | done |
 
 **The key (H46).** `staging_branch` is an optional string in `huddle.json` and `huddle.schema.json`.
 
@@ -692,6 +694,44 @@ Unset, nothing below applies and every command, text and call stays as it was.
 
 **Not in H48:** the «tested in staging» marker, `/huddle-release`, the release PR from staging to the default branch and the back-merge of a hotfix (H49), and the
 real-platform checks above.
+
+**The marker and the release (H49, #115).** With `staging_branch` set, nothing reaches the default branch (production) until the AI Manager has seen that **every
+Issue in staging was tested there**. Unset, the commands say «no staging branch is set» and nothing else changes.
+
+- **The marker.** The evidence is a **comment**, `✅ Tested in staging`; the label `tested in staging` is only its visible projection. A comment counts only when its author is
+  `ai_manager` or a login in `testers` (a new optional list in `huddle.json` and its schema, empty by default); a developer's comment never counts. `huddle tested <issue>`
+  (AI Manager only) posts the comment and adds the label. It refuses with «no staging branch is set», a caller who is not the `ai_manager`, an Issue that is **open**
+  (it has not landed, §21 H48), and an Issue that no PR merged into staging closes. A `testers` login may write the same comment by hand in the web page.
+- **The label** is a separate constant (`TESTED_LABEL`, like `DESIGN_LABEL`), **not** one of the seven `LABELS`, so `closedCleanup` leaves it on the closed Issues it lives on. It is not
+  renamable. `ensureLabels` creates it only with staging set. The labels job removes it from any **open** Issue (reopened means not tested) and `huddle land` removes it from every
+  Issue it lands.
+- **Validity.** An Issue is tested iff a valid comment is **newer than the `mergedAt` of the latest merged staging PR that closes it**. A fix after the test (reopen, new PR, land)
+  invalidates it by itself, even if the label was left on: **the gate reads dates, never the label**. A fix under another Issue (a Bug) is its own Issue and needs its own marker;
+  Huddle does not try to attribute by files.
+- **What is in staging and not yet released** is computed, never stored: the merged PRs into staging (`mergedReviews(staging, { limit })`, which now carries `mergeSha`, GitHub
+  `mergeCommit.oid`, GitLab `merge_commit_sha`) whose merge commit is **not an ancestor** of `origin/<default_branch>` (`git merge-base --is-ancestor`, as `huddle clean`
+  does), and the Issues they close (`closesIn`). This needs the release PR to be a **merge commit**, never squash or rebase; Huddle already merges with `--merge`.
+- **`huddle release [--json]`** (read-only) lists the staged Issues as `{ issue, pr, tested, by, at }`, the untested ones, and **two warnings** when they apply:
+  (1) `stray-commits`: staging received commits that belong to no listed Issue after the newest test (the first-parent history of staging that the default branch lacks; a hotfix or
+  a back-merge), so the AI Manager must confirm them; (2) `default-ahead`: the default branch has commits that are not merges and that staging lacks (a hotfix went straight to
+  production), so a **back-merge** PR from the default branch into staging must be merged first. Merge commits are not counted for (2), because the release PR itself leaves one on
+  the default branch. Exit 0 when it ran, 1 on a platform error, 2 on a bad argument.
+- **`huddle release open`** (AI Manager only; new adapter operation `openReview({ base, head, title, body }) -> { number, url }` on both platforms) opens the PR/MR from staging into
+  the default branch. It **refuses** while any staged Issue is untested (naming them), while the default branch is ahead of staging, and when nothing is staged.
+  `--untested <n> --reason "<why>"` lets one named Issue through (repeat the pair for more); a reason is required, it is written in the PR body one line per Issue, and it may not hold
+  a closing keyword. The body lists the Issues as plain `#N` with **no closing keyword**, so nothing is closed twice. There is no «leave an Issue out» in this version: it needs a
+  revert in staging, conflicts when other Issues depend on it, and is a separate decision.
+- **`/huddle-release`** (AI Manager only; `huddle doctor` first). In order: `huddle release --json` (and the back-merge first when the default branch is ahead); for each untested
+  Issue, ask whether it was tested and run `huddle tested <n>` only on a yes; the project's **clean check** on staging (the one the project documents in its `CLAUDE.md`: a fresh
+  worktree of `origin/<staging>`, a clean install, its test command; when none is documented it asks and never invents one; a failing suite stops the release); show the list and
+  wait for the OK; `huddle release open`; merge with a merge commit only when the AI Manager says so in the same chat.
+- **Branch protection.** A staging branch should have branch protection on the platform: nothing technical in Huddle stops a developer from merging into it. The label is cosmetic by
+  design; the gate trusts only the comments by authorised authors.
+
+**Not in H49:** «leave an Issue out» of a release (a guided revert), a PR check as a second form of the marker, the release notes and the tag (the AI Manager makes them as in
+`/huddle-review`), and the real-platform checks of H47's open points (on a throwaway repo, before the release of the four). What the tests cannot confirm here either:
+that `gh` and `glab` accept `POST pulls` and `POST merge_requests` with these fields, that `mergeCommit` is filled for a PR merged with `--merge`, and that `merge_commit_sha` is
+filled on GitLab for a merged MR.
 
 **What the tests cannot confirm** (no real platform in them; the AI Manager checks it on a throwaway repo with a staging branch
 before the release): that GitHub creates a `CROSS_REFERENCED_EVENT` for a PR into a non-default base; that GitLab's

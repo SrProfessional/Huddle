@@ -2,6 +2,10 @@
 // Fakes only: the adapters get canned `gh`/`glab` answers and git is a stub, never a real platform.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { run } from '../../lib/cli/run.mjs';
 import { TESTED_LABEL, closedCleanup, testedCleanup } from '../../lib/core/issue-status.mjs';
 import { closesIn } from '../../lib/core/closes.mjs';
@@ -276,4 +280,32 @@ test('the usage line lists tested and release', async () => {
   assert.equal(await run([], h.ctx), 2);
   assert.match(h.errText(), /tested <issue>/);
   assert.match(h.errText(), /release \[--json\] \| release open/);
+});
+
+test('real git: a release merge commit on main is not «ahead», a hotfix commit is', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'huddle-release-'));
+  const g = (...a) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'commit.gpgsign=false', ...a], { cwd: dir, encoding: 'utf8' });
+  const ask = async () => {
+    const h = harness({ config: STAGING, setup: world });
+    // There is no remote in this repo: fetch does nothing, every other command is the real git.
+    Object.assign(h.ctx, { cwd: dir, git: (args) => (args[0] === 'fetch' ? '' : g(...args)) });
+    assert.equal(await run(['release', '--json'], h.ctx), 0);
+    return JSON.parse(h.out.join('')).warnings.map((w) => w.code);
+  };
+  try {
+    g('init', '-q', '-b', 'main');
+    g('commit', '-q', '--allow-empty', '-m', 'A');
+    g('branch', 'staging');
+    g('checkout', '-q', 'staging');
+    g('commit', '-q', '--allow-empty', '-m', 'B: a staged change');
+    g('checkout', '-q', 'main');
+    g('merge', '-q', '--no-ff', '-m', 'release', 'staging'); // the release PR: a merge commit that staging lacks
+    for (const b of ['main', 'staging']) g('update-ref', `refs/remotes/origin/${b}`, b);
+    assert.ok(!(await ask()).includes('default-ahead'), 'the release merge commit alone is not a hotfix');
+    g('commit', '-q', '--allow-empty', '-m', 'H: a hotfix straight to main');
+    g('update-ref', 'refs/remotes/origin/main', 'main');
+    assert.ok((await ask()).includes('default-ahead'), 'a commit on main that staging lacks is');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
