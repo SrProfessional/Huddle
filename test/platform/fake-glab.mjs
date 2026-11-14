@@ -22,6 +22,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const calls = [];
   const failures = []; // { match(args), message, times } : answers like gitlab.com when it rate limits or breaks (world.failWhen)
   const merged = [];
+  let nextMr = 700; // the iid of the next MR opened through the API (openReview)
+  const openedMrs = [];
   let nextNote = 9000;
   let nextIssue = 900;
   let nextLabel = 500;
@@ -209,6 +211,14 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       n.eyes = true;
       return JSON.stringify({ id: 1, name: 'eyes' });
     }
+    if (rest === 'merge_requests' && method === 'POST') {
+      const b = body();
+      need(['source_branch', 'target_branch', 'title', 'description'].every((k) => typeof b[k] === 'string'), args);
+      const iid = nextMr++;
+      reviews.set(iid, { iid, draft: false, state: 'opened', branch: b.source_branch, base: b.target_branch, body: b.description, commits: [], head: `head${iid}` });
+      openedMrs.push({ number: iid, base: b.target_branch, head: b.source_branch, title: b.title, body: b.description });
+      return JSON.stringify({ ...mrJson(reviews.get(iid)), title: b.title, web_url: `https://gitlab.test/${project}/-/merge_requests/${iid}` });
+    }
     if (rest === 'merge_requests' && method === 'GET' && q.get('state') === 'merged') {
       // The merged MRs into one target branch, most recently updated first; per_page caps a page (a call without --paginate is one page).
       need(q.get('target_branch') && q.get('order_by') === 'updated_at' && q.get('sort') === 'desc', args);
@@ -314,6 +324,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     commentBody: (id) => notes.get(id)?.body,
     isTaken: (id) => notes.get(id).eyes,
     merged: () => [...merged],
+    /** The MRs opened through `openReview`, in order. */
+    opened: () => openedMrs.map((p) => ({ ...p })),
     commandCount: () => calls.length,
     stateOf: (n) => (issues.get(n).state === 'opened' ? 'open' : 'closed'),
     milestoneState: (title) => ([...milestones.values()].find((x) => x.title === title)?.state === 'active' ? 'open' : 'closed'),

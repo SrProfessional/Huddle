@@ -523,9 +523,23 @@ export function contract({ name, create }) {
     world.review({ number: 45, base: 'staging', open: false, body: 'Closes #6' });
     const all = await adapter.mergedReviews('staging');
     assert.deepEqual(all.map((r) => r.number), [41, 42, 40], 'merged into staging only, newest first');
-    assert.deepEqual(all[0], { number: 41, base: 'staging', body: 'Closes #2', mergedAt: '2026-11-03T00:00:00Z' });
+    assert.deepEqual(all[0], { number: 41, base: 'staging', body: 'Closes #2', mergedAt: '2026-11-03T00:00:00Z', mergeSha: 'merge41' }, 'with the sha of its merge commit');
     assert.deepEqual((await adapter.mergedReviews('staging', { limit: 2 })).map((r) => r.number), [41, 42]);
     assert.deepEqual((await adapter.mergedReviews('main')).map((r) => r.number), [43]);
     assert.deepEqual(await adapter.mergedReviews('other'), []);
+  });
+
+  t('openReview({ base, head, title, body }) opens a PR/MR and gives its number and url; it is open, not merged, and carries the body (H49)', async ({ adapter, world }) => {
+    const made = await adapter.openReview({ base: 'main', head: 'staging', title: 'Release', body: 'Issues: #5, #6' });
+    assert.equal(typeof made.number, 'number');
+    assert.match(made.url, /^https:\/\//);
+    assert.deepEqual(world.opened(), [{ number: made.number, base: 'main', head: 'staging', title: 'Release', body: 'Issues: #5, #6' }]);
+    assert.deepEqual(await adapter.reviewInfo(made.number), { number: made.number, merged: false, base: 'main', body: 'Issues: #5, #6' });
+  });
+
+  t('openReview throws what the platform answers when it refuses (no new commits, no access)', async ({ adapter, world }) => {
+    world.failWhen(() => true, 'HTTP 422 Unprocessable: No commits between main and staging');
+    await assert.rejects(() => adapter.openReview({ base: 'main', head: 'staging', title: 't', body: 'b' }), /422|No commits/);
+    assert.deepEqual(world.opened(), []);
   });
 }

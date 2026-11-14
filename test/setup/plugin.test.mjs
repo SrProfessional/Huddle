@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const abs = (rel) => fileURLToPath(new URL(`../../${rel}`, import.meta.url));
 const read = (rel) => readFileSync(abs(rel), 'utf8');
-const SKILLS = ['huddle-setup', 'huddle-play', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update', 'huddle-watch'];
+const SKILLS = ['huddle-setup', 'huddle-play', 'huddle-issue', 'huddle-review', 'huddle-decide', 'huddle-team', 'huddle-areas', 'huddle-bug', 'huddle-update', 'huddle-watch', 'huddle-release'];
 
 const frontmatter = (text) => {
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);

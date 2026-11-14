@@ -14,13 +14,15 @@ One person per repo. They lead the work with the help of their own Claude Code s
 | Answers every «❓ Decision for the AI Manager». | `/huddle-decide` |
 | Reviews each PR (MR on GitLab), asks for changes or merges. | `/huddle-review` |
 | Lets the session check every few minutes what waits and review it (the AI Manager's order to merge; decisions and bug triage stay with the person). | `/huddle-watch`, `huddle queue` |
+| With a staging branch: marks an Issue as tested in staging, and releases staging to the default branch. Only the AI Manager (or a login in `testers`, by writing the comment `✅ Tested in staging`) marks; only the AI Manager releases: [A staging branch](team-guide.md#a-staging-branch). | `/huddle-release`, `huddle tested`, `huddle release` |
 | Adds or removes a developer: [Add or remove someone](team-guide.md#add-or-remove-someone). | `/huddle-team` |
 | Defines the project's areas (milestones), puts Issues in them and keeps the estimates up to date: [Define the areas](team-guide.md#define-the-areas-with-huddle-areas). | `/huddle-areas` |
 | Keeps the estimates of the progress: the `Huddle remaining: N` line of each milestone description, the Issues still to write in that area. | `/huddle-issue` asks for the milestone; the estimate is edited by hand |
 
 Only the AI Manager:
 
-- merges into the default branch;
+- merges into the default branch (and so releases staging to it);
+- marks an Issue as tested in staging (a `testers` login may too, by hand; a developer never does);
 - touches production, deployments, settings and secrets;
 - creates the GitLab `HUDDLE_TOKEN` variable, which holds a secret (see [the GitLab notes](gitlab.md)).
 

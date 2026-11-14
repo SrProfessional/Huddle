@@ -7,6 +7,15 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The «tested in staging» marker and `/huddle-release` (Issue #115, the last of four, `docs/design.md` §21). With `staging_branch` set, nothing goes to the default branch until
+  every Issue in staging was tested there. `huddle tested <issue>` (AI Manager only) posts the comment `✅ Tested in staging` and adds the label `tested in staging`; a login in the new
+  optional `testers` list may write the same comment by hand. The evidence is the comment, valid only when newer than the Issue's last staging merge (a fix after the test invalidates it);
+  the label is cosmetic, is not one of the status labels, is created only with staging set, is removed from open Issues by the labels job and by `huddle land`. `huddle release [--json]`
+  lists what staging holds and has not released (merge commits not in the default branch), which Issues are tested, and two warnings (commits that belong to no listed Issue; the default
+  branch ahead of staging). `huddle release open [--untested <n> --reason "<why>"]` (AI Manager only) opens the PR/MR from staging into the default branch and refuses an untested Issue or a
+  default branch ahead of staging; its body names Issues as plain `#N`. New adapter operation `openReview`, and `mergedReviews` now carries `mergeSha`. New skill `/huddle-release`.
+  With `staging_branch` unset nothing changes.
+
 - `huddle labels --issue <n> [--dry-run]` (Issue #113, the first of two; the skills and the labels job template that use it are H51,
   `docs/design.md` §22). The labels of one Issue instead of the whole repo: for an open `n`, `n` alone; for a closed `n`, the open
   Issues that wait for it plus the cleanup of `n`. It assigns only when the caller is the AI Manager, never reads the comments of an
