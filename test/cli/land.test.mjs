@@ -23,6 +23,7 @@ const closeCalls = (h) => h.calls().filter((c) => (c.args.includes('PATCH') && /
 
 for (const gitlab of [false, true]) {
   const kind = gitlab ? 'gitlab' : 'github';
+  const ref = gitlab ? 'MR !' : 'PR #';
   const config = gitlab ? STAGING_GL : STAGING;
   const make = (over = {}) => harness({ gitlab, config, setup: world, ...over });
 
@@ -62,7 +63,7 @@ for (const gitlab of [false, true]) {
   test(`[${kind}] land refuses a PR that is not merged`, async () => {
     const h = make();
     assert.equal(await run(['land', '31'], h.ctx), 1);
-    assert.match(h.errText(), /PR #31 is not merged/);
+    assert.ok(h.errText().includes(`${ref}31 is not merged`));
     assert.equal(h.world.stateOf(5), 'open');
     assert.equal(closeCalls(h).length, 0);
   });
@@ -96,16 +97,16 @@ for (const gitlab of [false, true]) {
   test(`[${kind}] land with an unknown PR number is one clear line, exit 1`, async () => {
     const h = make();
     assert.equal(await run(['land', '999'], h.ctx), 1);
-    assert.match(h.errText(), /PR #999 not found/);
+    assert.ok(h.errText().includes(`${ref}999 not found`));
   });
 
   test(`[${kind}] land --check changes nothing and says what it would close`, async () => {
     const h = make();
     assert.equal(await run(['land', '30', '--check'], h.ctx), 0);
-    assert.match(h.text(), /ok: PR #30 \(base staging\) closes #5, #6, #8/);
+    assert.ok(h.text().includes(`ok: ${ref}30 (base staging) closes #5, #6, #8`));
     const open = make();
     assert.equal(await run(['land', '31', '--check'], open.ctx), 0, 'a PR that is still open is fine for --check');
-    assert.match(open.text(), /ok: PR #31 \(base staging\) closes #5/);
+    assert.ok(open.text().includes(`ok: ${ref}31 (base staging) closes #5`));
     for (const x of [h, open]) {
       assert.equal(closeCalls(x).length, 0);
       assert.equal(x.world.stateOf(5), 'open');
@@ -116,16 +117,16 @@ for (const gitlab of [false, true]) {
   test(`[${kind}] land --check reports each problem and exits 1`, async () => {
     const other = make();
     assert.equal(await run(['land', '32', '--check'], other.ctx), 1);
-    assert.match(other.errText(), /PR #32 does not target staging \(it targets main\)/);
+    assert.ok(other.errText().includes(`${ref}32 does not target staging (it targets main)`));
     const none = make();
     assert.equal(await run(['land', '33', '--check'], none.ctx), 1);
-    assert.match(none.errText(), /PR #33 has no closing keyword/);
+    assert.ok(none.errText().includes(`${ref}33 has no closing keyword`));
     const notIssue = make();
     assert.equal(await run(['land', '34', '--check'], notIssue.ctx), 1);
     assert.match(notIssue.errText(), /#999 is not an Issue/);
     const gone = make();
     assert.equal(await run(['land', '999', '--check'], gone.ctx), 1);
-    assert.match(gone.errText(), /PR #999 not found/);
+    assert.ok(gone.errText().includes(`${ref}999 not found`));
     for (const x of [other, none, notIssue, gone]) assert.equal(closeCalls(x).length, 0);
   });
 

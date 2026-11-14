@@ -266,6 +266,7 @@ the labels and reports one line about the error.
 close of each; on GitLab the REST equivalents are used (the closing date of a milestone is its `updated_at`, which GitLab
 does not expose otherwise; GitHub decides by `closedAt`). GitLab costs one `closed_by` call per closed Issue, at most 8 at a
 time. The hook ends the process right after it prints, so a call still running cannot hold it past its timeout. Open Issues now also carry their `milestone`, so «no area» costs no extra call.
+With a staging branch the milestone query reads 10 milestones per page (50 without one) with 100 Issues each and 100 references per Issue: GitHub refuses a query whose worst case (the `first:` values multiplied down a path) is over 500,000 nodes, and 50 x 100 x 100 plus the rest was 510,050; 10 x 100 x 100 is about 100,000, and the paging reaches the other milestones.
 
 ## 13. The session does every step it can
 
