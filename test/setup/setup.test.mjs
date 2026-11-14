@@ -22,7 +22,7 @@ function inTemp(fn) {
 }
 
 test('GitHub: writes a valid huddle.json and the GitHub templates, and no GitLab file', () => inTemp((root) => {
-  const r = setup(root, GH);
+  const r = setup(root, { ...GH, labels_job: 'hourly' });
   const config = loadConfig(root);
   assert.equal(config.platform, 'github');
   assert.equal(config.project, 'acme/app');
@@ -31,7 +31,7 @@ test('GitHub: writes a valid huddle.json and the GitHub templates, and no GitLab
   assert.equal(read(root, '.github/ISSUE_TEMPLATE/task.md'), tpl('github/ISSUE_TEMPLATE/task.md'));
   assert.equal(read(root, '.github/ISSUE_TEMPLATE/design.md'), tpl('github/ISSUE_TEMPLATE/design.md'));
   assert.equal(read(root, '.github/pull_request_template.md'), tpl('github/pull_request_template.md'));
-  assert.equal(read(root, '.github/workflows/huddle-labels.yml'), renderLabelsJob('github', tpl('github/workflows/huddle-labels.yml'), 'hourly')); // hourly is the default (docs/design.md §23)
+  assert.equal(read(root, '.github/workflows/huddle-labels.yml'), renderLabelsJob('github', tpl('github/workflows/huddle-labels.yml'), 'hourly')); // asked for hourly: sessions is the default and writes no file (docs/design.md §23)
   assert.equal(existsSync(path.join(root, '.gitlab')), false);
   assert.equal(existsSync(path.join(root, 'huddle-labels.gitlab-ci.yml')), false);
   assert.ok(r.written.includes('huddle.json'));
@@ -39,7 +39,7 @@ test('GitHub: writes a valid huddle.json and the GitHub templates, and no GitLab
 }));
 
 test('GitLab: writes the GitLab templates, the CI job and an .gitlab-ci.yml that includes it, and no GitHub file', () => inTemp((root) => {
-  const r = setup(root, GL);
+  const r = setup(root, { ...GL, labels_job: 'hourly' });
   const config = loadConfig(root);
   assert.equal(config.host, 'gitlab.example.com');
   assert.equal(config.max_open_per_person, 3);
@@ -55,7 +55,7 @@ test('GitLab: writes the GitLab templates, the CI job and an .gitlab-ci.yml that
 
 test('GitLab: an existing .gitlab-ci.yml is never edited; the include is left as a note', () => inTemp((root) => {
   writeFileSync(path.join(root, '.gitlab-ci.yml'), 'stages: [test]\n');
-  const r = setup(root, GL);
+  const r = setup(root, { ...GL, labels_job: 'hourly' });
   assert.equal(read(root, '.gitlab-ci.yml'), 'stages: [test]\n');
   assert.ok(r.notes.some((n) => /include/.test(n) && /\.gitlab-ci\.yml/.test(n)));
 }));

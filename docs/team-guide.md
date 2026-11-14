@@ -107,6 +107,14 @@ Manager:» (what is blocked, the options with trade-offs, its recommendation), a
 Issue #N stopped: waiting for a decision». The AI Manager answers with `/huddle-decide`, on the Issue and on the PR/MR,
 and the session continues on the same branch. The session never closes the Issue.
 
+## Issues change only through a session
+
+Every change to an Issue goes through a Huddle session: creating it (`/huddle-issue`, `/huddle-bug`), editing it, closing it, reopening it, and merging its PR/MR. Nobody merges, closes, reopens or edits an Issue by hand on the website or from a phone. The session runs `huddle labels` after the change, so the board stays right with no cloud job.
+
+Still fine by hand on the website: reading and commenting; the bug report form, for people with no session (it comes in as `needs triage` and waits for the AI Manager's `/huddle-bug`); and a tester's «✅ Tested in staging» comment (the release gate reads it).
+
+This is a rule, not a lock: if someone breaks it, it is not a problem. The next session that opens repairs the board (docs/design.md §22), so a label changed on the website is corrected with no cloud run.
+
 ## Not negotiable
 
 - **Never push to the default branch.** Only the AI Manager merges.
@@ -395,6 +403,6 @@ asks **only that question**, once, and never again; with no new question it asks
 change without writing anything. (`/huddle-setup` is for a first install: in a repo that already has a valid `huddle.json` it asks
 nothing and only refreshes; a half-written `huddle.json` is asked only for what is missing.) It replaces only what is between
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->` in `CLAUDE.md`, so your own rules stay. Edited templates are kept.
-**How much of the cloud labels job runs** is the `labels_job` setting in `huddle.json`: `sessions` (no cloud job: the sessions keep the labels right), `hourly` (the default: a safety net once an hour, for what nobody's session handled, so a label can be up to an hour old when nobody has a session open) or `events` (on every Issue, PR and comment: it uses many CI minutes). To change it, ask the AI Manager to run `/huddle-setup` again with the new answer (or edit `huddle.json` and run `/huddle-update`): the labels file is rewritten for the new mode unless you edited it.
+**How much of the cloud labels job runs** is the `labels_job` setting in `huddle.json`: `sessions` (the default and the recommended one: no cloud job and no CI minutes, the sessions keep the labels right), `hourly` (a safety net once an hour, for a team where changes may happen outside a session: a label can be up to an hour old when nobody has a session open) or `events` (on every Issue, PR and comment: it uses many CI minutes). To change it, ask the AI Manager to run `/huddle-setup` again with the new answer (or edit `huddle.json` and run `/huddle-update`): the labels file is rewritten for the new mode unless you edited it.
 If your repo runs the labels job under its own file name, setup keeps that file, adds no second labels job, and tells you
 when its `HUDDLE_REF` pins an older Huddle: move it to the new tag (or its full commit SHA) in a PR.

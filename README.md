@@ -128,8 +128,8 @@ CI job token cannot edit Issues.
    `huddle-labels.gitlab-ci.yml`, and inserts the Huddle block in `CLAUDE.md`. Add
    `include: local: huddle-labels.gitlab-ci.yml` to your `.gitlab-ci.yml`.
 4. Run `huddle doctor`, then `huddle labels` if a label is missing.
-5. **Create the schedule:** CI/CD > Schedules, cron `17 * * * *` (the default `labels_job` mode, `hourly`; `*/10 * * * *` for `events`), on the
-   default branch. The schedule is what updates the labels from the cloud, so on GitLab a label can take up to 10 minutes (with `events`; up to an hour with the default) to change,
+5. **Create the schedule:** CI/CD > Schedules, cron `17 * * * *` (only when `labels_job` is `hourly`; `*/10 * * * *` for `events`; the default, `sessions`, needs no schedule), on the
+   default branch. The schedule is what updates the labels from the cloud, so on GitLab a label can take up to 10 minutes (with `events`; up to an hour with `hourly`) to change,
    also after a push, when no session has fixed it first. The sessions keep the labels right themselves; the interval is a project setting, not in the file.
 6. **Create the token:** a project access token with the `api` scope, stored as the masked, protected CI variable
    `HUDDLE_TOKEN`.

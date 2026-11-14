@@ -130,7 +130,7 @@ for (const gitlab of [false, true]) {
     for (const argv of [['labels', '--issue'], ['labels', '--issue', 'abc'], ['labels', '--issue', '0'], ['labels', '--issue', '-3'], ['labels', '--issue', '5', '6']]) {
       const { h } = make();
       assert.equal(await run(argv, h.ctx), 2, argv.join(' '));
-      assert.match(h.errText(), /^Usage: huddle labels \[--dry-run\] \| labels --issue <n> \[--dry-run\]/);
+      assert.match(h.errText(), /^Usage: huddle labels \[--dry-run\] \[--no-assign\] \| labels --issue <n> \[--dry-run\]/);
     }
   });
 

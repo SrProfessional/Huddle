@@ -42,8 +42,8 @@ const withoutRules = (text) => text.replace(rules(text), '');
 
 const cfg = (extra) => loadConfig('/x', () => JSON.stringify({ platform: 'github', project: 'a/b', ai_manager: 'boss', ...extra }));
 
-test('config: labels_job absent loads as hourly, the three values load, anything else is refused naming the field', () => {
-  assert.equal(cfg({}).labels_job, 'hourly');
+test('config: labels_job absent loads as sessions, the three values load, anything else is refused naming the field', () => {
+  assert.equal(cfg({}).labels_job, 'sessions');
   for (const v of ['sessions', 'hourly', 'events']) assert.equal(cfg({ labels_job: v }).labels_job, v);
   for (const v of ['always', '', 3, true]) assert.throws(() => cfg({ labels_job: v }), /"labels_job"/);
 });
@@ -56,8 +56,8 @@ test('GitHub events: the on: block is today\'s template, and the whole file equa
   assert.match(onBlock(read(dir, GH_FILE)), /issues:[\s\S]*issue_comment:[\s\S]*pull_request:[\s\S]*cron: '\*\/30 \* \* \* \*'/);
 }));
 
-test('GitHub hourly (and the default): only schedule 17 * * * * and workflow_dispatch', () => {
-  for (const answers of [{ ...GH, labels_job: 'hourly' }, GH]) {
+test('GitHub hourly: only schedule 17 * * * * and workflow_dispatch', () => {
+  for (const answers of [{ ...GH, labels_job: 'hourly' }]) {
     inTemp((dir) => {
       setup(dir, answers);
       const on = onBlock(read(dir, GH_FILE));
@@ -88,8 +88,8 @@ test('GitLab events: the rules are today\'s (schedule and merge_request_event), 
   assert.deepEqual(rules(read(dir, GL_FILE)).split('\n').filter(Boolean).map((l) => l.trim()), ['- if: $CI_PIPELINE_SOURCE == "schedule"', '- if: $CI_PIPELINE_SOURCE == "merge_request_event"']);
 }));
 
-test('GitLab hourly (and the default): only the schedule rule and a web rule', () => {
-  for (const answers of [{ ...GL, labels_job: 'hourly' }, GL]) {
+test('GitLab hourly: only the schedule rule and a web rule', () => {
+  for (const answers of [{ ...GL, labels_job: 'hourly' }]) {
     inTemp((dir) => {
       setup(dir, answers);
       const text = read(dir, GL_FILE);
@@ -176,7 +176,7 @@ test('the question is in the registry, since 0.8.0, needed only while the key is
   const q = QUESTIONS.find((x) => x.id === 'labels-job');
   assert.ok(q);
   assert.equal(q.key, 'labels_job');
-  assert.equal(q.default, 'hourly');
+  assert.equal(q.default, 'sessions');
   assert.equal(q.since, '0.8.0');
   assert.equal(q.needed({}), true);
   assert.equal(q.needed({ labels_job: 'sessions' }), false);
@@ -232,7 +232,7 @@ async function doctorLines(extra) {
 
 test('doctor: one `labels job` line per mode, and with sessions it says nothing runs in the cloud', async () => {
   const none = await doctorLines({});
-  assert.match(none, /labels job: hourly/);
+  assert.match(none, /labels job: sessions/);
   for (const mode of ['events', 'hourly']) assert.match(await doctorLines({ labels_job: mode }), new RegExp(`labels job: ${mode}`));
   const sessions = await doctorLines({ labels_job: 'sessions' });
   assert.match(sessions, /labels job: sessions.*nothing runs in the cloud.*sessions keep the labels/);

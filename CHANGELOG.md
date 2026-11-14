@@ -7,12 +7,19 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Issues change only through a session, and the board repairs itself when a session opens (Issue #125, H54; `docs/design.md` §22 and §23). The rule: every change to an Issue
+  (create, edit, close, reopen, merge) goes through a Huddle session, which then runs `huddle labels`; still fine by hand: reading and commenting, the bug report form, and a tester's
+  «✅ Tested in staging» comment. It is a rule, not a lock. New: `huddle labels --no-assign` (recomputes every label, never assigns); the session-start hook starts it in the background
+  (at most once every 10 minutes per repo and machine, `--no-assign` unless the login is the AI Manager) and the next hook output or `huddle notice` says «Huddle corrected N label(s)»
+  once; `"labels_on_start": false` turns it off. `/huddle-issue` and `/huddle-bug` run the full `huddle labels` right after creating the Issue; `/huddle-review` and `/huddle-release`
+  describe how the AI Manager reopens an Issue. **The default of `labels_job` is now `sessions`** (see the next entry).
+
 - `labels_job` in `huddle.json`: the cloud labels job is a safety net and each project chooses how much of it runs (Issue #121, H52, the second of two; `docs/design.md` §23).
-  `sessions` (no cloud job), `hourly` (**the new default** when the key is absent: once an hour and on a manual run) or `events` (every event, as before).
+  `sessions` (**the default** when the key is absent: no cloud job, no CI minutes), `hourly` (once an hour and on a manual run, a safety net) or `events` (every event, as before).
   One template per platform, rendered for the mode by `/huddle-setup` and `huddle update` (GitHub: the `on:` block; GitLab: the `rules`; `sessions` writes no file). On GitLab the
   interval is a project setting (cron `17 * * * *` for `hourly`, `*/10 * * * *` for `events`), told in the file's comment, the report and the skills. New question `labels-job`
   (`since: 0.8.0`), flag `--labels-job`, and a `labels job: <mode>` line in `huddle doctor`. An unedited labels file of any mode is refreshed to the mode asked; an edited one is kept and reported.
-  **Behaviour change:** a repo with no `labels_job` key now gets `hourly` the next time its labels file is refreshed, instead of the every-event job it had.
+  **Behaviour change:** a repo with no `labels_job` key now gets `sessions` the next time its labels file is refreshed, instead of the every-event job it had; the report names the file that can be deleted in a PR.
 
 - The sessions keep the labels right themselves (Issue #120, H51, the first of two; `docs/design.md` §22 and §19). `huddle-play`, `huddle-review` and `huddle-decide` run
   `huddle labels --issue <n>` at each step an Issue changes state, and `huddle-watch` runs the full `huddle labels` before `huddle queue --json` in each tick and in the

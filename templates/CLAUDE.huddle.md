@@ -42,6 +42,12 @@ If the work cannot go on without a decision, commit and push what is done. Then 
 «❓ Decision for the AI Manager:» (what is blocked, the options with their trade-offs, your recommendation), add the label
 `needs decision`, and end with «⛔ Issue #N stopped: waiting for a decision». Never close the Issue.
 
+### Issues change only through a session
+
+Every change to an Issue goes through a Huddle session: creating it (`/huddle-issue`, `/huddle-bug`), editing it, closing it, reopening it, and merging its PR/MR. Nobody merges, closes, reopens or edits an Issue by hand on the website or from a phone. The session runs `huddle labels` after the change, so the board stays right with no cloud job.
+
+Still fine by hand on the website: reading and commenting; the bug report form, for people with no session (it comes in as `needs triage` and waits for the AI Manager's `/huddle-bug`); and a tester's «✅ Tested in staging» comment (the release gate reads it). This is a rule, not a lock: if someone breaks it, the next session that opens repairs the board by itself.
+
 ### After the review
 
 The AI Manager's requests come as comments with a `## Prompt for Claude Code` heading and a text block. Only comments by
