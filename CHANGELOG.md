@@ -5,6 +5,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- `/huddle-setup` and `/huddle-update` no longer ask how the cloud labels job runs (Issue #130, H56; `docs/design.md` §23). Every repo gets
+  `sessions` with no question (no cloud job, no CI minutes), and setup and update do not write the key: the session-start repair (§22) is the
+  safety net, local and free. `hourly` and `events` keep working when written by hand in `huddle.json`, and a value already there is kept; no
+  skill or guide offers them. The note for a leftover labels job file now says to set `"labels_job": "hourly"` in `huddle.json` instead of
+  answering a question. The GitLab quickstart no longer lists a schedule or a token as default steps.
+
 ## [0.8.0] - 2026-11-14
 
 ### Added
