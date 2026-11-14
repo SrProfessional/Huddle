@@ -55,6 +55,7 @@ const prCreateCalls = (h) => h.calls().filter((c) => c.args.some((a) => /(^|\/)p
 
 for (const gitlab of [false, true]) {
   const kind = gitlab ? 'gitlab' : 'github';
+  const ref = gitlab ? 'MR !' : 'PR #';
   const config = gitlab ? STAGING_GL : STAGING;
   const make = (over = {}) => {
     const h = harness({ gitlab, config, setup: world, ...over });
@@ -151,13 +152,13 @@ for (const gitlab of [false, true]) {
     const h = make();
     h.world.comment(6, { id: 602, author: 'tess', body: MARK, createdAt: '2026-11-04T00:00:00Z' }); // a tester, newer than the merge
     assert.equal(await run(['release'], h.ctx), 0);
-    assert.match(h.text(), /#5 .*PR #30.*tested by SrProfessional/);
-    assert.match(h.text(), /#6 .*PR #31.*tested by tess/);
+    assert.match(h.text(), new RegExp(`\#5 .*${ref}30.*tested by SrProfessional`));
+    assert.match(h.text(), new RegExp(`#6 .*${ref}31.*tested by tess`));
     assert.match(h.text(), /every staged Issue was tested/i);
     const dev = make();
     dev.world.comment(6, { id: 603, author: 'ana', body: MARK, createdAt: '2026-11-04T00:00:00Z' });
     assert.equal(await run(['release'], dev.ctx), 0);
-    assert.match(dev.text(), /#6 .*PR #31.*NOT tested/);
+    assert.match(dev.text(), new RegExp(`#6 .*${ref}31.*NOT tested`));
     assert.match(dev.text(), /1 untested: #6/);
   });
 
@@ -219,7 +220,7 @@ for (const gitlab of [false, true]) {
     assert.doesNotMatch(opened[0].body, /#4\b/, 'the released Issue is not listed');
     assert.deepEqual(closesIn(opened[0].body, 'acme/app'), [], 'nothing is closed twice: no closing keyword');
     assert.match(opened[0].body, /merge commit/i);
-    assert.match(h.text(), /opened PR #\d+: https:\/\//);
+    assert.match(h.text(), new RegExp(`opened ${ref}\\d+: https://`));
   });
 
   test(`[${kind}] release open --untested lets one named Issue through, writes the reason in the body, and refuses without a reason`, async () => {

@@ -38,6 +38,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   `huddle labels` warns about an open Issue that a merged staging PR closes, and never closes it. `huddle clean` judges by `origin/<staging_branch>`.
   `/huddle-play`, `/huddle-issue`, `/huddle-review`, the CLAUDE.md block and the Issue/PR/MR templates say it. With it unset nothing changes.
 
+### Fixed
+
+- `huddle labels` updates the «Huddle progress» Issue again with a `staging_branch` set (Issue #119). The milestone query, with the references to each Issue that H47 added, asked for up to 510,050 nodes against
+  GitHub's limit of 500,000, so the progress Issue never updated. With a staging branch it now reads 10 milestones per page (about 100,000 nodes in the worst case); the paging reaches the rest. Without one nothing changes.
+  On GitLab, `huddle land`, `huddle tested` and `huddle release` now say «MR !N» where they said «PR #N» (GitHub keeps «PR #N»).
+
 ### Changed
 
 - `/huddle-watch` checks what waits as soon as it is turned on (Issue #107). After creating the job it runs `huddle queue --json` once in
