@@ -50,6 +50,10 @@ Issue's allowed files. If something does not fit, it stops and asks.
 
 **Load:** one or two active Issues per person. `max_open_per_person` in `huddle.json` makes the labels job respect that.
 
+## Issues change only through a session
+
+Every change to an Issue goes through a Huddle session: creating it (`/huddle-issue`, `/huddle-bug`), editing it, closing it, reopening it, and merging its PR/MR. Nobody merges, closes, reopens or edits an Issue by hand on the website or from a phone. The session runs `huddle labels` after the change, so the board stays right with no cloud job. See [the team guide](team-guide.md) for the three things that stay fine by hand.
+
 ## The AI is not a role
 
 The AI writes, tests and asks. It does not decide. A session that does not belong to the AI Manager gives its review as

@@ -28,6 +28,14 @@ Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle
 5. **Merge.** Merge the release PR/MR with a merge commit (never squash or rebase) only when the AI Manager says so in the same chat.
    Report the link and what went out. The release notes and the tag are made as in `/huddle-review`.
 
+## Reopening an Issue
+
+Only the AI Manager's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
+Run `gh issue reopen <n>` (or `glab issue reopen <n>`) with a comment that says why. Then run
+`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` and, once, the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, so the «tested in
+staging» label goes and the Issues that depend on it are blocked again. Both are best effort, as above. The fix is a new PR/MR on the same Issue,
+landed as usual.
+
 ## Who does each step
 
 Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,

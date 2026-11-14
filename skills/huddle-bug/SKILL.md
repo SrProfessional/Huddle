@@ -36,7 +36,9 @@ login; if not, stop and say so.
 5. **Show the draft and wait for the AI Manager's OK.** Then create it with `gh issue create --label bug` (or
    `glab issue create --label bug`) using the repo from `huddle.json`. For `#N`, rewrite that report's body into the full Bug
    Issue instead: keep the reporter's original text under «Original report», and remove `needs triage`. Do not add status
-   labels or an assignee: the labels job does that. Answer with the Issue link.
+   labels or an assignee by hand. Right after creating the Issue, or after rewriting the report and taking `needs triage` off, run the **full**
+   `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` once: it puts `ready` or `blocked` on the Issue and assigns it (a run scoped with `--issue` never
+   assigns an open Issue). It is best effort: on a failure, say one line with the reason and go on. Answer with the Issue link.
 6. A missing capture or detail is a question you write as a comment to the reporter; do not stop for it.
 
 ## Who does each step

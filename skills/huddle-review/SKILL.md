@@ -68,6 +68,14 @@ Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`)
 with the reason and go on; it never stops or blocks the review or the merge and never asks the person anything. The cloud job, or the next
 session, catches up.
 
+## Reopening an Issue
+
+Only the AI Manager's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
+Run `gh issue reopen <n>` (or `glab issue reopen <n>`) with a comment that says why. Then run
+`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` and, once, the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, so the «tested in
+staging» label goes and the Issues that depend on it are blocked again. Both are best effort, as above. The fix is a new PR/MR on the same Issue,
+landed as usual.
+
 ## Who does each step
 
 Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,

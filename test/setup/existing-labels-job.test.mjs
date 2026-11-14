@@ -64,7 +64,7 @@ test('GitHub: a SHA without a tag cannot be dated, so the note asks to check it'
 }));
 
 test('GitHub: a workflow that does not run huddle labels does not count', () => inTemp({ '.github/workflows/tests.yml': 'jobs:\n  t:\n    steps:\n      - run: npm test\n' }, (root) => {
-  const r = setup(root, GH);
+  const r = setup(root, { ...GH, labels_job: 'hourly' });
   assert.ok(existsSync(path.join(root, '.github/workflows/huddle-labels.yml')));
   assert.ok(!has(r, /already runs huddle labels/));
 }));

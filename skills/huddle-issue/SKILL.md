@@ -36,9 +36,13 @@ not, stop and say so.
      changes are asked for in the chat and never by hand on the canvas, and that «ready» makes the session save the design and open the PR.
 3. Show the draft, with its milestone, and wait for the AI Manager's OK. Create it with `gh issue create --milestone "<title>"`
    (or `glab issue create --milestone "<title>"`) using the repo from `huddle.json`; a Design Issue also gets `--label design`
-   (the `design` label exists once `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` has run). Do not add status labels or an
-   assignee: the labels job does that. The issue number is known only after creating it, so edit the Issue once to write it in the allowed files path.
-4. Answer with the Issue link.
+   (the `design` label exists once `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` has run). Do not add them by hand (the status
+   labels and the assignee): the command in step 4 does. The issue number is known only after creating it, so edit the Issue once to write it in the allowed files path.
+4. Right after creating the Issue (and after that edit), run the **full** `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` once: it puts `ready` or
+   `blocked` on the new Issue and assigns it (a run scoped with `--issue` never assigns an open Issue). It is best effort: on a failure, say one
+   line with the reason and go on; it never stops the task. Every change to an Issue goes through a Huddle session (docs/design.md §22), so this is
+   what keeps the board right with no cloud job.
+5. Answer with the Issue link.
 
 ## Who does each step
 

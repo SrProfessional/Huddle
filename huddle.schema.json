@@ -16,10 +16,11 @@
     "max_open_per_person": { "type": "integer", "minimum": 1, "description": "Nobody gets more open Issues than this." },
     "default_branch": { "type": "string", "minLength": 1 },
     "staging_branch": { "type": "string", "description": "Optional. The branch where changes are tested before they go to the default branch. Empty or absent means none. Must differ from default_branch and be a plain branch name (docs/design.md §21). Stored only for now." },
-    "labels_job": { "enum": ["sessions", "hourly", "events"], "description": "Optional. How the cloud labels job runs (docs/design.md §23). sessions: no cloud job, the sessions keep the labels right. hourly (default when absent): once an hour and on a manual run, a safety net. events: on every Issue, PR and comment event, as before." },
+    "labels_job": { "enum": ["sessions", "hourly", "events"], "description": "Optional. How the cloud labels job runs (docs/design.md §23). sessions (default when absent): no cloud job, no CI minutes, the sessions keep the labels right. hourly: once an hour and on a manual run, a safety net for a team where changes may happen outside a session. events: on every Issue, PR and comment event; it uses a lot of CI minutes." },
     "testers": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Optional. Logins, besides the AI Manager, whose «✅ Tested in staging» comment counts as the marker that an Issue was tested in staging (docs/design.md §21). Empty by default." },
     "progress_issue": { "type": "boolean", "description": "false turns off the «Huddle progress» Issue that `huddle labels` keeps up to date. Default: true." },
     "clean_worktrees": { "type": "boolean", "description": "false stops the session start from removing finished worktrees (clean, merged into the default branch, untouched for 24 hours). `huddle clean` still works by hand. Default: true." },
+    "labels_on_start": { "type": "boolean", "description": "false stops the session start from running a background pass of `huddle labels --no-assign` that corrects the labels (at most once every 10 minutes). It runs whatever labels_job says: it is local and free. Default: true." },
     "setup_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "The Huddle release this repo was last set up or updated for (major.minor.patch). Written by setup and update, never by hand." },
     "labels": {
       "type": "object",
