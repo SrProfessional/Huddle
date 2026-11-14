@@ -27,8 +27,10 @@ Decision: <the chosen option and why, in one or two lines>.
 ````
 
    Use `gh issue comment` / `gh pr comment` (or `glab issue note` / `glab mr note`).
-4. Do not change labels or close anything: the labels job takes `needs decision` off once the answer is there, and the
-   developer's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
+4. Right after posting the answer, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` (`n` the Issue): it takes `needs decision` off now that the
+   answer is there. Do not close anything and do not edit labels by hand. The command is best effort: if it fails (no permission to edit labels, the
+   platform is unreachable), say one line with the reason and go on; it never stops or blocks the task and never asks anything, since the cloud job,
+   or the next session, catches up. The developer's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
 5. If the decision changes the Issue's scope, edit the Issue text too, so it stays true.
 
 ## Who does each step

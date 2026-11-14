@@ -43,8 +43,8 @@ First run /huddle-play <n>: it marks this request as taken (👀), so the Issue 
 ```
 ````
 
-Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Do not edit labels: the labels job puts
-`changes requested from AI Manager` on from the comment, and the take step in the prompt takes it off.
+Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Right after posting, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
+(`n` the Issue): it puts `changes requested from AI Manager` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
 
 ## All good
 
@@ -52,7 +52,7 @@ Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`)
 1. Approve with a comment (self-approval may be disabled). Your approval in this session is the AI Manager's approval, so
    merge it yourself with the platform's merge commit and keep the branch (`gh pr merge --merge`; on GitLab merge without
    removing the source branch). Do not hand the merge command to the person: never hand over a step you can do.
-2. Confirm the Issue closed (a merged PR/MR; `CLOSED` with `COMPLETED` on GitHub). With a staging branch it is `huddle land` that closes it: right after the merge run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr>`, then the labels pass as today.
+2. Confirm the Issue closed (a merged PR/MR; `CLOSED` with `COMPLETED` on GitHub). With a staging branch it is `huddle land` that closes it: right after the merge run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr>`, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` once. Without a staging branch run it right after the merge. The Issue is closed by then, so for it the command recomputes the Issues that wait for it and **assigns** the ones that come out ready: only the AI Manager assigns, and you are the AI Manager here.
 3. **A release PR** (versions and `CHANGELOG.md` at a new version): after the merge, check that every cell of the smoke test is ✔
    in the PR text. Then, on an up-to-date default branch, tag and publish it yourself: `git tag -a vX.Y.Z -m "Huddle vX.Y.Z"`,
    `git push origin vX.Y.Z`, and `gh release create vX.Y.Z --notes-file <the version's section of CHANGELOG.md>` (GitLab:
@@ -61,6 +61,12 @@ Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`)
    permission the platform denied. If a merge or a push is refused (branch protection, a missing permission), stop and
    ask; never look for another way.
 5. Tell the developer's next step in one line.
+
+## Keeping the labels right
+
+`labels --issue <n>` (docs/design.md §22) is best effort: if it fails (no permission to edit labels, the platform is unreachable), say one line
+with the reason and go on; it never stops or blocks the review or the merge and never asks the person anything. The cloud job, or the next
+session, catches up.
 
 ## Who does each step
 
