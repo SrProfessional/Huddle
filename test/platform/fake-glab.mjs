@@ -41,7 +41,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const noteJson = (n) => ({ id: n.id, body: n.body, created_at: n.created_at, author: user(n.author), system: n.system, noteable_iid: n.issue, noteable_type: n.mr ? 'MergeRequest' : 'Issue' });
   const mrJson = (r) => ({
     iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}`, source_branch: r.branch ?? '',
-    target_branch: r.base ?? 'main', description: r.body ?? '', merge_commit_sha: r.state === 'merged' ? `merge${r.iid}` : null,
+    target_branch: r.base ?? 'main', description: r.body ?? '', merge_commit_sha: r.state === 'merged' ? `merge${r.iid}` : null, merged_at: r.state === 'merged' ? (r.mergedAt ?? '2026-11-10T00:00:00Z') : null,
   });
   const issueJson = (i) => ({
     iid: i.iid, title: i.title, description: i.description, state: i.state,
@@ -209,6 +209,12 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       n.eyes = true;
       return JSON.stringify({ id: 1, name: 'eyes' });
     }
+    if (rest === 'merge_requests' && method === 'GET' && q.get('state') === 'merged') {
+      // The merged MRs into one target branch, most recently updated first; per_page caps a page (a call without --paginate is one page).
+      need(q.get('target_branch') && q.get('order_by') === 'updated_at' && q.get('sort') === 'desc', args);
+      const found = [...reviews.values()].filter((r) => r.state === 'merged' && r.base === q.get('target_branch')).sort((x, y) => y.iid - x.iid).map(mrJson);
+      return paginate ? pages(found, true) : JSON.stringify(found.slice(0, Math.min(Number(q.get('per_page') ?? 20), 100)));
+    }
     if (rest === 'merge_requests' && method === 'GET') {
       need(q.get('state') === 'opened', args);
       const branch = q.get('source_branch');
@@ -225,7 +231,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     }
     if ((m = /^merge_requests\/(\d+)$/.exec(rest))) {
       const r = reviews.get(Number(m[1]));
-      need(method === 'GET' && r, args);
+      need(method === 'GET', args);
+      if (!r) throw new Error(`glab ${args.join(' ')} failed: 404 Not Found`);
       return JSON.stringify({ ...mrJson(r), sha: r.head, diff_refs: { base_sha: 'base', start_sha: 'start', head_sha: r.head } });
     }
     if ((m = /^merge_requests\/(\d+)\/merge$/.exec(rest))) {
@@ -269,8 +276,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       addSystemNote(number, `changed title to «${title}»`);
     },
     // base: the branch the MR targets; body: its description; merged: it was merged (so it is not open).
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false }) {
-      reviews.set(number, { iid: number, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head });
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt }) {
+      reviews.set(number, { iid: number, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head, mergedAt });
     },
     /** A branch that exists on the remote (`main` always does). */
     branch(name) { branches.add(name); },

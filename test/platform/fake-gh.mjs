@@ -142,21 +142,31 @@ export function fakeGithub({ project = PROJECT } = {}) {
         ...(fields.includes('body') ? { baseRefName: r.base, body: r.body } : {}),
       })));
     }
-    if (a === 'pr' && b === 'list' && args.includes('--base')) {
+    if (a === 'pr' && b === 'list' && args.includes('--base') && values(args, '--state')[0] !== 'merged') {
       // The open PRs into one base, with their bodies, in one call: the adapter parses the links itself.
       need(values(args, '--state')[0] === 'open' && values(args, '--limit')[0] === '1000' && values(args, '--json')[0] === 'number,isDraft,body,headRefName', args);
       const base = values(args, '--base')[0];
       return JSON.stringify([...reviews.values()].filter((r) => r.open && r.base === base).map((r) => ({ number: r.number, isDraft: r.draft, body: r.body, headRefName: r.branch })));
     }
-    if (a === 'pr' && b === 'list') {
+    if (a === 'pr' && b === 'list' && values(args, '--state')[0] !== 'merged') {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
       return JSON.stringify([...reviews.values()].filter((r) => r.open).map((r) => ({ number: r.number, isDraft: r.draft })));
     }
     if (a === 'pr' && b === 'view') {
-      need(values(args, '--json')[0] === 'headRefOid', args);
+      const fields = values(args, '--json')[0];
+      need(fields === 'headRefOid' || fields === 'number,state,baseRefName,body,mergedAt', args);
       const r = reviews.get(Number(args[2]));
-      need(r, args);
-      return JSON.stringify({ headRefOid: r.head });
+      if (fields === 'headRefOid') { need(r, args); return JSON.stringify({ headRefOid: r.head }); }
+      if (!r) throw new Error(`gh ${args.join(' ')} failed: GraphQL: Could not resolve to a PullRequest with the number of ${args[2]}. (repository.pullRequest)`);
+      return JSON.stringify({ number: r.number, state: r.open ? 'OPEN' : r.merged ? 'MERGED' : 'CLOSED', baseRefName: r.base, body: r.body, mergedAt: r.merged ? r.mergedAt : null });
+    }
+    if (a === 'pr' && b === 'list' && values(args, '--state')[0] === 'merged') {
+      // The merged PRs into one base, in the order GitHub lists them (by creation, newest first): the adapter sorts by mergedAt itself.
+      need(values(args, '--json')[0] === 'number,baseRefName,body,mergedAt' && values(args, '--base').length === 1, args);
+      const base = values(args, '--base')[0];
+      const limit = Number(values(args, '--limit')[0]);
+      return JSON.stringify([...reviews.values()].filter((r) => r.merged && r.base === base).sort((x, y) => y.number - x.number).slice(0, limit)
+        .map((r) => ({ number: r.number, baseRefName: r.base, body: r.body, mergedAt: r.mergedAt })));
     }
     if (a === 'pr' && b === 'merge') {
       need(args.includes('--merge') && !args.includes('--delete-branch'), args);
@@ -310,8 +320,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
       issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing], milestone });
     },
     // base: the branch the PR targets; body: its text; merged: it was merged (so it is not open).
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false }) {
-      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, commits: [...commits], head });
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt = '2026-11-10T00:00:00Z' }) {
+      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, commits: [...commits], head, mergedAt });
     },
     /** A branch that exists on the remote (`main` always does). */
     branch(name) { branches.add(name); },

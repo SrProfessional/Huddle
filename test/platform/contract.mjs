@@ -497,4 +497,35 @@ export function contract({ name, create }) {
     await assert.rejects(() => adapter.branchExists('staging'), /offline/);
     assert.equal(await adapter.branchExists('staging'), true, 'the failure was one call: the next one is answered');
   });
+
+  t('reviewInfo(n) tells merged, open, the base and the body of a PR/MR; an unknown number is the notFound flag', async ({ adapter, world }) => {
+    world.review({ number: 30, base: 'staging', body: 'Closes #5', merged: true });
+    world.review({ number: 31, base: 'main', body: 'Closes #6' });
+    world.review({ number: 32, base: 'staging', open: false, body: 'x' });
+    assert.deepEqual(await adapter.reviewInfo(30), { number: 30, merged: true, base: 'staging', body: 'Closes #5' });
+    assert.deepEqual(await adapter.reviewInfo(31), { number: 31, merged: false, base: 'main', body: 'Closes #6' });
+    assert.deepEqual(await adapter.reviewInfo(32), { number: 32, merged: false, base: 'staging', body: 'x' }, 'closed without a merge is not merged');
+    await assert.rejects(() => adapter.reviewInfo(999), (e) => e.notFound === true);
+  });
+
+  t('reviewInfo(n) throws a failure that is not «not found» as it is', async ({ adapter, world }) => {
+    world.review({ number: 30, base: 'staging', merged: true });
+    world.failWhen(() => true, 'HTTP 403 Forbidden: no access');
+    await assert.rejects(() => adapter.reviewInfo(30), (e) => /403/.test(e.message) && !e.notFound);
+  });
+
+  t('mergedReviews(base, { limit }) lists the merged PRs/MRs into that base, newest first, at most limit', async ({ adapter, world }) => {
+    world.review({ number: 40, base: 'staging', body: 'Closes #1', merged: true, mergedAt: '2026-11-01T00:00:00Z' });
+    world.review({ number: 41, base: 'staging', body: 'Closes #2', merged: true, mergedAt: '2026-11-03T00:00:00Z' });
+    world.review({ number: 42, base: 'staging', body: 'Closes #3', merged: true, mergedAt: '2026-11-02T00:00:00Z' });
+    world.review({ number: 43, base: 'main', body: 'Closes #4', merged: true, mergedAt: '2026-11-04T00:00:00Z' });
+    world.review({ number: 44, base: 'staging', body: 'Closes #5' });
+    world.review({ number: 45, base: 'staging', open: false, body: 'Closes #6' });
+    const all = await adapter.mergedReviews('staging');
+    assert.deepEqual(all.map((r) => r.number), [41, 42, 40], 'merged into staging only, newest first');
+    assert.deepEqual(all[0], { number: 41, base: 'staging', body: 'Closes #2', mergedAt: '2026-11-03T00:00:00Z' });
+    assert.deepEqual((await adapter.mergedReviews('staging', { limit: 2 })).map((r) => r.number), [41, 42]);
+    assert.deepEqual((await adapter.mergedReviews('main')).map((r) => r.number), [43]);
+    assert.deepEqual(await adapter.mergedReviews('other'), []);
+  });
 }

@@ -1,6 +1,6 @@
 Closes #N
 
-<!-- Replace N with the Issue number. GitLab closes the Issue on merge only when the MR targets the default branch. -->
+<!-- Replace N with the Issue number. GitLab closes the Issue on merge only when the MR targets the default branch. With a staging branch in `huddle.json`, open the MR against the staging branch: Huddle closes the Issue when it is merged there. -->
 
 ## What changed
 

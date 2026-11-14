@@ -10,7 +10,7 @@
 
 ## Branch
 
-<!-- Name of the branch, created from an up-to-date default branch. Never work on or push to the default branch. -->
+<!-- Name of the branch, created from an up-to-date default branch (or the staging branch when `huddle.json` has one). Never work on or push to the default branch. -->
 
 ## Prompt for Claude Code
 

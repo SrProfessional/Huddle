@@ -22,6 +22,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   and today's rule holds **or** a merged PR/MR into staging closes it. New adapter operation `branchExists(name)`, and `huddle doctor`
   checks that the staging branch exists on the remote (only when it is set). With it unset, every call and result is unchanged.
 
+- The staging flow and `huddle land` (Issue #114, the third of four, `docs/design.md` §21). With `staging_branch` set, an Issue's branch starts from
+  staging, its PR/MR targets it, and the Issue is done when that PR/MR is merged there. New `huddle land <pr> [--check]` (AI Manager only) closes
+  the Issues the merged PR names, since the platforms only close an Issue on a merge into the default branch; it is idempotent, never reopens and
+  never touches an Issue the PR does not name. New adapter operations `reviewInfo(n)` and `mergedReviews(base, { limit })` on both platforms.
+  `huddle labels` warns about an open Issue that a merged staging PR closes, and never closes it. `huddle clean` judges by `origin/<staging_branch>`.
+  `/huddle-play`, `/huddle-issue`, `/huddle-review`, the CLAUDE.md block and the Issue/PR/MR templates say it. With it unset nothing changes.
+
 ### Changed
 
 - `/huddle-watch` checks what waits as soon as it is turned on (Issue #107). After creating the job it runs `huddle queue --json` once in

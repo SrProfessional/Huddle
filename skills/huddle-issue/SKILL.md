@@ -14,7 +14,7 @@ not, stop and say so.
 2. Fill the repo's Issue template (`.github/ISSUE_TEMPLATE/task.md` or `.gitlab/issue_templates/Task.md`):
    - **Goal:** one or two sentences.
    - **Depends on:** one `- #N` per line, or `- None`. The labels job reads this section.
-   - **Branch:** a short name, created from an up-to-date default branch.
+   - **Branch:** a short name, created from an up-to-date <staging> (the default branch when there is no staging): read `staging_branch` in `huddle.json`, and write its name in place of «<staging>». With one set, the PR/MR targets it and Huddle closes the Issue when it is merged there.
    - **Prompt for Claude Code:** a text block the developer pastes as is. It must say: read the Issue and the named
      documents; check «Depends on» first; create the branch in its own worktree; TDD; the allowed files only; the tests to
      report with their counts; the closing message; «What was NOT done».
