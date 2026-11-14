@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-14
+
 ### Changed
 
 - The README, the guides, the PDFs and the website match 0.8.0 (Issue #132, H57). They no longer describe a cloud labels job, a GitLab

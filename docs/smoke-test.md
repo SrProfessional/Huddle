@@ -464,6 +464,15 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.8.1
+
+Run of: 2026-11-14, Huddle `staging` with Issues #130 and #132 merged (commit cc54e7f), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.0 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Setup and update no longer ask `labels_job` (#130) | ✔ | ✔ | Run with the staging code on throwaway local repos (setup and update read and write only files). A fresh setup wrote no labels job file on GitHub, and no job file and no `.gitlab-ci.yml` on GitLab, and no `labels_job` key. A 0.7.0 repo with the old every-event file was asked only `staging-branch`; the note named the file to delete and pointed to `huddle.json`; `--answer labels_job=hourly` was refused as not a pending question. The setup and update skills name no labels job question. A hand-written `hourly`/`events`: covered by tests. |
+| The README, the guides, the PDFs and the website (#132) | ✔ | ✔ | The three site pages rendered from staging at 1280 px and 375 px: no sideways scroll; the «Staging» section, the setup steps, the rule and the GitLab answer read right. Both PDFs rebuilt and read by eye. The live site changes when this release is merged into `main`. |
+
 ### Results 0.8.0
 
 Run of: 2026-11-14, Huddle `main` with Issues #107 to #125 merged (commit 3030bfe), by the AI Manager's Claude Code session, on two throwaway projects with a `staging` branch: one on GitHub and one on GitLab (gitlab.com). Only the new parts were checked; the 0.7.0 and older tables below still hold for the rest.
