@@ -19,11 +19,12 @@ for (const f of WAIT) {
 }
 
 for (const f of WATCH) {
-  test(`${f}: /huddle-watch is turned on by hand in each session, and each check uses tokens`, () => {
+  // Issue #157: the watch waits in the background like a developer's session, so it no longer spends a Claude turn per check.
+  test(`${f}: /huddle-watch is turned on by hand in each session, and uses no Claude tokens while nothing waits`, () => {
     const t = read(f);
     assert.match(t, /turned on by hand in each session/);
-    assert.match(t, /each check is a short Claude turn/i);
-    assert.match(t, /\/huddle-watch 15m/);
+    assert.match(t, /no Claude tokens while nothing waits/i);
+    assert.doesNotMatch(t, /each check is a short Claude turn|expires after 7 days/i);
   });
 }
 

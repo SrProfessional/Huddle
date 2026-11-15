@@ -1,6 +1,6 @@
 ---
 name: huddle-watch
-description: Use when the AI Manager wants its session to check by itself, every few minutes, what waits for it and review the PRs/MRs. Run it as `/huddle-watch`, `/huddle-watch 10m`, `/huddle-watch status` or `/huddle-watch off`.
+description: Use when the AI Manager wants its session to check by itself what waits for it and review the PRs/MRs, waiting in the background with no Claude tokens while nothing waits. Run it as `/huddle-watch`, `/huddle-watch 10m`, `/huddle-watch status` or `/huddle-watch off`.
 ---
 
 # huddle-watch
@@ -8,43 +8,49 @@ description: Use when the AI Manager wants its session to check by itself, every
 For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`,
 stop with one clear line («/huddle-watch is for the AI Manager») and change nothing. The rules are in docs/design.md §19.
 
+The watch waits in the background with a small Node process (`queue --wait`), as a developer's session waits for its review: it uses
+**no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself.
+
 ## On (`/huddle-watch` or `/huddle-watch <interval>`)
 
-An interval is like `5m`: default 5 minutes, allowed 2 to 60.
+An interval is like `5m`: default 5 minutes, allowed 2 to 60 (the wait takes it in seconds: `5m` is `300`).
 
-1. Run `CronList`. If a job whose prompt starts with `[huddle-watch]` is there, the watch is already on: do **not** start a second one;
-   say it is on, its interval and when it runs next, and stop.
-2. Otherwise `CronCreate` a recurring job on a minute that is not :00 or :30 (for 5 minutes, `2-59/5 * * * *`) whose prompt starts with
-   `[huddle-watch]` and says: first run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json`; if nothing waits, say nothing and stop;
-   otherwise handle the items one at a time, oldest first, as «Each item» below.
-3. Your first message says plainly: **turning the watch on is the AI Manager's order to review and merge, as if they asked for each
-   review.** It stops with `/huddle-watch off`, or by closing Claude Code, because the job lives only in the session. A recurring job
-   expires after 7 days: run `/huddle-watch` again then. Add that the first check runs now and the next ones at the interval.
-4. **Check now:** in the same turn, first run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` once, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` once and handle what it lists exactly as a
-   tick does («Each item» below). The same list is shared with the ticks (the stopped PR/MR + `head` pairs), so a PR stopped now is not
-   tried again at the next tick. Unlike a tick, the first check is not silent when nothing waits: say one line,
-   «Nothing is waiting for the AI Manager.», so the person sees that it ran.
+1. If this session already runs the watch's background wait, the watch is already on: do **not** start a second one; say it is on and its
+   interval, and stop.
+2. Your first message says plainly: **turning the watch on is the AI Manager's order to review and merge, as if they asked for each
+   review.** It uses no Claude tokens while nothing waits. It stops with `/huddle-watch off`, or by closing Claude Code, because the wait
+   lives only in the session; it needs the session open and the computer on.
+3. **Check now:** first run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` once, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` once and handle what it
+   lists («Each item» below). When nothing waits, say one line, «Nothing is waiting for the AI Manager.», so the person sees that it ran.
+4. **Then wait:** start `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait <seconds> --seen <keys>` in the background (run it as a background command
+   and keep its ID). `<keys>` are the items already told or stopped, separated by commas: `<pr>@<head>` for a review that stopped, `#<issue>`
+   for a decision or a triage already said. With no keys, leave `--seen` out.
+5. **When the wait ends:** it prints `{ "waiting": [...] }` with only the new items: handle them («Each item»), then start the wait again
+   (step 4) with the keys updated. It prints `{ "stopped": true }` after `/huddle-watch off`: say the watch is off and start nothing.
+   A wait that fails (the login, the network) ends with one line; say it once and start it again.
 
-## The labels pass (before the queue, in each tick and in the first check)
+## The labels pass
 
-The full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` is local and free, unlike the cloud job, so the board is right every few minutes even for
-what nobody's session handled (a merge from a phone). It is best effort: if it fails, say one line with the reason, at most once per tick, and
-the queue is read anyway; it never stops or blocks the watch and never asks anything. Docs/design.md §19 and §22.
+Each round of the wait runs the full labels pass by itself (local and free, unlike the cloud job), so the board is right every few minutes
+even for what nobody's session handled (a merge from a phone). The check now runs `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` before the queue. It is best
+effort: if it fails, say one line with the reason, and the queue is read anyway; it never stops or blocks the watch and never asks
+anything. Docs/design.md §19 and §22.
 
 ## Each item
 
 - **`review`:** run `/huddle-review` on that PR/MR (the item's `pr`) with its usual rules. All good: approve and merge, as it does today.
   Changes needed: the usual «🔁 Changes requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a test
   fails, a requirement is missing, the platform refuses the merge, a permission is missing), say it once, with the reason, and do **not**
-  try that same PR/MR with that same `head` again. A new commit changes `head` and makes it a new item (a `head` of `null` means it could not be read: use the PR/MR number alone). Keep the list of
-  stopped PR/MR + `head` pairs for the session.
+  try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes `head` and makes it a new item (a
+  `head` of `null` means it could not be read: use the PR/MR number alone). Handle the items one at a time, oldest first.
 - **`decision` and `triage`:** never answered by the watch: those are the person's decisions. Say one line per new item («#47 waits for your
-  decision», «#53 waits for your triage») once per Issue, and leave it.
+  decision», «#53 waits for your triage») once per Issue, add `#<issue>` to the keys, and leave it.
 
 ## Off (`/huddle-watch off`) and status (`/huddle-watch status`)
 
-- **Off:** `CronList`, `CronDelete` the `[huddle-watch]` job, and say it is off. Nothing running: say so.
-- **Status:** say whether it is on, the interval and the next run, as `CronList` gives it.
+- **Off:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait-off` (the wait stops at its next round, even if this session lost its ID), stop
+  the background command too when its ID is known, and say it is off. Nothing running: say so.
+- **Status:** say whether this session runs the watch's background wait, and its interval.
 
 ## Who does each step
 

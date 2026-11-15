@@ -582,27 +582,30 @@ gets the same «not configured» error as the other commands.
 **The skill `/huddle-watch [interval|off|status]`.** For the AI Manager only: it runs `huddle doctor` first and stops with a clear line
 if the login is not `ai_manager`.
 
-1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). `CronList` first: a job whose prompt starts with
-   `[huddle-watch]` means it is already on, so no second one starts and the skill says when it runs next. Otherwise `CronCreate` a
-   recurring job on a minute that is not :00 or :30 (for example `2-59/5 * * * *`) whose prompt starts with `[huddle-watch]`: first
-   run the full `huddle labels` (Issue #120, §22: it is local and free, unlike the cloud job, so the board is right every few minutes even
-   for what nobody's session handled; a failure is reported once per tick at most, in one line, and the queue is read anyway), then run
-   `huddle queue --json`; nothing waits, say nothing; otherwise handle the items one at a time, oldest first. **Check now (Issue #107):**
-   right after `CronCreate`, in the same turn, the session runs the full `huddle labels` and then `huddle queue --json` once and handles what it lists as a tick does
-   (step 3 and 4). The same list is shared with the ticks (the stopped PR/MR + `head` pairs), so a PR that stopped now is not tried again at
-   the next tick. Unlike a tick, the first check is not silent when nothing waits: it says «Nothing is waiting for the AI Manager.», so the
-   person sees that it ran. A job fires only while the session is idle, so the first check and a tick never overlap, and `huddle queue`
-   reads the Issues and PRs fresh each time, so a tick that comes due during a long review finds the reviewed item already gone. The
-   cron job alone fires at the next matching minute plus a fixed delay of up to half the interval, which is why the first check is not left to it.
+1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). If this session already runs the watch's
+   background wait, it is already on and no second one starts. **Check now (Issue #107):** the session runs the full `huddle labels` and
+   then `huddle queue --json` once and handles what it lists (step 3 and 4); when nothing waits it says «Nothing is waiting for the AI
+   Manager.», so the person sees that it ran. **Then it waits in the background (Issue #157).** Until 0.8.5 the watch was a recurring job
+   (`CronCreate`): each tick woke the session for a Claude turn that re-read its context only to run `labels` and `queue`, and most ticks
+   found nothing; the job also expired after 7 days. Now the session starts `huddle queue --wait <seconds> --seen <keys>` as a background
+   command, the way a developer's session runs `huddle wait`. That Node loop runs the full labels pass (quietly; Issue #120, §22: local and
+   free, so the board is right every few minutes even for what nobody's session handled; a failure does not stop it) and reads the queue
+   each round, and ends only when an item not in `--seen` waits, printing `{ "waiting": [...] }` with the new items. The session handles
+   them and starts the wait again. Keys: `<pr>@<head>` for a review that stopped (a new commit makes it new again) and `#<issue>` for a
+   decision or a triage already said. Interval: default 300 seconds, 120 to 3600. It refuses a login that is not `ai_manager`. The API
+   use per hour is the same as the old job at the same interval; the Claude tokens while nothing waits go to zero.
 2. The first message says that **turning the watch on is the AI Manager's order to review and merge, as if they asked for each review**,
-   what stops it (`/huddle-watch off`, or closing Claude Code, because the job lives only in the session), that a recurring job
-   expires after 7 days, and that the first check runs now and the next ones at the interval.
+   that it uses no Claude tokens while nothing waits, and what stops it (`/huddle-watch off`, or closing Claude Code, because the wait
+   lives only in the session; it needs the session open and the computer on). Nothing turns it on by itself.
 3. **`review`:** `/huddle-review` on that PR with its usual rules: all good, approve and merge; changes needed, the «🔁 Changes
    requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a failing test, a missing requirement, a
    merge the platform refuses, a missing permission) the watch says it once, with the reason, and does not try that PR with that `head`
    again; a new commit changes `head` and makes it a new item.
 4. **`decision` and `triage` are never answered by the watch:** they are the person's decisions. One line per new item, once per Issue.
-5. **Off:** `CronList`, `CronDelete` the `[huddle-watch]` job. Nothing running: it says so. **Status:** on or off, the interval and the next run.
+5. **Off:** `huddle queue --wait-off` leaves a stop mark for this repo (next to the update cache, never in the repo); the waiting loop finds
+   it at its next round, clears it, prints `{ "stopped": true }` and ends, so off works even when the session lost the background command's
+   ID (it also stops the command when it knows the ID). A new `--wait` clears an old mark. Nothing running: it says so. **Status:** whether
+   this session runs the wait, and its interval.
 6. «Who does each step», and every command in the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` form.
 
 **The start line (Issue #138).** With the watch off nothing told the AI Manager what waits. When the login is the `ai_manager`, the
@@ -615,11 +618,13 @@ informs, because turning the watch on is the order to merge and that stays the A
 login, no login or a failed read: the hook adds nothing. The login is read once for this line and the update notice.
 
 **What waiting costs.** A developer's waiting session (`huddle wait`) is a Node process on their computer that asks the platform every
-two minutes with their own login: no Claude tokens and no CI minutes while it waits. Each `/huddle-watch` check is a short Claude turn
-even when nothing waits, so it uses some tokens; a longer interval spends less. The guides and the website say both.
+two minutes with their own login: no Claude tokens and no CI minutes while it waits. Since Issue #157 `/huddle-watch` waits the same way
+(`huddle queue --wait`): no Claude tokens while nothing waits; the session's model works only on what waits. The guides and the website
+say both.
 
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
-computer off, starting the watch when a session opens. A job fires only while the session is open and idle.
+computer off, starting the watch when a session opens, a cheaper model for the reviews (the review and the merge are the steps that need
+the most judgment).
 
 ## 20. The version notice inside the skills: `huddle notice`
 

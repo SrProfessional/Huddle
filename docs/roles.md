@@ -13,7 +13,7 @@ One person per repo. They lead the work with the help of their own Claude Code s
 | Writes the Issues, each with «Depends on» and a «Prompt for Claude Code». | `/huddle-issue` |
 | Answers every «❓ Decision for the AI Manager». | `/huddle-decide` |
 | Reviews each PR (MR on GitLab), asks for changes or merges. | `/huddle-review` |
-| Lets the session check every few minutes what waits and review it (the AI Manager's order to merge; decisions and bug triage stay with the person). | `/huddle-watch`, `huddle queue` |
+| Lets the session check every few minutes what waits and review it (the AI Manager's order to merge; decisions and bug triage stay with the person). It waits in the background, with no Claude tokens while nothing waits. | `/huddle-watch`, `huddle queue` |
 | With a staging branch: marks an Issue as tested in staging, and releases staging to the default branch. Only the AI Manager (or a login in `testers`, by writing the comment `✅ Tested in staging`) marks; only the AI Manager releases: [A staging branch](team-guide.md#a-staging-branch). | `/huddle-release`, `huddle tested`, `huddle release` |
 | Adds or removes a developer: [Add or remove someone](team-guide.md#add-or-remove-someone). | `/huddle-team` |
 | Defines the project's areas (milestones), puts Issues in them and keeps the estimates up to date: [Define the areas](team-guide.md#define-the-areas-with-huddle-areas). | `/huddle-areas` |
