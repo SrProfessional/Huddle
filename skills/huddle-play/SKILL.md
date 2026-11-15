@@ -34,7 +34,7 @@ With no number (`/huddle-play`): read and follow `${CLAUDE_PLUGIN_ROOT}/skills/h
 6. End with «✅ Issue #N finished» (or «⛔ Issue #N stopped»), the link, the counts, what was not done, the next step. The next step is
    one the session takes, or numbered «🙋 Only you» steps when only the person can do it (see «Who does each step»).
 7. Start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`. When it ends, a review request is
-   pending: the Player runs `/huddle-play <n>` again.
+   pending: the Player runs `/huddle-play <n>` again. If `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` says you are the Coach (a team of one), do not wait and do not stop: run `/huddle-review` on that PR/MR right away, in a fresh worktree (the tests run again), and on all good merge it, `huddle land` and the labels, as its standing order says. A Player who is not the Coach never merges.
 
 ## A Design Issue (the Issue has the `design` label, or the Design template's «Screens» and «Visual guide» sections)
 
