@@ -588,9 +588,11 @@ if the login is not `ai_manager`.
    Manager.», so the person sees that it ran. **Then it waits in the background (Issue #157).** Until 0.8.5 the watch was a recurring job
    (`CronCreate`): each tick woke the session for a Claude turn that re-read its context only to run `labels` and `queue`, and most ticks
    found nothing; the job also expired after 7 days. Now the session starts `huddle queue --wait <seconds> --seen <keys>` as a background
-   command, the way a developer's session runs `huddle wait`. That Node loop runs the full labels pass (quietly; Issue #120, §22: local and
-   free, so the board is right every few minutes even for what nobody's session handled; a failure does not stop it) and reads the queue
-   each round, and ends only when an item not in `--seen` waits, printing `{ "waiting": [...] }` with the new items. The session handles
+   command, the way a developer's session runs `huddle wait`. Each round, that Node loop reads the queue **first** and ends as soon as an
+   item not in `--seen` waits, printing `{ "waiting": [...] }` with the new items; only a round where nothing new waits runs the full labels
+   pass (quietly; Issue #120, §22: local and free, so the board is right every few minutes even for what nobody's session handled; a
+   failure does not stop it). Found in staging on a real project: the labels pass took 4m46s and the queue 15 s, so running the labels
+   first made every wake about five minutes late. The session handles
    them and starts the wait again. Keys: `<pr>@<head>` for a review that stopped (a new commit makes it new again) and `#<issue>` for a
    decision or a triage already said. Interval: default 300 seconds, 120 to 3600. It refuses a login that is not `ai_manager`. The API
    use per hour is the same as the old job at the same interval; the Claude tokens while nothing waits go to zero.

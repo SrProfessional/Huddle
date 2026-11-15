@@ -35,6 +35,15 @@ test('an unseen item ends the wait at once and prints only the new items', async
   assert.equal(h.rounds(), 0);
 });
 
+test('the queue comes first: with something new it wakes at once, without the slow labels pass (on a real project 15 s against 4m46s)', async () => {
+  const calls = [];
+  const h = harness({ setup: (w) => { review(w); decision(w); }, wrap: (a) => new Proxy(a, { get: (t, p) => (typeof t[p] === 'function' ? (...args) => { calls.push(String(p)); return t[p](...args); } : t[p]) }) });
+  h.ctx.updateCachePath = '/data/huddle-update.json';
+  assert.equal(await run(['queue', '--wait', '300'], h.ctx), 0);
+  assert.equal(JSON.parse(h.text()).waiting.length, 2);
+  assert.ok(!calls.includes('listClosedIssues') && !calls.includes('setLabels'), `no labels pass before waking: ${calls.join(', ')}`);
+});
+
 test('seen items do not wake it; a new commit on a seen PR does', async () => {
   const h = looping({ setup: (w) => { review(w); decision(w); }, rounds: 1, then: (hh) => { hh.world.review({ number: 51, head: 'ffff000' }); } });
   assert.equal(await run(['queue', '--wait', '300', '--seen', '51@a1b2c3d,#47'], h.ctx), 0);
