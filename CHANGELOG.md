@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-11-15
+
 ### Fixed
 
 - The update notice and `huddle doctor` name the scope Huddle is installed in (Issue #143, H60). They read Claude Code's
