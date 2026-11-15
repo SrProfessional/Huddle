@@ -302,7 +302,7 @@ test('H27: the home page has the eight scenes, in order, and every scene has its
     assert.match(p, /<h[12][\s>]/, `scene ${order[i]} has no heading`);
     assert.ok(strip(p.split(/<footer/)[0]).length >= 150, `scene ${order[i]} has too little text in the HTML`);
   });
-  for (const s of ['Five developers, five Claude Code sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The AI Manager', "The developer's session"]) {
+  for (const s of ['Five Players, five Claude Code sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The Coach', "The Player's session"]) {
     assert.ok(t.includes(s), `missing text «${s}»`);
   }
   // the label-flow scene has a text equivalent that names every stop and both side roads

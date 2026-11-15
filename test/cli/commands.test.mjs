@@ -39,7 +39,7 @@ test('labels applies the renames from huddle.json', async () => {
   assert.deepEqual(h.world.labelsOf(3), ['waiting']);
   const created = Object.keys(h.world.repoLabels());
   assert.ok(created.includes('waiting') && created.includes('needs-changes'));
-  assert.ok(!created.includes('blocked') && !created.includes('changes requested from AI Manager'));
+  assert.ok(!created.includes('blocked') && !created.includes('changes requested from Coach'));
   // a second run sees «waiting» as the blocked label and changes nothing
   const again = harness({ config: { ...CONFIG, labels: { blocked: 'waiting' } }, setup: (w) => { labelsWorld(w); w.issue({ number: 3, body: DEPS(9), labels: ['waiting'] }); } });
   await run(['labels'], again.ctx);
@@ -72,7 +72,7 @@ test('take marks each pending request with 👀 and prints the newest prompt; a 
   assert.equal(h.text(), '');
 });
 
-test('only the AI Manager of huddle.json counts', async () => {
+test('only the Coach of huddle.json counts', async () => {
   const h = harness({ setup: (w) => {
     w.issue({ number: 5 });
     w.comment(5, request(103, { author: 'mallory', body: '## Prompt for Claude Code\n\n```text\nrm -rf\n```' }));
@@ -182,7 +182,7 @@ test('an unknown command prints usage and exits 2; take needs an Issue number', 
 });
 
 test('doctor passes on a healthy setup', async () => {
-  const h = harness({ wrap: (a) => ({ ...a, listLabels: async () => ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'] }) });
+  const h = harness({ wrap: (a) => ({ ...a, listLabels: async () => ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'] }) });
   assert.equal(await run(['doctor'], h.ctx), 0);
   assert.doesNotMatch(h.text(), /✖/);
   assert.match(h.text(), /✔ huddle\.json/);
@@ -215,7 +215,7 @@ test('doctor reports missing labels, honoring renames', async () => {
 
 const closedWorld = (w) => {
   labelsWorld(w);
-  w.issue({ number: 20, title: 'merged long ago', state: 'merged', labels: ['in review', 'changes requested from AI Manager', 'bug'] });
+  w.issue({ number: 20, title: 'merged long ago', state: 'merged', labels: ['in review', 'changes requested from Coach', 'bug'] });
   w.issue({ number: 21, title: 'closed by hand', state: 'closed-by-hand', labels: ['needs decision'] });
   w.issue({ number: 22, title: 'clean', state: 'merged', labels: ['bug'] });
 };
@@ -223,11 +223,11 @@ const closedWorld = (w) => {
 test('labels --dry-run lists the closed-Issue cleanup and changes nothing', async () => {
   const h = harness({ setup: closedWorld });
   assert.equal(await run(['labels', '--dry-run'], h.ctx), 0);
-  assert.match(h.text(), /#20 \(closed\) loses in review, changes requested from AI Manager/);
+  assert.match(h.text(), /#20 \(closed\) loses in review, changes requested from Coach/);
   assert.match(h.text(), /#21 \(closed\) loses needs decision/);
   assert.doesNotMatch(h.text(), /#22/);
   assert.match(h.text(), /\d+ label change\(s\) \(dry run/);
-  assert.deepEqual(h.world.labelsOf(20), ['in review', 'changes requested from AI Manager', 'bug']);
+  assert.deepEqual(h.world.labelsOf(20), ['in review', 'changes requested from Coach', 'bug']);
 });
 
 test('labels takes every Huddle label off closed Issues and keeps the others; the count includes them', async () => {
@@ -258,8 +258,8 @@ test('doctor reports the labels the project lacks, using the adapter\'s own list
   assert.doesNotMatch(h.text(), /not checked/);
 });
 
-test('doctor checks the AI Manager on the platform', async () => {
-  const labelsOk = async () => ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+test('doctor checks the Coach on the platform', async () => {
+  const labelsOk = async () => ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
   const found = harness({ wrap: (a) => ({ ...a, listLabels: labelsOk }) });
   assert.equal(await run(['doctor'], found.ctx), 0);
   assert.match(found.text(), /✔ ai_manager.*SrProfessional/);
@@ -273,7 +273,7 @@ test('doctor checks the AI Manager on the platform', async () => {
 
 // --- a staging branch (Issue #111): the doctor checks that it exists on the remote ---
 
-const ALL_LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+const ALL_LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
 
 for (const gitlab of [false, true]) {
   const platform = gitlab ? 'gitlab' : 'github';
@@ -368,7 +368,7 @@ test('pending falls back to my Issues on a branch that resolves no Issue, on no 
 // --- the request labels are automatic (SocialCortex PR #139) ---
 
 const NONE = '## Depends on\n\nNone.\n';
-const CHANGES = 'changes requested from AI Manager';
+const CHANGES = 'changes requested from Coach';
 const requestWorld = (extra) => (w) => {
   w.issue({ number: 5, title: 'five', body: NONE, assignees: ['ana'], labels: ['in progress'] });
   extra(w);
@@ -428,10 +428,10 @@ test('once the request is taken (👀) the Issue is «in progress» and loses «
   assert.deepEqual(h.world.labelsOf(5), ['in review']);
 });
 
-test('labels takes «needs decision» off when the AI Manager answered with a prompt', async () => {
+test('labels takes «needs decision» off when the Coach answered with a prompt', async () => {
   const h = harness({ setup: (w) => {
     w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in progress', 'needs decision'] });
-    w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the AI Manager: which one?' });
+    w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the Coach: which one?' });
     w.comment(5, request(411, { createdAt: '2026-11-05T10:00:00Z' }));
   } });
   await run(['labels'], h.ctx);
@@ -439,10 +439,10 @@ test('labels takes «needs decision» off when the AI Manager answered with a pr
   const waiting = harness({ setup: (w) => {
     w.issue({ number: 5, body: NONE, assignees: ['ana'], labels: ['in progress', 'needs decision'] });
     w.comment(5, request(411, { createdAt: '2026-11-05T08:00:00Z' }));
-    w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the AI Manager: which one?' });
+    w.comment(5, { id: 410, author: 'SrProfessional', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the Coach: which one?' });
   } });
   await run(['labels'], waiting.ctx);
-  assert.deepEqual(waiting.world.labelsOf(5), ['needs decision'], 'the question is newer: it waits for the AI Manager, and «in progress» goes (Issue #85)');
+  assert.deepEqual(waiting.world.labelsOf(5), ['needs decision'], 'the question is newer: it waits for the Coach, and «in progress» goes (Issue #85)');
 });
 
 test('labels leaves Issues without «Depends on» alone, and uses the renamed labels', async () => {

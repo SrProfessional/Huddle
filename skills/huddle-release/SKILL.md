@@ -1,12 +1,12 @@
 ---
 name: huddle-release
-description: Use when the AI Manager wants to release the staging branch to production (the default branch): it checks that every Issue in staging was tested there, runs the project's clean check, opens the release PR/MR and merges it. Run it as `/huddle-release`.
+description: Use when the Coach wants to release the staging branch to production (the default branch): it checks that every Issue in staging was tested there, runs the project's clean check, opens the release PR/MR and merges it. Run it as `/huddle-release`.
 ---
 
 # huddle-release
 
-For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`,
-stop with one clear line («/huddle-release is for the AI Manager») and change nothing; you never merge when you are not that session.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`,
+stop with one clear line («/huddle-release is for the Coach») and change nothing; you never merge when you are not that session.
 A repo with no `staging_branch` has nothing to release this way: say so and stop. The rules are in docs/design.md §21.
 
 Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` followed by the words shown.
@@ -15,22 +15,22 @@ Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle
    marker, and the two warnings. Nothing in staging: say so and stop.
    - If the default branch is ahead of staging (a hotfix went straight to production), say that the back-merge comes first: a PR/MR from the
      default branch into staging, merged before this release. Offer to open that PR/MR, and stop until it is merged.
-   - If staging received commits that belong to no listed Issue after the newest test, show them and ask the AI Manager to confirm them.
+   - If staging received commits that belong to no listed Issue after the newest test, show them and ask the Coach to confirm them.
 2. **Each untested Issue.** Say it plainly («#N has no «tested in staging» mark») and ask: has it been tested in staging? Run
-   `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` only on a yes from the AI Manager. On a no, stop for that Issue. You may release it
-   anyway with `--untested <n> --reason "<why>"` in step 4, only if the AI Manager gives the reason: never make up a reason yourself.
+   `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` only on a yes from the Coach. On a no, stop for that Issue. You may release it
+   anyway with `--untested <n> --reason "<why>"` in step 4, only if the Coach gives the reason: never make up a reason yourself.
 3. **The project's clean check on staging.** Run the check the project documents in its `CLAUDE.md`: a fresh worktree of `origin/<staging>`,
-   a clean install, the project's test command. If the project documents none, ask the AI Manager how it is run; never invent it. A failing
+   a clean install, the project's test command. If the project documents none, ask the Coach how it is run; never invent it. A failing
    suite stops the release: report it with the output, and change nothing else.
-4. **The list for production.** Show the Issues that will go out (and any with a reason) and wait for the AI Manager's OK. Then run
+4. **The list for production.** Show the Issues that will go out (and any with a reason) and wait for the Coach's OK. Then run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" release open` (add `--untested <n> --reason "<why>"` for each Issue let through). It refuses on its own
    an untested Issue and a default branch that is ahead; report the refusal as it is.
-5. **Merge.** Merge the release PR/MR with a merge commit (never squash or rebase) only when the AI Manager says so in the same chat.
+5. **Merge.** Merge the release PR/MR with a merge commit (never squash or rebase) only when the Coach says so in the same chat.
    Report the link and what went out. The release notes and the tag are made as in `/huddle-review`.
 
 ## Reopening an Issue
 
-Only the AI Manager's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
+Only the Coach's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
 Run `gh issue reopen <n>` (or `glab issue reopen <n>`) with a comment that says why. Then run
 `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` and, once, the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, so the «tested in
 staging» label goes and the Issues that depend on it are blocked again. Both are best effort, as above. The fix is a new PR/MR on the same Issue,

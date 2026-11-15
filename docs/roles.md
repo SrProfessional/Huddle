@@ -1,9 +1,9 @@
 # Roles
 
-Huddle has two roles. The AI Manager's login is `ai_manager` in `huddle.json`; the developers are `assignees`. Roles are
+Huddle has two roles. The Coach's login is `coach` in `huddle.json`; the Players are `assignees`. Roles are
 about people, not about the AI: every person has their own Claude Code session.
 
-## AI Manager
+## Coach
 
 One person per repo. They lead the work with the help of their own Claude Code session.
 
@@ -11,41 +11,41 @@ One person per repo. They lead the work with the help of their own Claude Code s
 |---|---|
 | Installs Huddle and keeps its block and templates up to date. | `/huddle-setup` |
 | Writes the Issues, each with «Depends on» and a «Prompt for Claude Code». | `/huddle-issue` |
-| Answers every «❓ Decision for the AI Manager». | `/huddle-decide` |
+| Answers every «❓ Decision for the Coach». | `/huddle-decide` |
 | Reviews each PR (MR on GitLab), asks for changes or merges. | `/huddle-review` |
-| Lets the session check every few minutes what waits and review it (the AI Manager's order to merge; decisions and bug triage stay with the person). It waits in the background, with no Claude tokens while nothing waits. | `/huddle-watch`, `huddle queue` |
-| With a staging branch: marks an Issue as tested in staging, and releases staging to the default branch. Only the AI Manager (or a login in `testers`, by writing the comment `✅ Tested in staging`) marks; only the AI Manager releases: [A staging branch](team-guide.md#a-staging-branch). | `/huddle-release`, `huddle tested`, `huddle release` |
-| Adds or removes a developer: [Add or remove someone](team-guide.md#add-or-remove-someone). | `/huddle-team` |
+| Lets the session check every few minutes what waits and review it (the Coach's order to merge; decisions and bug triage stay with the person). It waits in the background, with no Claude tokens while nothing waits. | `/huddle-watch`, `huddle queue` |
+| With a staging branch: marks an Issue as tested in staging, and releases staging to the default branch. Only the Coach (or a login in `testers`, by writing the comment `✅ Tested in staging`) marks; only the Coach releases: [A staging branch](team-guide.md#a-staging-branch). | `/huddle-release`, `huddle tested`, `huddle release` |
+| Adds or removes a Player: [Add or remove someone](team-guide.md#add-or-remove-someone). | `/huddle-team` |
 | Defines the project's areas (milestones), puts Issues in them and keeps the estimates up to date: [Define the areas](team-guide.md#define-the-areas-with-huddle-areas). | `/huddle-areas` |
 | Keeps the estimates of the progress: the `Huddle remaining: N` line of each milestone description, the Issues still to write in that area. | `/huddle-issue` asks for the milestone; the estimate is edited by hand |
 
-Only the AI Manager:
+Only the Coach:
 
 - merges into the default branch (and so releases staging to it);
-- marks an Issue as tested in staging (a `testers` login may too, by hand; a developer never does);
+- marks an Issue as tested in staging (a `testers` login may too, by hand; a Player never does);
 - touches production, deployments, settings and secrets;
 - only when the project wrote a cloud labels job by hand on GitLab: creates its `HUDDLE_TOKEN` variable, which holds a secret (see [the GitLab notes](gitlab.md)). By default there is none.
 
-The AI Manager's session does every step it can: merging, tagging, creating the GitLab schedule when a project has a cloud labels job, and running the smoke test on
+The Coach's session does every step it can: merging, tagging, creating the GitLab schedule when a project has a cloud labels job, and running the smoke test on
 the sandboxes. It asks the person only for what needs them, as numbered «🙋 Only you» steps; see
 [who does each step](team-guide.md#who-does-each-step).
 
-Only the AI Manager's comments count as requests. Anyone else's comment is just a comment.
+Only the Coach's comments count as requests. Anyone else's comment is just a comment.
 
 Why one person: decisions that nobody owns get answered in a rush, or twice, in two ways. One owner keeps the answers
 consistent and keeps production in a single pair of hands.
 
-## Developer
+## Player
 
 Takes an Issue, works on its own branch and answers what the session asks.
 
 | Does | Skill or command |
 |---|---|
-| Starts an Issue, or continues it after the AI Manager answered. | `/huddle-play <n>` |
-| Sees if the AI Manager left a request. | `huddle pending` |
+| Starts an Issue, or continues it after the Coach answered. | `/huddle-play <n>` |
+| Sees if the Coach left a request. | `huddle pending` |
 | Checks the setup. | `huddle doctor` |
 
-A developer's session never merges, never touches the default branch, production or secrets, and touches only the
+A Player's session never merges, never touches the default branch, production or secrets, and touches only the
 Issue's allowed files. If something does not fit, it stops and asks.
 
 **Load:** one or two active Issues per person. `max_open_per_person` in `huddle.json` makes `huddle labels` respect that when it assigns.
@@ -56,6 +56,6 @@ Every change to an Issue goes through a Huddle session: creating it (`/huddle-is
 
 ## The AI is not a role
 
-The AI writes, tests and asks. It does not decide. A session that does not belong to the AI Manager gives its review as
+The AI writes, tests and asks. It does not decide. A session that does not belong to the Coach gives its review as
 text and stops; it does not merge, even if the person asks it to. See [the team guide](team-guide.md) for the rules and
 [the first day](first-day.md) for what a new person does.

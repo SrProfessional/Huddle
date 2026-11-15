@@ -1,11 +1,11 @@
 ---
 name: huddle-bug
-description: Use when the AI Manager wants to turn a bug description, a capture, a link or a raw report labeled «needs triage» into a ready Bug Issue.
+description: Use when the Coach wants to turn a bug description, a capture, a link or a raw report labeled «needs triage» into a ready Bug Issue.
 ---
 
 # huddle-bug
 
-For the AI Manager (the `ai_manager` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that
+For the Coach (the `coach` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that
 login; if not, stop and say so.
 
 ## Two ways in
@@ -33,7 +33,7 @@ login; if not, stop and say so.
 4. **Severity** is `blocking` (stops a person or production), `normal` or `minor`. Write it under «## Severity»: the labels job
    reads that word and assigns a `blocking` Bug before every other ready Issue. For a `blocking` Bug, also make «🚨 Blocking
    bug» the first line of the Issue's first comment.
-5. **Show the draft and wait for the AI Manager's OK.** Then create it with `gh issue create --label bug` (or
+5. **Show the draft and wait for the Coach's OK.** Then create it with `gh issue create --label bug` (or
    `glab issue create --label bug`) using the repo from `huddle.json`. For `#N`, rewrite that report's body into the full Bug
    Issue instead: keep the reporter's original text under «Original report», and remove `needs triage`. Do not add status
    labels or an assignee by hand. Right after creating the Issue, or after rewriting the report and taking `needs triage` off, run the **full**

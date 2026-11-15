@@ -5,7 +5,7 @@ import { run } from '../../lib/cli/run.mjs';
 import { harness } from './harness.mjs';
 import { isInstalledPlugin } from '../../lib/cli/main.mjs';
 
-const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
 const wrap = (a) => ({ ...a, listLabels: async () => LABELS });
 
 test('doctor plugin check: ✔ when it runs from an installed plugin', async () => {

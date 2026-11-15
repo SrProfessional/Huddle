@@ -60,7 +60,7 @@ assignees: ''
 
 ## Tests that must pass
 
-<!-- There is no code. The AI Manager's review checks the screens, the content, the visual guide, contrast and phone width. -->
+<!-- There is no code. The Coach's review checks the screens, the content, the visual guide, contrast and phone width. -->
 
 - None (no code)
 

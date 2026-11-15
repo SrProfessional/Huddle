@@ -9,13 +9,13 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = (rel) => readFileSync(path.join(root, rel), 'utf8');
 const skill = () => read('skills/huddle-areas/SKILL.md');
 
-test('the skill is for the AI Manager only and stops for anyone else', () => {
+test('the skill is for the Coach only and stops for anyone else', () => {
   const t = skill();
   assert.match(t, /^name: huddle-areas$/m);
   assert.match(t, /^description: Use when /m);
-  assert.match(t, /AI Manager only|For the AI Manager only/);
+  assert.match(t, /Coach only|For the Coach only/);
   assert.match(t, /doctor/);
-  assert.match(t, /ai_manager/);
+  assert.match(t, /`coach`/);
 });
 
 test('the skill says that areas are milestones and that their number depends on the project, never fixed', () => {
@@ -26,7 +26,7 @@ test('the skill says that areas are milestones and that their number depends on 
   assert.match(t, /depends on the project/i);
 });
 
-test('the skill always proposes and explains, and changes nothing before the AI Manager says yes', () => {
+test('the skill always proposes and explains, and changes nothing before the Coach says yes', () => {
   const t = skill();
   assert.match(t, /propose/i);
   assert.match(t, /explain/i);
@@ -57,7 +57,7 @@ test('the team guide explains /huddle-areas under «Progress» as the way to def
 
 test('the README lists the skill and the command; the CHANGELOG has them under «Unreleased»', () => {
   const readme = read('README.md');
-  assert.match(readme, /\| `\/huddle-areas` \| AI Manager \|/);
+  assert.match(readme, /\| `\/huddle-areas` \| Coach \|/);
   assert.match(readme, /\| `huddle areas /);
   const log = read('CHANGELOG.md');
   const unreleased = log.slice(log.indexOf('## [Unreleased]'), log.indexOf('## [0.2.0]'));
@@ -66,6 +66,6 @@ test('the README lists the skill and the command; the CHANGELOG has them under �
   assert.match(unreleased, /#42/);
 });
 
-test('roles.md points the AI Manager to /huddle-areas', () => {
+test('roles.md points the Coach to /huddle-areas', () => {
   assert.match(read('docs/roles.md'), /`\/huddle-areas`/);
 });

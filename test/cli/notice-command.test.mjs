@@ -87,7 +87,7 @@ test('notice is silent with exit 0 offline, and with an unreadable installed ver
   assert.equal(JSON.parse(json.h.text()).show, false);
 });
 
-test('the AI Manager\'s extra line only for the AI Manager; a failed login is a developer', async () => {
+test('the Coach\'s extra line only for the Coach; a failed login is a Player', async () => {
   const dev = mk({ me: 'ana' });
   await run(['notice'], dev.h.ctx);
   assert.doesNotMatch(dev.h.text(), /huddle-update/);

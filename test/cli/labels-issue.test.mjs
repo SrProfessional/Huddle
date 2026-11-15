@@ -21,7 +21,7 @@ const world = (w) => {
   w.issue({ number: 11, body: dep(), assignees: ['ana'], labels: ['in progress'], reviews: [61] });
   w.review({ number: 61 });
   w.issue({ number: 12, body: dep(), assignees: ['ana'], labels: ['in progress', 'needs decision'] });
-  w.comment(12, { id: 700, author: 'ana', body: '❓ Decision for the AI Manager: which one?', createdAt: '2026-11-05T10:00:00Z' });
+  w.comment(12, { id: 700, author: 'ana', body: '❓ Decision for the Coach: which one?', createdAt: '2026-11-05T10:00:00Z' });
   w.issue({ number: 13, body: dep(), assignees: ['ana'], labels: ['in review'], reviews: [62] });
   w.review({ number: 62 });
   w.comment(13, { id: 701, author: 'SrProfessional', body: ask, createdAt: '2026-11-05T11:00:00Z' });
@@ -68,7 +68,7 @@ for (const gitlab of [false, true]) {
     assert.equal(await run(['labels', '--issue', '12'], h.ctx), 0);
     assert.deepEqual(h.world.labelsOf(12), ['needs decision'], 'a stop label stays on a pending question');
     assert.equal(await run(['labels', '--issue', '13'], h.ctx), 0);
-    assert.deepEqual(h.world.labelsOf(13).sort(), ['changes requested from AI Manager']);
+    assert.deepEqual(h.world.labelsOf(13).sort(), ['changes requested from Coach']);
   });
 
   test(`[${kind}] open n: nothing else is read: no comment of another Issue, no assignment, no progress update, no cleanup`, async () => {
@@ -79,7 +79,7 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(h.world.labelsOf(20).sort(), ['in review', 'needs decision'], 'the closed Issue keeps its stale labels');
   });
 
-  test(`[${kind}] closed n: its dependents are relabelled, the ready one is assigned by the AI Manager, the one still blocked is not`, async () => {
+  test(`[${kind}] closed n: its dependents are relabelled, the ready one is assigned by the Coach, the one still blocked is not`, async () => {
     const { log, h } = make();
     assert.equal(await run(['labels', '--issue', '20'], h.ctx), 0);
     assert.deepEqual(h.world.labelsOf(21), ['assigned']);
@@ -103,12 +103,12 @@ for (const gitlab of [false, true]) {
     assert.equal(h.world.created().length, 1);
   });
 
-  test(`[${kind}] closed n run by a login that is not the AI Manager: labels change, nothing is assigned, the skip line is printed`, async () => {
+  test(`[${kind}] closed n run by a login that is not the Coach: labels change, nothing is assigned, the skip line is printed`, async () => {
     const { h } = make({ wrap: (a) => ({ ...a, me: async () => 'ana' }) });
     assert.equal(await run(['labels', '--issue', '20'], h.ctx), 0);
     assert.deepEqual(h.world.labelsOf(21), ['ready']);
     assert.deepEqual(h.world.assigneesOf(21), []);
-    assert.match(h.text(), /assignment skipped: only the AI Manager assigns/);
+    assert.match(h.text(), /assignment skipped: only the Coach assigns/);
   });
 
   test(`[${kind}] n is not an Issue: one line, exit 1`, async () => {

@@ -6,7 +6,7 @@ import { harness, CONFIG, GITLAB_CONFIG } from './harness.mjs';
 import { createGithub } from '../../lib/platform/github.mjs';
 import { createGitlab } from '../../lib/platform/gitlab.mjs';
 
-const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
 // What execFile gives when the program is missing: the runner keeps its message, the code rides on the error.
 const missing = (cli) => () => { throw Object.assign(new Error(`${cli} api user failed: spawn ${cli} ENOENT`), { code: 'ENOENT' }); };
 const notLoggedIn = (cli) => () => { throw new Error(`${cli} api user failed: ${cli === 'gh' ? 'To get started with GitHub CLI, please run:  gh auth login' : '401 Unauthorized'}`); };

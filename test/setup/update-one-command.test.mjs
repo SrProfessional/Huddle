@@ -28,11 +28,11 @@ test('step 3 makes its own worktree and branch from the default branch and runs 
   assert.match(skill, /never changes? branch|does not change branch/i);
 });
 
-test('step 5 opens the PR; a developer\'s session never merges, the AI Manager\'s merges it without asking (Issue #147)', () => {
+test('step 5 opens the PR; a Player\'s session never merges, the Coach\'s merges it without asking (Issue #147)', () => {
   const step5 = skill.slice(skill.indexOf('## 5.'), skill.indexOf('## 6.'));
   assert.match(step5, /open the PR\/MR/i);
-  assert.match(step5, /A developer's session never merges/);
-  assert.match(step5, /AI Manager's session .*merges it itself, without asking/);
+  assert.match(step5, /A Player's session never merges/);
+  assert.match(step5, /Coach's session .*merges it itself, without asking/);
   assert.match(step5, /gh pr merge --merge/);
   assert.match(step5, /refused .* stop and say so, never look for another way/);
   assert.doesNotMatch(step5, /does not merge it either/);
@@ -41,7 +41,7 @@ test('step 5 opens the PR; a developer\'s session never merges, the AI Manager\'
 test('step 6 ends with /reload-plugins, the restart fallback and both ways to restart', () => {
   assert.match(skill, /\/reload-plugins/);
   assert.match(skill, /restart Claude Code/i);
-  assert.match(skill, /Developer: Reload Window/);
+  assert.match(skill, /Player: Reload Window/);
   assert.match(skill, /close `claude` and open it again/);
   assert.doesNotMatch(skill, /applies (right away|by itself)/i);
 });

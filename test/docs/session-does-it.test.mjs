@@ -50,7 +50,7 @@ test('huddle-review merges and tags itself once its session approved, and asks o
   for (const needle of ['merge it yourself', 'gh pr merge --merge', 'git tag -a', 'git push origin', 'gh release create', 'glab release create',
     ONLY, 'every cell of the smoke test is ✔', 'never hand'])
     assert.ok(t.includes(needle), `huddle-review is missing «${needle}»`);
-  assert.doesNotMatch(t, /Tell the developer's next step in one line\.$/);
+  assert.doesNotMatch(t, /Tell the Player's next step in one line\.$/);
 });
 
 test('huddle-issue marks the steps only a person can do with «🙋» and leaves the rest to the session', () => {
@@ -66,7 +66,7 @@ test('huddle-play closes with the next step as a session action or as 🙋 steps
 
 test('the smoke test says who does each step: «Session» or «🙋 Only you», and the session runs its own', () => {
   const head = smoke.slice(0, smoke.indexOf('## 1. Setup')).replace(/\s+/g, ' ');
-  assert.match(head, /The AI Manager's session runs/);
+  assert.match(head, /The Coach's session runs/);
   assert.ok(head.includes(ONLY) && head.includes('Session'), 'the intro must explain both labels');
   const all = steps(smoke);
   assert.ok(all.length > 50, 'expected the whole checklist');

@@ -14,7 +14,7 @@ const inTemp = (fn) => {
   try { return fn(dir); } finally { rmSync(dir, { recursive: true, force: true }); }
 };
 const LABELS_NOTE = /Run `node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle" labels` once/;
-const INSTALL_NOTE = /Send every developer both install routes/;
+const INSTALL_NOTE = /Send every Player both install routes/;
 const has = (notes, re) => notes.some((n) => re.test(n));
 
 test('a first install writes both first-install notes', () => inTemp((dir) => {
@@ -36,9 +36,9 @@ test('a refresh and huddle update on a set-up repo leave them out', () => inTemp
 
 const skill = (name) => readFileSync(fileURLToPath(new URL(`../../skills/${name}/SKILL.md`, import.meta.url)), 'utf8');
 
-test('the setup skill stops for a developer on a project already set up, and changes nothing', () => {
+test('the setup skill stops for a Player on a project already set up, and changes nothing', () => {
   const t = skill('huddle-setup');
-  assert.match(t, /already uses Huddle; its AI Manager is <login>/);
+  assert.match(t, /already uses Huddle; its Coach is <login>/);
   assert.match(t, /bin\/huddle" doctor/);
   assert.match(t, /\/huddle-play <n>/);
   assert.match(t, /change nothing/i);

@@ -15,7 +15,7 @@ test('an Issue waiting for a decision is recognized by its label', () => {
   assert.equal(waitsForDecision({}), false);
 });
 
-// Issue #85: needs decision and changes requested are stop labels. «in progress» (the session works) and «in review» (the AI Manager works)
+// Issue #85: needs decision and changes requested are stop labels. «in progress» (the session works) and «in review» (the Coach works)
 // never sit next to them. Those two labels are still never put or removed by the status labels.
 
 test('needs decision takes «in progress» off, and the decision label itself is left alone', () => {
@@ -35,7 +35,7 @@ test('an Issue that waits for a decision gets no status label at all, so nothing
   assert.deepEqual(plan({ open: withPr, issues: done, openPrs: prs }), []);
 });
 
-test('once the AI Manager answered, the usual status comes back by itself', () => {
+test('once the Coach answered, the usual status comes back by itself', () => {
   const open = [{ number: 5, body, assignees: ['a'], labels: [LABELS.decision.name] }];
   assert.deepEqual(rows(plan({ open, issues, requests: new Map([[5, 'taken']]) })), [[5, LABELS.progress.name, []]]);
   assert.deepEqual(plan({ open, issues, requests: new Map([[5, 'pending']]) }), [], 'pending: only the changes label shows');

@@ -1,19 +1,19 @@
 ---
 name: huddle-decide
-description: Use when an Issue has the needs decision label and the AI Manager must answer the developer's «Decision for the AI Manager» question.
+description: Use when an Issue has the needs decision label and the Coach must answer the Player's «Decision for the Coach» question.
 ---
 
 # huddle-decide
 
-For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`, stop; a developer
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; a Player
 session never answers its own decision.
 
 ## Do
 
 1. List the Issues with the `needs decision` label (name in `huddle.json` under `labels.decision` if renamed). Open the
-   one the AI Manager picks and read the newest comment that starts with «❓ Decision for the AI Manager:».
+   one the Coach picks and read the newest comment that starts with «❓ Decision for the Coach:».
 2. Read the options, their trade-offs and the recommendation. Read the pushed branch if the answer depends on the code.
-   If the choice is really the AI Manager's, ask them with the options; do not decide for them.
+   If the choice is really the Coach's, ask them with the options; do not decide for them.
 3. Post the answer on the Issue **and** on its PR/MR (if one exists), starting with the heading and a text block:
 
 ````text
@@ -30,7 +30,7 @@ Decision: <the chosen option and why, in one or two lines>.
 4. Right after posting the answer, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` (`n` the Issue): it takes `needs decision` off now that the
    answer is there. Do not close anything and do not edit labels by hand. The command is best effort: if it fails (no permission to edit labels, the
    platform is unreachable), say one line with the reason and go on; it never stops or blocks the task and never asks anything, since the cloud job,
-   or the next session, catches up. The developer's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
+   or the next session, catches up. The Player's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
 5. If the decision changes the Issue's scope, edit the Issue text too, so it stays true.
 
 ## Who does each step

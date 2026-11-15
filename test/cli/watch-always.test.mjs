@@ -1,4 +1,4 @@
-// Issue #160: `/huddle-watch always` keeps the watch on in the AI Manager's sessions of a repo, on their machine only.
+// Issue #160: `/huddle-watch always` keeps the watch on in the Coach's sessions of a repo, on their machine only.
 // `huddle queue --always` sets a mark next to the update cache; `--wait-off` clears it; the hook asks Claude to start the watch. Canned adapter only.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -35,10 +35,10 @@ test('--always sets the mark, the hook then asks Claude to start the watch, and 
 test('another login cannot set it', async () => {
   const h = mk({ me: 'ana' });
   assert.equal(await run(['queue', '--always'], h.ctx), 1);
-  assert.match(h.text(), /AI Manager only/);
+  assert.match(h.text(), /Coach only/);
 });
 
-test('a developer\'s session start never starts the watch, even with the mark on the machine', async () => {
+test('a Player\'s session start never starts the watch, even with the mark on the machine', async () => {
   const boss = mk();
   await run(['queue', '--always'], boss.ctx);
   const dev = mk({ me: 'ana' });
@@ -52,7 +52,7 @@ test('no mark: the session start says nothing about the watch, and the line abou
   const h = mk({ setup: (w) => { w.issue({ number: 42, title: 'Add login form', body: MANAGED, assignees: ['ana'], reviews: [51] }); w.review({ number: 51 }); } });
   assert.equal(await run(['hook'], h.ctx), 0);
   assert.doesNotMatch(h.text(), /watch starts now/);
-  assert.match(hookOut(h).systemMessage, /1 thing waits for the AI Manager/);
+  assert.match(hookOut(h).systemMessage, /1 thing waits for the Coach/);
 });
 
 const skill = readFileSync(fileURLToPath(new URL('../../skills/huddle-watch/SKILL.md', import.meta.url)), 'utf8').replace(/\s+/g, ' ');

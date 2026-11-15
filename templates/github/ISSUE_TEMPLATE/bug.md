@@ -1,11 +1,11 @@
 ---
 name: Bug
-about: A bug, written as a ready Issue (the AI Manager uses /huddle-bug; reporters use the Bug report form)
+about: A bug, written as a ready Issue (the Coach uses /huddle-bug; reporters use the Bug report form)
 title: ''
 labels: bug
 assignees: ''
 ---
-<!-- Reporting a bug and you are not the AI Manager? Fill only the sections from «What happens» to «Severity», then add the label «needs triage» (GitLab: the Labels box on the right; the GitHub form does it for you). The AI Manager turns the report into a ready Bug Issue with /huddle-bug. A report with «needs triage» is never assigned. -->
+<!-- Reporting a bug and you are not the Coach? Fill only the sections from «What happens» to «Severity», then add the label «needs triage» (GitLab: the Labels box on the right; the GitHub form does it for you). The Coach turns the report into a ready Bug Issue with /huddle-bug. A report with «needs triage» is never assigned. -->
 
 ## What happens
 
@@ -56,7 +56,7 @@ unknown yet
 ## Prompt for Claude Code
 
 ```text
-<!-- The text the developer pastes into a new Claude Code session. It says: write the failing test first and see it fail. -->
+<!-- The text the Player pastes into a new Claude Code session. It says: write the failing test first and see it fail. -->
 ```
 
 ## Allowed files

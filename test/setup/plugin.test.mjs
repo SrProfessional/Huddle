@@ -38,7 +38,7 @@ for (const name of SKILLS) {
 
 test('setup asks the five questions and calls lib/setup', () => {
   const t = read('skills/huddle-setup/SKILL.md');
-  for (const q of [/platform/i, /host/i, /project/i, /AI Manager/, /team/i]) assert.match(t, q);
+  for (const q of [/platform/i, /host/i, /project/i, /Coach/, /team/i]) assert.match(t, q);
   assert.match(t, /lib\/setup\/cli\.mjs/);
   assert.match(t, /bin\/huddle" doctor/);
 });
@@ -52,8 +52,8 @@ test('review and decide post «## Prompt for Claude Code» on the PR/MR and on i
   }
 });
 
-test('only the AI Manager merges: review says so, start never merges and uses wait/take', () => {
-  assert.match(read('skills/huddle-review/SKILL.md'), /AI Manager/);
+test('only the Coach merges: review says so, start never merges and uses wait/take', () => {
+  assert.match(read('skills/huddle-review/SKILL.md'), /Coach/);
   const play = read('skills/huddle-play/SKILL.md');
   assert.match(play, /never merge/i);
   assert.match(play, /huddle" wait/);
@@ -69,10 +69,10 @@ test('every command runs as node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" <command>: a
   }
 });
 
-test('the label is always named in full: «changes requested from AI Manager»', () => {
-  for (const name of SKILLS) assert.doesNotMatch(read(`skills/${name}/SKILL.md`), /changes requested(?! from AI Manager)/, name);
-  assert.match(read('skills/huddle-review/SKILL.md'), /changes requested from AI Manager/);
-  assert.match(read('skills/huddle-play/SKILL.md'), /changes requested from AI Manager/);
+test('the label is always named in full: «changes requested from Coach»', () => {
+  for (const name of SKILLS) assert.doesNotMatch(read(`skills/${name}/SKILL.md`), /changes requested(?! from Coach)/, name);
+  assert.match(read('skills/huddle-review/SKILL.md'), /changes requested from Coach/);
+  assert.match(read('skills/huddle-play/SKILL.md'), /changes requested from Coach/);
 });
 
 test('setup says an empty max open per person means no limit, and gives no default of 2', () => {

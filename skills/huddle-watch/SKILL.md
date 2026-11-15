@@ -1,16 +1,16 @@
 ---
 name: huddle-watch
-description: Use when the AI Manager wants its session to check by itself what waits for it and review the PRs/MRs, waiting in the background with no Claude tokens while nothing waits. Run it as `/huddle-watch`, `/huddle-watch 10m`, `/huddle-watch always`, `/huddle-watch status` or `/huddle-watch off`.
+description: Use when the Coach wants its session to check by itself what waits for it and review the PRs/MRs, waiting in the background with no Claude tokens while nothing waits. Run it as `/huddle-watch`, `/huddle-watch 10m`, `/huddle-watch always`, `/huddle-watch status` or `/huddle-watch off`.
 ---
 
 # huddle-watch
 
-For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`,
-stop with one clear line («/huddle-watch is for the AI Manager») and change nothing. The rules are in docs/design.md §19.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`,
+stop with one clear line («/huddle-watch is for the Coach») and change nothing. The rules are in docs/design.md §19.
 
-The watch waits in the background with a small Node process (`queue --wait`), as a developer's session waits for its review: it uses
+The watch waits in the background with a small Node process (`queue --wait`), as a Player's session waits for its review: it uses
 **no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself, unless
-the AI Manager chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
+the Coach chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
 
 ## Always (`/huddle-watch always`)
 
@@ -24,11 +24,11 @@ An interval is like `5m`: default 5 minutes, allowed 2 to 60 (the wait takes it 
 
 1. If this session already runs the watch's background wait, the watch is already on: do **not** start a second one; say it is on and its
    interval, and stop.
-2. Your first message says plainly: **turning the watch on is the AI Manager's order to review and merge, as if they asked for each
+2. Your first message says plainly: **turning the watch on is the Coach's order to review and merge, as if they asked for each
    review.** It uses no Claude tokens while nothing waits. It stops with `/huddle-watch off`, or by closing Claude Code, because the wait
    lives only in the session; it needs the session open and the computer on.
 3. **Check now:** first run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` once, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` once and handle what it
-   lists («Each item» below). When nothing waits, say one line, «Nothing is waiting for the AI Manager.», so the person sees that it ran.
+   lists («Each item» below). When nothing waits, say one line, «Nothing is waiting for the Coach.», so the person sees that it ran.
 4. **Then wait:** start `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait <seconds> --seen <keys>` in the background (run it as a background command
    and keep its ID). `<keys>` are the items already told or stopped, separated by commas: `<pr>@<head>` for a review that stopped, `#<issue>`
    for a decision or a triage already said. With no keys, leave `--seen` out.

@@ -9,7 +9,7 @@ const ask = (text) => `🔁 Changes requested\n\n1. Fix the pronunciation hint.\
 const comment = (author, body, createdAt, taken = false) => ({ author, body, createdAt, taken });
 const M = 'SrProfessional';
 
-test('a prompt from the AI Manager newer than the last work is «pending»; once a session took it (👀) it is «taken»', () => {
+test('a prompt from the Coach newer than the last work is «pending»; once a session took it (👀) it is «taken»', () => {
   assert.equal(requestState({ manager: M, comments: [comment(M, ask('Continue Issue #103.'), '2026-11-05T15:00:00Z')], commits: ['2026-11-05T14:00:00Z'] }), 'pending');
   assert.equal(requestState({ manager: M, comments: [comment(M, ask('Continue Issue #103.'), '2026-11-05T15:00:00Z', true)], commits: ['2026-11-05T14:00:00Z'] }), 'taken');
 });
@@ -31,13 +31,13 @@ test('comments without a prompt, or by someone else, ask for nothing', () => {
   assert.equal(requestState({ manager: M, comments, commits: [] }), null);
 });
 
-test('a question («❓ Decision for the AI Manager») newer than the prompt means the session waits for the AI Manager, not the other way round', () => {
+test('a question («❓ Decision for the Coach») newer than the prompt means the session waits for the Coach, not the other way round', () => {
   const comments = [
     comment(M, ask('Continue Issue #126.'), '2026-11-05T15:00:00Z'),
-    comment(M, '❓ Decision for the AI Manager: the sweep needs a read in db/.', '2026-11-05T15:30:00Z'),
+    comment(M, '❓ Decision for the Coach: the sweep needs a read in db/.', '2026-11-05T15:30:00Z'),
   ];
   assert.equal(requestState({ manager: M, comments, commits: [] }), null);
-  const answered = [...comments, comment(M, `✅ Decision by the AI Manager\n\n${ask('Continue Issue #126 with option 1.')}`, '2026-11-05T16:00:00Z')];
+  const answered = [...comments, comment(M, `✅ Decision by the Coach\n\n${ask('Continue Issue #126 with option 1.')}`, '2026-11-05T16:00:00Z')];
   assert.equal(requestState({ manager: M, comments: answered, commits: [] }), 'pending');
 });
 

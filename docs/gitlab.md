@@ -1,7 +1,7 @@
 # Huddle on GitLab
 
 Huddle works on gitlab.com and on a company's own GitLab server. The commands are the same as on GitHub, but GitLab
-differs in a few places. Everything on this page except the first section is done by the AI Manager.
+differs in a few places. Everything on this page except the first section is done by the Coach.
 
 ## Configuration
 
@@ -12,7 +12,7 @@ differs in a few places. Everything on this page except the first section is don
   "platform": "gitlab",
   "host": "gitlab.example.com",
   "project": "team/app",
-  "ai_manager": "santiago",
+  "coach": "santiago",
   "assignees": ["ana", "luis"]
 }
 ```
@@ -48,14 +48,13 @@ request. With the `hourly` mode a label can be up to an hour old when nobody has
 Huddle does not ask: every project gets `sessions`, with no cloud job and no CI minutes. A project that wants a cloud run anyway writes
 `"labels_job": "hourly"` or `"events"` in `huddle.json` by hand and runs `/huddle-update`. **On GitLab the interval is a project setting, not
 part of `huddle-labels.gitlab-ci.yml`:** set the cron of the schedule in **CI/CD > Schedules** to `17 * * * *` for `hourly` or `*/10 * * * *` for
-`events`. Going back to `sessions`: remove the key, delete the schedule, the job file and the `include` line. The AI Manager's session can do
+`events`. Going back to `sessions`: remove the key, delete the schedule, the job file and the `include` line. The Coach's session can do
 the schedule with `glab api`; if it cannot, it gives you the steps.
 
 ## The HUDDLE_TOKEN step
 
 The job token (`CI_JOB_TOKEN`) cannot edit Issues, so the job needs a token of its own. A token (a long password that lets a
-program act for you) is a secret, so the AI Manager's session cannot create it and never sees it. This step is only the AI
-Manager's, once per project.
+program act for you) is a secret, so the Coach's session cannot create it and never sees it. This step is only the Coach's, once per project.
 
 🙋 Only you
 
@@ -88,9 +87,9 @@ a missing token still fails the job.
 
 Huddle only reads the variable. It never reads a token from a file, never prints it and never turns on shell tracing.
 
-## On the developer's machine
+## On the Player's machine
 
-Every developer who works on a GitLab repo needs two things on their own machine. The AI Manager's session checks them once in
+Every Player who works on a GitLab repo needs two things on their own machine. The Coach's session checks them once in
 the [smoke test](smoke-test.md).
 
 1. **`glab` must be on the PATH of the terminal that starts Claude.** If it is not, the SessionStart hook stays silent
@@ -117,7 +116,7 @@ The sessions change the labels; with a hand-written cloud job, its schedule also
 | A close has no reason and no closing event, only `closed_by`. | A dependency counts as merged only when a merged MR closed it. An Issue closed by hand unblocks nothing (GitHub gives the same result by reading the event that closed the Issue). |
 | Notes include system notes («added label ...»). | The adapter drops them before anything reads comments. |
 | Issues and merge requests are numbered separately (Issue #2 and MR !2 are different things). | Requests left on an MR are read through the MR, and messages say «MR !2» instead of «PR #2». |
-| Self-approval may be disabled. | The AI Manager approves with a comment, then merges. |
+| Self-approval may be disabled. | The Coach approves with a comment, then merges. |
 | `Closes #N` works only for MRs into the default branch. | The MR template uses `Closes #N`. Open the MR into the default branch. |
 | Merging can remove the source branch. | Huddle merges without removing it. |
 | There are no pinned Issues. | The «Huddle progress» Issue is created, but not pinned. Find it in the Issue list by its title, «Huddle progress». |

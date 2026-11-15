@@ -5,6 +5,16 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- **The roles are now Coach and Player** (Issue #166, H70). The person who writes the Issues, answers the decisions, reviews and merges
+  was the «AI Manager» and is now the **Coach**; the people who work on the Issues with a Claude Code session, code or design, were
+  «developers» and are now **Players**. Every guide, PDF, website page, skill, template, the `CLAUDE.md` block and the CLI messages use
+  the new names; the skill names do not change. Nothing breaks: `huddle.json` takes `coach` (setup writes it on a new repo), and
+  `ai_manager` keeps working (both set to different logins is an error). The label «changes requested from AI Manager» is now
+  «changes requested from Coach»: the full `huddle labels` renames the old one once, and both names are read until then. GitLab's own
+  member role «Developer» keeps its name. The website and the guide PDF also say `/huddle-watch always`.
+
 ### Added
 
 - `/huddle-watch always` keeps the watch on (Issue #160, H65). `huddle queue --always` leaves a mark for the repo on the AI Manager's machine

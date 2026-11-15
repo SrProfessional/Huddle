@@ -15,7 +15,7 @@
 ## Prompt for Claude Code
 
 ```text
-<!-- The text the developer pastes into a new Claude Code session. -->
+<!-- The text the Player pastes into a new Claude Code session. -->
 ```
 
 ## Allowed files
