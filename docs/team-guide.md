@@ -235,6 +235,14 @@ about it.
 | See if a newer Huddle exists (the skills say it too) | `huddle notice` |
 | Have the AI Manager's session review by itself (AI Manager) | `/huddle-watch`, and `/huddle-watch off` to stop |
 
+**What waiting costs.** After a PR/MR opens, the developer's session waits with a small Node process on the developer's own computer
+(`huddle wait`) that asks GitHub or GitLab every two minutes, with the developer's own login: it uses no Claude tokens and no GitHub
+Actions or CI minutes, and wakes the session only when a request arrives. It needs the session open and the computer on; otherwise the
+next session start says a request is pending. `/huddle-watch` is turned on by hand in each session, because turning it on is the AI
+Manager's order to review and merge; it stops with `/huddle-watch off`, when Claude Code closes, or after 7 days. Each check is a short
+Claude turn even when nothing waits, so it uses some tokens: a longer interval (`/huddle-watch 15m`) and a fresh, short session spend
+less. Without it, the AI Manager's session start says what waits for them.
+
 ## Old worktrees clean themselves
 
 Every Issue's session works in a folder of its own, a git worktree in `.claude/worktrees/`. In a project with dependencies each
