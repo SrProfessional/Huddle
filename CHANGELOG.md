@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- A developer's session that stops for a decision keeps waiting for the answer (Issue #151, H62). After «⛔ Issue #N stopped: waiting
+  for a decision», `/huddle-play` starts `huddle wait <n>` in the background, as it does after the PR/MR, so the AI Manager's answer
+  from `/huddle-decide` is picked up by itself. Before, the developer had to notice it and type `/huddle-play <n>`.
+
 ## [0.8.4] - 2026-11-15
 
 ### Fixed
