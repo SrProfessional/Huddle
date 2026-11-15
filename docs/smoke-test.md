@@ -464,6 +464,15 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.8.5
+
+Run of: 2026-11-15, Huddle `staging` with Issues #151 and #153 merged (commit d15a320), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.4 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| `--started` and `--needs-decision` set the label and recompute in one run (#153) | ✔ | covered by tests | Found live on a real project: an Issue had `in progress` and `assigned` at once (a session added the label and had not run the labels yet). `huddle labels --issue <n> --started --dry-run` from staging printed `#<n> − assigned` and changed nothing; the released `labels --issue <n>` then fixed it. The Issue's history showed the cause: `in progress` at 16:46, `assigned` removed at 16:52, and `needs decision` added with no labels run after it. |
+| The developer's session waits for the answer to a decision (#151) | covered by tests | covered by tests | Skill text, tested as text. `huddle wait` ending on the AI Manager's answer to a decision is pinned by a CLI test on canned answers. |
+
 ### Results 0.8.4
 
 Run of: 2026-11-15, Huddle `staging` with Issue #147 merged (commit f0b0046), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.3 and older tables below still hold for the rest.
