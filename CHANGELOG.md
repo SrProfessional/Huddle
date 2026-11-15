@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.8.4] - 2026-11-15
+
 ### Fixed
 
 - Setup and update say only what the person must do (Issue #147, H61). `/huddle-setup` run by a developer on a project already set up
