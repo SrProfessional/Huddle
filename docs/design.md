@@ -467,7 +467,11 @@ says to update with `/plugins` or the terminal and run `/huddle-update` again); 
 `huddle-update-<version>` from the up-to-date default branch, entered with `EnterWorktree`, running `huddle update --json` from the
 **new** version's folder (a sibling of `${CLAUDE_PLUGIN_ROOT}`, found by `newPluginRoot` in `lib/core/update.mjs`), because the session
 still has the old skills loaded; (4) the pending questions, as before; (5) the PR/MR, which a developer's session never merges; (6) the
-last line: `/reload-plugins` applies the new version in the open session, in the terminal and in VS Code. It was tried on a real project:
+last line: `/reload-plugins` applies the new version in the open session, in the terminal and in VS Code. Since Issue #136 step (2) runs
+every time, not only when the notice or `doctor` saw a newer release (the lookup is cached and can be hours late: on 2026-11-14 a cache
+read that morning said 0.7.0 and a repo on 0.8.0 skipped 0.8.1). It runs `claude plugin marketplace update huddle`, reads
+`claude plugin list --json`, and updates the `huddle@huddle` entry this project uses: a `project` entry whose `projectPath` is the repo
+root (`--scope project`, run from there), else the `user` entry (`--scope user`); with neither it points to `/huddle-setup`. It was tried on a real project:
 `claude plugin update` from a second terminal, then `/reload-plugins` in the open session, and the skill added by the new version showed
 up, in both. «Restart Claude Code» (and «Developer: Reload Window» in VS Code) is the fallback only. A plugin updated from the `/plugins`
 dialog applying by itself was not tried, so no text says it. `huddle update` itself does not change. The first update to a version
@@ -580,6 +584,19 @@ if the login is not `ai_manager`.
 5. **Off:** `CronList`, `CronDelete` the `[huddle-watch]` job. Nothing running: it says so. **Status:** on or off, the interval and the next run.
 6. «Who does each step», and every command in the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` form.
 
+**The start line (Issue #138).** With the watch off nothing told the AI Manager what waits. When the login is the `ai_manager`, the
+SessionStart hook (`huddle hook`) reads what waits with the same computation as `huddle queue` (`waitingItems` in `lib/cli/run.mjs`,
+without the head commits), in parallel with its other reads and inside its time limit, and adds one visible line first, for example
+«Huddle: 4 things wait for the AI Manager: PRs to review #51, #52; a decision on #47; a bug report to triage #53. Type
+/huddle-review <pr>, or /huddle-watch to let this session check by itself.» (`MRs` and `!` on GitLab). Its `additionalContext` tells
+Claude to say it first, in the person's language, and to review, merge, answer or triage nothing until the person asks: the line only
+informs, because turning the watch on is the order to merge and that stays the AI Manager's explicit act. Nothing waiting, a developer's
+login, no login or a failed read: the hook adds nothing. The login is read once for this line and the update notice.
+
+**What waiting costs.** A developer's waiting session (`huddle wait`) is a Node process on their computer that asks the platform every
+two minutes with their own login: no Claude tokens and no CI minutes while it waits. Each `/huddle-watch` check is a short Claude turn
+even when nothing waits, so it uses some tokens; a longer interval spends less. The guides and the website say both.
+
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
 computer off, starting the watch when a session opens. A job fires only while the session is open and idle.
 
@@ -590,7 +607,8 @@ Asked on 2026-11-11 (Issue #91). The SessionStart hook's «newer Huddle» notice
 session then shows nothing. A skill runs in the chat, so what it says is seen in every client.
 
 **`huddle notice [--json]`.** Read-only, and it needs no login. It uses the same release lookup as the hook (`latestRelease`: cached for a
-day, 3 seconds at most) and the same text (`noticeText`, with the AI Manager's extra line when `isManager()` says so, as the hook asks it:
+day, 3 seconds at most; since Issue #136 a cached answer lower than the installed version is stale and looked up again, and the
+`version` line of `huddle doctor`, run on purpose, looks up first with `{ fresh: true }` and falls back to the cache) and the same text (`noticeText`, with the AI Manager's extra line when `isManager()` says so, as the hook asks it:
 only when there is something to show; with no `huddle.json` or no login nobody is the AI Manager). It prints the text when a newer
 release exists **and** the skills have not shown it in the last 24 hours; otherwise it prints nothing. It keeps its own timestamp,
 `skillShownAt`, in the same cache file: it never reads or writes the hook's `shownAt`, and the hook never reads `skillShownAt`, so the two

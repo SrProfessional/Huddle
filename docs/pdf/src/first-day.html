@@ -17,7 +17,7 @@
       <li><strong>Only the Issue's allowed files.</strong> If another one is needed, ask first.</li>
       <li><strong>No production and no secrets.</strong> If a permission or a key is missing, stop and tell the AI Manager.</li>
       <li><strong>Nothing is dropped silently.</strong> What is not done goes under «What was NOT done» with the reason.</li>
-      <li><strong>Wait for the closing message.</strong> «✅ Issue #N finished» or «⛔ Issue #N stopped» tells you the session is over and what your next step is.</li>
+      <li><strong>Wait for the closing message.</strong> «✅ Issue #N finished» or «⛔ Issue #N stopped» tells you the session is over and what your next step is. Then the session waits for the review in the background: it uses no Claude tokens and no GitHub Actions or CI minutes, so leave it open.</li>
     </ul>
     <p><strong>Every change to an Issue goes through a Huddle session</strong>, never by hand on the website. Still fine by hand: reading and commenting, the bug report form, and a tester's «✅ Tested in staging» comment. If someone breaks the rule, the next session that opens repairs the board by itself.</p>
   </section>

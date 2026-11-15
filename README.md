@@ -9,7 +9,7 @@ the review on its own.
 
 It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** the latest release is [0.8.1](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.1); what came after
+> **Status:** the latest release is [0.8.2](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.2); what came after
 > it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
@@ -234,7 +234,7 @@ session cannot touch what customers use.
 | `/huddle-review` | AI Manager | Reviews a PR or MR, then asks for changes or merges. |
 | `/huddle-decide` | AI Manager | Answers a «needs decision» question. |
 | `/huddle-release` | AI Manager | With a staging branch: releases staging to production. Lists what is in staging, asks about each Issue without the «tested in staging» mark, runs the project's own clean check, opens the PR/MR from staging into the default branch and merges it (a merge commit) only on the AI Manager's word in the same chat. |
-| `/huddle-watch [interval\|status\|off]` | AI Manager | Checks every few minutes (default 5) what waits for the AI Manager and runs `/huddle-review` on each PR/MR that waits. Turning it on is the order to review and merge. It never answers decisions or triages bugs. It stops with `off` or when Claude Code closes, and expires after 7 days. |
+| `/huddle-watch [interval\|status\|off]` | AI Manager | Checks every few minutes (default 5) what waits for the AI Manager and runs `/huddle-review` on each PR/MR that waits. Turning it on is the order to review and merge. It never answers decisions or triages bugs. It stops with `off` or when Claude Code closes, and expires after 7 days. It is turned on by hand in each session, because turning it on is the order to merge. Each check is a short Claude turn even when nothing waits, so it uses some tokens: a longer interval (`/huddle-watch 15m`) and a fresh, short session spend less. Without it, the AI Manager's session start says what waits. |
 | `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |
 | `/huddle-areas` | AI Manager | Helps define the project's areas (milestones): proposes them, puts Issues in them, estimates what is missing and checks them later. |
 | `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
@@ -267,7 +267,10 @@ The method works with plain Issues and a good `CLAUDE.md`. The plugin takes the 
   session opens show each area's percentage and the total (see the [team guide](docs/team-guide.md#progress)).
   `/huddle-areas` helps the AI Manager define the areas, whatever their number.
 - Skills to set a project up, start an Issue, write a new Issue, review a pull request and ask for a decision.
-- A session that waits for the review on its own and picks up the AI Manager's requested changes as soon as they arrive.
+- A session that waits for the review on its own and picks up the AI Manager's requested changes as soon as they arrive. It waits with a
+  small Node process on the developer's own computer that asks GitHub or GitLab every two minutes, with the developer's own login: it
+  uses no Claude tokens and no GitHub Actions or CI minutes, and wakes the session only when a request arrives. It needs the session
+  open and the computer on.
 - The same commands on GitHub, on gitlab.com and on a company's own GitLab server.
 
 ## Development

@@ -17,15 +17,18 @@ and never asks anything. When it prints nothing, say nothing about versions (it 
 
 ## 2. The plugin
 
-If a newer Huddle exists (the notice said so, or `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` shows a newer latest), run in the
-project folder:
+Do this every time, even when the notice said nothing: it can be hours late, and updating the latest only says so.
 
-1. `claude plugin marketplace update huddle`
-2. `claude plugin update huddle@huddle --scope project`
+1. Always run `claude plugin marketplace update huddle` (it has no scope).
+2. Find where Huddle is installed: run `claude plugin list --json` and look at the `huddle@huddle` entries. A `project` entry whose
+   `projectPath` is this repo's root (compare without case and with either slash) means `--scope project`, run from that folder;
+   otherwise a `user` entry means `--scope user`. With neither, say that Huddle is not installed for this project, point to
+   `/huddle-setup`, and stop.
+3. Run `claude plugin update huddle@huddle --scope <scope>` (a project install: `claude plugin update huddle@huddle --scope project`).
 
-Read the output: «updated from X to Y», or already the latest. If the `claude` command cannot be run from this session (not found, or it
-fails), do not stop: do steps 3 to 5 with the Huddle that is installed, and tell the person to update the plugin with `/plugins`
-(VS Code) or the two terminal commands above, and then run `/huddle-update` again.
+Read the output: «updated from X to Y», or already the latest; that version is the one step 3 uses. If the `claude` command cannot be run
+from this session (not found, or it fails), do not stop: do steps 3 to 5 with the Huddle that is installed, and tell the person to update
+the plugin with `/plugins` (VS Code) or the terminal commands above, and then run `/huddle-update` again.
 
 ## 3. The files, in a worktree of its own
 
