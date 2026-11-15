@@ -9,7 +9,7 @@ the review on its own.
 
 It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** the latest release is [0.8.4](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.4); what came after
+> **Status:** the latest release is [0.8.5](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.5); what came after
 > it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
@@ -238,7 +238,7 @@ session cannot touch what customers use.
 | `/huddle-team` | AI Manager | Adds or removes a developer through a PR/MR and prints the message for the new person. |
 | `/huddle-areas` | AI Manager | Helps define the project's areas (milestones): proposes them, puts Issues in them, estimates what is missing and checks them later. |
 | `huddle labels [--dry-run]` | AI Manager, CI | Assigns ready Issues and keeps the status labels up to date. |
-| `huddle labels --issue <n> [--dry-run]` | AI Manager, developers | The same for one Issue (and, when it is closed, the Issues that wait for it); only the AI Manager assigns. |
+| `huddle labels --issue <n> [--started \| --needs-decision] [--dry-run]` | AI Manager, developers | The same for one Issue (and, when it is closed, the Issues that wait for it); only the AI Manager assigns. `--started` adds `in progress` and `--needs-decision` adds `needs decision` in the same run, so the old status comes off at once. |
 | `huddle wait <n>` | Session | Waits in the background for the AI Manager's request on Issue `n`. |
 | `huddle take <n>` | Session | Marks the pending request 👀 and prints its prompt. |
 | `huddle pending [n]` | Anyone | Lists the requests nobody has done yet. |

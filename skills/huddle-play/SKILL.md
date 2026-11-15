@@ -29,7 +29,7 @@ Read the Issue and find its branch (the «Branch» section). Then:
 1. Read the whole Issue and the documents it names. Follow its «Prompt for Claude Code» block.
 2. Check each Issue under «Depends on»: it counts only if it is closed **and** a merged PR/MR closed it. If one is not, change
    nothing and end with «⛔ Issue #N stopped: waiting for #X».
-3. Create the branch in a worktree of its own, as the Issue says, and add the `in progress` label, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`. With `staging_branch` set in `huddle.json`, the branch starts from the up-to-date staging branch (`origin/<staging_branch>`), not from the default branch; without it, from the up-to-date default branch.
+3. Create the branch in a worktree of its own, as the Issue says, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n> --started`: one command adds `in progress` and takes `assigned` off (never add it by hand). With `staging_branch` set in `huddle.json`, the branch starts from the up-to-date staging branch (`origin/<staging_branch>`), not from the default branch; without it, from the up-to-date default branch.
 4. Run the tests before changing anything. Then work with TDD, touching only the allowed files.
 5. Open the PR/MR with `Closes #N`, using the template (with `staging_branch` set, open it **against** the staging branch; Huddle closes the Issue when it is merged there): what changed, the real test counts, **What was NOT done**. Right after it is opened, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`.
 6. End with «✅ Issue #N finished» (or «⛔ Issue #N stopped»), the link, the counts, what was not done, the next step. The next step is
@@ -41,7 +41,7 @@ Read the Issue and find its branch (the «Branch» section). Then:
 
 The person is usually a designer. A Design Issue never changes code: there is no code, so there are no tests to run or to report, and
 the only allowed files are `design/<issue number>-<slug>/`. Steps 1 to 3 of «Start an Issue» are the same (check «Depends on», the
-branch in its own worktree, the `in progress` label). Then:
+branch in its own worktree, `labels --issue <n> --started`). Then:
 
 1. **Create the design with Claude Design in this session**, as a design artifact (`Artifact` tool, quickstart with the `design` intent). Use the
    project's design system when one is set up; otherwise follow the Issue's «Visual guide». Design every screen listed under «Screens»,
@@ -85,8 +85,8 @@ branch in its own worktree, the `in progress` label). Then:
 ## When you cannot go on
 
 Commit and push what is done. Comment on the Issue starting with «❓ Decision for the AI Manager:» (what is blocked, the
-options with trade-offs, your recommendation), add the `needs decision` label, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`, and end with «⛔ Issue #N stopped: waiting for a
-decision». Never close the Issue.
+options with trade-offs, your recommendation), then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n> --needs-decision` (one command adds `needs decision` and takes `in progress` off), and end with «⛔ Issue #N stopped: waiting for a
+decision». Never close the Issue. Then start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>` (tell the developer to leave the session open; it uses no Claude tokens). When it ends, the AI Manager answered: continue as in «Continue an Issue» (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`, then follow the prompt).
 
 ## Who does each step
 
