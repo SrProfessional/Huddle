@@ -626,7 +626,11 @@ the task: the notice never stops the work and never asks anything. When it print
 default: auto-detect), and `claude plugin list` shows one `huddle@huddle` entry per scope, each with its own version (a machine can
 hold a user install and several project installs at once, on different versions). `/huddle-setup` installs Huddle **per project** (the
 marketplace and `enabledPlugins` in the project's `.claude/settings.json`), so the update names that scope: `updateSteps` and the
-`version` line of `huddle doctor` say `claude plugin update huddle@huddle --scope project`, run inside the project.
+`version` line of `huddle doctor` say `claude plugin update huddle@huddle --scope project`, run inside the project. Since Issue #143 they
+name the scope Huddle is really installed in: `installScope(ctx)` in `lib/core/update.mjs` reads Claude Code's
+`<CLAUDE_CONFIG_DIR or ~/.claude>/plugins/installed_plugins.json` (`ctx.installedPluginsPath`), a local file read once. A `project` entry
+for the repo root (compared without case and with either slash) keeps `--scope project`; otherwise a `user` entry gives `--scope user`
+(«Huddle is installed for your user on this machine»); no file, an unreadable one or no Huddle entry falls back to `--scope project`.
 `claude plugin marketplace update` has no scope. The team guide says: update inside each project where Huddle is used, open a new
 session, and that a project can be on an older version than another.
 
