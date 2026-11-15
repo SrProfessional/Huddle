@@ -1016,3 +1016,13 @@ change, and a verdict («ready to merge», «needs changes», «stopped»), but 
 session, **one at a time**: before each one, the PR/MR is checked again against the updated base (it still merges cleanly and its tests
 pass on the branch updated with the base, in a fresh worktree), because the merge before it may have changed the base; if not, the
 Player gets a «🔁 Changes requested» comment to update the branch and nothing is merged. Then the next review that fits starts.
+
+**Standing orders of the Coach (Issue #175).** Claude Code asks before an outward action (a merge, a push) unless the authorization is
+written down for good, so a session that read «merge it yourself» in `/huddle-review` could still stop and ask. Seen on 2026-11-15: after
+the first Issue of a new repo the session said «if you say merge, I will merge PR #12 to staging, close Issue #4 with huddle land and
+update the labels», and waited. The `CLAUDE.md` block now has «Standing orders of the Coach»: in a session whose login is the Coach,
+merging into staging (or the default branch when there is none) an Issue PR/MR that passed `/huddle-review`, `huddle land` and `huddle
+labels` right after, the PRs/MRs of `/huddle-update` and `/huddle-team`, and starting the watch with `/huddle-watch always` set need no
+confirmation. Only `/huddle-release` (staging to production) still waits for the Coach's word. And a Coach who works on an Issue (a team
+of one) does not stop after opening the PR/MR: `/huddle-play` runs `/huddle-review` on it right away, in a fresh worktree with the tests
+run again, and merges on all good. A Player who is not the Coach never merges.
