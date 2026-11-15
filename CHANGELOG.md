@@ -7,6 +7,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The Coach's watch reviews several PRs/MRs at once, by effort (Issue #165, H68; `docs/design.md` §19 and §24). Each review is a
+  background subagent with a clean context, within `review_capacity` effort points (default 5); the subagents never merge. The watch
+  merges one at a time, checking each PR/MR again against the updated base first, and asks for an update instead of merging when it no
+  longer merges cleanly or its tests fail. Review items of `huddle queue --json` carry their `effort`.
 - One Player session works on several Issues at once, by effort and capacity (Issue #164, H67; `docs/design.md` §24). `/huddle-play`
   with no number hands each assigned Issue that fits to a background subagent with a clean context, keeps the review waits in the main
   session, continues the same subagent when the Coach asks for changes, and starts the next one when room frees. The capacity is 5 points

@@ -68,7 +68,7 @@ test('--json prints the items; pr and head only for review', async () => {
   assert.equal(await run(['queue', '--json'], h.ctx), 0);
   assert.deepEqual(JSON.parse(h.text()), {
     waiting: [
-      { issue: 42, title: 'Add login form', waits: 'review', pr: 51, head: 'a1b2c3d' },
+      { issue: 42, title: 'Add login form', waits: 'review', pr: 51, head: 'a1b2c3d', effort: 2 },
       { issue: 47, title: 'Which payment provider?', waits: 'decision' },
       { issue: 53, title: 'Login page crashes on Safari', waits: 'triage' },
     ],

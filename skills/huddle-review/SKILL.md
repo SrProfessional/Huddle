@@ -5,15 +5,13 @@ description: Use when the Coach reviews a Player's PR/MR and must either request
 
 # huddle-review
 
-For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not
-merge, deploy or change settings; give the review as text and stop.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop.
 
 ## Review
 
 1. Read the PR/MR, the Issue it closes (goal, allowed files, tests that must pass) and the diff.
 2. Check out the branch in a worktree and run the tests yourself. Compare the counts with the PR/MR text.
-3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence;
-   no secret, no runtime dependency the rules forbid.
+3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence; no secret, no runtime dependency the rules forbid.
 
 ## A design PR (its Issue has the `design` label, and the PR only touches `design/<n>-<slug>/`)
 
@@ -45,6 +43,10 @@ First run /huddle-play <n>: it marks this request as taken (👀), so the Issue 
 
 Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Right after posting, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
 (`n` the Issue): it puts `changes requested from Coach` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
+
+## Reviewing for the watch
+
+When the prompt says you review for `/huddle-watch` (a subagent, Issue #165): do the whole «Review» above, and «Changes needed» when something must change. When all is good, do **not** approve or merge: the watch merges one PR at a time. End with a short verdict: «ready to merge», «needs changes» (and what), or «stopped» (and why).
 
 ## All good
 
