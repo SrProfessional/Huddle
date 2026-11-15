@@ -53,6 +53,7 @@
         <li><a href="#areas">Areas and progress</a></li>
         <li><a href="#decisions">Decisions</a></li>
         <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#effort">Effort and capacity</a></li>
         <li><a href="#staging">Staging</a></li>
         <li><a href="#only-you">Only you</a></li>
       </ul>
@@ -118,6 +119,13 @@
         <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The Coach reviews with <code>/huddle-review</code> and either merges or asks for changes.</p>
         <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub Actions or CI minutes. If Claude Code was closed meanwhile, a hook says on the next start that a request is pending. Either way, <code>/huddle-play &lt;n&gt;</code> picks the Issue up again after the Coach answered a review or a decision.</p>
         <p class="prose">The Coach can also let their session do the checking: <code>/huddle-watch</code> looks every few minutes at what waits and reviews it (<code>/huddle-watch status</code> and <code>/huddle-watch off</code> do what they say). Turning it on is the order to merge what it approves. Decisions and bug triage stay with the person, and <code>huddle queue</code> lists what waits. The watch is turned on by hand in each session. It waits in the background like a Player's session, so it uses no Claude tokens while nothing waits, and wakes the session only when something waits. Without it, the Coach's session start says what waits. <code>/huddle-watch always</code> keeps it on: it starts again in each of the Coach's sessions of that repo on that machine (a mark on the machine, not a file of the repo), until <code>/huddle-watch off</code>. It never starts for a Player.</p>
+      </section>
+
+      <section id="effort">
+        <h2>Effort and capacity</h2>
+        <p class="prose">Each Issue says how big it is: 1 small, 2 medium, 3 large (2 when it says nothing). <code>/huddle-issue</code> suggests the effort from the Issue's own files, tests and migrations, and warns when an Issue is too big and should be split into parts.</p>
+        <p class="prose">Each Player has a capacity of 5 points by default, set by the Coach in <code>huddle.json</code>. With <code>/huddle-play</code> alone, the Player's session works on as many assigned Issues as fit at once, each in a subagent with a clean context, and starts the next one when room frees. Work in review uses no room, and two Issues that share a file never run at once. A Player can only lower their capacity, on their machine, with <code>huddle capacity</code>; <code>huddle next</code> shows what starts and what waits.</p>
+        <p class="prose">The Coach's watch does the same with the reviews: it reviews several pull requests at once within <code>review_capacity</code> points, and still merges them one at a time, checking each one again against the updated base first.</p>
       </section>
 
       <section id="staging">
