@@ -7,6 +7,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Fixed
 
+- One command sets the session's label and recomputes the Issue (Issue #153, H63). `huddle labels --issue <n> --started` adds
+  `in progress` and takes `assigned` off; `--needs-decision` adds `needs decision` and takes `in progress` off, in the same run.
+  `/huddle-play` and the `CLAUDE.md` block use them instead of «add the label, then run labels», which a real session left half-done
+  (`assigned` next to `in progress`, then `in progress` next to `needs decision`). The labels output says what goes on and what comes off
+  instead of «(keeps its label)».
+
 - A developer's session that stops for a decision keeps waiting for the answer (Issue #151, H62). After «⛔ Issue #N stopped: waiting
   for a decision», `/huddle-play` starts `huddle wait <n>` in the background, as it does after the PR/MR, so the AI Manager's answer
   from `/huddle-decide` is picked up by itself. Before, the developer had to notice it and type `/huddle-play <n>`.

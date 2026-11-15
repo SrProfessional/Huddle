@@ -30,8 +30,8 @@ test('huddle-play runs labels --issue after the branch and label, the PR, the de
   const t = flat('skills/huddle-play/SKILL.md');
   assert.ok(t.includes(ISSUE_CMD));
   const start = at(t, '## Start an Issue');
-  const branch = at(t, '`in progress` label', start);
-  const l1 = at(t, 'labels --issue', branch, 'labels after the branch');
+  const branch = at(t, 'Create the branch', start);
+  const l1 = at(t, 'labels --issue <n> --started', branch, 'labels --started right after the branch (Issue #153)');
   const pr = at(t, 'Open the PR/MR', l1);
   const l2 = at(t, 'labels --issue', pr, 'labels after the PR is opened');
   assert.ok(l1 < pr && pr < l2);
@@ -42,8 +42,8 @@ test('huddle-play runs labels --issue after the branch and label, the PR, the de
   const l4 = at(t, 'labels --issue', ready, 'labels after Ready for review again');
   assert.ok(take < l3 && l3 < ready && ready < l4);
   const stop = at(t, '## When you cannot go on');
-  const dec = at(t, '`needs decision` label', stop);
-  const l5 = at(t, 'labels --issue', dec, 'labels after the decision comment');
+  const dec = at(t, '«❓ Decision for the AI Manager:»', stop);
+  const l5 = at(t, 'labels --issue <n> --needs-decision', dec, 'labels --needs-decision after the decision comment (Issue #153)');
   assert.ok(dec < l5);
 });
 
