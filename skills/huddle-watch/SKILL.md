@@ -46,11 +46,17 @@ anything. Docs/design.md §19 and §22.
 
 ## Each item
 
-- **`review`:** run `/huddle-review` on that PR/MR (the item's `pr`) with its usual rules. All good: approve and merge, as it does today.
-  Changes needed: the usual «🔁 Changes requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a test
-  fails, a requirement is missing, the platform refuses the merge, a permission is missing), say it once, with the reason, and do **not**
-  try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes `head` and makes it a new item (a
-  `head` of `null` means it could not be read: use the PR/MR number alone). Handle the items one at a time, oldest first.
+- **`review` (Issue #165):** review several at once, oldest first: start reviews while the sum of the item's `effort` stays within
+  `review_capacity` of `huddle.json` (default 5); a PR/MR bigger than the capacity is reviewed alone. Each review is a subagent with the
+  Agent tool, **in the background**, with a clean context, told: «Review <pr> with /huddle-review, following its «Reviewing for the
+  watch» section». A subagent never merges. When it ends with «needs changes», it already posted the comment and the item leaves the queue by itself.
+- **Merges, one at a time, in this session.** For each «ready to merge», in order: check it again against the updated base (it still
+  merges cleanly, and its tests pass on the branch updated with the base, in a fresh worktree). If not, post the usual «🔁 Changes
+  requested» comment asking to update the branch from the base, and nothing is merged. If it does, approve and merge it, and land it, as
+  «All good» of `/huddle-review` says. Then start the next review that fits.
+- **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,
+  with the reason, and do **not** try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes
+  `head` and makes it a new item (a `head` of `null` means it could not be read: use the PR/MR number alone).
 - **`decision` and `triage`:** never answered by the watch: those are the person's decisions. Say one line per new item («#47 waits for your
   decision», «#53 waits for your triage») once per Issue, add `#<issue>` to the keys, and leave it.
 

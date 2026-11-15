@@ -1007,3 +1007,12 @@ docs do not promise it in the VS Code extension), and runs `huddle next` again w
 2026-11-15: background subagents can run Bash, git and gh and push, up to 20 at once by default; a permission prompt of a subagent appears
 in the main session; closing the main session stops them. Each subagent makes its own worktree from the staging branch with git (the
 Agent tool's worktree isolation starts from the default branch).
+
+**Parallel reviews (Issue #165).** When several PRs/MRs wait, the Coach's watch reviews them at once, each in a background subagent with
+a clean context, while the sum of their efforts stays within `review_capacity` in `huddle.json` (default **5** points; a PR/MR bigger than
+it is reviewed alone). Each review item of `huddle queue --json` and `queue --wait` carries its Issue's `effort` (2 when it has none). A
+subagent follows «Reviewing for the watch» of `/huddle-review`: the whole review, the «🔁 Changes requested» comment when something must
+change, and a verdict («ready to merge», «needs changes», «stopped»), but it never approves or merges. The merges stay in the watch's main
+session, **one at a time**: before each one, the PR/MR is checked again against the updated base (it still merges cleanly and its tests
+pass on the branch updated with the base, in a fresh worktree), because the merge before it may have changed the base; if not, the
+Player gets a «🔁 Changes requested» comment to update the branch and nothing is merged. Then the next review that fits starts.
