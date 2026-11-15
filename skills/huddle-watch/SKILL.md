@@ -31,7 +31,8 @@ An interval is like `5m`: default 5 minutes, allowed 2 to 60 (the wait takes it 
 
 ## The labels pass
 
-Each round of the wait runs the full labels pass by itself (local and free, unlike the cloud job), so the board is right every few minutes
+Each round of the wait runs the full labels pass by itself after reading the queue, only when nothing new waits (it can take minutes on a
+big project, and the queue seconds). It is local and free, unlike the cloud job, so the board is right every few minutes
 even for what nobody's session handled (a merge from a phone). The check now runs `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` before the queue. It is best
 effort: if it fails, say one line with the reason, and the queue is read anyway; it never stops or blocks the watch and never asks
 anything. Docs/design.md §19 and §22.

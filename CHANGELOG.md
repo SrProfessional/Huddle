@@ -10,7 +10,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 - `/huddle-watch` waits in the background with no Claude tokens while nothing waits (Issue #157, H64). It was a recurring job that woke
   the AI Manager's session every few minutes for a Claude turn that mostly found nothing, and it expired after 7 days. Now the session
   runs `huddle queue --wait [seconds] [--seen <keys>]` as a background command, the way a developer's session runs `huddle wait`: a Node
-  loop that runs the labels pass and reads the queue each round, and wakes the session only when something new waits. `huddle queue
+  loop that reads the queue each round and wakes the session as soon as something new waits; only a round with nothing new runs the
+  labels pass (it took minutes on a real project, the queue seconds). `huddle queue
   --wait-off` stops it at its next round. The review is still done by the session's own model, and turning the watch on is still the AI
   Manager's order to review and merge. The guides, the guide PDF and the website say so.
 
