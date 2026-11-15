@@ -1,6 +1,6 @@
 ---
 name: huddle-play
-description: Use when a Player works on an Issue: it starts an Issue that has no branch yet, and picks one up again after the Coach answered it (a review asked for changes, or a decision was given). Run it as `/huddle-play <n>`.
+description: Use when a Player works on an Issue: it starts an Issue that has no branch yet, and picks one up again after the Coach answered it (a review asked for changes, or a decision was given). Run it as `/huddle-play <n>`, or `/huddle-play` alone to work on several assigned Issues at once.
 ---
 
 # huddle-play
@@ -19,8 +19,7 @@ and never asks anything. When it prints nothing, say nothing about versions (it 
 
 ## Which one is it?
 
-Read the Issue and find its branch (the «Branch» section). Then:
-
+With no number (`/huddle-play`): read and follow `${CLAUDE_PLUGIN_ROOT}/skills/huddle-play/parallel.md` (several Issues at once, by capacity). With a number, read the Issue and find its branch (the «Branch» section):
 - **Neither a local branch nor `origin/<branch>` exists:** the Issue was never started. Follow «Start an Issue» (or «A Design Issue»).
 - **The branch exists:** the Issue was started. Follow «Continue an Issue». Do not start it over.
 

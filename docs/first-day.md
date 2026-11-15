@@ -70,7 +70,8 @@ most questions you will have.
 ## 3. Take your first Issue
 
 1. The Coach's session assigns you an Issue (`huddle labels` does it when the Issue is ready): it carries `assigned` and your name.
-2. Open Claude Code in the repo and run `/huddle-play <n>`. You can also paste the «Prompt for Claude Code» block of the
+2. Open Claude Code in the repo and run `/huddle-play <n>` (or `/huddle-play` alone to work on several of your Issues at once, as many
+   as your capacity allows; `huddle next` shows which). You can also paste the «Prompt for Claude Code» block of the
    Issue.
 3. The session reads the Issue, checks that what it depends on is merged, creates its own branch in a worktree and adds
    the `in progress` label. If a dependency is not merged, it stops: that is correct, wait for it.
