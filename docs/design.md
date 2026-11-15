@@ -499,7 +499,7 @@ and to send every developer the install routes, which read as missing steps; `hu
   else `origin/master`, after `git fetch origin`): if the file is there, an old clone is told to update its copy, so it never becomes a
   first install that offers the developer's own login as AI Manager. A failed fetch is said in one line and setup goes on.
 - The AI Manager's session merges the update PR/MR itself, without asking (asked by the AI Manager on 2026-11-15: asking was one more
-  step for nobody's benefit). Running `/huddle-update` is the order, as turning on `/huddle-watch` is: merge commit, branch kept. A refused
+  step for nobody's benefit). The AI Manager typing `/huddle-update` is the order (nothing runs it by itself): merge commit, branch kept. A refused
   merge (branch protection, a required review) stops with one line, never another way. A developer's session still never merges.
 - `/huddle-update`'s last line says the project's Huddle files apply to every branch once its PR/MR is merged into the default branch
   (older branches get them when updated from it), and that the plugin itself is per machine, not per branch.
