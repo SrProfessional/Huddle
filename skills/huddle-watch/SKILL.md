@@ -1,6 +1,6 @@
 ---
 name: huddle-watch
-description: Use when the AI Manager wants its session to check by itself what waits for it and review the PRs/MRs, waiting in the background with no Claude tokens while nothing waits. Run it as `/huddle-watch`, `/huddle-watch 10m`, `/huddle-watch status` or `/huddle-watch off`.
+description: Use when the AI Manager wants its session to check by itself what waits for it and review the PRs/MRs, waiting in the background with no Claude tokens while nothing waits. Run it as `/huddle-watch`, `/huddle-watch 10m`, `/huddle-watch always`, `/huddle-watch status` or `/huddle-watch off`.
 ---
 
 # huddle-watch
@@ -9,7 +9,14 @@ For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: i
 stop with one clear line («/huddle-watch is for the AI Manager») and change nothing. The rules are in docs/design.md §19.
 
 The watch waits in the background with a small Node process (`queue --wait`), as a developer's session waits for its review: it uses
-**no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself.
+**no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself, unless
+the AI Manager chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
+
+## Always (`/huddle-watch always`)
+
+Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --always` (a mark on this machine only, never in the repo: no PR, nobody else affected), then turn the
+watch on as in «On». Say that it will start again in each of your sessions of this repo on this machine until `/huddle-watch off`. When the
+session start says «the watch starts now, as you asked», do the same «On» steps before anything else.
 
 ## On (`/huddle-watch` or `/huddle-watch <interval>`)
 
@@ -50,8 +57,8 @@ anything. Docs/design.md §19 and §22.
 ## Off (`/huddle-watch off`) and status (`/huddle-watch status`)
 
 - **Off:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait-off` (the wait stops at its next round, even if this session lost its ID), stop
-  the background command too when its ID is known, and say it is off. Nothing running: say so.
-- **Status:** say whether this session runs the watch's background wait, and its interval.
+  the background command too when its ID is known, and say it is off. Off also forgets «always»: it will not start again by itself. Nothing running: say so.
+- **Status:** say whether this session runs the watch's background wait, its interval, and whether «always» is set on this machine.
 
 ## Who does each step
 
