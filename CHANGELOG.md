@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- `/huddle-update` always gets the newest Huddle (Issue #136, H58). It updates the plugin every time instead of trusting the release
+  lookup, which is cached for a day: a cache read before a release made a repo on 0.8.0 skip 0.8.1 and ask the removed `labels_job`
+  question. It updates the install this project uses, read from `claude plugin list --json` (`--scope project` or `--scope user`). A
+  cached release older than the installed plugin is looked up again, and `huddle doctor` always looks up fresh.
+
 ## [0.8.1] - 2026-11-14
 
 ### Changed

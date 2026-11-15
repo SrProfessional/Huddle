@@ -467,7 +467,11 @@ says to update with `/plugins` or the terminal and run `/huddle-update` again); 
 `huddle-update-<version>` from the up-to-date default branch, entered with `EnterWorktree`, running `huddle update --json` from the
 **new** version's folder (a sibling of `${CLAUDE_PLUGIN_ROOT}`, found by `newPluginRoot` in `lib/core/update.mjs`), because the session
 still has the old skills loaded; (4) the pending questions, as before; (5) the PR/MR, which a developer's session never merges; (6) the
-last line: `/reload-plugins` applies the new version in the open session, in the terminal and in VS Code. It was tried on a real project:
+last line: `/reload-plugins` applies the new version in the open session, in the terminal and in VS Code. Since Issue #136 step (2) runs
+every time, not only when the notice or `doctor` saw a newer release (the lookup is cached and can be hours late: on 2026-11-14 a cache
+read that morning said 0.7.0 and a repo on 0.8.0 skipped 0.8.1). It runs `claude plugin marketplace update huddle`, reads
+`claude plugin list --json`, and updates the `huddle@huddle` entry this project uses: a `project` entry whose `projectPath` is the repo
+root (`--scope project`, run from there), else the `user` entry (`--scope user`); with neither it points to `/huddle-setup`. It was tried on a real project:
 `claude plugin update` from a second terminal, then `/reload-plugins` in the open session, and the skill added by the new version showed
 up, in both. «Restart Claude Code» (and «Developer: Reload Window» in VS Code) is the fallback only. A plugin updated from the `/plugins`
 dialog applying by itself was not tried, so no text says it. `huddle update` itself does not change. The first update to a version
@@ -590,7 +594,8 @@ Asked on 2026-11-11 (Issue #91). The SessionStart hook's «newer Huddle» notice
 session then shows nothing. A skill runs in the chat, so what it says is seen in every client.
 
 **`huddle notice [--json]`.** Read-only, and it needs no login. It uses the same release lookup as the hook (`latestRelease`: cached for a
-day, 3 seconds at most) and the same text (`noticeText`, with the AI Manager's extra line when `isManager()` says so, as the hook asks it:
+day, 3 seconds at most; since Issue #136 a cached answer lower than the installed version is stale and looked up again, and the
+`version` line of `huddle doctor`, run on purpose, looks up first with `{ fresh: true }` and falls back to the cache) and the same text (`noticeText`, with the AI Manager's extra line when `isManager()` says so, as the hook asks it:
 only when there is something to show; with no `huddle.json` or no login nobody is the AI Manager). It prints the text when a newer
 release exists **and** the skills have not shown it in the last 24 hours; otherwise it prints nothing. It keeps its own timestamp,
 `skillShownAt`, in the same cache file: it never reads or writes the hook's `shownAt`, and the hook never reads `skillShownAt`, so the two
