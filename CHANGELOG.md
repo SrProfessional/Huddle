@@ -11,7 +11,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   stops and changes nothing: it names the AI Manager and points to `/huddle-play`; with an old clone that has no `huddle.json` yet, it
   finds the file on the remote's default branch and says to update the copy instead of offering the developer's own login as AI Manager.
   `/huddle-update` no longer repeats the first-install notes (run `huddle labels` once, send the install routes), and its last line says
-  that the files apply to every branch once its PR/MR is merged, while the plugin is per machine.
+  that the files apply to every branch once its PR/MR is merged, while the plugin is per machine. When the AI Manager runs it, the session
+  merges the update PR/MR itself, without asking (a developer's session still never merges).
 
 ## [0.8.3] - 2026-11-15
 

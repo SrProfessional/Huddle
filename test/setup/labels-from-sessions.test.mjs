@@ -114,5 +114,7 @@ test('design §22 and §19, the team guide and the changelog say it', () => {
   const s19 = d.slice(at(d, '## 19. Watching what waits'), at(d, '## 20. The version notice'));
   assert.match(s19, /full `huddle labels` first|runs the full `huddle labels`/);
   assert.match(flat('docs/team-guide.md'), /permission to edit labels/i);
-  assert.match(flat('CHANGELOG.md').slice(0, 6000), /H51|Issue #120/);
+  // The 0.8.0 section, wherever newer releases push it (a fixed window broke as the CHANGELOG grew).
+  const c = flat('CHANGELOG.md');
+  assert.match(c.slice(at(c, '## [0.8.0]'), at(c, '## [0.7.0]')), /H51|Issue #120/);
 });

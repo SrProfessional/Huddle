@@ -466,7 +466,7 @@ huddle@huddle --scope project`, run in the project (if `claude` cannot be run fr
 says to update with `/plugins` or the terminal and run `/huddle-update` again); (3) the files, in a worktree and branch of their own,
 `huddle-update-<version>` from the up-to-date default branch, entered with `EnterWorktree`, running `huddle update --json` from the
 **new** version's folder (a sibling of `${CLAUDE_PLUGIN_ROOT}`, found by `newPluginRoot` in `lib/core/update.mjs`), because the session
-still has the old skills loaded; (4) the pending questions, as before; (5) the PR/MR, which a developer's session never merges; (6) the
+still has the old skills loaded; (4) the pending questions, as before; (5) the PR/MR, which a developer's session never merges and the AI Manager's session merges itself (Issue #147); (6) the
 last line: `/reload-plugins` applies the new version in the open session, in the terminal and in VS Code. Since Issue #136 step (2) runs
 every time, not only when the notice or `doctor` saw a newer release (the lookup is cached and can be hours late: on 2026-11-14 a cache
 read that morning said 0.7.0 and a repo on 0.8.0 skipped 0.8.1). It runs `claude plugin marketplace update huddle`, reads
@@ -498,6 +498,9 @@ and to send every developer the install routes, which read as missing steps; `hu
   changes. With no `huddle.json` here, it first looks at the remote's default branch (`git show origin/HEAD:huddle.json`, else `origin/main`,
   else `origin/master`, after `git fetch origin`): if the file is there, an old clone is told to update its copy, so it never becomes a
   first install that offers the developer's own login as AI Manager. A failed fetch is said in one line and setup goes on.
+- The AI Manager's session merges the update PR/MR itself, without asking (asked by the AI Manager on 2026-11-15: asking was one more
+  step for nobody's benefit). Running `/huddle-update` is the order, as turning on `/huddle-watch` is: merge commit, branch kept. A refused
+  merge (branch protection, a required review) stops with one line, never another way. A developer's session still never merges.
 - `/huddle-update`'s last line says the project's Huddle files apply to every branch once its PR/MR is merged into the default branch
   (older branches get them when updated from it), and that the plugin itself is per machine, not per branch.
 
