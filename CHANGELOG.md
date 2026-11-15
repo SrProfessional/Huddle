@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-15
+
 ### Added
 
 - The website and the PDF guides say effort, capacity and the parallel work (Issue #171, H71): a new «Effort and capacity» section on
@@ -23,6 +25,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   and says when an Issue is too big and should be split; `/huddle-issue` and `/huddle-bug` use it. `huddle effort <n>` shows an Issue's
   effort. It is the base of the parallel work of #164 and #165.
 
+- `/huddle-watch always` keeps the watch on (Issue #160, H65). `huddle queue --always` leaves a mark for the repo on the AI Manager's machine
+  (never in the repo), and each of their session starts there says «the watch starts now, as you asked» and has Claude start it before
+  anything else. `/huddle-watch off` also forgets it. A developer's login never starts it.
+
 ### Changed
 
 - **The roles are now Coach and Player** (Issue #166, H70). The person who writes the Issues, answers the decisions, reviews and merges
@@ -32,14 +38,6 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   `ai_manager` keeps working (both set to different logins is an error). The label «changes requested from AI Manager» is now
   «changes requested from Coach»: the full `huddle labels` renames the old one once, and both names are read until then. GitLab's own
   member role «Developer» keeps its name. The website and the guide PDF also say `/huddle-watch always`.
-
-### Added
-
-- `/huddle-watch always` keeps the watch on (Issue #160, H65). `huddle queue --always` leaves a mark for the repo on the AI Manager's machine
-  (never in the repo), and each of their session starts there says «the watch starts now, as you asked» and has Claude start it before
-  anything else. `/huddle-watch off` also forgets it. A developer's login never starts it.
-
-### Changed
 
 - `/huddle-watch` waits in the background with no Claude tokens while nothing waits (Issue #157, H64). It was a recurring job that woke
   the AI Manager's session every few minutes for a Claude turn that mostly found nothing, and it expired after 7 days. Now the session

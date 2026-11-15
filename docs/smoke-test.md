@@ -461,6 +461,20 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.9.0
+
+Run of: 2026-11-15, Huddle `staging` with Issues #157, #160, #162, #164, #165, #166 and #171 merged (commit 7a0f262), by the Coach's Claude Code session. Only the new parts were checked; the 0.8.5 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| The watch waits in the background with no Claude tokens (#157) | ✔ | covered by tests | On a real project: `queue --wait 120` with nothing seen woke in 9 s with the two PRs waiting; with everything seen, `queue --wait-off` ended it with `{"stopped":true}` right after its labels pass. Found in staging and fixed: the labels pass (4m46s there) ran before the queue (15 s). |
+| `/huddle-watch always` (#160) | ✔ | covered by tests | `queue --always` left the mark for this repo; `huddle hook` then printed «the watch starts now, as you asked» and told Claude to start it. A Player's login and no mark: covered by tests. |
+| Coach and Player (#166) | ✔ | covered by tests | This repo, still with `ai_manager` in `huddle.json`, loads as before. On a real project a labels dry run printed `changes requested from AI Manager → changes requested from Coach (dry run)`. |
+| Effort (#162) | ✔ | covered by tests | `huddle effort --suggest` on three real Issues gave 2 (5 files and a migration), 1 (3 files) and 2 (9 files); `huddle effort <n>` reads the section or says the default. |
+| A Player works on several Issues at once (#164) | ✔ | covered by tests | `huddle next` on a real project, read-only: capacity 5, 4 points in use, three Issues wait for room and one because it shares `services/panel-api/src/routes/` with an Issue in progress. The subagents themselves: checked against the Claude Code docs, not run live. |
+| The watch reviews several PRs at once (#165) | ✔ | covered by tests | `queue --json` on a real project listed two reviews with effort 2 each. Parallel reviews with real subagents: covered by tests and the docs check, not run live. |
+| The website and the PDFs (#171) | ✔ | ✔ | The three pages rendered at 1280 and 375 px with no sideways scroll; both PDFs rebuilt. The live site changes when this release is merged into `main`. |
+
 ### Results 0.8.5
 
 Run of: 2026-11-15, Huddle `staging` with Issues #151 and #153 merged (commit d15a320), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.4 and older tables below still hold for the rest.
