@@ -28,9 +28,14 @@ test('step 3 makes its own worktree and branch from the default branch and runs 
   assert.match(skill, /never changes? branch|does not change branch/i);
 });
 
-test('step 5 opens the PR and never merges', () => {
-  assert.match(skill, /open the PR\/MR/i);
-  assert.match(skill, /never merges?/i);
+test('step 5 opens the PR; a developer\'s session never merges, the AI Manager\'s merges it without asking (Issue #147)', () => {
+  const step5 = skill.slice(skill.indexOf('## 5.'), skill.indexOf('## 6.'));
+  assert.match(step5, /open the PR\/MR/i);
+  assert.match(step5, /A developer's session never merges/);
+  assert.match(step5, /AI Manager's session .*merges it itself, without asking/);
+  assert.match(step5, /gh pr merge --merge/);
+  assert.match(step5, /refused .* stop and say so, never look for another way/);
+  assert.doesNotMatch(step5, /does not merge it either/);
 });
 
 test('step 6 ends with /reload-plugins, the restart fallback and both ways to restart', () => {
