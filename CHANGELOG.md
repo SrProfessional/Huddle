@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- Each Issue has an effort of 1, 2 or 3 points (Issue #162, H66; `docs/design.md` §24). Every Issue template has an «Effort» section
+  (2 when an Issue has none). `huddle effort --suggest <file>` proposes one from the Issue's allowed files, tests, migrations and folders,
+  and says when an Issue is too big and should be split; `/huddle-issue` and `/huddle-bug` use it. `huddle effort <n>` shows an Issue's
+  effort. It is the base of the parallel work of #164 and #165.
+
 ### Changed
 
 - **The roles are now Coach and Player** (Issue #166, H70). The person who writes the Issues, answers the decisions, reviews and merges
