@@ -11,9 +11,15 @@ Installs Huddle in the repo you are in. Run it from the repo root, on a branch t
 
 Before asking anything, look for `huddle.json` in the repo root and read it. A repo that already has a valid one is set up: to bring it to a newer Huddle, use `/huddle-update` (it also asks any question a new release added).
 
-- **It exists and is valid** (a refresh, for example after updating the plugin): **ask nothing**. Everything the questions would ask is already in the file. Go straight to «Do» and run `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs"` with no flags: it reuses the file's answers, replaces the block of `CLAUDE.md` and refreshes the templates. In your report say what changed: the block (updated or not), the templates written, and the templates **kept** because the project edited them (the report's `skipped`), with the one-line way to get the current one.
+- **It exists and is valid, and you are not its AI Manager:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`. If the login is not `ai_manager`,
+  stop and change nothing, with one plain message: «This project already uses Huddle; its AI Manager is <login>. You do not need
+  /huddle-setup: type /reload-plugins and work with /huddle-play <n>.»
+- **It exists and is valid** (a refresh by the AI Manager, for example after updating the plugin): **ask nothing**. Everything the questions would ask is already in the file. Go straight to «Do» and run `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs"` with no flags: it reuses the file's answers, replaces the block of `CLAUDE.md` and refreshes the templates. In your report say what changed: the block (updated or not), the templates written, and the templates **kept** because the project edited them (the report's `skipped`), with the one-line way to get the current one.
 - **It does not exist, or it is invalid or incomplete**: ask **only** for what is missing. Run the CLI once with no flags: for a missing file it fails naming each missing field (`"platform" is required`), and for an invalid one it names the field. Ask only the questions below that match those fields, and keep what the file already says.
-- **No file at all** is a first install: ask all five.
+- **No file here:** first run `git fetch origin` and look for it on the remote's default branch: `git show origin/HEAD:huddle.json`
+  (else `origin/main`, else `origin/master`). If it is there, stop and change nothing: «This project is already set up on <platform>; its
+  AI Manager is <login>. Update your copy first (git pull on <default branch>).» If the fetch fails, say so in one line and go on.
+- **No file anywhere** is a first install: ask all five.
 
 ## Ask (one message, in the developer's language; only on a first install, or for the fields that are missing)
 

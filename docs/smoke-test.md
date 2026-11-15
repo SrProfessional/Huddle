@@ -464,6 +464,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.8.4
+
+Run of: 2026-11-15, Huddle `staging` with Issue #147 merged (commit f0b0046), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.3 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Update no longer repeats the first-install notes (#147) | ✔ | covered by tests | A copy of a real project's Huddle files at setup 0.5.1 (its `huddle.json`, `CLAUDE.md`, `.github` and `.claude`), updated with `huddle update --dry-run`: 0.8.3 listed «Run huddle labels once» and «Send every developer both install routes»; staging listed neither and kept the other notes. On that project `huddle labels --dry-run` would create 0 labels, so nothing was missing. |
+| Setup stops for a developer on a project already set up, and checks the remote first (#147) | covered by tests | covered by tests | Skill text, tested as text. `git show origin/HEAD:huddle.json` read the real project's file and its `ai_manager` from the remote. A developer's login was not available for a live run. |
+| The AI Manager's `/huddle-update` merges its own PR (#147) | covered by tests | covered by tests | Skill text, tested as text. |
+
 ### Results 0.8.3
 
 Run of: 2026-11-15, Huddle `staging` with Issue #143 merged (commit a8ff2ac), by the AI Manager's Claude Code session. Only the new part was checked; the 0.8.2 and older tables below still hold for the rest.
