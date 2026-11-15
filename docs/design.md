@@ -992,3 +992,18 @@ Issue that is not open is one line and exit 1. `huddle effort --suggest <file>` 
 **The skills.** `/huddle-issue` and `/huddle-bug` write the draft to a temporary file outside the repo, run `huddle effort --suggest`,
 write its effort in the section and show the reasons; the Coach may change it. With `split: true` they propose the split before creating
 the Issue.
+
+**Capacity and several Issues at once (Issue #164).** A Player's **capacity** is how many effort points of active work their session takes
+on at once: `capacity` in `huddle.json` (default **5**), or `capacity_per_person` (`{ login: points }`), both set by the Coach. The Player can
+only **lower** theirs, on their machine: `huddle capacity <points>` leaves a mark next to the update cache (never in the repo), a higher
+value is refused, and `huddle capacity reset` restores it. `schedule({ active, candidates, capacity })` in `lib/core/schedule.mjs` decides:
+active work (in progress, or with changes requested) uses room and an Issue in review uses none; the candidates (assigned, ready, no stop
+label, not a Design Issue) go in by order, blocking bugs first then the oldest, while the sum stays within the capacity; two Issues that
+share an allowed file never run at once; an Issue bigger than the whole capacity runs alone when nothing else is active. `huddle next
+[--json]` prints it, with the reason of each wait. `/huddle-play` with no number follows `skills/huddle-play/parallel.md`: it hands each
+Issue that starts to a background subagent with a clean context (so no Issue pays for another's context), keeps the review waits in the
+main session, continues the same subagent with SendMessage when a request comes (or a new one when SendMessage is not available, as the
+docs do not promise it in the VS Code extension), and runs `huddle next` again when room frees. Checked against the Claude Code docs on
+2026-11-15: background subagents can run Bash, git and gh and push, up to 20 at once by default; a permission prompt of a subagent appears
+in the main session; closing the main session stops them. Each subagent makes its own worktree from the staging branch with git (the
+Agent tool's worktree isolation starts from the default branch).

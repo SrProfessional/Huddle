@@ -7,6 +7,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- One Player session works on several Issues at once, by effort and capacity (Issue #164, H67; `docs/design.md` §24). `/huddle-play`
+  with no number hands each assigned Issue that fits to a background subagent with a clean context, keeps the review waits in the main
+  session, continues the same subagent when the Coach asks for changes, and starts the next one when room frees. The capacity is 5 points
+  by default (`capacity`, `capacity_per_person` in `huddle.json`); a Player can only lower theirs, on their machine (`huddle capacity`).
+  `huddle next` shows what starts and what waits. Work in review uses no room; two Issues that share a file never run at once.
 - Each Issue has an effort of 1, 2 or 3 points (Issue #162, H66; `docs/design.md` §24). Every Issue template has an «Effort» section
   (2 when an Issue has none). `huddle effort --suggest <file>` proposes one from the Issue's allowed files, tests, migrations and folders,
   and says when an Issue is too big and should be split; `/huddle-issue` and `/huddle-bug` use it. `huddle effort <n>` shows an Issue's
