@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-11-15
+
 ### Added
 
 - The AI Manager's session start says what waits for them (Issue #138, H59): one line with the PRs/MRs to review, the decisions and the

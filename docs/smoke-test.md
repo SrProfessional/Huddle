@@ -464,6 +464,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.8.2
+
+Run of: 2026-11-15, Huddle `staging` with Issues #136 and #138 merged (commit a11028b), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.1 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| `/huddle-update` always gets the newest Huddle (#136) | ✔ | covered by tests | Run on this machine with the real release cache in the incident's state (`latest: 0.7.0`, read 7 hours earlier, installed 0.8.1): `huddle notice` from the installed 0.8.1 left the cache at 0.7.0; from staging it looked GitHub up again and wrote 0.8.1. `huddle doctor` from staging looked up fresh. `claude plugin list --json` gave one `huddle@huddle` entry per scope, with `scope` and `projectPath`, as the skill reads them. The release lookup is the same on GitLab. |
+| The AI Manager's session start says what waits (#138) | ✔ | covered by tests | `huddle hook` from staging, run as the AI Manager on a real project with one PR waiting, printed «Huddle: 1 thing waits for the AI Manager: a PR to review #424…», the same item as `huddle queue`, and its context says to act on nothing until asked. Developer, offline and GitLab (`MRs`, `!`) are covered by tests. |
+| What waiting costs, in the guides, the PDFs and the website (#138) | ✔ | ✔ | The three site pages rendered from the branch at 1280 px and 375 px: no sideways scroll; the home «roles» card read by screenshot. Both PDFs rebuilt (guide 15 → 16 pages, first day 7). The live site changes when this release is merged into `main`. |
+
 ### Results 0.8.1
 
 Run of: 2026-11-14, Huddle `staging` with Issues #130 and #132 merged (commit cc54e7f), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.0 and older tables below still hold for the rest.
