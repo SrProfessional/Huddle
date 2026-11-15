@@ -607,7 +607,15 @@ if the login is not `ai_manager`.
 5. **Off:** `huddle queue --wait-off` leaves a stop mark for this repo (next to the update cache, never in the repo); the waiting loop finds
    it at its next round, clears it, prints `{ "stopped": true }` and ends, so off works even when the session lost the background command's
    ID (it also stops the command when it knows the ID). A new `--wait` clears an old mark. Nothing running: it says so. **Status:** whether
-   this session runs the wait, and its interval.
+   this session runs the wait, its interval, and whether «always» is set.
+   **Always (Issue #160, asked by the AI Manager on 2026-11-15).** With no Claude tokens while nothing waits, the only reason left to turn
+   the watch on by hand each time is that it is the order to merge. `/huddle-watch always` gives that order once: `huddle queue --always`
+   (AI Manager only) leaves a mark for this repo next to the update cache, on this machine only (never in the repo: no PR, nobody else
+   affected), and turns the watch on. At each session start, when the login is `ai_manager` and the mark is set, the hook adds one line
+   («Huddle: the watch starts now, as you asked (/huddle-watch always). /huddle-watch off stops it.») and a context that tells Claude to
+   start the watch before anything else, as `/huddle-watch` does; it replaces the start line's «act on nothing until asked», since that
+   order was given, while the line about what waits still shows. A hook's context reaches Claude with the person's first message, so the
+   watch starts then. `/huddle-watch off` (`--wait-off`) also clears the mark. A developer's login never starts it.
 6. «Who does each step», and every command in the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` form.
 
 **The start line (Issue #138).** With the watch off nothing told the AI Manager what waits. When the login is the `ai_manager`, the

@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `/huddle-watch always` keeps the watch on (Issue #160, H65). `huddle queue --always` leaves a mark for the repo on the AI Manager's machine
+  (never in the repo), and each of their session starts there says «the watch starts now, as you asked» and has Claude start it before
+  anything else. `/huddle-watch off` also forgets it. A developer's login never starts it.
+
 ### Changed
 
 - `/huddle-watch` waits in the background with no Claude tokens while nothing waits (Issue #157, H64). It was a recurring job that woke
