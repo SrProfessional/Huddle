@@ -488,6 +488,19 @@ install or an update; a test walks the docs, the skills, the site and the CLI st
 **What it never does.** It never overwrites a template the project edited, never changes a key of `huddle.json` it was not
 given or does not own, never commits, never touches the network.
 
+**Only what the person must do (Issue #147).** Seen on 2026-11-15: a 0.5.1 repo updated to 0.8.3 was told to run `huddle labels` once
+and to send every developer the install routes, which read as missing steps; `huddle labels --dry-run` would have created 0 labels.
+
+- `setup()` writes those two notes only on a **first install** (no `huddle.json` before the run). A refresh and `huddle update` leave them
+  out: the labels exist (the session start's labels pass creates any new one) and the team installed Huddle already.
+- `/huddle-setup` on a project already set up: with `huddle.json` here, `huddle doctor` tells the AI Manager from a developer; a developer
+  is told «This project already uses Huddle; its AI Manager is <login>…» (type `/reload-plugins`, work with `/huddle-play <n>`) and nothing
+  changes. With no `huddle.json` here, it first looks at the remote's default branch (`git show origin/HEAD:huddle.json`, else `origin/main`,
+  else `origin/master`, after `git fetch origin`): if the file is there, an old clone is told to update its copy, so it never becomes a
+  first install that offers the developer's own login as AI Manager. A failed fetch is said in one line and setup goes on.
+- `/huddle-update`'s last line says the project's Huddle files apply to every branch once its PR/MR is merged into the default branch
+  (older branches get them when updated from it), and that the plugin itself is per machine, not per branch.
+
 ## 18. One command to work on an Issue: `/huddle-play`
 
 Asked by the AI Manager on 2026-11-11 (Issues #83 and #100). Issue #83 split the work in two commands: one to start an Issue and

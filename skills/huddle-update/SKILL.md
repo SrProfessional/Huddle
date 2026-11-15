@@ -75,11 +75,11 @@ opens). A developer's session never merges. The AI Manager's session does not me
 
 ## 6. The last line
 
-Say what was done, the PR link, and how to use Huddle `<version>` now. Use this text, in the person's language:
+Say what was done, the PR link, that the files apply to every branch once the PR/MR is merged into the default branch (older branches
+get them when updated from it; the plugin itself is per machine, not per branch), and how to use `<version>` now, in the person's language:
 
-> To use Huddle <version> in this session, type `/reload-plugins`. This works in the terminal and in VS Code. If the new skills do not
-> show up, restart Claude Code: close `claude` and open it again; in VS Code, run «Developer: Reload Window» from the Command Palette, or
-> close VS Code and open it again.
+> To use Huddle <version> in this session, type `/reload-plugins`. This works in the terminal and in VS Code. If the new skills do not show up,
+> restart Claude Code: close `claude` and open it again; in VS Code, run «Developer: Reload Window» from the Command Palette, or close VS Code and open it again.
 
 If nothing changed because the project is up to date, say so and ask for nothing. Do not send the person to a fresh session: `/reload-plugins` comes first.
 
