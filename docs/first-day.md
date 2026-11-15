@@ -83,6 +83,8 @@ A session ends with a message that starts with «✅ Issue #N finished» or «�
 test counts, what was not done and your next step. If you do not see it, the session is not over.
 
 After the PR is open the session waits in the background. When the AI Manager asks for changes, it continues on its own.
+The waiting is a small Node process on your computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no
+GitHub Actions or CI minutes. Leave the session open and the computer on.
 If you closed Claude Code meanwhile, the next time you open it a hook says there is a pending request and asks if it
 should continue. You can also run `/huddle-play <n>` yourself: it picks up the AI Manager's answer on Issue `n`, so you
 never copy the prompt by hand. `huddle pending` lists the requests.

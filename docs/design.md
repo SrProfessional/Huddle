@@ -584,6 +584,19 @@ if the login is not `ai_manager`.
 5. **Off:** `CronList`, `CronDelete` the `[huddle-watch]` job. Nothing running: it says so. **Status:** on or off, the interval and the next run.
 6. «Who does each step», and every command in the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` form.
 
+**The start line (Issue #138).** With the watch off nothing told the AI Manager what waits. When the login is the `ai_manager`, the
+SessionStart hook (`huddle hook`) reads what waits with the same computation as `huddle queue` (`waitingItems` in `lib/cli/run.mjs`,
+without the head commits), in parallel with its other reads and inside its time limit, and adds one visible line first, for example
+«Huddle: 4 things wait for the AI Manager: PRs to review #51, #52; a decision on #47; a bug report to triage #53. Type
+/huddle-review <pr>, or /huddle-watch to let this session check by itself.» (`MRs` and `!` on GitLab). Its `additionalContext` tells
+Claude to say it first, in the person's language, and to review, merge, answer or triage nothing until the person asks: the line only
+informs, because turning the watch on is the order to merge and that stays the AI Manager's explicit act. Nothing waiting, a developer's
+login, no login or a failed read: the hook adds nothing. The login is read once for this line and the update notice.
+
+**What waiting costs.** A developer's waiting session (`huddle wait`) is a Node process on their computer that asks the platform every
+two minutes with their own login: no Claude tokens and no CI minutes while it waits. Each `/huddle-watch` check is a short Claude turn
+even when nothing waits, so it uses some tokens; a longer interval spends less. The guides and the website say both.
+
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
 computer off, starting the watch when a session opens. A job fires only while the session is open and idle.
 

@@ -29,7 +29,7 @@
       </li>
       <li>
         <div><span class="who">Claude Code</span><h3>Writes the test, the code and opens the PR</h3>
-        <p>First the failing test, then the code that makes it pass. It opens a pull request (a merge request on GitLab) with the tests it ran and their real results, and closes with a message that starts with <strong>«✅ Issue #N finished»</strong>. Then it keeps waiting for the review in the background.</p></div>
+        <p>First the failing test, then the code that makes it pass. It opens a pull request (a merge request on GitLab) with the tests it ran and their real results, and closes with a message that starts with <strong>«✅ Issue #N finished»</strong>. Then it keeps waiting for the review in the background, with a small Node process on the developer's computer that asks the platform every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes.</p></div>
       </li>
       <li>
         <div><span class="who">The platform</span><h3>Automatic tests and labels</h3>
@@ -176,7 +176,7 @@
       </li>
       <li>
         <h3>Let the session review by itself</h3>
-        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the AI Manager's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it.</p>
+        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the AI Manager's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it. It is turned on by hand in each session. Each check is a short Claude turn even when nothing waits, so it uses some tokens: a longer interval (<code>/huddle-watch 15m</code>) and a fresh, short session spend less. Without it, the AI Manager's session start says what waits.</p>
       </li>
       <li>
         <h3>Update a project to a new release</h3>

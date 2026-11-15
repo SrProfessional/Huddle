@@ -116,7 +116,7 @@ claude plugin install huddle@huddle</code></pre>
           <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the AI Manager.</li>
           <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
         </ol>
-        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the AI Manager's requested changes on its own.</p>
+        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the AI Manager's requested changes on its own. The waiting is a small Node process on the developer's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. On the other side, the AI Manager can run <code>/huddle-watch</code> to let their session review what waits every few minutes.</p>
         <p class="prose">Next: <a href="../how-it-works/">how it works</a>, with the roles, the labels and the reviews.</p>
       </section>
     </article>
