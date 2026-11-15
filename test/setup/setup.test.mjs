@@ -122,7 +122,7 @@ test('the CLI entry takes flags, works in the current folder and prints a JSON r
   assert.throws(() => execFileSync(process.execPath, [cli, '--platform', 'nope'], { cwd: root, stdio: 'pipe' }));
 }));
 
-test('setup tells the developer that the labels command creates the design label (setup itself never calls the network)', () => {
+test('setup tells the Player that the labels command creates the design label (setup itself never calls the network)', () => {
   // A first install on each platform (Issue #147: a refresh no longer repeats this note).
   for (const answers of [GH, GL]) inTemp((root) => assert.ok(setup(root, answers).notes.some((n) => /bin\/huddle" labels/.test(n) && /design/.test(n)), answers.platform));
 });

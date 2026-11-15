@@ -1,6 +1,6 @@
 # Your first day
 
-For a developer joining a team that already runs Huddle. About thirty minutes before your first Issue.
+For a Player joining a team that already runs Huddle. About thirty minutes before your first Issue.
 
 ## 1. Set up your machine
 
@@ -34,7 +34,7 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
    In a terminal where `glab` is on the PATH run
    `git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"`, and check it with
    `git ls-remote origin`. Labels change by the schedule, so they can take up to 10 minutes: see
-   [Huddle on GitLab](gitlab.md#on-the-developers-machine).
+   [Huddle on GitLab](gitlab.md#on-the-players-machine).
 
    **Turn on auto-update, once.** Claude Code does not update a plugin from a third-party marketplace on its own.
 
@@ -56,8 +56,8 @@ For a developer joining a team that already runs Huddle. About thirty minutes be
 
 ## 2. Check it works
 
-Run `huddle doctor`. You want ✔ on `plugin`, `huddle.json`, `login`, `ai_manager` and `labels`. If `login` fails, read the line: «`gh`/`glab` is not installed or not on the PATH of this terminal» comes with the install command for your system (on Windows, then open a new terminal, or reload the PATH in PowerShell as the line shows); «is not logged in» comes with the step, `gh auth login` or `glab auth login` (with `--hostname <host>` on a self-managed server). If
-`labels` fails, tell the AI Manager: only they run `huddle labels`.
+Run `huddle doctor`. You want ✔ on `plugin`, `huddle.json`, `login`, `coach` and `labels`. If `login` fails, read the line: «`gh`/`glab` is not installed or not on the PATH of this terminal» comes with the install command for your system (on Windows, then open a new terminal, or reload the PATH in PowerShell as the line shows); «is not logged in» comes with the step, `gh auth login` or `glab auth login` (with `--hostname <host>` on a self-managed server). If
+`labels` fails, tell the Coach: only they run `huddle labels`.
 
 **Every change to an Issue goes through a Huddle session**: creating it, editing it, closing it, reopening it and merging
 its pull request. The session runs `huddle labels` after the change, so the board stays right. Still fine by hand on the
@@ -69,12 +69,13 @@ most questions you will have.
 
 ## 3. Take your first Issue
 
-1. The AI Manager's session assigns you an Issue (`huddle labels` does it when the Issue is ready): it carries `assigned` and your name.
-2. Open Claude Code in the repo and run `/huddle-play <n>`. You can also paste the «Prompt for Claude Code» block of the
+1. The Coach's session assigns you an Issue (`huddle labels` does it when the Issue is ready): it carries `assigned` and your name.
+2. Open Claude Code in the repo and run `/huddle-play <n>` (or `/huddle-play` alone to work on several of your Issues at once, as many
+   as your capacity allows; `huddle next` shows which). You can also paste the «Prompt for Claude Code» block of the
    Issue.
 3. The session reads the Issue, checks that what it depends on is merged, creates its own branch in a worktree and adds
    the `in progress` label. If a dependency is not merged, it stops: that is correct, wait for it.
-4. Answer its questions. This is the job. If you do not know, say so and let it ask the AI Manager.
+4. Answer its questions. This is the job. If you do not know, say so and let it ask the Coach.
 5. Review what it did before you accept the pull request. You are responsible for it.
 
 ## 4. The end of a session
@@ -82,11 +83,11 @@ most questions you will have.
 A session ends with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped». It has the PR link, the
 test counts, what was not done and your next step. If you do not see it, the session is not over.
 
-After the PR is open the session waits in the background. When the AI Manager asks for changes, it continues on its own.
+After the PR is open the session waits in the background. When the Coach asks for changes, it continues on its own.
 The waiting is a small Node process on your computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no
 GitHub Actions or CI minutes. Leave the session open and the computer on.
 If you closed Claude Code meanwhile, the next time you open it a hook says there is a pending request and asks if it
-should continue. You can also run `/huddle-play <n>` yourself: it picks up the AI Manager's answer on Issue `n`, so you
+should continue. You can also run `/huddle-play <n>` yourself: it picks up the Coach's answer on Issue `n`, so you
 never copy the prompt by hand. `huddle pending` lists the requests.
 
 ## If you are a designer
@@ -97,7 +98,7 @@ happens in the chat.
 What to install, once:
 
 1. Claude Code in VS Code (the editor with a chat panel), and a Claude plan that includes Claude Code.
-2. A GitHub account (a GitLab one if your team uses GitLab) that the AI Manager has added to the team.
+2. A GitHub account (a GitLab one if your team uses GitLab) that the Coach has added to the team.
 3. Huddle, with the two commands of step 1.3 above. Ask the session to run them with you if you are unsure.
 
 How a design task goes:
@@ -109,7 +110,7 @@ How a design task goes:
 4. When you are happy, write «ready» (or «listo»). The session asks for a one-line confirmation, then saves the design in
    the repo (`design/<issue number>-<slug>/`), opens the pull request with the screenshots and tells you what comes next.
    You do not run any other step.
-5. If the AI Manager asks for changes, keep talking in the same session. Each round is saved as a new commit, so nothing is lost.
+5. If the Coach asks for changes, keep talking in the same session. Each round is saved as a new commit, so nothing is lost.
 
 ## Do not
 
@@ -117,4 +118,4 @@ How a design task goes:
 - Touch files the Issue does not allow. Ask first.
 - Open ten sessions at once. One or two is the number.
 - Drop a requirement silently. List it under «What was NOT done» with the reason.
-- Look for another way when a permission or a key is missing. Stop and tell the AI Manager.
+- Look for another way when a permission or a key is missing. Stop and tell the Coach.

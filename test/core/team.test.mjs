@@ -1,4 +1,4 @@
-// Huddle: the pure part of `huddle team` (Issue #36): editing `assignees` in the text of huddle.json, and the step for the AI Manager.
+// Huddle: the pure part of `huddle team` (Issue #36): editing `assignees` in the text of huddle.json, and the step for the Coach.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assignStep, withAssignees } from '../../lib/core/team.mjs';
@@ -47,7 +47,7 @@ test('assignStep on GitHub names the Settings page and the exact gh command', ()
 test('assignStep on GitLab names Manage → Members and the Developer role, with the members page of the host', () => {
   const step = assignStep({ platform: 'gitlab', project: 'team/sub/app', host: 'gitlab.example.com' }, 'luis', true);
   assert.match(step, /Manage → Members/);
-  assert.match(step, /Developer/);
+  assert.match(step, /Developer/, "GitLab's member role keeps its own name");
   assert.match(step, /https:\/\/gitlab\.example\.com\/team\/sub\/app\/-\/project_members/);
   assert.match(assignStep({ platform: 'gitlab', project: 'a/b', host: '' }, 'x', true), /https:\/\/gitlab\.com\/a\/b\/-\/project_members/);
 });

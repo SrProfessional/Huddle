@@ -1,5 +1,5 @@
 name: Bug report
-description: Report something that does not work. The AI Manager checks it before anyone works on it.
+description: Report something that does not work. The Coach checks it before anyone works on it.
 title: "[Bug] "
 labels:
   - bug
@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the report. The AI Manager reads it, finds the cause and turns it into a ready Bug Issue. Until then it is labeled `needs triage` and nobody is assigned.
+        Thanks for the report. The Coach reads it, finds the cause and turns it into a ready Bug Issue. Until then it is labeled `needs triage` and nobody is assigned.
   - type: textarea
     id: what-happens
     attributes:

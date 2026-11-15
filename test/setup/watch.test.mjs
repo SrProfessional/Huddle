@@ -1,4 +1,5 @@
-// Issue #88, docs/design.md §19: `/huddle-watch` starts a check every few minutes in the AI Manager's session. The skill is text the session follows, so it is tested as text.
+// Issue #88, docs/design.md §19: `/huddle-watch` lets the Coach's session check what waits and review it. Since Issue #157 it waits in
+// the background (`huddle queue --wait`) with no Claude tokens while nothing waits, instead of a recurring job. The skill is tested as text.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -16,50 +17,64 @@ test('the watch skill has a name, says when to use it, and is short', () => {
   assert.ok(text.split('\n').length <= 90, 'keep it short');
 });
 
-test('it is for the AI Manager only: doctor first, and a clear stop for anyone else', () => {
+test('it is for the Coach only: doctor first, and a clear stop for anyone else', () => {
   const t = flat(WATCH);
-  assert.match(t, /For the AI Manager only/);
+  assert.match(t, /For the Coach only/);
   assert.ok(t.indexOf(`${HUDDLE} doctor`) > 0);
-  assert.match(t, /`ai_manager`/);
+  assert.match(t, /`coach`/);
   assert.match(t, /stop/i);
 });
 
-test('on: CronList first, no second watch, then CronCreate a recurring job whose prompt starts with [huddle-watch], on an off-minute', () => {
+test('on: no second watch, the check now, then the background wait with the interval in seconds (Issue #157)', () => {
   const t = flat(WATCH);
-  const list = t.indexOf('CronList');
-  const create = t.indexOf('CronCreate');
-  assert.ok(list >= 0 && create > list, 'CronList before CronCreate');
-  assert.match(t, /\[huddle-watch\]/);
-  assert.match(t, /already (on|running)/i);
-  assert.match(t, /not a second|no second|do \*\*not\*\* start a second|never (a )?second/i);
-  assert.match(t, /not :00 or :30|never :00 or :30|not the :00 or :30/i);
-  assert.match(t, /2-59\/5 \* \* \* \*/);
+  assert.match(t, /already on/i);
+  assert.match(t, /do \*\*not\*\* start a second/i);
   assert.match(t, /default 5 minutes/i);
   assert.match(t, /2 to 60/);
-  assert.ok(t.includes(`${HUDDLE} queue --json`));
+  const check = t.search(/\*\*Check now:\*\*/);
+  const queue = t.indexOf(`${HUDDLE} queue --json`, check);
+  const wait = t.indexOf(`${HUDDLE} queue --wait <seconds> --seen <keys>`, queue);
+  assert.ok(check > 0 && queue > check && wait > queue, 'check now, then queue --json, then the background wait');
+  assert.match(t, /in the background/i);
+  assert.match(t, /`5m` is `300`/);
 });
 
-test('the first message says that turning it on is the order to review and merge', () => {
+test('it uses no recurring job, never expires after 7 days, and says it uses no Claude tokens while nothing waits', () => {
   const t = flat(WATCH);
-  assert.match(t, /turning the watch on is the AI Manager's order to review and merge/i);
+  assert.doesNotMatch(t, /CronCreate|CronList|CronDelete|7 days/);
+  assert.match(t, /no Claude tokens while nothing waits/i);
+  assert.match(t, /Nothing turns it on by itself/);
+});
+
+test('the first message says that turning it on is the order to review and merge, and what stops it', () => {
+  const t = flat(WATCH);
+  assert.match(t, /turning the watch on is the Coach's order to review and merge/i);
   assert.match(t, /as if (they|you) asked for each review/i);
-});
-
-test('it says what stops it: off, or closing Claude Code, and that a recurring job expires after 7 days', () => {
-  const t = flat(WATCH);
   assert.match(t, /\/huddle-watch off/);
   assert.match(t, /closing Claude Code/i);
-  assert.match(t, /only in the session|lives only in the session/i);
-  assert.match(t, /7 days/);
+  assert.match(t, /lives only in the session/i);
+  assert.match(t, /session open/i);
 });
 
-test('off: CronList, CronDelete the [huddle-watch] job, and says so when nothing runs; status says on or off, the interval and the next run', () => {
+test('when the wait ends: the new items are handled and the wait starts again; stopped means off', () => {
   const t = flat(WATCH);
-  assert.match(t, /CronDelete/);
-  assert.match(t, /nothing (is )?running|not running/i);
+  assert.match(t, /\{ "waiting": \[\.\.\.\] \}/);
+  assert.match(t, /start the wait again/i);
+  assert.match(t, /\{ "stopped": true \}/);
+  assert.match(t, /`<pr>@<head>`/);
+  assert.match(t, /`#<issue>`/);
+});
+
+test('off runs queue --wait-off and stops the background command; status says whether it runs and its interval', () => {
+  const t = flat(WATCH);
+  assert.ok(t.includes(`${HUDDLE} queue --wait-off`));
+  assert.match(t, /Nothing running: say so/);
   assert.match(t, /\/huddle-watch status/);
-  assert.match(t, /next run/i);
   assert.match(t, /interval/i);
+});
+
+test('the check now says «Nothing is waiting for the Coach.» when empty', () => {
+  assert.match(flat(WATCH), /Nothing is waiting for the Coach\./);
 });
 
 test('a review item runs /huddle-review with its usual rules: merge when good, the «🔁 Changes requested» comment when not', () => {
@@ -99,52 +114,20 @@ test('it has «Who does each step», and every command is in the full form, neve
 
 test('the docs say what the watch is and where it stops', () => {
   const design = read('docs/design.md');
-  assert.match(design, /^## 19\. Watching what waits for the AI Manager/m);
+  assert.match(design, /^## 19\. Watching what waits for the Coach/m);
   assert.match(design, /huddle-watch\/SKILL\.md/);
   for (const f of ['README.md', 'docs/team-guide.md', 'docs/roles.md']) assert.match(read(f), /\/huddle-watch/, f);
   assert.match(read('README.md'), /huddle queue/);
   assert.match(read('CHANGELOG.md').split('## [0.5.0]')[0], /huddle queue[\s\S]*\/huddle-watch|\/huddle-watch[\s\S]*huddle queue/);
 });
 
-// Issue #107: the first check runs right away, in the same turn.
-const onSection = (text) => text.split(/## Each item/)[0];
-
-test('on: the order is CronList, then CronCreate, then an immediate queue --json check', () => {
-  const t = onSection(flat(WATCH));
-  const list = t.indexOf('CronList');
-  const create = t.indexOf('CronCreate');
-  const check = t.search(/Check now/);
-  const queue = t.indexOf(`${HUDDLE} queue --json`, check);
-  assert.ok(list >= 0 && create > list, 'CronList before CronCreate');
-  assert.ok(check > create, 'the check now comes after CronCreate');
-  assert.ok(queue > check, 'the immediate queue --json comes after «Check now»');
-});
-
-test('the immediate check handles the items as a tick does and shares the stopped list', () => {
-  const t = flat(WATCH);
-  assert.match(t, /Check now:.*?as a tick does/);
-  assert.match(t, /«Each item»/);
-  assert.match(t, /same list is shared with the ticks/i);
-  assert.match(t, /not tried again at the next tick/i);
-});
-
-test('the first check says «Nothing is waiting for the AI Manager.» but a tick stays silent when nothing waits', () => {
-  const t = flat(WATCH);
-  assert.match(t, /Nothing is waiting for the AI Manager\./);
-  assert.match(t, /unlike a tick/i);
-  assert.match(t, /if nothing waits, say nothing and stop/i);
-});
-
-test('the first message says the first check runs now and the next ones at the interval', () => {
-  assert.match(flat(WATCH), /first check runs now and the next ones at the interval/i);
-});
-
-test('§19 says the same as the skill about the first check', () => {
+test('§19 says the watch waits in the background with queue --wait, and keeps the check now', () => {
   const d = flat('docs/design.md');
   const s19 = d.slice(d.indexOf('## 19. Watching'), d.indexOf('## 20.'));
+  assert.match(s19, /queue --wait/);
+  assert.match(s19, /--wait-off/);
+  assert.match(s19, /no Claude tokens/i);
   assert.match(s19, /Check now/);
-  assert.match(s19, /Nothing is waiting for the AI Manager\./);
-  assert.match(s19, /unlike a tick/i);
-  assert.match(s19, /first check runs now and the next ones at the interval/i);
-  assert.match(s19, /not tried again at the next tick/i);
+  assert.match(s19, /Nothing is waiting for the Coach\./);
+  assert.doesNotMatch(s19, /expires after 7 days/);
 });

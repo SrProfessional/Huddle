@@ -6,7 +6,7 @@ import { run } from '../../lib/cli/run.mjs';
 import { harness, request } from './harness.mjs';
 
 const NONE = '## Depends on\n\nNone.\n';
-const CHANGES = 'changes requested from AI Manager';
+const CHANGES = 'changes requested from Coach';
 
 // Issue #5 is closed by MR !2. Issue #2 also exists and is unrelated: reading MR !2's notes as Issue #2's finds nothing (or the wrong thing).
 const world = (extra = () => {}) => (w) => {

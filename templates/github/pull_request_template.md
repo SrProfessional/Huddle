@@ -1,6 +1,6 @@
 Closes #N
 
-<!-- Replace N with the Issue number. On GitLab and GitHub this closes the Issue when the AI Manager merges. With a staging branch in `huddle.json`, open the PR against the staging branch instead of the default branch: Huddle closes the Issue when it is merged there. -->
+<!-- Replace N with the Issue number. On GitLab and GitHub this closes the Issue when the Coach merges. With a staging branch in `huddle.json`, open the PR against the staging branch instead of the default branch: Huddle closes the Issue when it is merged there. -->
 
 ## What changed
 
@@ -16,4 +16,4 @@ Closes #N
 
 ## Next step
 
-<!-- What the AI Manager should do next. -->
+<!-- What the Coach should do next. -->

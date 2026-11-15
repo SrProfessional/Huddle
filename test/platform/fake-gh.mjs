@@ -193,6 +193,15 @@ export function fakeGithub({ project = PROJECT } = {}) {
       need(args.length > 4, args);
       return '';
     }
+    if (a === 'label' && b === 'edit') {
+      const from = args[2];
+      const to = values(args, '--name')[0];
+      need(repoLabels.has(from) && to && !repoLabels.has(to), args);
+      repoLabels.set(to, repoLabels.get(from));
+      repoLabels.delete(from);
+      for (const it of issues.values()) it.labels = it.labels.map((l) => (l === from ? to : l));
+      return '';
+    }
     if (a === 'label' && b === 'create') {
       need(args.includes('--force') && values(args, '--color').length === 1, args);
       // github.com refuses a label description longer than 100 characters (Validation Failed, HTTP 422).

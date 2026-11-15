@@ -1,19 +1,17 @@
 ---
 name: huddle-review
-description: Use when the AI Manager reviews a developer's PR/MR and must either request changes or approve and merge it.
+description: Use when the Coach reviews a Player's PR/MR and must either request changes or approve and merge it.
 ---
 
 # huddle-review
 
-For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`, you do not
-merge, deploy or change settings; give the review as text and stop.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop.
 
 ## Review
 
 1. Read the PR/MR, the Issue it closes (goal, allowed files, tests that must pass) and the diff.
 2. Check out the branch in a worktree and run the tests yourself. Compare the counts with the PR/MR text.
-3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence;
-   no secret, no runtime dependency the rules forbid.
+3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence; no secret, no runtime dependency the rules forbid.
 
 ## A design PR (its Issue has the `design` label, and the PR only touches `design/<n>-<slug>/`)
 
@@ -27,11 +25,11 @@ There is no code, so this review never checks tests: do not run them and do not 
 5. If something is wrong, ask for changes with the usual «🔁 Changes requested» comment and its `## Prompt for Claude Code` block, as below. Each
    round is a new commit of the same PR.
 6. If it is good, approve and merge it as in «All good». Then **offer the build Issue**: «Build <screen> from design #N», written with `/huddle-issue`,
-   with `- #N` under «Depends on» and the `design/` folder of the merged PR as its «Contract or spec». Create it only after the AI Manager's OK.
+   with `- #N` under «Depends on» and the `design/` folder of the merged PR as its «Contract or spec». Create it only after the Coach's OK.
 
 ## Changes needed
 
-Post **the same comment** on the PR/MR and on its Issue (the labels job and the developer's wait read both), starting with the
+Post **the same comment** on the PR/MR and on its Issue (the labels job and the Player's wait read both), starting with the
 heading and a text block:
 
 ````text
@@ -44,23 +42,27 @@ First run /huddle-play <n>: it marks this request as taken (👀), so the Issue 
 ````
 
 Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Right after posting, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
-(`n` the Issue): it puts `changes requested from AI Manager` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
+(`n` the Issue): it puts `changes requested from Coach` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
+
+## Reviewing for the watch
+
+When the prompt says you review for `/huddle-watch` (a subagent, Issue #165): do the whole «Review» above, and «Changes needed» when something must change. When all is good, do **not** approve or merge: the watch merges one PR at a time. End with a short verdict: «ready to merge», «needs changes» (and what), or «stopped» (and why).
 
 ## All good
 
 0. With `staging_branch` set in `huddle.json`, for an Issue PR/MR: run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr> --check` first (it changes nothing). If the base is not staging, do not merge: ask for it to be retargeted to staging. Meta PRs (setup, update, team) keep targeting the default branch.
-1. Approve with a comment (self-approval may be disabled). Your approval in this session is the AI Manager's approval, so
+1. Approve with a comment (self-approval may be disabled). Your approval in this session is the Coach's approval, so
    merge it yourself with the platform's merge commit and keep the branch (`gh pr merge --merge`; on GitLab merge without
    removing the source branch). Do not hand the merge command to the person: never hand over a step you can do.
-2. Confirm the Issue closed (a merged PR/MR; `CLOSED` with `COMPLETED` on GitHub). With a staging branch it is `huddle land` that closes it: right after the merge run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr>`, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` once. Without a staging branch run it right after the merge. The Issue is closed by then, so for it the command recomputes the Issues that wait for it and **assigns** the ones that come out ready: only the AI Manager assigns, and you are the AI Manager here.
+2. Confirm the Issue closed (a merged PR/MR; `CLOSED` with `COMPLETED` on GitHub). With a staging branch it is `huddle land` that closes it: right after the merge run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr>`, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` once. Without a staging branch run it right after the merge. The Issue is closed by then, so for it the command recomputes the Issues that wait for it and **assigns** the ones that come out ready: only the Coach assigns, and you are the Coach here.
 3. **A release PR** (versions and `CHANGELOG.md` at a new version): after the merge, check that every cell of the smoke test is ✔
    in the PR text. Then, on an up-to-date default branch, tag and publish it yourself: `git tag -a vX.Y.Z -m "Huddle vX.Y.Z"`,
    `git push origin vX.Y.Z`, and `gh release create vX.Y.Z --notes-file <the version's section of CHANGELOG.md>` (GitLab:
    `glab release create vX.Y.Z`). If a cell is not ✔, do not tag: say which one.
-4. Ask the AI Manager only for what needs them, as «🙋 Only you» steps: for example a second account, a token, or a
+4. Ask the Coach only for what needs them, as «🙋 Only you» steps: for example a second account, a token, or a
    permission the platform denied. If a merge or a push is refused (branch protection, a missing permission), stop and
    ask; never look for another way.
-5. Tell the developer's next step in one line.
+5. Tell the Player's next step in one line.
 
 ## Keeping the labels right
 
@@ -70,7 +72,7 @@ session, catches up.
 
 ## Reopening an Issue
 
-Only the AI Manager's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
+Only the Coach's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
 Run `gh issue reopen <n>` (or `glab issue reopen <n>`) with a comment that says why. Then run
 `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` and, once, the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, so the «tested in
 staging» label goes and the Issues that depend on it are blocked again. Both are best effort, as above. The fix is a new PR/MR on the same Issue,

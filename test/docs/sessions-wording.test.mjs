@@ -31,7 +31,7 @@ test('no text says setup writes a labels workflow or a labels job', () => {
 test('no text makes a GitLab schedule or HUDDLE_TOKEN a default step', () => {
   for (const f of TEXTS) {
     const t = flat(f);
-    assert.doesNotMatch(t, /two more steps are only the AI Manager's/i, f);
+    assert.doesNotMatch(t, /two more steps are only the Coach's/i, f);
     assert.doesNotMatch(t, /On GitLab the labels update on a pipeline schedule/i, f);
     assert.doesNotMatch(t, /on GitLab, by a schedule every 10 minutes/i, f);
     assert.doesNotMatch(t, /creates the GitLab `?HUDDLE_TOKEN`? variable, which holds a secret/i, f);

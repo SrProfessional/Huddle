@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>How Huddle works: roles, labels, decisions and reviews</title>
-<meta name="description" content="Roles, status labels, areas and progress, decisions and reviews: how developers and one AI Manager work together with Huddle and Claude Code.">
+<meta name="description" content="Roles, status labels, areas and progress, decisions and reviews: how Players and one Coach work together with Huddle and Claude Code.">
 <link rel="canonical" href="https://srprofessional.github.io/Huddle/how-it-works/">
 <meta name="theme-color" content="#4336d8">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Huddle">
 <meta property="og:title" content="How Huddle works: roles, labels, decisions and reviews">
-<meta property="og:description" content="Roles, status labels, areas and progress, decisions and reviews: how developers and one AI Manager work together with Huddle and Claude Code.">
+<meta property="og:description" content="Roles, status labels, areas and progress, decisions and reviews: how Players and one Coach work together with Huddle and Claude Code.">
 <meta property="og:url" content="https://srprofessional.github.io/Huddle/how-it-works/">
 <meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="How Huddle works: roles, labels, decisions and reviews">
-<meta name="twitter:description" content="Roles, status labels, areas and progress, decisions and reviews: how developers and one AI Manager work together with Huddle and Claude Code.">
+<meta name="twitter:description" content="Roles, status labels, areas and progress, decisions and reviews: how Players and one Coach work together with Huddle and Claude Code.">
 <meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="preload" href="../fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -53,6 +53,7 @@
         <li><a href="#areas">Areas and progress</a></li>
         <li><a href="#decisions">Decisions</a></li>
         <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#effort">Effort and capacity</a></li>
         <li><a href="#staging">Staging</a></li>
         <li><a href="#only-you">Only you</a></li>
       </ul>
@@ -64,15 +65,15 @@
         <p class="prose">Huddle has two roles. They are about people, not about the AI: every person has their own Claude Code session.</p>
         <div class="two">
           <div>
-            <h3>AI Manager</h3>
+            <h3>Coach</h3>
             <p>One person per repo. They install Huddle, write the Issues, answer decisions, review pull requests and merge. Only they merge into the default branch, and only they touch production, settings and secrets.</p>
           </div>
           <div>
-            <h3>Developer</h3>
+            <h3>Player</h3>
             <p>Takes an Issue, works on its own branch and answers what the session asks. Their session never merges, never touches the default branch or secrets, and touches only the files the Issue allows.</p>
           </div>
         </div>
-        <p class="prose">Why one AI Manager: decisions that nobody owns get answered in a rush, or twice in two ways. One owner keeps the answers consistent and keeps production in a single pair of hands. Each person runs one or two Issues at a time.</p>
+        <p class="prose">Why one Coach: decisions that nobody owns get answered in a rush, or twice in two ways. One owner keeps the answers consistent and keeps production in a single pair of hands. Each person runs one or two Issues at a time.</p>
       </section>
 
       <section id="labels">
@@ -84,23 +85,23 @@
             <thead><tr><th scope="col">Label</th><th scope="col">Meaning</th></tr></thead>
             <tbody>
               <tr><th scope="row"><code>ready</code></th><td>Everything it depends on is merged. Waiting for someone.</td></tr>
-              <tr><th scope="row"><code>assigned</code></th><td>A developer has it. Not started.</td></tr>
+              <tr><th scope="row"><code>assigned</code></th><td>A Player has it. Not started.</td></tr>
               <tr><th scope="row"><code>in progress</code></th><td>A session is working on it.</td></tr>
-              <tr><th scope="row"><code>in review</code></th><td>A pull request is open and waits for the AI Manager.</td></tr>
+              <tr><th scope="row"><code>in review</code></th><td>A pull request is open and waits for the Coach.</td></tr>
               <tr><th scope="row"><code>blocked</code></th><td>It depends on an Issue that is not merged yet.</td></tr>
-              <tr><th scope="row"><code>needs decision</code></th><td>The session asked the AI Manager and waits.</td></tr>
-              <tr><th scope="row"><code>changes requested from AI Manager</code></th><td>The AI Manager asked for changes and nobody has taken the request yet.</td></tr>
+              <tr><th scope="row"><code>needs decision</code></th><td>The session asked the Coach and waits.</td></tr>
+              <tr><th scope="row"><code>changes requested from Coach</code></th><td>The Coach asked for changes and nobody has taken the request yet.</td></tr>
             </tbody>
           </table>
         </div>
         <p class="prose">An Issue lists what it needs under «Depends on». A dependency counts as merged only when the Issue is closed and a merged pull request closed it. An Issue closed by hand unblocks nothing.</p>
-        <p class="prose">Two labels are stop labels: <code>needs decision</code> and <code>changes requested from AI Manager</code>. The work waits for someone else, so they stand alone: <code>in progress</code> and <code>in review</code> are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered.</p>
+        <p class="prose">Two labels are stop labels: <code>needs decision</code> and <code>changes requested from Coach</code>. The work waits for someone else, so they stand alone: <code>in progress</code> and <code>in review</code> are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered.</p>
       </section>
 
       <section id="areas">
         <h2>Areas and progress</h2>
-        <p class="prose">A team sees how far each part of its project has come, as a percentage, and the total. Areas are milestones, on GitHub and on GitLab alike, and a project has as many as it needs. The AI Manager keeps an estimate of the Issues not written yet in each milestone, so the percentage is honest about the work still to come.</p>
-        <p class="prose">Progress shows in three places: a pinned «Huddle progress» Issue that rewrites itself, the <code>huddle progress</code> command, and one line when a Claude Code session opens. The skill <code>/huddle-areas</code> proposes the areas and puts Issues in them, and it changes nothing until the AI Manager says yes.</p>
+        <p class="prose">A team sees how far each part of its project has come, as a percentage, and the total. Areas are milestones, on GitHub and on GitLab alike, and a project has as many as it needs. The Coach keeps an estimate of the Issues not written yet in each milestone, so the percentage is honest about the work still to come.</p>
+        <p class="prose">Progress shows in three places: a pinned «Huddle progress» Issue that rewrites itself, the <code>huddle progress</code> command, and one line when a Claude Code session opens. The skill <code>/huddle-areas</code> proposes the areas and puts Issues in them, and it changes nothing until the Coach says yes.</p>
       </section>
 
       <section id="decisions">
@@ -109,25 +110,32 @@
         <ol class="prose">
           <li>It pushes what is done.</li>
           <li>It comments on the Issue with the question, the options with their trade-offs and a recommendation, and adds the <code>needs decision</code> label.</li>
-          <li>It stops. The AI Manager answers with <code>/huddle-decide</code>, and the session continues on the same branch.</li>
+          <li>It stops. The Coach answers with <code>/huddle-decide</code>, and the session continues on the same branch.</li>
         </ol>
       </section>
 
       <section id="reviews">
         <h2>Reviews</h2>
-        <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The AI Manager reviews with <code>/huddle-review</code> and either merges or asks for changes.</p>
-        <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». The waiting is a small Node process on the developer's computer that asks GitHub or GitLab every two minutes, with the developer's own login: it uses no Claude tokens and no GitHub Actions or CI minutes. If Claude Code was closed meanwhile, a hook says on the next start that a request is pending. Either way, <code>/huddle-play &lt;n&gt;</code> picks the Issue up again after the AI Manager answered a review or a decision.</p>
-        <p class="prose">The AI Manager can also let their session do the checking: <code>/huddle-watch</code> looks every few minutes at what waits and reviews it (<code>/huddle-watch status</code> and <code>/huddle-watch off</code> do what they say). Turning it on is the order to merge what it approves. Decisions and bug triage stay with the person, and <code>huddle queue</code> lists what waits. The watch is turned on by hand in each session. Each check is a short Claude turn even when nothing waits, so it uses some tokens: a longer interval (<code>/huddle-watch 15m</code>) and a fresh, short session spend less. Without it, the AI Manager's session start says what waits.</p>
+        <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The Coach reviews with <code>/huddle-review</code> and either merges or asks for changes.</p>
+        <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub Actions or CI minutes. If Claude Code was closed meanwhile, a hook says on the next start that a request is pending. Either way, <code>/huddle-play &lt;n&gt;</code> picks the Issue up again after the Coach answered a review or a decision.</p>
+        <p class="prose">The Coach can also let their session do the checking: <code>/huddle-watch</code> looks every few minutes at what waits and reviews it (<code>/huddle-watch status</code> and <code>/huddle-watch off</code> do what they say). Turning it on is the order to merge what it approves. Decisions and bug triage stay with the person, and <code>huddle queue</code> lists what waits. The watch is turned on by hand in each session. It waits in the background like a Player's session, so it uses no Claude tokens while nothing waits, and wakes the session only when something waits. Without it, the Coach's session start says what waits. <code>/huddle-watch always</code> keeps it on: it starts again in each of the Coach's sessions of that repo on that machine (a mark on the machine, not a file of the repo), until <code>/huddle-watch off</code>. It never starts for a Player.</p>
+      </section>
+
+      <section id="effort">
+        <h2>Effort and capacity</h2>
+        <p class="prose">Each Issue says how big it is: 1 small, 2 medium, 3 large (2 when it says nothing). <code>/huddle-issue</code> suggests the effort from the Issue's own files, tests and migrations, and warns when an Issue is too big and should be split into parts.</p>
+        <p class="prose">Each Player has a capacity of 5 points by default, set by the Coach in <code>huddle.json</code>. With <code>/huddle-play</code> alone, the Player's session works on as many assigned Issues as fit at once, each in a subagent with a clean context, and starts the next one when room frees. Work in review uses no room, and two Issues that share a file never run at once. A Player can only lower their capacity, on their machine, with <code>huddle capacity</code>; <code>huddle next</code> shows what starts and what waits.</p>
+        <p class="prose">The Coach's watch does the same with the reviews: it reviews several pull requests at once within <code>review_capacity</code> points, and still merges them one at a time, checking each one again against the updated base first.</p>
       </section>
 
       <section id="staging">
         <h2>Staging</h2>
-        <p class="prose">A project can test changes on a staging branch before they reach the default branch: set <code>staging_branch</code> in <code>huddle.json</code> (setup asks for it). Issue branches then start from staging and their pull requests target it. The AI Manager closes each Issue with <code>huddle land</code> once it is merged there, marks it tested with <code>huddle tested</code> after trying it in staging, and runs <code>/huddle-release</code>, which opens and merges the pull request from staging into the default branch only when every Issue in it was tested. Without a staging branch nothing changes.</p>
+        <p class="prose">A project can test changes on a staging branch before they reach the default branch: set <code>staging_branch</code> in <code>huddle.json</code> (setup asks for it). Issue branches then start from staging and their pull requests target it. The Coach closes each Issue with <code>huddle land</code> once it is merged there, marks it tested with <code>huddle tested</code> after trying it in staging, and runs <code>/huddle-release</code>, which opens and merges the pull request from staging into the default branch only when every Issue in it was tested. Without a staging branch nothing changes.</p>
       </section>
 
       <section id="only-you">
         <h2>«Only you» steps</h2>
-        <p class="prose">The AI Manager's own Claude Code session does every step it can: merging an approved pull request, tagging a release, running the smoke test on the sandboxes. It hands a step to a person only when it needs something the session cannot have:</p>
+        <p class="prose">The Coach's own Claude Code session does every step it can: merging an approved pull request, tagging a release, running the smoke test on the sandboxes. It hands a step to a person only when it needs something the session cannot have:</p>
         <ul class="prose">
           <li>a second person's account;</li>
           <li>a payment;</li>

@@ -1,11 +1,11 @@
 ---
 name: huddle-bug
-description: Use when the AI Manager wants to turn a bug description, a capture, a link or a raw report labeled «needs triage» into a ready Bug Issue.
+description: Use when the Coach wants to turn a bug description, a capture, a link or a raw report labeled «needs triage» into a ready Bug Issue.
 ---
 
 # huddle-bug
 
-For the AI Manager (the `ai_manager` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that
+For the Coach (the `coach` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that
 login; if not, stop and say so.
 
 ## Two ways in
@@ -30,10 +30,13 @@ login; if not, stop and say so.
    - **Allowed files:** the smallest set that can fix it.
    - **Tests that must pass:** the area's suite plus the new test.
    - **Depends on:** one `- #N` per line, or `- None`. The labels job reads it.
+   - **Effort:** 1 small, 2 medium or 3 large. Write the draft to a temporary file outside the repo and run
+     `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" effort --suggest <file>`: write its `effort` in the «Effort» section and show its `reasons`; the
+     Coach may change it. With `split: true`, propose splitting the Issue into parts with «Depends on» between them, before creating it.
 4. **Severity** is `blocking` (stops a person or production), `normal` or `minor`. Write it under «## Severity»: the labels job
    reads that word and assigns a `blocking` Bug before every other ready Issue. For a `blocking` Bug, also make «🚨 Blocking
    bug» the first line of the Issue's first comment.
-5. **Show the draft and wait for the AI Manager's OK.** Then create it with `gh issue create --label bug` (or
+5. **Show the draft and wait for the Coach's OK.** Then create it with `gh issue create --label bug` (or
    `glab issue create --label bug`) using the repo from `huddle.json`. For `#N`, rewrite that report's body into the full Bug
    Issue instead: keep the reporter's original text under «Original report», and remove `needs triage`. Do not add status
    labels or an assignee by hand. Right after creating the Issue, or after rewriting the report and taking `needs triage` off, run the **full**

@@ -1,7 +1,6 @@
 # Smoke test (before each release)
 
-Huddle's tests never touch a real GitHub or GitLab. This checklist is the one place where they are touched. The AI
-Manager's session runs it, once on a sandbox repo on **github.com** and once on a sandbox project on **gitlab.com**,
+Huddle's tests never touch a real GitHub or GitLab. This checklist is the one place where they are touched. The Coach's session runs it, once on a sandbox repo on **github.com** and once on a sandbox project on **gitlab.com**,
 before every release, and fills in [Results](#results). The session ticks a box only when it saw the result itself, in a
 command's output; for a 🙋 step, the person says what they saw.
 
@@ -12,14 +11,14 @@ Use a throwaway sandbox. Never run this on a team repo. Never paste a token into
 The session does every step it can (see [the design](design.md#13-the-session-does-every-step-it-can)). Each step starts with
 its label:
 
-- **Session:** the AI Manager's session does it itself, with `gh`, `glab` and git, and writes what it saw in Results.
+- **Session:** the Coach's session does it itself, with `gh`, `glab` and git, and writes what it saw in Results.
 - **🙋 Only you:** it needs a person: a second account, a secret, or watching a new Claude Code window. It is written as
   numbered steps for someone with no technical background. The session fills in anything in `<angle brackets>` before it
   shows you the step. If something looks different from «You should see», stop and tell the session; do not try to fix it.
 
 If a permission is denied or a credential is missing, the session stops and asks; it does not look for another way.
 
-Two sessions are needed: the **AI Manager** session (this one) and a **developer** window (a second clone, or a second
+Two sessions are needed: the **Coach** session (this one) and a **Player** window (a second clone, or a second
 person). `huddle` below means `node <plugin folder>/bin/huddle`, where the plugin folder is where Claude Code installed
 the plugin (see `/plugin`), not a clone of the Huddle repo.
 
@@ -30,7 +29,7 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
 | Sandbox | empty repo `<you>/huddle-sandbox` on github.com | empty project `<you>/huddle-sandbox` on gitlab.com |
 | Login | `gh auth login` | `glab auth login` |
 
-1. [ ] **Session:** **Install the plugin from the marketplace**, in the AI Manager session. In a terminal run
+1. [ ] **Session:** **Install the plugin from the marketplace**, in the Coach session. In a terminal run
    `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (the CLI also has
    `/plugin marketplace add SrProfessional/Huddle` and `/plugin install huddle@huddle`; in the VS Code extension, type
    `/plugins` and install `huddle` with **Install for this project**). `claude plugin list` (or `/plugin`) shows `huddle` enabled at the version under test (0.1.0, 0.2.0 for
@@ -39,17 +38,17 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
    Before anything else it checks `gh auth status` (or `glab auth status`): if not logged in, it asks the person to log in
    and stops.
 2. [ ] **Session:** Create the sandbox and push a first commit to its default branch (a README is enough).
-3. [ ] **Session:** Run `/huddle-setup` in the sandbox. It writes `huddle.json` (`platform`, `project`, `ai_manager` = your
-   login, `assignees` = the developer login), the CLAUDE.md block, the Issue and PR/MR templates, the labels job, and
+3. [ ] **Session:** Run `/huddle-setup` in the sandbox. It writes `huddle.json` (`platform`, `project`, `coach` = your
+   login, `assignees` = the Player login), the CLAUDE.md block, the Issue and PR/MR templates, the labels job, and
    `.claude/settings.json` with `extraKnownMarketplaces.huddle` and `enabledPlugins["huddle@huddle"]`. Open
    `.claude/settings.json` and check both keys are there: setup wrote it, not by hand.
 4. [ ] **Session:** Merge the setup to the default branch (the session approved it, so it merges it itself). **Each
-   developer installs Huddle once on their machine** (see [first-day.md](first-day.md)): the settings snippet is only a
-   helper and does not offer the plugin to a session that has not installed it. On the developer's machine the session
+   Player installs Huddle once on their machine** (see [first-day.md](first-day.md)): the settings snippet is only a
+   helper and does not offer the plugin to a session that has not installed it. On the Player's machine the session
    runs `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle`, and makes a fresh
-   clone of the sandbox for the developer window of step 5. If the developer is another person on another machine, the
+   clone of the sandbox for the Player window of step 5. If the Player is another person on another machine, the
    session writes those commands as a 🙋 step for them.
-5. [ ] **🙋 Only you:** Open a new Claude Code window as the developer and check that Huddle is there.
+5. [ ] **🙋 Only you:** Open a new Claude Code window as the Player and check that Huddle is there.
    1. Open a terminal (the window where you type commands; on Windows search for «PowerShell» in the Start menu) and go to
       the clone (a copy of the project on your computer) that the session made. Paste the line the session gives you:
       ```text
@@ -63,11 +62,11 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
       ```text
       Run the Huddle doctor check and show me the result.
       ```
-   4. Tell the AI Manager's session what you saw.
+   4. Tell the Coach's session what you saw.
 
    You should see: a list of checks, and the `plugin` line starts with ✔. Typing `/huddle` shows `/huddle-play` in the
    suggestions.
-   If you see something else: copy the whole list, paste it to the AI Manager's session, and do nothing else.
+   If you see something else: copy the whole list, paste it to the Coach's session, and do nothing else.
 6. [ ] **🙋 Only you:** **GitLab only:** create the project token and save it as a variable. A token (a long password that
    lets a program act for you) is a secret, so the session cannot create it and never sees it. This is the same step as
    [The HUDDLE_TOKEN step](gitlab.md#the-huddle_token-step).
@@ -90,15 +89,15 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
    breaks. If you are not allowed to open **Access tokens**, you are not a Maintainer: tell the session and stop.
 7. [ ] **Session:** **GitLab only:** create the pipeline schedule (`*/10 * * * *`, on the default branch, active) with
    `glab api`, as in [gitlab.md](gitlab.md). Then check the two machine requirements of
-   [gitlab.md](gitlab.md#on-the-developers-machine): `glab` is on the PATH of the terminal that starts Claude (without it
+   [gitlab.md](gitlab.md#on-the-players-machine): `glab` is on the PATH of the terminal that starts Claude (without it
    the hook stays silent and `huddle doctor` shows ✖ on `login`), and Git uses `glab` for gitlab.com
    (`git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"`, then `git ls-remote origin`
    works without a prompt). Labels change by the schedule, so they can take up to 10 minutes.
-8. [ ] **Session:** `huddle doctor`: ✔ on `huddle.json`, `login` and `ai_manager`. `labels` fails on a new repo, as the
+8. [ ] **Session:** `huddle doctor`: ✔ on `huddle.json`, `login` and `coach`. `labels` fails on a new repo, as the
    labels do not exist yet.
 9. [ ] **Session:** Run `huddle labels` once on the new repo: it prints «7 labels created.».
 10. [ ] **Session:** `huddle doctor` again: all ✔. The labels exist on the platform: `ready`, `assigned`, `in progress`,
-    `in review`, `blocked`, `needs decision`, `changes requested from AI Manager`.
+    `in review`, `blocked`, `needs decision`, `changes requested from Coach`.
 11. [ ] **Session:** Run `huddle labels --dry-run`: it exits 0, prints no error and creates nothing.
 
 ## 2. An Issue with a dependency
@@ -106,23 +105,23 @@ the plugin (see `/plugin`), not a clone of the Huddle repo.
 1. [ ] **Session:** Create Issue **A** from the template, with `## Depends on` set to `- None`.
 2. [ ] **Session:** Create Issue **B** from the template, with `## Depends on` listing `#<A>`.
 3. [ ] **Session:** Run `huddle labels` (GitLab: run the schedule with `glab api`, or wait up to 10 minutes).
-4. [ ] **Session:** A is `ready`, or `assigned` with the developer's login. B is `blocked`.
+4. [ ] **Session:** A is `ready`, or `assigned` with the Player's login. B is `blocked`.
 
 ## 3. Start
 
-These steps happen in the developer window of section 1, step 5. If you closed it, open it again with its sub-steps 1 and 2.
+These steps happen in the Player window of section 1, step 5. If you closed it, open it again with its sub-steps 1 and 2.
 
-1. [ ] **🙋 Only you:** Ask the developer window to start Issue B, which must be refused.
-   1. Click the developer's Claude Code window to bring it to the front.
+1. [ ] **🙋 Only you:** Ask the Player window to start Issue B, which must be refused.
+   1. Click the Player's Claude Code window to bring it to the front.
    2. Paste the line below and press Enter (the session replaces `<B>` with the number of Issue B):
       ```text
       /huddle-play <B>
       ```
-   3. Tell the AI Manager's session what the window said.
+   3. Tell the Coach's session what the window said.
 
    You should see: the window ends with «⛔ Issue #B stopped: waiting for #A», and says it changed nothing.
    If you see something else: copy the window's last message, paste it to the session, and do not start anything else.
-2. [ ] **🙋 Only you:** Ask the developer window to start Issue A.
+2. [ ] **🙋 Only you:** Ask the Player window to start Issue A.
    1. In the same window, paste the line below and press Enter (the session replaces `<A>` with the number of Issue A):
       ```text
       /huddle-play <A>
@@ -132,9 +131,9 @@ These steps happen in the developer window of section 1, step 5. If you closed i
 
    You should see: the window says it creates a branch in its own folder and starts working. This can take several minutes.
    If you see something else: copy the window's last message, paste it to the session, and wait for its answer.
-3. [ ] **🙋 Only you:** Wait until the developer window has finished, then tell the session.
+3. [ ] **🙋 Only you:** Wait until the Player window has finished, then tell the session.
    1. Watch the window until it writes a message that starts with «✅ Issue #A finished».
-   2. Go to the AI Manager's session, paste this and press Enter:
+   2. Go to the Coach's session, paste this and press Enter:
       ```text
       done
       ```
@@ -152,11 +151,11 @@ These steps happen in the developer window of section 1, step 5. If you closed i
 
 ## 5. A review request taken by a waiting session
 
-1. [ ] **Session:** As the AI Manager, comment on the PR/MR with a `## Prompt for Claude Code` heading and a text block
+1. [ ] **Session:** As the Coach, comment on the PR/MR with a `## Prompt for Claude Code` heading and a text block
    asking for a small change (for example, one more line in the README).
-2. [ ] **🙋 Only you:** Watch the developer window pick up the request.
-   1. Click the developer's Claude Code window to bring it to the front, and wait up to two minutes.
-   2. When it says the AI Manager left a request and asks if it should continue, paste this and press Enter:
+2. [ ] **🙋 Only you:** Watch the Player window pick up the request.
+   1. Click the Player's Claude Code window to bring it to the front, and wait up to two minutes.
+   2. When it says the Coach left a request and asks if it should continue, paste this and press Enter:
       ```text
       yes
       ```
@@ -168,8 +167,7 @@ These steps happen in the developer window of section 1, step 5. If you closed i
    emoji `eyes` on GitLab), checked with `gh api` or `glab api`.
 4. [ ] **Session:** The change is pushed and the PR/MR has the comment «Ready for review again» with the counts.
 5. [ ] **🙋 Only you:** **A comment by someone else is not a request.** This step is for the **second account** (**S**: a
-   person or a test account that can comment on the PR/MR and is not the AI Manager). It runs while no request of the AI
-   Manager is pending (after step 4).
+   person or a test account that can comment on the PR/MR and is not the Coach). It runs while no request of the Coach is pending (after step 4).
    1. S opens the PR/MR link the session gives you in a browser, logged in as S.
    2. Scroll to the bottom of the page, to the box where you write a comment.
    3. Paste this text in the box:
@@ -181,23 +179,23 @@ These steps happen in the developer window of section 1, step 5. If you closed i
       ```
       ````
    4. Click **Comment** (GitLab: **Comment** or **Reply**).
-   5. Tell the AI Manager's session «S commented».
+   5. Tell the Coach's session «S commented».
 
    You should see: S's comment on the page, and nothing else happens.
    If you see something else: if the box does not let S comment, tell the session: S may not have access.
 6. [ ] **Session:** Check that S's comment is ignored: `huddle pending` prints nothing, `huddle take <A>` finds no request
-   and does not mark S's comment 👀, a waiting `huddle wait <A>` does not end, and the `changes requested from AI Manager`
+   and does not mark S's comment 👀, a waiting `huddle wait <A>` does not end, and the `changes requested from Coach`
    label does **not** appear (GitLab: wait up to 10 minutes for the schedule, then check again). Then post a real request
-   as the AI Manager: only that one is pending, and `huddle pending` shows the AI Manager's text, never S's. Take it and
+   as the Coach: only that one is pending, and `huddle pending` shows the Coach's text, never S's. Take it and
    clear it as in steps 2 to 4. Write «not testable» in Results **only** if there is no second account.
-7. [ ] **Session:** The `changes requested from AI Manager` label shows while the request is pending, and goes away after
+7. [ ] **Session:** The `changes requested from Coach` label shows while the request is pending, and goes away after
    the push. GitLab: it can lag up to 10 minutes after a comment; a push updates it at once.
 
 ## 6. The hook on reopen
 
-1. [ ] **Session:** As the AI Manager, post a second `## Prompt for Claude Code` request on the PR/MR.
-2. [ ] **🙋 Only you:** Close the developer window without answering it, then open a new Claude Code window.
-   1. Close the developer's Claude Code window (the **X** of the window; in a terminal you can also type `/exit` and press
+1. [ ] **Session:** As the Coach, post a second `## Prompt for Claude Code` request on the PR/MR.
+2. [ ] **🙋 Only you:** Close the Player window without answering it, then open a new Claude Code window.
+   1. Close the Player's Claude Code window (the **X** of the window; in a terminal you can also type `/exit` and press
       Enter). Do not answer its questions.
    2. Open a terminal (the window where you type commands) in the sandbox clone and start Claude by pasting this:
       ```text
@@ -209,9 +207,9 @@ These steps happen in the developer window of section 1, step 5. If you closed i
    If you see something else: if the old window does not close or the new one shows an error, tell the session what you see.
 3. [ ] **🙋 Only you:** Look at what the new window shows **before you do anything**.
    1. Read the first lines of the new Claude Code window.
-   2. Tell the AI Manager's session what they say, word for word.
+   2. Tell the Coach's session what they say, word for word.
 
-   You should see: in the CLI (`claude` in a terminal), a line like «Huddle: the AI Manager left 1 request…» before you do
+   You should see: in the CLI (`claude` in a terminal), a line like «Huddle: the Coach left 1 request…» before you do
    anything. After the first message, Claude asks whether to continue. In the VS Code panel nothing shows until the first
    message; then Claude asks. That is expected behavior, not a failure: the session notes it in Results.
    If you see something else: tell the session exactly what you see, and do nothing else.
@@ -225,12 +223,12 @@ These steps happen in the developer window of section 1, step 5. If you closed i
 
    You should see: the window opens within a few seconds and shows no Huddle line.
    If you see something else: if it takes more than 10 seconds or shows an error, tell the session what you saw.
-5. [ ] **🙋 Only you:** The developer takes the request.
+5. [ ] **🙋 Only you:** The Player takes the request.
    1. In the new window of step 2, answer Claude's question «Do you want to continue?» by pasting this and pressing Enter:
       ```text
       yes
       ```
-   2. Wait until the window says it pushed and commented «Ready for review again», then tell the AI Manager's session.
+   2. Wait until the window says it pushed and commented «Ready for review again», then tell the Coach's session.
 
    You should see: the window works on the request and ends by saying it pushed and commented «Ready for review again»
    with the counts.
@@ -238,20 +236,20 @@ These steps happen in the developer window of section 1, step 5. If you closed i
 
 ## 7. Merge
 
-1. [ ] **Session:** Approve (GitLab: with a comment, as self-approval may be off), then merge it itself as the AI Manager.
-   The developer window never merges.
+1. [ ] **Session:** Approve (GitLab: with a comment, as self-approval may be off), then merge it itself as the Coach.
+   The Player window never merges.
 2. [ ] **Session:** The merge is a merge commit, and on GitLab the source branch is **not** removed.
 3. [ ] **Session:** Issue A closes. On GitHub it shows `CLOSED` with `COMPLETED`.
 
 ## 8. The dependency unblocks
 
 1. [ ] **Session:** Run `huddle labels` (GitLab: run the schedule).
-2. [ ] **Session:** B is no longer `blocked`: it is `ready`, or `assigned` to the developer.
+2. [ ] **Session:** B is no longer `blocked`: it is `ready`, or `assigned` to the Player.
 3. [ ] **Session:** Control: create Issue **C** depending on a third Issue **D**, then close D **by hand** with the
    platform's normal «Close issue» (on GitHub, closed as completed), with no PR/MR. After `huddle labels`, C is still
    `blocked`, so `/huddle-play <C>` would refuse it.
-4. [ ] **🙋 Only you:** Ask the developer window to start Issue B, which now works.
-   1. Click the developer's Claude Code window to bring it to the front.
+4. [ ] **🙋 Only you:** Ask the Player window to start Issue B, which now works.
+   1. Click the Player's Claude Code window to bring it to the front.
    2. Paste the line below and press Enter (the session replaces `<B>` with the number of Issue B):
       ```text
       /huddle-play <B>
@@ -291,7 +289,7 @@ it on (write the platform in Results). Leave `progress_issue` out of `huddle.jso
       ```text
       claude
       ```
-   2. Do not type anything else. Read the first lines of the window and tell the AI Manager's session what they say.
+   2. Do not type anything else. Read the first lines of the window and tell the Coach's session what they say.
 
    You should see: before you type, the visible lines include `Progress: Alpha 25% · Beta 0% · Total 16%` (the order of the
    areas may differ), next to the pending-request line when there is one. VS Code panel: nothing shows until the first
@@ -315,14 +313,13 @@ it on (write the platform in Results). Leave `progress_issue` out of `huddle.jso
 Needs Huddle 0.2.0 or later. The **second account** of step 5.5 (call it **S**) is the person to add. If there is no
 second account, use any login that exists on the platform and is not a collaborator, and write that in Results.
 
-1. [ ] **Session:** **The team is listed.** `huddle team` prints the AI Manager and each assignee of `huddle.json`, each with ✔ or ✖
-   for «exists on the platform» and «can be assigned» (collaborator on GitHub, Developer or higher on GitLab). The AI
-   Manager and the developer from section 1 show ✔ ✔.
+1. [ ] **Session:** **The team is listed.** `huddle team` prints the Coach and each assignee of `huddle.json`, each with ✔ or ✖
+   for «exists on the platform» and «can be assigned» (collaborator on GitHub, Developer or higher on GitLab). The Coach and the Player from section 1 show ✔ ✔.
 2. [ ] **Session:** **A login that is not a collaborator is warned about.** Run `/huddle-team add <S>` while S is **not** a collaborator
-   (GitLab: not a member, or below Developer). It warns that S cannot be assigned, prints the 🙋 step for the AI Manager
+   (GitLab: not a member, or below Player). It warns that S cannot be assigned, prints the 🙋 step for the Coach
    (see step 4) and **writes nothing**: no branch, no PR/MR, `huddle.json` unchanged.
 3. [ ] **Session:** **`huddle doctor` has the «team» check.** It shows ✔ on `team` while every assignee can be assigned.
-4. [ ] **🙋 Only you:** **The AI Manager invites S, and S accepts.** The session never invites anyone: it sends an invitation to another person.
+4. [ ] **🙋 Only you:** **The Coach invites S, and S accepts.** The session never invites anyone: it sends an invitation to another person.
    1. Open the sandbox on the platform in your browser (GitHub: github.com, the sandbox repo; GitLab: gitlab.com, the sandbox project).
    2. GitHub: click **Settings**, then **Collaborators** (or **Access**), then **Add people**. GitLab: click **Manage** in the
       left menu, then **Members**, then **Invite members**.
@@ -330,9 +327,9 @@ second account, use any login that exists on the platform and is not a collabora
       ```text
       <S>
       ```
-   4. Choose S in the list. GitLab: choose the role **Developer**. Click **Add** (GitHub) or **Invite** (GitLab).
+   4. Choose S in the list. GitLab: choose the role **Player**. Click **Add** (GitHub) or **Invite** (GitLab).
    5. GitHub only: S opens the e-mail from GitHub and clicks **Accept invitation**, or opens `github.com/<project>/invitations` and clicks **Accept**. GitLab adds S at once.
-   6. Tell the AI Manager's session «S is in».
+   6. Tell the Coach's session «S is in».
 
    You should see: S listed as a collaborator (GitHub) or a member with the role Developer (GitLab).
    If you see something else: if S is not in the list, or the platform says you cannot invite, tell the session what the
@@ -356,7 +353,7 @@ Needs Huddle 0.3.0 or later. Do GitHub and GitLab each in their own sandbox, and
 it on (write the platform in Results). Use a sandbox with **no milestones** for steps 1 and 2: **delete** the Alpha and Beta
 milestones of section 9 first (GitHub: Milestones → Delete; GitLab: Delete milestone). Closing them is not enough: a
 milestone closed less than 90 days ago is still listed, so `huddle areas list` would show «Alpha (closed)» and never print
-«No areas yet». Run `huddle` as the AI Manager; the skill `/huddle-areas` refuses anyone else.
+«No areas yet». Run `huddle` as the Coach; the skill `/huddle-areas` refuses anyone else.
 
 1. [ ] **Session:** **No areas yet** (no milestone left, not even a closed one). `huddle areas list` prints «No areas yet. Define them with the skill /huddle-areas, or create one:
    huddle areas set <title> --remaining N», plus a line «No area: N open, M closed» if Issues exist. `huddle areas check`
@@ -421,14 +418,14 @@ milestone closed less than 90 days ago is still listed, so `huddle areas list` w
 
 ## Results
 
-Results of the run of 2026-11-06 (Huddle `main` with H12, H14 and H15; AI Manager SrProfessional; GitHub sandbox
+Results of the run of 2026-11-06 (Huddle `main` with H12, H14 and H15; Coach SrProfessional; GitHub sandbox
 `SrProfessional/huddle-sandbox-2`, GitLab sandbox `SrProfessional/huddle-sandbox` on gitlab.com). For the next release,
 run the checklist again and replace the table, with the date, the Huddle commit and anything unexpected. Copy the table
 into the PR description.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|
-| 1. Setup | ✔ | ✔ | Install by terminal (`claude plugin …`). Setup writes `.claude/settings.json`. GitHub: «7 labels created.». GitLab: the MR pipeline skips green without the protected token, and the schedule on `main` runs labels. The snippet does not offer the plugin (documented in H14): each developer installs once. |
+| 1. Setup | ✔ | ✔ | Install by terminal (`claude plugin …`). Setup writes `.claude/settings.json`. GitHub: «7 labels created.». GitLab: the MR pipeline skips green without the protected token, and the schedule on `main` runs labels. The snippet does not offer the plugin (documented in H14): each Player installs once. |
 | 2. Issue with a dependency | ✔ | ✔ | A assigned, B blocked |
 | 3. Start | ✔ | ✔ | B refused, A started in its own worktree |
 | 4. PR / MR | ✔ | ✔ | `Closes #A`, in progress → in review |
@@ -463,6 +460,20 @@ description next to the tables above.
 | 11. Areas: assign (open, closed, closed area, none), check, progress | ✔ | ✔ | Re-run 2026-11-09 with Issue #52 merged: on GitLab the closed Docs was reopened, the Issue assigned and Docs closed again, and the Issue is in Docs. First run, GitLab ✘ step 7: `huddle areas assign <issue> "Docs"` on a **closed** milestone prints «Done.» but the Issue keeps its old milestone (checked twice). Steps 6, 8, 9, 10 ✔ on both. Note: `check` lists a milestone with no estimate line both as «No «Huddle remaining» line» and «No Issue and remaining 0». |
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
+
+### Results 0.9.0
+
+Run of: 2026-11-15, Huddle `staging` with Issues #157, #160, #162, #164, #165, #166 and #171 merged (commit 7a0f262), by the Coach's Claude Code session. Only the new parts were checked; the 0.8.5 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| The watch waits in the background with no Claude tokens (#157) | ✔ | covered by tests | On a real project: `queue --wait 120` with nothing seen woke in 9 s with the two PRs waiting; with everything seen, `queue --wait-off` ended it with `{"stopped":true}` right after its labels pass. Found in staging and fixed: the labels pass (4m46s there) ran before the queue (15 s). |
+| `/huddle-watch always` (#160) | ✔ | covered by tests | `queue --always` left the mark for this repo; `huddle hook` then printed «the watch starts now, as you asked» and told Claude to start it. A Player's login and no mark: covered by tests. |
+| Coach and Player (#166) | ✔ | covered by tests | This repo, still with `ai_manager` in `huddle.json`, loads as before. On a real project a labels dry run printed `changes requested from AI Manager → changes requested from Coach (dry run)`. |
+| Effort (#162) | ✔ | covered by tests | `huddle effort --suggest` on three real Issues gave 2 (5 files and a migration), 1 (3 files) and 2 (9 files); `huddle effort <n>` reads the section or says the default. |
+| A Player works on several Issues at once (#164) | ✔ | covered by tests | `huddle next` on a real project, read-only: capacity 5, 4 points in use, three Issues wait for room and one because it shares `services/panel-api/src/routes/` with an Issue in progress. The subagents themselves: checked against the Claude Code docs, not run live. |
+| The watch reviews several PRs at once (#165) | ✔ | covered by tests | `queue --json` on a real project listed two reviews with effort 2 each. Parallel reviews with real subagents: covered by tests and the docs check, not run live. |
+| The website and the PDFs (#171) | ✔ | ✔ | The three pages rendered at 1280 and 375 px with no sideways scroll; both PDFs rebuilt. The live site changes when this release is merged into `main`. |
 
 ### Results 0.8.5
 

@@ -16,7 +16,7 @@ const section = (text, heading) => {
 test('the team guide has «Add or remove someone»: the three steps, the skill and the command', () => {
   const t = section(read('docs/team-guide.md'), 'Add or remove someone');
   assert.match(t, /collaborator/i);
-  assert.match(t, /Developer/);
+  assert.match(t, /Player|Developer/);
   assert.match(t, /`assignees`/);
   assert.match(t, /PR\/MR/);
   assert.match(t, /gh auth login/);
@@ -33,7 +33,7 @@ test('the team guide has «Add or remove someone»: the three steps, the skill a
 test('the roles doc links the team guide section, and the README lists the command and the skill', () => {
   assert.match(read('docs/roles.md'), /\]\(team-guide\.md#add-or-remove-someone\)/);
   const readme = read('README.md');
-  assert.match(readme, /\| `\/huddle-team` \| AI Manager \|/);
+  assert.match(readme, /\| `\/huddle-team` \| Coach \|/);
   assert.match(readme, /\| `huddle team( \[add[^`]*)?` \|/);
 });
 
@@ -45,9 +45,9 @@ test('the CHANGELOG lists it under Unreleased', () => {
   assert.match(unreleased, /#36/);
 });
 
-test('the huddle-team skill is for the AI Manager, uses the CLI, never merges and never commits to the default branch', () => {
+test('the huddle-team skill is for the Coach, uses the CLI, never merges and never commits to the default branch', () => {
   const t = read('skills/huddle-team/SKILL.md');
-  assert.match(t, /For the AI Manager only/);
+  assert.match(t, /For the Coach only/);
   assert.match(t, /bin\/huddle" team add/);
   assert.match(t, /bin\/huddle" team|team remove/);
   assert.match(t, /Never commit to the default branch/);
@@ -77,7 +77,7 @@ test('the skill prints the message for the new person: both install commands, th
   assert.ok(t.includes(credential), 'the credential step is the one of docs/gitlab.md');
 });
 
-test('the skill and the CLI agree on the steps for the AI Manager', () => {
+test('the skill and the CLI agree on the steps for the Coach', () => {
   const t = read('skills/huddle-team/SKILL.md');
   assert.match(t, /Settings → Collaborators/);
   assert.match(t, /gh api -X PUT repos\/<project>\/collaborators\/<login>/);

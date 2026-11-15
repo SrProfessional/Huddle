@@ -17,7 +17,7 @@ test('an invalid field is refused with the field named', () => {
   assert.throws(() => load({ platform: 'github', project: 'a/b', ai_manager: 'sr', max_open_per_person: 'two' }), /"max_open_per_person" must be of type integer/);
   assert.throws(() => load({ platform: 'bitbucket', project: 'a/b', ai_manager: 'sr' }), /"platform" must be one of github, gitlab/);
   assert.throws(() => load({ platform: 'github', ai_manager: 'sr' }), /"project" is required/);
-  assert.throws(() => load({ platform: 'github', project: 'a/b' }), /"ai_manager" is required/);
+  assert.throws(() => load({ platform: 'github', project: 'a/b' }), /"coach" is required \(or "ai_manager" in older repos\)/);
   assert.throws(() => load({ platform: 'github', project: 'a/b', ai_manager: 'sr', labels: { changes: '' } }), /"labels\.changes" must not be empty/);
   assert.throws(() => load({ platform: 'github', project: 'a/b', ai_manager: 'sr', labels: { nope: 'x' } }), /"labels\.nope" is not allowed/);
 });
@@ -38,7 +38,7 @@ test('staging_branch: absent and "" both load as "", a valid name loads, a proje
   assert.equal(load({ ...BASE, staging_branch: 'staging' }).staging_branch, 'staging');
   assert.equal(load({ ...BASE, staging_branch: 'release/qa-1' }).staging_branch, 'release/qa-1');
   const { staging_branch, labels_job, ...rest } = load(BASE);
-  assert.deepEqual(rest, { host: '', assignees: [], default_branch: 'main', ...BASE });
+  assert.deepEqual(rest, { host: '', assignees: [], default_branch: 'main', ...BASE, coach: 'sr', review_capacity: 5 });
 });
 test('staging_branch must differ from default_branch', () => {
   assert.throws(() => load({ ...BASE, staging_branch: 'main' }), /huddle\.json: "staging_branch" must not be the same as "default_branch"/);

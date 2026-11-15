@@ -8,6 +8,12 @@
 
 - None
 
+## Effort
+
+<!-- 1 small, 2 medium, 3 large (huddle effort --suggest proposes one). Larger than 3: split the Issue. -->
+
+2
+
 ## Branch
 
 <!-- Name of the branch, created from an up-to-date default branch (or the staging branch when `huddle.json` has one). Never work on or push to the default branch. -->
@@ -52,7 +58,7 @@
 
 ## Tests that must pass
 
-<!-- There is no code. The AI Manager's review checks the screens, the content, the visual guide, contrast and phone width. -->
+<!-- There is no code. The Coach's review checks the screens, the content, the visual guide, contrast and phone width. -->
 
 - None (no code)
 

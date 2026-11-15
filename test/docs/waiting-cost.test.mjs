@@ -1,4 +1,4 @@
-// Issue #138: the README, the guides, the PDF sources and the website say what waiting costs. The developer's waiting session
+// Issue #138: the README, the guides, the PDF sources and the website say what waiting costs. The Player's waiting session
 // uses no Claude tokens and no GitHub Actions or CI minutes; /huddle-watch is turned on by hand in each session and each check uses tokens.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,16 +19,17 @@ for (const f of WAIT) {
 }
 
 for (const f of WATCH) {
-  test(`${f}: /huddle-watch is turned on by hand in each session, and each check uses tokens`, () => {
+  // Issue #157: the watch waits in the background like a Player's session, so it no longer spends a Claude turn per check.
+  test(`${f}: /huddle-watch is turned on by hand in each session, and uses no Claude tokens while nothing waits`, () => {
     const t = read(f);
     assert.match(t, /turned on by hand in each session/);
-    assert.match(t, /each check is a short Claude turn/i);
-    assert.match(t, /\/huddle-watch 15m/);
+    assert.match(t, /no Claude tokens while nothing waits/i);
+    assert.doesNotMatch(t, /each check is a short Claude turn|expires after 7 days/i);
   });
 }
 
 for (const f of ['README.md', 'docs/team-guide.md', 'docs/pdf/src/guide.html', 'site/how-it-works/index.html']) {
-  test(`${f}: the AI Manager's session start says what waits`, () => {
+  test(`${f}: the Coach's session start says what waits`, () => {
     assert.match(read(f), /session start says what waits/i);
   });
 }

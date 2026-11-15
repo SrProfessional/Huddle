@@ -5,6 +5,48 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-15
+
+### Added
+
+- The website and the PDF guides say effort, capacity and the parallel work (Issue #171, H71): a new «Effort and capacity» section on
+  «How it works», `/huddle-play` alone on «Get started» and in the first-day PDF, and one paragraph in the guide PDF.
+- The Coach's watch reviews several PRs/MRs at once, by effort (Issue #165, H68; `docs/design.md` §19 and §24). Each review is a
+  background subagent with a clean context, within `review_capacity` effort points (default 5); the subagents never merge. The watch
+  merges one at a time, checking each PR/MR again against the updated base first, and asks for an update instead of merging when it no
+  longer merges cleanly or its tests fail. Review items of `huddle queue --json` carry their `effort`.
+- One Player session works on several Issues at once, by effort and capacity (Issue #164, H67; `docs/design.md` §24). `/huddle-play`
+  with no number hands each assigned Issue that fits to a background subagent with a clean context, keeps the review waits in the main
+  session, continues the same subagent when the Coach asks for changes, and starts the next one when room frees. The capacity is 5 points
+  by default (`capacity`, `capacity_per_person` in `huddle.json`); a Player can only lower theirs, on their machine (`huddle capacity`).
+  `huddle next` shows what starts and what waits. Work in review uses no room; two Issues that share a file never run at once.
+- Each Issue has an effort of 1, 2 or 3 points (Issue #162, H66; `docs/design.md` §24). Every Issue template has an «Effort» section
+  (2 when an Issue has none). `huddle effort --suggest <file>` proposes one from the Issue's allowed files, tests, migrations and folders,
+  and says when an Issue is too big and should be split; `/huddle-issue` and `/huddle-bug` use it. `huddle effort <n>` shows an Issue's
+  effort. It is the base of the parallel work of #164 and #165.
+
+- `/huddle-watch always` keeps the watch on (Issue #160, H65). `huddle queue --always` leaves a mark for the repo on the AI Manager's machine
+  (never in the repo), and each of their session starts there says «the watch starts now, as you asked» and has Claude start it before
+  anything else. `/huddle-watch off` also forgets it. A developer's login never starts it.
+
+### Changed
+
+- **The roles are now Coach and Player** (Issue #166, H70). The person who writes the Issues, answers the decisions, reviews and merges
+  was the «AI Manager» and is now the **Coach**; the people who work on the Issues with a Claude Code session, code or design, were
+  «developers» and are now **Players**. Every guide, PDF, website page, skill, template, the `CLAUDE.md` block and the CLI messages use
+  the new names; the skill names do not change. Nothing breaks: `huddle.json` takes `coach` (setup writes it on a new repo), and
+  `ai_manager` keeps working (both set to different logins is an error). The label «changes requested from AI Manager» is now
+  «changes requested from Coach»: the full `huddle labels` renames the old one once, and both names are read until then. GitLab's own
+  member role «Developer» keeps its name. The website and the guide PDF also say `/huddle-watch always`.
+
+- `/huddle-watch` waits in the background with no Claude tokens while nothing waits (Issue #157, H64). It was a recurring job that woke
+  the AI Manager's session every few minutes for a Claude turn that mostly found nothing, and it expired after 7 days. Now the session
+  runs `huddle queue --wait [seconds] [--seen <keys>]` as a background command, the way a developer's session runs `huddle wait`: a Node
+  loop that reads the queue each round and wakes the session as soon as something new waits; only a round with nothing new runs the
+  labels pass (it took minutes on a real project, the queue seconds). `huddle queue
+  --wait-off` stops it at its next round. The review is still done by the session's own model, and turning the watch on is still the AI
+  Manager's order to review and merge. The guides, the guide PDF and the website say so.
+
 ## [0.8.5] - 2026-11-15
 
 ### Fixed

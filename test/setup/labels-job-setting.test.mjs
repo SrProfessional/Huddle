@@ -235,7 +235,7 @@ test('the setup and update skills do not ask about the labels job and do not off
 // --- doctor ----------------------------------------------------------------------------------------------------------------------------
 
 async function doctorLines(extra) {
-  const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+  const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
   const h = harness({ config: { ...CONFIG, ...extra }, wrap: (adapter) => ({ ...adapter, listLabels: async () => LABELS }) });
   h.ctx.pluginInstalled = true;
   await run(['doctor'], h.ctx);

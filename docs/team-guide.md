@@ -16,28 +16,41 @@ The status of an Issue lives in its labels. Nobody sets them by hand: `huddle la
 Issue's «Depends on» section and from the comments. There is no cloud labels job by default.
 
 `huddle labels --issue <n>` does the same for one Issue (and, when it is closed, for the Issues that wait for it), so a session can
-keep the board right at the moments that matter without reading the whole repo. Only the AI Manager's login assigns; the full
+keep the board right at the moments that matter without reading the whole repo. Only the Coach's login assigns; the full
 `huddle labels` stays the safety net for what nobody's session saw, such as a PR merged from a phone.
 
-The sessions run that command themselves at each step (a developer's session when it starts, opens the PR, stops for a decision or
-pushes a fix; the AI Manager's session when it requests changes, answers or merges), so the labels are right within seconds, with no
-cloud job. It needs permission to edit labels on the repo, which a developer's session already has, since the same
+The sessions run that command themselves at each step (a Player's session when it starts, opens the PR, stops for a decision or
+pushes a fix; the Coach's session when it requests changes, answers or merges), so the labels are right within seconds, with no
+cloud job. It needs permission to edit labels on the repo, which a Player's session already has, since the same
 session adds `in progress` (with `huddle labels --issue <n> --started`, which adds it and takes `assigned` off in one step; a question
 uses `--needs-decision`). If it fails, the session says one line and goes on; the next session catches up.
 
 | Label | Meaning |
 |---|---|
 | `ready` | Everything it depends on is merged. Waiting for someone. |
-| `assigned` | A developer has it. Not started. |
+| `assigned` | A Player has it. Not started. |
 | `in progress` | A session is working on it. |
-| `in review` | A PR/MR is open and waits for the AI Manager. |
+| `in review` | A PR/MR is open and waits for the Coach. |
 | `blocked` | It depends on an Issue that is not merged yet. |
-| `needs decision` | The session asked the AI Manager and waits. |
-| `changes requested from AI Manager` | The AI Manager asked for changes and nobody has taken the request yet. |
+| `needs decision` | The session asked the Coach and waits. |
+| `changes requested from Coach` | The Coach asked for changes and nobody has taken the request yet. |
 
 The names can be changed under `labels` in `huddle.json`.
 
-**Stop labels.** `needs decision` and `changes requested from AI Manager` mean the work waits for someone else, so they stand alone: `in progress` (a session is working) and `in review` (the AI Manager is working) are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.
+**Stop labels.** `needs decision` and `changes requested from Coach` mean the work waits for someone else, so they stand alone: `in progress` (a session is working) and `in review` (the Coach is working) are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.
+
+## Effort
+
+Each Issue says how big it is under «Effort»: **1** small, **2** medium, **3** large (2 when it says nothing). `/huddle-issue` suggests it
+from the Issue's own files, tests and migrations, and warns when an Issue is too big and should be split into parts. `huddle effort <n>`
+shows it. It decides how many Issues a Player works on at once.
+
+**Several Issues at once.** Each Player has a **capacity** of 5 points by default (`capacity`, or `capacity_per_person`, in
+`huddle.json`, set by the Coach). `/huddle-play` with no number works on as many of your assigned Issues as fit, each in a background
+subagent with a clean context, so no Issue pays for another one's context. Work in review uses no room, two Issues that share a file
+never run at once, and the next one starts when room frees. `huddle next` shows what starts and what waits, and why. You can only
+**lower** your capacity, on your machine: `huddle capacity 3` (and `huddle capacity reset`). Keep that session open: closing it stops the
+subagents. Design Issues stay in a session of their own.
 
 ## Dependencies
 
@@ -48,17 +61,17 @@ in the labels run, not a failure; that Issue stays `blocked`.
 
 ## How a task goes
 
-1. The AI Manager writes the Issue (`/huddle-issue`).
-2. `huddle labels`, run by the AI Manager's session, assigns it when it is ready.
-3. The developer runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
+1. The Coach writes the Issue (`/huddle-issue`).
+2. `huddle labels`, run by the Coach's session, assigns it when it is ready.
+3. The Player runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
 4. It opens the PR/MR with `Closes #N`, the real test counts and «What was NOT done», and ends with «✅ Issue #N finished».
-5. CI runs the tests. The AI Manager reviews (`/huddle-review`): either requests changes or merges.
+5. CI runs the tests. The Coach reviews (`/huddle-review`): either requests changes or merges.
 6. A request comes as a comment with a `## Prompt for Claude Code` heading. The session picks it up (`huddle take <n>`),
    pushes the fix and comments «Ready for review again» with the counts.
 
 ## Who does each step
 
-The AI Manager's session does every step it can. Before it hands you a step, it checks whether it can do the step itself
+The Coach's session does every step it can. Before it hands you a step, it checks whether it can do the step itself
 with the tools and logins it has (`gh`, `glab`, the sandboxes, git). If it can, it does it and tells you what it did: it
 merges the PR/MR it approved, tags and publishes a release, and runs the steps of the [smoke test](smoke-test.md) on the
 sandboxes and fills «Results». You do not get commands to copy for those.
@@ -87,13 +100,13 @@ way.
 A bug has its own Issue type: the Bug template (the Task sections plus a bug block with what happens, how to reproduce,
 evidence, severity, the probable cause and the failing test to write first).
 
-- **A developer, a tester or a client with access** reports it with the **Bug report form** on GitHub, or with the **Bug
+- **A Player, a tester or a client with access** reports it with the **Bug report form** on GitHub, or with the **Bug
   template** on GitLab (fill only the bug block and add the label `needs triage`: GitLab has no issue forms). A report is
   labeled `bug` and `needs triage`, and it is not a ready Issue: `huddle labels` never gives it `ready` or an assignee while
   it has `needs triage`.
-- **The AI Manager** runs `/huddle-bug` with a plain description, a capture or a link, or `/huddle-bug #N` on a raw report.
+- **The Coach** runs `/huddle-bug` with a plain description, a capture or a link, or `/huddle-bug #N` on a raw report.
   The session investigates without changing anything, looks for duplicates, writes the Bug Issue with a probable cause and
-  the failing test to write first, and waits for the AI Manager's OK before creating it (or before rewriting the report and
+  the failing test to write first, and waits for the Coach's OK before creating it (or before rewriting the report and
   removing `needs triage`).
 - **Severity** is `blocking` (stops a person or production), `normal` or `minor`. A `blocking` Bug is assigned before every
   other ready Issue.
@@ -103,9 +116,8 @@ form can apply them.
 
 ## When the session cannot go on
 
-It does not guess. It commits and pushes what is done, comments on the Issue starting with «❓ Decision for the AI
-Manager:» (what is blocked, the options with trade-offs, its recommendation), adds `needs decision` and stops with «⛔
-Issue #N stopped: waiting for a decision». The AI Manager answers with `/huddle-decide`, on the Issue and on the PR/MR,
+It does not guess. It commits and pushes what is done, comments on the Issue starting with «❓ Decision for the Coach:» (what is blocked, the options with trade-offs, its recommendation), adds `needs decision` and stops with «⛔
+Issue #N stopped: waiting for a decision». The Coach answers with `/huddle-decide`, on the Issue and on the PR/MR,
 and the session continues on the same branch: it keeps waiting in the background and picks the answer up by itself (leave it open; if
 Claude Code was closed, run `/huddle-play <n>`). The session never closes the Issue.
 
@@ -113,13 +125,13 @@ Claude Code was closed, run `/huddle-play <n>`). The session never closes the Is
 
 Every change to an Issue goes through a Huddle session: creating it (`/huddle-issue`, `/huddle-bug`), editing it, closing it, reopening it, and merging its PR/MR. Nobody merges, closes, reopens or edits an Issue by hand on the website or from a phone. The session runs `huddle labels` after the change, so the board stays right with no cloud job.
 
-Still fine by hand on the website: reading and commenting; the bug report form, for people with no session (it comes in as `needs triage` and waits for the AI Manager's `/huddle-bug`); and a tester's «✅ Tested in staging» comment (the release gate reads it).
+Still fine by hand on the website: reading and commenting; the bug report form, for people with no session (it comes in as `needs triage` and waits for the Coach's `/huddle-bug`); and a tester's «✅ Tested in staging» comment (the release gate reads it).
 
 This is a rule, not a lock: if someone breaks it, it is not a problem. The next session that opens repairs the board (docs/design.md §22), so a label changed on the website is corrected with no cloud run.
 
 ## Not negotiable
 
-- **Never push to the default branch.** Only the AI Manager merges.
+- **Never push to the default branch.** Only the Coach merges.
 - **Only the allowed files.** If another one is needed, ask first.
 - **Test first.** See the failing test, then write the code. Report the commands with their real counts.
 - **No production, no secrets.** If a permission or key is missing, stop and tell. Do not look for another way.
@@ -128,13 +140,13 @@ This is a rule, not a lock: if someone breaks it, it is not a problem. The next 
 
 ## Design tasks
 
-A design task is an Issue written from the **Design** template (`/huddle-issue` picks it when the AI Manager asks for a design).
+A design task is an Issue written from the **Design** template (`/huddle-issue` picks it when the Coach asks for a design).
 It has the label `design`, which `huddle labels` creates when it is missing, and the same sections as a task (so the labels
 job treats it like one: `ready`, `assigned`, `in progress`, `in review`), plus **Screens**, **For whom**, **Visual guide**,
 **Content** (real texts, never lorem ipsum) and **Deliverable**. Its allowed files are always `design/<issue number>-<slug>/`:
 a design task never changes code.
 
-- **The design system.** A project can set one up once, from its repo, with `/design-sync` in Claude Code (an AI Manager
+- **The design system.** A project can set one up once, from its repo, with `/design-sync` in Claude Code (a Coach
   step). The session uses it when it exists; otherwise it follows the Issue's visual guide.
 - **Work.** The designer runs `/huddle-play <n>`. The session creates the design with Claude Design and shares the link.
   Changes are asked for **only in the chat**, never by hand on the canvas. If the session finds a change it did not make, it
@@ -152,19 +164,19 @@ a design task never changes code.
 ## Why one or two sessions
 
 Many sessions at once slow the machine (each runs tests and builds), split your attention until your answers get rushed,
-and fill the AI Manager's queue with half-reviewed PRs. More speed comes from more developers, not more windows.
+and fill the Coach's queue with half-reviewed PRs. More speed comes from more Players, not more windows.
 
 ## Progress
 
 A project has **areas**, and the areas are **milestones** (GitHub and GitLab both have them). Each Issue goes in one
-milestone; `/huddle-issue` asks which. The progress code only reads milestones; the AI Manager defines them with
+milestone; `/huddle-issue` asks which. The progress code only reads milestones; the Coach defines them with
 `/huddle-areas`, described next.
 
 ### Define the areas with /huddle-areas
 
 How many areas a project needs, which ones, which area an old Issue belongs to and how many Issues are still missing are
 judgments. **The number of areas depends on the project and is never fixed**: one project has 3, another more or fewer.
-So the AI Manager does not write them by hand: `/huddle-areas` (AI Manager only) reads the README, `CLAUDE.md`, the specs and
+So the Coach does not write them by hand: `/huddle-areas` (Coach only) reads the README, `CLAUDE.md`, the specs and
 plans and the Issues, and then:
 
 1. **Proposes the areas**, each with a one-line description and the reason, and waits for you to accept, rename, merge,
@@ -191,7 +203,7 @@ commands, the same on GitHub and GitLab, that you can also run yourself:
 Every command that writes prints what it will change first, and `--dry-run` prints it and stops. Closing or deleting a
 milestone stays a manual act on the platform.
 
-The percentage of an area counts the work that is not written yet. The AI Manager writes an estimate of the Issues still
+The percentage of an area counts the work that is not written yet. The Coach writes an estimate of the Issues still
 missing in the milestone description, on a line of its own:
 
 ```text
@@ -228,22 +240,24 @@ about it.
 |---|---|
 | Know if something is waiting for me | `huddle pending` |
 | See how far each area has come | `huddle progress` |
-| Define or check the areas (AI Manager) | `/huddle-areas`, or `huddle areas check` |
+| Define or check the areas (Coach) | `/huddle-areas`, or `huddle areas check` |
 | Check my setup | `huddle doctor` |
 | See what `huddle labels` would change | `huddle labels --dry-run` |
 | Update the labels of one Issue only | `huddle labels --issue <n>` |
 | Continue after a request | `/huddle-play <n>`, or answer yes to the hook |
-| See what waits for the AI Manager | `huddle queue` |
+| See what waits for the Coach | `huddle queue` |
 | See if a newer Huddle exists (the skills say it too) | `huddle notice` |
-| Have the AI Manager's session review by itself (AI Manager) | `/huddle-watch`, and `/huddle-watch off` to stop |
+| Have the Coach's session review by itself (Coach) | `/huddle-watch`, and `/huddle-watch off` to stop |
 
-**What waiting costs.** After a PR/MR opens, the developer's session waits with a small Node process on the developer's own computer
-(`huddle wait`) that asks GitHub or GitLab every two minutes, with the developer's own login: it uses no Claude tokens and no GitHub
+**What waiting costs.** After a PR/MR opens, the Player's session waits with a small Node process on the Player's own computer
+(`huddle wait`) that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub
 Actions or CI minutes, and wakes the session only when a request arrives. It needs the session open and the computer on; otherwise the
-next session start says a request is pending. `/huddle-watch` is turned on by hand in each session, because turning it on is the AI
-Manager's order to review and merge; it stops with `/huddle-watch off`, when Claude Code closes, or after 7 days. Each check is a short
-Claude turn even when nothing waits, so it uses some tokens: a longer interval (`/huddle-watch 15m`) and a fresh, short session spend
-less. Without it, the AI Manager's session start says what waits for them.
+next session start says a request is pending. `/huddle-watch` is turned on by hand in each session, because turning it on is the Coach's order to review and merge; it stops with `/huddle-watch off` or when Claude Code closes. It waits in the background the same
+way (`huddle queue --wait`), so it uses no Claude tokens while nothing waits, and wakes the Coach's session only when something
+waits. Without it, the Coach's session start says what waits for them. `/huddle-watch always` keeps it on: it starts again in each of When several PRs/MRs wait, the
+watch reviews them at once, each in a background subagent, within `review_capacity` effort points (default 5), and still merges them
+one at a time, checking each one again against the updated base.
+the Coach's sessions of that repo on that machine (a mark on the machine, not a file of the repo), until `/huddle-watch off`.
 
 ## Old worktrees clean themselves
 
@@ -275,23 +289,23 @@ is never deleted. Before judging, it runs `git fetch`; offline, it judges with w
 
 ## Installing Huddle
 
-Every developer installs Huddle once on their own machine, then types `/reload-plugins` in the open session (or restarts Claude Code if the skills do not show up). With the `claude` command, in a terminal run
+Every Player installs Huddle once on their own machine, then types `/reload-plugins` in the open session (or restarts Claude Code if the skills do not show up). With the `claude` command, in a terminal run
 `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (in the CLI, `/plugin marketplace add ...`
 and `/plugin install ...` work too). With only the VS Code extension, which puts no `claude` command in the terminal, type `/plugins`,
 add the marketplace `SrProfessional/Huddle` in the **Marketplaces** tab and install `huddle` from the **Plugins** tab with **Install for
-this project** (not «Install for you»), once per clone. The AI Manager sends both routes to each developer after `/huddle-setup`.
+this project** (not «Install for you»), once per clone. The Coach sends both routes to each Player after `/huddle-setup`.
 
 The `.claude/settings.json` snippet that setup writes is only a helper. It enables the plugin for the project and, in the
 CLI, registers the marketplace silently, only after the trust dialog of that folder itself. When a parent folder is already
 trusted there is no dialog and it is not used, and it is not documented for the VS Code extension. `huddle doctor` shows
-a «plugin» line so a developer can check their own machine. Its «login» line tells two failures apart: «`gh`/`glab` is not
+a «plugin» line so a Player can check their own machine. Its «login» line tells two failures apart: «`gh`/`glab` is not
 installed or not on the PATH of this terminal» (with the install command for the system, and on Windows «open a new
 terminal, or reload the PATH») and «is not logged in» (with `gh auth login` or `glab auth login`, plus `--hostname <host>`
 when `huddle.json` has a host). The SessionStart hook stays silent in both cases.
 
 ## Add or remove someone
 
-Only the AI Manager changes the team (see [the roles](roles.md)). Adding a person takes three steps:
+Only the Coach changes the team (see [the roles](roles.md)). Adding a person takes three steps:
 
 1. **They can be assigned.** They are a collaborator (GitHub) or a member with at least the Developer role (GitLab). If
    not, Huddle can never assign them an Issue, and it stays `ready`.
@@ -307,7 +321,7 @@ end it prints the message to send the new person, with the commands of step 3.
 **The command, if you prefer it by hand:**
 
 ```text
-huddle team                     the AI Manager and the assignees: ✔/✖ for «exists» and «can be assigned»
+huddle team                     the Coach and the assignees: ✔/✖ for «exists» and «can be assigned»
 huddle team add <login>         adds the login to assignees
 huddle team remove <login>      takes the login out of assignees
 ```
@@ -316,7 +330,7 @@ huddle team remove <login>      takes the login out of assignees
 someone twice, or removing someone who is not there, says so and changes nothing.
 
 They never invite anyone and never change a platform setting. When the login cannot be assigned, `add` prints the step for
-the AI Manager and writes nothing:
+the Coach and writes nothing:
 
 - GitHub: Settings → Collaborators → Add people, or `gh api -X PUT repos/<project>/collaborators/<login>`.
 - GitLab: Manage → Members → Invite members, with the role Developer.
@@ -325,7 +339,7 @@ Do the step, then run `add` again. To write the file before the step is done, ad
 `ready` until the step is done. `huddle doctor` has a «team» check that shows a ⚠ with the step for each assignee who
 cannot be assigned.
 
-Removing someone does not touch their open Issues: they keep that assignee until the AI Manager reassigns them.
+Removing someone does not touch their open Issues: they keep that assignee until the Coach reassigns them.
 
 ## A staging branch
 
@@ -334,7 +348,7 @@ Removing someone does not touch their open Issues: they keep that assignee until
 
 With one set, the work of an Issue goes **into staging**: the session starts the branch from the up-to-date staging branch and opens
 the PR/MR against it, still writing `Closes #N`. The Issue is **done when that PR/MR is merged into staging**. GitHub and GitLab only
-close an Issue when its PR merges into the default branch, so Huddle closes it itself: right after the merge, the AI Manager's
+close an Issue when its PR merges into the default branch, so Huddle closes it itself: right after the merge, the Coach's
 session runs `huddle land <pr>` (`huddle land <pr> --check` first looks without changing anything). It is safe to run twice. If an Issue
 is still open although its PR was merged into staging, `huddle labels` says so with one line; it never closes the Issue by itself,
 so an Issue you reopened on purpose after a failed test in staging stays open. Old worktrees are cleaned once their work is merged
@@ -342,22 +356,22 @@ into staging. Setup, update and team PRs keep going to the default branch. With 
 
 ### Tested in staging, then the release
 
-Nothing goes from staging to production until the AI Manager has seen that **every Issue in staging was tested there**.
+Nothing goes from staging to production until the Coach has seen that **every Issue in staging was tested there**.
 
-- **Who marks.** Only the AI Manager, with `huddle tested <issue>` (their session runs it when they say the Issue was tested). It writes the comment
+- **Who marks.** Only the Coach, with `huddle tested <issue>` (their session runs it when they say the Issue was tested). It writes the comment
   `✅ Tested in staging` on the Issue and puts the label `tested in staging`. Someone else may do it by hand, writing exactly that comment in the web page, **only** if their login is
-  in `testers` in `huddle.json`. A developer's comment never counts.
+  in `testers` in `huddle.json`. A Player's comment never counts.
 - **What the mark means.** It is the comment that counts, not the label. A mark is valid only if it is **newer than the last time the Issue's PR/MR was merged into staging**: if
   the Issue is reopened and fixed again, the old mark stops counting by itself, and the label is taken off.
-- **The release.** The AI Manager runs `/huddle-release`. It lists what is in staging and not yet in production, asks about every Issue without a valid mark, runs the project's
-  own clean check (a fresh copy of staging, a clean install, the tests; it asks if the project has not written down how), shows the list and waits for the AI Manager's OK. Then it
-  opens the PR/MR from staging into the default branch, and merges it with a **merge commit** only when the AI Manager says so in the same chat. `huddle release` shows the list
+- **The release.** The Coach runs `/huddle-release`. It lists what is in staging and not yet in production, asks about every Issue without a valid mark, runs the project's
+  own clean check (a fresh copy of staging, a clean install, the tests; it asks if the project has not written down how), shows the list and waits for the Coach's OK. Then it
+  opens the PR/MR from staging into the default branch, and merges it with a **merge commit** only when the Coach says so in the same chat. `huddle release` shows the list
   without changing anything.
-- **Two warnings.** If staging received commits that belong to no listed Issue (a hotfix, a back-merge), the AI Manager must confirm them. If the default branch is **ahead** of staging
+- **Two warnings.** If staging received commits that belong to no listed Issue (a hotfix, a back-merge), the Coach must confirm them. If the default branch is **ahead** of staging
   (a hotfix went straight to production), a back-merge PR/MR from the default branch into staging comes first, and the release does not open until it is merged.
-- **An Issue that was not tested** can go out only if the AI Manager gives the reason (`--untested <n> --reason "<why>"`); the reason is written in the PR/MR.
-- **Protect the staging branch** on GitHub or GitLab (branch protection): Huddle does not stop a developer from merging into it. The label is cosmetic by design; the release trusts
-  only the comments of the AI Manager and the `testers`.
+- **An Issue that was not tested** can go out only if the Coach gives the reason (`--untested <n> --reason "<why>"`); the reason is written in the PR/MR.
+- **Protect the staging branch** on GitHub or GitLab (branch protection): Huddle does not stop a Player from merging into it. The label is cosmetic by design; the release trusts
+  only the comments of the Coach and the `testers`.
 
 ## Updating Huddle
 
@@ -370,7 +384,7 @@ agree). Claude Code also leaves auto-update off for a plugin from a third-party 
 one short block, and Claude says it first in its first answer, in your language: `Huddle <new> is available (you have
 <old>)`, the two commands, and a link to what changed. It looks the release up without a login (so GitLab teams get it
 too), at most once a day, from a small cache in Claude Code's data folder. If there is no network, GitHub answers with an
-error or the answer is slow (3 seconds at most), it says nothing. A pre-release never counts. The AI Manager's notice has
+error or the answer is slow (3 seconds at most), it says nothing. A pre-release never counts. The Coach's notice has
 one more line: after updating, run `/huddle-update` in each repo to get the new templates and any new questions. If you run Huddle
 from a clone (`--plugin-dir`), the notice says to pull your clone.
 
@@ -402,7 +416,7 @@ notice above is the safety net.
 then `claude plugin update huddle@huddle --scope project`, run for you); the project's files, in a worktree and a branch of their own
 (`huddle-update-<version>`), using the **new** version's templates, so you never change branch; the pending questions; and the PR.
 It ends by telling you to type `/reload-plugins` in the open session (in the terminal and in VS Code); if the new skills do not show up, restart
-Claude Code (close `claude` and open it again; in VS Code, «Developer: Reload Window» or close VS Code and open it again). If the `claude`
+Claude Code (close `claude` and open it again; in VS Code, «Player: Reload Window» or close VS Code and open it again). If the `claude`
 command cannot be run from the session (for example in the VS Code extension, which puts none in the terminal), it still refreshes the files with the Huddle
 that is installed and tells you to update the plugin with `/plugins` or the terminal commands, and then run `/huddle-update` again. By hand, the same plugin update is `/plugin marketplace update huddle` and the Installed tab of `/plugin`, or the two terminal commands. If you work from
 a clone with `--plugin-dir`, pull it instead. The first update to a version that has this skill is done the old way (your installed

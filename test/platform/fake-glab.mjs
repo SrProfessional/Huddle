@@ -267,6 +267,10 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       const l = labels.get(Number(m[1]));
       need(method === 'PUT' && l, args);
       const b = body();
+      if (b.new_name) {
+        for (const it of issues.values()) it.labels = it.labels.map((x) => (x === l.name ? b.new_name : x));
+        l.name = b.new_name;
+      }
       Object.assign(l, { color: b.color ?? l.color, description: b.description ?? l.description });
       return JSON.stringify(l);
     }

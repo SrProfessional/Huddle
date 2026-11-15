@@ -8,6 +8,12 @@
 
 - None
 
+## Effort
+
+<!-- 1 small, 2 medium, 3 large (huddle effort --suggest proposes one). Larger than 3: split the Issue. -->
+
+2
+
 ## Branch
 
 <!-- Name of the branch, created from an up-to-date default branch (or the staging branch when `huddle.json` has one). Never work on or push to the default branch. -->
@@ -15,7 +21,7 @@
 ## Prompt for Claude Code
 
 ```text
-<!-- The text the developer pastes into a new Claude Code session. -->
+<!-- The text the Player pastes into a new Claude Code session. -->
 ```
 
 ## Allowed files

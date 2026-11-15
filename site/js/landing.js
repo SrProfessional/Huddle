@@ -232,7 +232,7 @@ function flowScene(gsap, { phone, addClass }) {
   tl.addLabel('toProgress', 2);
   travel(P.progress, 1, 'toProgress'); progressTo(2, 'toProgress', 1); light(2, 'toProgress+=0.8'); dim(1, 'toProgress+=0.8');
 
-  // Side road 1: needs decision. The card stops, a question appears, the AI Manager answers, it goes on.
+  // Side road 1: needs decision. The card stops, a question appears, the Coach answers, it goes on.
   tl.addLabel('ask', 3.4);
   tl.to(sideA, { opacity: 1, duration: 0.3 }, 'ask');
   travel(P.decision, 0.9, 'ask');

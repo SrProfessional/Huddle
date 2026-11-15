@@ -1,4 +1,4 @@
-<!-- Reporting a bug and you are not the AI Manager? Fill only the sections from «What happens» to «Severity», then add the label «needs triage» (GitLab: the Labels box on the right; the GitHub form does it for you). The AI Manager turns the report into a ready Bug Issue with /huddle-bug. A report with «needs triage» is never assigned. -->
+<!-- Reporting a bug and you are not the Coach? Fill only the sections from «What happens» to «Severity», then add the label «needs triage» (GitLab: the Labels box on the right; the GitHub form does it for you). The Coach turns the report into a ready Bug Issue with /huddle-bug. A report with «needs triage» is never assigned. -->
 
 ## What happens
 
@@ -42,6 +42,12 @@ unknown yet
 
 - None
 
+## Effort
+
+<!-- 1 small, 2 medium, 3 large (huddle effort --suggest proposes one). Larger than 3: split the Issue. -->
+
+2
+
 ## Branch
 
 <!-- Name of the branch, created from an up-to-date default branch (or the staging branch when `huddle.json` has one). Never work on or push to the default branch. -->
@@ -49,7 +55,7 @@ unknown yet
 ## Prompt for Claude Code
 
 ```text
-<!-- The text the developer pastes into a new Claude Code session. It says: write the failing test first and see it fail. -->
+<!-- The text the Player pastes into a new Claude Code session. It says: write the failing test first and see it fail. -->
 ```
 
 ## Allowed files
