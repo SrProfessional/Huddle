@@ -1,4 +1,4 @@
-// Issue #88, docs/design.md §19: `/huddle-watch` lets the AI Manager's session check what waits and review it. Since Issue #157 it waits in
+// Issue #88, docs/design.md §19: `/huddle-watch` lets the Coach's session check what waits and review it. Since Issue #157 it waits in
 // the background (`huddle queue --wait`) with no Claude tokens while nothing waits, instead of a recurring job. The skill is tested as text.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,11 +17,11 @@ test('the watch skill has a name, says when to use it, and is short', () => {
   assert.ok(text.split('\n').length <= 90, 'keep it short');
 });
 
-test('it is for the AI Manager only: doctor first, and a clear stop for anyone else', () => {
+test('it is for the Coach only: doctor first, and a clear stop for anyone else', () => {
   const t = flat(WATCH);
-  assert.match(t, /For the AI Manager only/);
+  assert.match(t, /For the Coach only/);
   assert.ok(t.indexOf(`${HUDDLE} doctor`) > 0);
-  assert.match(t, /`ai_manager`/);
+  assert.match(t, /`coach`/);
   assert.match(t, /stop/i);
 });
 
@@ -48,7 +48,7 @@ test('it uses no recurring job, never expires after 7 days, and says it uses no 
 
 test('the first message says that turning it on is the order to review and merge, and what stops it', () => {
   const t = flat(WATCH);
-  assert.match(t, /turning the watch on is the AI Manager's order to review and merge/i);
+  assert.match(t, /turning the watch on is the Coach's order to review and merge/i);
   assert.match(t, /as if (they|you) asked for each review/i);
   assert.match(t, /\/huddle-watch off/);
   assert.match(t, /closing Claude Code/i);
@@ -73,8 +73,8 @@ test('off runs queue --wait-off and stops the background command; status says wh
   assert.match(t, /interval/i);
 });
 
-test('the check now says «Nothing is waiting for the AI Manager.» when empty', () => {
-  assert.match(flat(WATCH), /Nothing is waiting for the AI Manager\./);
+test('the check now says «Nothing is waiting for the Coach.» when empty', () => {
+  assert.match(flat(WATCH), /Nothing is waiting for the Coach\./);
 });
 
 test('a review item runs /huddle-review with its usual rules: merge when good, the «🔁 Changes requested» comment when not', () => {
@@ -114,7 +114,7 @@ test('it has «Who does each step», and every command is in the full form, neve
 
 test('the docs say what the watch is and where it stops', () => {
   const design = read('docs/design.md');
-  assert.match(design, /^## 19\. Watching what waits for the AI Manager/m);
+  assert.match(design, /^## 19\. Watching what waits for the Coach/m);
   assert.match(design, /huddle-watch\/SKILL\.md/);
   for (const f of ['README.md', 'docs/team-guide.md', 'docs/roles.md']) assert.match(read(f), /\/huddle-watch/, f);
   assert.match(read('README.md'), /huddle queue/);
@@ -128,6 +128,6 @@ test('§19 says the watch waits in the background with queue --wait, and keeps t
   assert.match(s19, /--wait-off/);
   assert.match(s19, /no Claude tokens/i);
   assert.match(s19, /Check now/);
-  assert.match(s19, /Nothing is waiting for the AI Manager\./);
+  assert.match(s19, /Nothing is waiting for the Coach\./);
   assert.doesNotMatch(s19, /expires after 7 days/);
 });

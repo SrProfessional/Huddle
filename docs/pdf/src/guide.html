@@ -12,32 +12,32 @@
     <h2 id="ciclo">From an idea to merged code, step by step</h2>
     <ol class="cycle">
       <li>
-        <div><span class="who">AI Manager</span><h3>Plans and splits the work</h3>
-        <p>The AI Manager defines what gets built, writes the spec and splits it into tasks that do not step on each other: each one touches different files. When one task needs another first, it says so under «Depends on».</p></div>
+        <div><span class="who">Coach</span><h3>Plans and splits the work</h3>
+        <p>The Coach defines what gets built, writes the spec and splits it into tasks that do not step on each other: each one touches different files. When one task needs another first, it says so under «Depends on».</p></div>
       </li>
       <li>
-        <div><span class="who">AI Manager</span><h3>Creates the Issue with its prompt ready</h3>
+        <div><span class="who">Coach</span><h3>Creates the Issue with its prompt ready</h3>
         <p>With <code>/huddle-issue</code>, each task becomes an Issue from the template: the exact prompt to paste into Claude Code, the files that may and may not be touched, and the tests that must pass. Huddle assigns it to the person with the fewest open Issues.</p></div>
       </li>
       <li>
-        <div><span class="who">Developer</span><h3>Starts it with one command</h3>
-        <p><code>/huddle-play N</code> checks that every dependency is merged, creates the branch in a folder of its own, marks the Issue <code>in progress</code> and runs its prompt. There is no need to explain the project: <code>CLAUDE.md</code> already gives the session the context. Run the same <code>/huddle-play N</code> again once the AI Manager has answered a review or a decision: the session sees the Issue is already started and continues it.</p></div>
+        <div><span class="who">Player</span><h3>Starts it with one command</h3>
+        <p><code>/huddle-play N</code> checks that every dependency is merged, creates the branch in a folder of its own, marks the Issue <code>in progress</code> and runs its prompt. There is no need to explain the project: <code>CLAUDE.md</code> already gives the session the context. Run the same <code>/huddle-play N</code> again once the Coach has answered a review or a decision: the session sees the Issue is already started and continues it.</p></div>
       </li>
       <li class="human">
-        <div><span class="who">Developer · this is where the value is</span><h3>Answers the AI's questions and decides</h3>
-        <p>The session asks what the Issue does not settle: what to do in an unusual case, what text the user sees, what to prioritize. Each answer is a decision, and the quality of the result depends on it. If the work cannot go on without the AI Manager, the session asks a «❓ Decision for the AI Manager» on the Issue and stops.</p></div>
+        <div><span class="who">Player · this is where the value is</span><h3>Answers the AI's questions and decides</h3>
+        <p>The session asks what the Issue does not settle: what to do in an unusual case, what text the user sees, what to prioritize. Each answer is a decision, and the quality of the result depends on it. If the work cannot go on without the Coach, the session asks a «❓ Decision for the Coach» on the Issue and stops.</p></div>
       </li>
       <li>
         <div><span class="who">Claude Code</span><h3>Writes the test, the code and opens the PR</h3>
-        <p>First the failing test, then the code that makes it pass. It opens a pull request (a merge request on GitLab) with the tests it ran and their real results, and closes with a message that starts with <strong>«✅ Issue #N finished»</strong>. Then it keeps waiting for the review in the background, with a small Node process on the developer's computer that asks the platform every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes.</p></div>
+        <p>First the failing test, then the code that makes it pass. It opens a pull request (a merge request on GitLab) with the tests it ran and their real results, and closes with a message that starts with <strong>«✅ Issue #N finished»</strong>. Then it keeps waiting for the review in the background, with a small Node process on the Player's computer that asks the platform every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes.</p></div>
       </li>
       <li>
         <div><span class="who">The platform</span><h3>Automatic tests and labels</h3>
         <p>The project's CI runs its tests. Each session runs <code>huddle labels</code> after the change it makes, which moves each Issue through <code>ready</code>, <code>assigned</code>, <code>in progress</code>, <code>in review</code> and <code>blocked</code>, from its «Depends on» and its PR. Nobody moves those labels by hand, and there is no cloud job.</p></div>
       </li>
       <li>
-        <div><span class="who">AI Manager</span><h3>Reviews: asks for changes or merges</h3>
-        <p>With <code>/huddle-review</code>, the AI Manager either comments a request with a «Prompt for Claude Code» block, which the waiting session takes by itself (marking it 👀), or approves and merges. A merged PR closes the Issue and unblocks the ones that depend on it. Anything that touches production or secrets is done only by the AI Manager. To have its session check by itself what waits, the AI Manager runs <code>/huddle-watch</code> (see «For the AI Manager»).</p></div>
+        <div><span class="who">Coach</span><h3>Reviews: asks for changes or merges</h3>
+        <p>With <code>/huddle-review</code>, the Coach either comments a request with a «Prompt for Claude Code» block, which the waiting session takes by itself (marking it 👀), or approves and merges. A merged PR closes the Issue and unblocks the ones that depend on it. Anything that touches production or secrets is done only by the Coach. To have its session check by itself what waits, the Coach runs <code>/huddle-watch</code> (see «For the Coach»).</p></div>
       </li>
     </ol>
   </section>
@@ -47,25 +47,25 @@
     <h2 id="roles">Who does what</h2>
     <div class="roles">
       <div class="role">
-        <h3>AI Manager (a single person)</h3>
+        <h3>Coach (a single person)</h3>
         <p class="def">A person, not the AI: leads the work with the help of their own Claude Code session. Their login is <code>ai_manager</code> in <code>huddle.json</code>.</p>
         <ul>
           <li>Decides what gets built and in what order.</li>
           <li>Writes the specs and the Issues with their prompt.</li>
-          <li>Answers every «❓ Decision for the AI Manager».</li>
+          <li>Answers every «❓ Decision for the Coach».</li>
           <li>Reviews and merges PRs. The only one who merges into the default branch.</li>
           <li>The only one who touches production, settings and secrets.</li>
           <li>Adds and removes people from the team.</li>
         </ul>
       </div>
       <div class="role">
-        <h3>Developer</h3>
+        <h3>Player</h3>
         <p class="def">Listed under <code>assignees</code> in <code>huddle.json</code>.</p>
         <ul>
           <li>Takes an assigned Issue and works on its own branch.</li>
           <li>Answers the session's questions with judgment.</li>
           <li>Reviews what the AI did before the PR is opened.</li>
-          <li>If something does not fit the Issue, asks the AI Manager instead of improvising.</li>
+          <li>If something does not fit the Issue, asks the Coach instead of improvising.</li>
           <li>Never merges, never touches production.</li>
         </ul>
       </div>
@@ -97,26 +97,26 @@
     <dl class="glossary">
       <dt><code>ready</code></dt><dd>Its dependencies are merged and nobody has it yet.</dd>
       <dt><code>assigned</code></dt><dd>Someone has it but has not started.</dd>
-      <dt><code>in progress</code></dt><dd>Its session started it, or took a request from the AI Manager.</dd>
-      <dt><code>in review</code></dt><dd>Its PR is open and waiting for the AI Manager.</dd>
+      <dt><code>in progress</code></dt><dd>Its session started it, or took a request from the Coach.</dd>
+      <dt><code>in review</code></dt><dd>Its PR is open and waiting for the Coach.</dd>
       <dt><code>blocked</code></dt><dd>It waits for an Issue under «Depends on» to be merged. Closing that Issue by hand does not count.</dd>
-      <dt><code>needs decision</code></dt><dd>The session asked the AI Manager a question and stopped.</dd>
-      <dt><code>changes requested from AI Manager</code></dt><dd>A review request is waiting for the session to take it.</dd>
+      <dt><code>needs decision</code></dt><dd>The session asked the Coach a question and stopped.</dd>
+      <dt><code>changes requested from Coach</code></dt><dd>A review request is waiting for the session to take it.</dd>
     </dl>
-    <p><strong>The stop labels.</strong> <code>needs decision</code> and <code>changes requested from AI Manager</code> mean the work waits for someone else, so they stand alone: <code>in progress</code> and <code>in review</code> are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.</p>
+    <p><strong>The stop labels.</strong> <code>needs decision</code> and <code>changes requested from Coach</code> mean the work waits for someone else, so they stand alone: <code>in progress</code> and <code>in review</code> are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.</p>
   </section>
 
   <section aria-labelledby="progress">
     <span class="eyebrow">Progress</span>
     <h2 id="progress">How far each area has come</h2>
-    <p>Each area of the project (for example «Content», «Social networks», «Ads») is a milestone, and each Issue belongs to one. The AI Manager writes in each milestone's description how many Issues are still missing, on a line <code>Huddle remaining: N</code>. Huddle then shows, per area and in total, the merged Issues over all the work the area will need:</p>
+    <p>Each area of the project (for example «Content», «Social networks», «Ads») is a milestone, and each Issue belongs to one. The Coach writes in each milestone's description how many Issues are still missing, on a line <code>Huddle remaining: N</code>. Huddle then shows, per area and in total, the merged Issues over all the work the area will need:</p>
     <ul>
       <li>in a pinned «Huddle progress» Issue that <code>huddle labels</code> keeps up to date;</li>
       <li>with <code>huddle progress</code> (ask Claude Code «run huddle progress»);</li>
       <li>in one line when a session opens, for example <code>Content 76% · Social networks 55% · Ads 0% · Total 58%</code>.</li>
     </ul>
     <p>Issues closed by hand or «not planned» do not count, and Issues with no milestone stay out of the percentage.</p>
-    <p><strong>Not sure which areas to use?</strong> The AI Manager runs <code>/huddle-areas</code>. Claude reads the README, the specs and the Issues, proposes the areas with the reason for each (as many as the project needs), puts the Issues that have no area in one, and suggests how many Issues are still missing in each. It explains first and changes nothing until the AI Manager says yes. It can be run again later to check that the areas are up to date.</p>
+    <p><strong>Not sure which areas to use?</strong> The Coach runs <code>/huddle-areas</code>. Claude reads the README, the specs and the Issues, proposes the areas with the reason for each (as many as the project needs), puts the Issues that have no area in one, and suggests how many Issues are still missing in each. It explains first and changes nothing until the Coach says yes. It can be run again later to check that the areas are up to date.</p>
   </section>
 
   <section aria-labelledby="why">
@@ -128,7 +128,7 @@
     </div>
     <div class="reasons">
       <div class="reason"><h3>The decision is the work</h3><p>The AI is fast at writing and testing, but it does not know the business, the users or the priorities. When it asks, the person brings what the AI does not know. A good answer saves hours; a rushed answer is paid for later.</p></div>
-      <div class="reason"><h3>A ready prompt removes variation</h3><p>If each person writes their own request, each session understands something different. With the prompt written by the AI Manager, they all start with the same goal, the same limits and the same tests.</p></div>
+      <div class="reason"><h3>A ready prompt removes variation</h3><p>If each person writes their own request, each session understands something different. With the prompt written by the Coach, they all start with the same goal, the same limits and the same tests.</p></div>
       <div class="reason"><h3>Clear limits, fewer collisions</h3><p>Allowed and forbidden files let several people move forward at once without stepping on each other, and tell the AI where not to go.</p></div>
       <div class="reason"><h3>Production in a single pair of hands</h3><p>Nobody on the team needs keys or access to production. A mistake in one session cannot touch what customers use.</p></div>
     </div>
@@ -136,21 +136,21 @@
 
   <section aria-labelledby="sessions">
     <span class="eyebrow">A frequent question</span>
-    <h2 id="sessions">Why doesn't a developer open 10 sessions to take 10 Issues at once?</h2>
-    <p>It sounds faster, but in practice a developer with many open sessions gets less done and decides worse.</p>
+    <h2 id="sessions">Why doesn't a Player open 10 sessions to take 10 Issues at once?</h2>
+    <p>It sounds faster, but in practice a Player with many open sessions gets less done and decides worse.</p>
     <div class="reasons">
       <div class="reason"><h3>The computer becomes the bottleneck</h3><p>Each session runs tests and builds. With many at once, the machine slows down and they all move more slowly than a few would.</p></div>
       <div class="reason"><h3>Attention does not multiply</h3><p>Each session asks questions. With ten open, the questions pile up, you lose the thread and start answering fast just to get through. That is when the decision stops being good, and the decision is exactly what the person brings.</p></div>
-      <div class="reason"><h3>Every session has to be reviewed</h3><p>Ten half-reviewed PRs are worth less than two done well, and they fill up the AI Manager's review queue.</p></div>
+      <div class="reason"><h3>Every session has to be reviewed</h3><p>Ten half-reviewed PRs are worth less than two done well, and they fill up the Coach's review queue.</p></div>
     </div>
-    <div class="note"><p><strong>Our recommendation:</strong> one or two active sessions per person. Huddle assigns at most a few open Issues per person for the same reason. More speed comes from adding developers, not from adding windows.</p></div>
+    <div class="note"><p><strong>Our recommendation:</strong> one or two active sessions per person. Huddle assigns at most a few open Issues per person for the same reason. More speed comes from adding Players, not from adding windows.</p></div>
   </section>
 
   <section aria-labelledby="rules">
     <span class="eyebrow">Rules</span>
     <h2 id="rules">What is not negotiable</h2>
     <ul class="rules">
-      <li><strong>Never push to the default branch.</strong> One task is one Issue, one branch and one PR. Only the AI Manager merges.</li>
+      <li><strong>Never push to the default branch.</strong> One task is one Issue, one branch and one PR. Only the Coach merges.</li>
       <li><strong>Only the allowed files.</strong> If another one is needed, ask first.</li>
       <li><strong>Test first.</strong> Write the failing test, then the code. The PR says which tests were run and with what result.</li>
       <li><strong>No production and no secrets.</strong> If a permission or a key is missing, stop and tell. Do not look for another way.</li>
@@ -161,12 +161,12 @@
   </section>
 
   <section aria-labelledby="team">
-    <span class="eyebrow">For the AI Manager</span>
+    <span class="eyebrow">For the Coach</span>
     <h2 id="team">Setting up, adding people, watching and updating</h2>
     <ol class="steps">
       <li>
         <h3>Put Huddle in the repository</h3>
-        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the AI Manager and the team, and whether there is a staging branch, then writes <code>huddle.json</code>, the Issue and PR templates, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor». If its <code>login</code> line says «gh is not installed or not on the PATH» (or <code>glab</code>), the tool is missing from that terminal: it gives the install command, and on Windows you open a new terminal afterwards. «Is not logged in» is a different message, with <code>gh auth login</code> or <code>glab auth login</code> as the fix.</p>
+        <p>On a branch, run <code>/huddle-setup</code>. It asks the platform, the project, the Coach and the team, and whether there is a staging branch, then writes <code>huddle.json</code>, the Issue and PR templates, the Huddle block of <code>CLAUDE.md</code> and <code>.claude/settings.json</code>. Merge it with a PR, then ask Claude Code «run huddle doctor». If its <code>login</code> line says «gh is not installed or not on the PATH» (or <code>glab</code>), the tool is missing from that terminal: it gives the install command, and on Windows you open a new terminal afterwards. «Is not logged in» is a different message, with <code>gh auth login</code> or <code>glab auth login</code> as the fix.</p>
         <p><strong>On GitLab</strong> the steps are the same, with nothing extra to set up: the sessions keep the labels right.</p>
         <p><strong>With a staging branch</strong> (<code>staging_branch</code> in <code>huddle.json</code>), Issue branches start from staging and their PRs target it. After merging one there, run <code>huddle land</code> to close its Issue; after trying it in staging, <code>huddle tested</code>. When everything in staging was tested, <code>/huddle-release</code> opens and merges the PR from staging into the default branch.</p>
       </li>
@@ -176,7 +176,7 @@
       </li>
       <li>
         <h3>Let the session review by itself</h3>
-        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the AI Manager's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it. It is turned on by hand in each session. It waits in the background like a developer's session, so it uses no Claude tokens while nothing waits. Without it, the AI Manager's session start says what waits.</p>
+        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the Coach's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it. It is turned on by hand in each session. It waits in the background like a Player's session, so it uses no Claude tokens while nothing waits. Without it, the Coach's session start says what waits. <code>/huddle-watch always</code> keeps it on: it starts again in each of the Coach's sessions of that repo on that machine (a mark on the machine, not a file of the repo), until <code>/huddle-watch off</code>. It never starts for a Player.</p>
       </li>
       <li>
         <h3>Update a project to a new release</h3>

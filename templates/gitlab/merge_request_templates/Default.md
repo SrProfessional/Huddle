@@ -16,4 +16,4 @@ Closes #N
 
 ## Next step
 
-<!-- What the AI Manager should do next. -->
+<!-- What the Coach should do next. -->

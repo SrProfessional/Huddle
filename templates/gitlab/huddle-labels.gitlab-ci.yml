@@ -8,7 +8,7 @@
 # The interval is a project setting on GitLab, not in this file. Set it in CI/CD > Schedules, on the default branch:
 # the cron `17 * * * *` for `hourly` and `*/10 * * * *` for `events` (the default, `sessions`, writes no job file).
 #
-# It needs a token: the job token cannot edit Issues. The AI Manager creates a project access token with the `api` scope
+# It needs a token: the job token cannot edit Issues. The Coach creates a project access token with the `api` scope
 # and stores it as the CI variable HUDDLE_TOKEN (masked and protected). This file only reads the variable; the job
 # never prints it and never turns on shell tracing.
 #
@@ -36,7 +36,7 @@ huddle-labels:
           echo "Huddle: HUDDLE_TOKEN is only available on protected branches; the schedule on the default branch updates the labels."
           exit 0
         fi
-        echo "HUDDLE_TOKEN is not set: the AI Manager must add it as a masked, protected CI variable." >&2
+        echo "HUDDLE_TOKEN is not set: the Coach must add it as a masked, protected CI variable." >&2
         exit 1
       fi
     - export GITLAB_TOKEN="$HUDDLE_TOKEN"

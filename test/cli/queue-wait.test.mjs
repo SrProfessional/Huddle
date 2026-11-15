@@ -1,4 +1,4 @@
-// Issue #157: `huddle queue --wait` is the AI Manager's watch with no Claude tokens: a Node loop that runs the labels pass and reads the queue
+// Issue #157: `huddle queue --wait` is the Coach's watch with no Claude tokens: a Node loop that runs the labels pass and reads the queue
 // each round, and ends only when something new waits. Canned adapter and a fake sleep: no test calls a real platform or really waits.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -9,7 +9,7 @@ const MANAGED = '## Depends on\n\nNone.\n';
 const review = (w) => { w.issue({ number: 42, title: 'Add login form', body: MANAGED, assignees: ['ana'], reviews: [51] }); w.review({ number: 51, head: 'a1b2c3d' }); };
 const decision = (w) => {
   w.issue({ number: 47, title: 'Which payment provider?', body: MANAGED, labels: ['needs decision'] });
-  w.comment(47, { id: 1, author: 'ana', body: '❓ Decision for the AI Manager: which one?', createdAt: '2026-11-10T10:00:00Z' });
+  w.comment(47, { id: 1, author: 'ana', body: '❓ Decision for the Coach: which one?', createdAt: '2026-11-10T10:00:00Z' });
 };
 const STOP = new Error('test: stop the loop');
 
@@ -73,7 +73,7 @@ test('--wait-off leaves a stop mark; the loop ends with stopped at its next roun
 test('another login is refused', async () => {
   const h = looping({ setup: review, me: 'ana' });
   assert.equal(await run(['queue', '--wait', '300'], h.ctx), 1);
-  assert.match(h.text(), /AI Manager only/);
+  assert.match(h.text(), /Coach only/);
 });
 
 test('bad intervals and arguments are exit 2', async () => {

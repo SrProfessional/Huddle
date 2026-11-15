@@ -77,13 +77,13 @@ test('huddle-review and huddle-release have the note on reopening, with both com
     const full = note.indexOf(`${LABELS_CMD}\``, scoped);
     assert.ok(reopen >= 0 && scoped > reopen && full > scoped, `${file}: reopen, then labels --issue <n>, then the full labels`);
     assert.match(note, /glab issue reopen <n>/);
-    assert.match(note, /AI Manager/);
+    assert.match(note, /Coach/);
   }
 });
 
 // --- the board repairs itself when a session opens -------------------------------------------------------------------------------------
 
-/** A hook run with a fake `startLabels` that records its arguments. `manager`: the logged-in user is the AI Manager. */
+/** A hook run with a fake `startLabels` that records its arguments. `manager`: the logged-in user is the Coach. */
 function hooked({ manager = false, config = {}, now = Date.parse('2026-11-13T10:00:00Z'), files } = {}) {
   const started = [];
   const h = harness({ config: { ...CONFIG, ai_manager: manager ? 'SrProfessional' : 'someone-else', ...config } });
@@ -93,7 +93,7 @@ function hooked({ manager = false, config = {}, now = Date.parse('2026-11-13T10:
   return { h, started };
 }
 
-test('the hook starts the labels pass with --no-assign for a developer and without it for the AI Manager', async () => {
+test('the hook starts the labels pass with --no-assign for a Player and without it for the Coach', async () => {
   const dev = hooked();
   assert.equal(await run(['hook'], dev.h.ctx), 0);
   assert.deepEqual(dev.started, [['labels', '--no-assign']]);

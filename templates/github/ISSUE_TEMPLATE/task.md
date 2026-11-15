@@ -1,6 +1,6 @@
 ---
 name: Task
-about: One task for one developer session (one Issue = one branch = one PR)
+about: One task for one Player session (one Issue = one branch = one PR)
 title: ''
 labels: ''
 assignees: ''
@@ -23,7 +23,7 @@ assignees: ''
 ## Prompt for Claude Code
 
 ```text
-<!-- The text the developer pastes into a new Claude Code session. -->
+<!-- The text the Player pastes into a new Claude Code session. -->
 ```
 
 ## Allowed files

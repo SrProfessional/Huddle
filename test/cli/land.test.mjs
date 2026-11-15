@@ -76,10 +76,10 @@ for (const gitlab of [false, true]) {
     assert.equal(closeCalls(h).length, 0);
   });
 
-  test(`[${kind}] land refuses a caller who is not the AI Manager, before it reads or changes anything`, async () => {
+  test(`[${kind}] land refuses a caller who is not the Coach, before it reads or changes anything`, async () => {
     const h = make({ config: { ...config, ai_manager: 'ana' } });
     assert.equal(await run(['land', '30'], h.ctx), 1);
-    assert.match(h.errText(), /only the AI Manager lands a PR/);
+    assert.match(h.errText(), /only the Coach lands a PR/);
     assert.equal(closeCalls(h).length, 0);
     assert.equal(h.world.stateOf(5), 'open');
   });

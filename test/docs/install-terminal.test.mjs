@@ -37,7 +37,7 @@ test('the GitHub labels workflow template clones https://github.com/SrProfession
   assert.doesNotMatch(t, /SrProfessional\/huddle\b/);
 });
 
-// Issue #29: the settings snippet is a helper; each developer installs Huddle once.
+// Issue #29: the settings snippet is a helper; each Player installs Huddle once.
 const INSTALL_DOCS = ['README.md', 'docs/first-day.md', 'docs/team-guide.md', 'docs/roles.md', 'docs/gitlab.md', 'skills/huddle-setup/SKILL.md'];
 
 test('no doc says the settings snippet «offers» or «prompts» the plugin', () => {
@@ -48,7 +48,7 @@ test('no doc says the settings snippet «offers» or «prompts» the plugin', ()
   }
 });
 
-test('README, first-day guide and team guide say every developer installs once, and what the snippet really does', () => {
+test('README, first-day guide and team guide say every Player installs once, and what the snippet really does', () => {
   for (const file of ['README.md', 'docs/first-day.md', 'docs/team-guide.md']) {
     const t = read(file).replace(/\s+/g, ' ');
     assert.match(t, /claude plugin marketplace add SrProfessional\/Huddle/, file);

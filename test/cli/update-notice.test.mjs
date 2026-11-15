@@ -10,7 +10,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const T0 = Date.parse('2026-11-10T09:00:00Z');
 const ROOT = '/plugins/cache/huddle/huddle/0.3.0';
 const CACHE = '/data/huddle-update.json';
-const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
 const wrap = (a) => ({ ...a, listLabels: async () => LABELS });
 
 /** A fake `fetch` for the releases/latest endpoint. `answer` is a release, or { status }, or { raw }, or 'hang' / 'offline'. */
@@ -57,7 +57,7 @@ test('semver: newer only for a higher release; a pre-release never counts', () =
 });
 
 test('hook shows the notice when the latest release is newer, with the two commands and the release link', async () => {
-  const h = harness({ wrap: (a) => ({ ...a, me: async () => 'ana' }) }); // a developer: no AI Manager line
+  const h = harness({ wrap: (a) => ({ ...a, me: async () => 'ana' }) }); // a Player: no Coach line
   const u = setupUpdate(h);
   assert.equal(await run(['hook'], h.ctx), 0);
   assert.equal(u.fetch.calls[0].url, 'https://api.github.com/repos/SrProfessional/Huddle/releases/latest');
@@ -70,7 +70,7 @@ test('hook shows the notice when the latest release is newer, with the two comma
   }
   assert.match(context(h), /first thing in your first answer/i);
   assert.match(context(h), /in (the person's|their) language/i);
-  assert.doesNotMatch(visible(h) + context(h), /huddle-update/, 'the extra line is for the AI Manager only');
+  assert.doesNotMatch(visible(h) + context(h), /huddle-update/, 'the extra line is for the Coach only');
 });
 
 test('hook keeps the pending-request message and adds the notice to it', async () => {
@@ -127,7 +127,7 @@ test('a failed lookup does not hide the notice for a release that is cached', as
   assert.match(visible(h), /Huddle 0\.4\.0 is available/, 'the old answer is better than none');
 });
 
-test('for the AI Manager login the notice adds the /huddle-update line; a developer does not get it', async () => {
+test('for the Coach login the notice adds the /huddle-update line; a Player does not get it', async () => {
   const manager = harness();
   setupUpdate(manager);
   await run(['hook'], manager.ctx);

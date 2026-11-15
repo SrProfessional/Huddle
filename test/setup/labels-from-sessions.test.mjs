@@ -42,14 +42,14 @@ test('huddle-play runs labels --issue after the branch and label, the PR, the de
   const l4 = at(t, 'labels --issue', ready, 'labels after Ready for review again');
   assert.ok(take < l3 && l3 < ready && ready < l4);
   const stop = at(t, '## When you cannot go on');
-  const dec = at(t, '«❓ Decision for the AI Manager:»', stop);
+  const dec = at(t, '«❓ Decision for the Coach:»', stop);
   const l5 = at(t, 'labels --issue <n> --needs-decision', dec, 'labels --needs-decision after the decision comment (Issue #153)');
   assert.ok(dec < l5);
 });
 
 test('huddle-play and huddle-decide never say to assign, and play keeps «do not edit labels by hand»', () => {
   for (const f of ['skills/huddle-play/SKILL.md', 'skills/huddle-decide/SKILL.md']) {
-    assert.doesNotMatch(flat(f), /(?<!never |not |only the AI Manager )\bassign(s)? (it|the|an|a|them)\b/i, `${f} must not tell to assign`);
+    assert.doesNotMatch(flat(f), /(?<!never |not |only the Coach )\bassign(s)? (it|the|an|a|them)\b/i, `${f} must not tell to assign`);
   }
   const play = flat('skills/huddle-play/SKILL.md');
   assert.match(play, /never assigns/i);
@@ -79,7 +79,7 @@ test('huddle-review runs labels --issue after the changes comment and after the 
   const m = at(t, 'labels --issue', land, 'labels after the merge');
   assert.ok(merge < land && land < m);
   assert.match(t.slice(m, m + 400), /assign/i);
-  assert.match(t, /only the AI Manager/i);
+  assert.match(t, /only the Coach/i);
 });
 
 test('huddle-watch runs the full labels before queue --json in the first check, and each round of the wait runs it by itself', () => {

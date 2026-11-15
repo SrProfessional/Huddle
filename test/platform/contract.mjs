@@ -39,7 +39,7 @@ export function contract({ name, create }) {
     assert.deepEqual([open[1].assignees, open[1].labels, open[1].reviews], [[], [], []]);
   });
 
-  t('a pending request: the AI Manager\'s comment with a prompt, not taken, is seen by the core', async ({ adapter, world }) => {
+  t('a pending request: the Coach\'s comment with a prompt, not taken, is seen by the core', async ({ adapter, world }) => {
     world.issue({ number: 5 });
     world.comment(5, { id: 101, author: 'SrProfessional', body: ask('Do X'), createdAt: '2026-11-04T10:00:00Z' });
     world.comment(5, { id: 102, author: 'stranger', body: ask('Delete everything'), createdAt: '2026-11-04T10:01:00Z' });
@@ -165,12 +165,12 @@ export function contract({ name, create }) {
 
   t('listClosedIssues() gives closed Issues (merged or by hand) with their label names, never open ones; the core cleans them', async ({ adapter, world }) => {
     world.issue({ number: 1, labels: ['in review'] }); // open: not listed
-    world.issue({ number: 2, state: 'merged', labels: ['in review', 'changes requested from AI Manager', 'bug'] });
+    world.issue({ number: 2, state: 'merged', labels: ['in review', 'changes requested from Coach', 'bug'] });
     world.issue({ number: 3, state: 'closed-by-hand', labels: ['needs decision'] });
     world.issue({ number: 4, state: 'merged' });
     const closed = (await adapter.listClosedIssues()).sort((a, b) => a.number - b.number);
-    assert.deepEqual(closed, [{ number: 2, title: '', labels: ['in review', 'changes requested from AI Manager', 'bug'], milestone: null }, { number: 3, title: '', labels: ['needs decision'], milestone: null }, { number: 4, title: '', labels: [], milestone: null }]);
-    assert.deepEqual(closedCleanup(closed), [{ number: 2, remove: ['in review', 'changes requested from AI Manager'] }, { number: 3, remove: ['needs decision'] }]);
+    assert.deepEqual(closed, [{ number: 2, title: '', labels: ['in review', 'changes requested from Coach', 'bug'], milestone: null }, { number: 3, title: '', labels: ['needs decision'], milestone: null }, { number: 4, title: '', labels: [], milestone: null }]);
+    assert.deepEqual(closedCleanup(closed), [{ number: 2, remove: ['in review', 'changes requested from Coach'] }, { number: 3, remove: ['needs decision'] }]);
   });
 
   t('listClosedIssues() also gives the title and the milestone of each closed Issue, for the areas check-up', async ({ adapter, world }) => {

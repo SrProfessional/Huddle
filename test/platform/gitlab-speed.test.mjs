@@ -8,7 +8,7 @@ import { requestCandidates } from '../../lib/core/review-requests.mjs';
 const PROMPT = (n) => `Changes please (${n}).\n\n## Prompt for Claude Code\n\n\`\`\`text\ndo thing ${n}\n\`\`\``;
 const stamp = (i) => `2026-11-04T10:${String(i).padStart(2, '0')}:00Z`;
 
-/** An Issue with 30 notes; the AI Manager's requests are notes 10 and 20, the others are chatter (by ana, or by the manager without a prompt). */
+/** An Issue with 30 notes; the Coach's requests are notes 10 and 20, the others are chatter (by ana, or by the manager without a prompt). */
 function thirtyNotes({ manager = 'SrProfessional' } = {}) {
   const fake = fakeGitlab();
   fake.world.issue({ number: 7, title: 'Seven' });

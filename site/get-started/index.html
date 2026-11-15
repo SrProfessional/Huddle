@@ -46,19 +46,19 @@
   <div class="wrap">
     <div class="page-head">
       <h1>Get started with Huddle</h1>
-      <p class="lead">Install the plugin, set up one repo, write the first Issue. Then a developer takes it. About five minutes for the setup, thirty for a developer's first day.</p>
+      <p class="lead">Install the plugin, set up one repo, write the first Issue. Then a Player takes it. About five minutes for the setup, thirty for a Player's first day.</p>
       <ul class="toc">
         <li><a href="#install">Install</a></li>
         <li><a href="#setup">Set up a repo</a></li>
         <li><a href="#first-issue">First Issue</a></li>
-        <li><a href="#first-day">A developer's first day</a></li>
+        <li><a href="#first-day">A Player's first day</a></li>
       </ul>
     </div>
 
     <article>
       <section id="install">
         <h2>1. Install the plugin</h2>
-        <p class="prose">Every developer installs Huddle once, on their own machine. A settings file committed to the repo does not do it for them. You need:</p>
+        <p class="prose">Every Player installs Huddle once, on their own machine. A settings file committed to the repo does not do it for them. You need:</p>
         <ul class="prose">
           <li><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>.</li>
           <li>Node 22 or newer, and <code>git</code>.</li>
@@ -75,17 +75,17 @@ claude plugin install huddle@huddle</code></pre>
 
       <section id="setup">
         <h2>2. Set up your repo</h2>
-        <p class="prose">This is the AI Manager's step, once per repo. Open Claude Code in the repo and create a branch for the setup:</p>
+        <p class="prose">This is the Coach's step, once per repo. Open Claude Code in the repo and create a branch for the setup:</p>
         <pre tabindex="0"><code>git switch -c huddle-setup</code></pre>
         <ol class="prose">
-          <li>Run <code>/huddle-setup</code>. It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the AI Manager and the logins of the developers.</li>
+          <li>Run <code>/huddle-setup</code>. It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the Coach and the logins of the Players.</li>
           <li>It also asks whether the project has a staging branch where changes are tested first (<code>staging_branch</code>); answer none if not.</li>
           <li>It writes <code>huddle.json</code>, the Issue and pull request templates and the Huddle block of <code>CLAUDE.md</code>. There is no cloud job: the sessions keep the labels right. Nothing outside that block is touched.</li>
-          <li>Run <code>huddle doctor</code>. You want a check mark on the file, the login, the AI Manager and the labels. If a label is missing, run <code>huddle labels</code> once.</li>
-          <li>Commit, push and open a pull request with the setup files. Merge it. The AI Manager is the only one who merges.</li>
+          <li>Run <code>huddle doctor</code>. You want a check mark on the file, the login, the Coach and the labels. If a label is missing, run <code>huddle labels</code> once.</li>
+          <li>Commit, push and open a pull request with the setup files. Merge it. The Coach is the only one who merges.</li>
         </ol>
         <div class="note">
-          <p><strong>On GitLab</strong> the steps are the same, with nothing extra to set up. <strong>With a staging branch</strong>, Issue branches start from it and their pull requests target it; the AI Manager closes the Issue with <code>huddle land</code>, marks it tested there with <code>huddle tested</code>, and runs <code>/huddle-release</code> to take staging to the default branch once everything in it was tested. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/gitlab.md" target="_blank" rel="noopener">GitLab notes<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> cover self-managed servers.</p>
+          <p><strong>On GitLab</strong> the steps are the same, with nothing extra to set up. <strong>With a staging branch</strong>, Issue branches start from it and their pull requests target it; the Coach closes the Issue with <code>huddle land</code>, marks it tested there with <code>huddle tested</code>, and runs <code>/huddle-release</code> to take staging to the default branch once everything in it was tested. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/gitlab.md" target="_blank" rel="noopener">GitLab notes<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> cover self-managed servers.</p>
         </div>
       </section>
 
@@ -97,7 +97,7 @@ claude plugin install huddle@huddle</code></pre>
             <thead><tr><th scope="col">Part</th><th scope="col">What it says</th></tr></thead>
             <tbody>
               <tr><th scope="row">Goal</th><td>What we want to achieve and why, in a few lines.</td></tr>
-              <tr><th scope="row">Prompt for Claude Code</th><td>The text the developer pastes, with the steps, the branch and how to open the pull request.</td></tr>
+              <tr><th scope="row">Prompt for Claude Code</th><td>The text the Player pastes, with the steps, the branch and how to open the pull request.</td></tr>
               <tr><th scope="row">Allowed files</th><td>The only files the session may touch.</td></tr>
               <tr><th scope="row">Forbidden files</th><td>What is not touched. If it must be, the session asks first.</td></tr>
               <tr><th scope="row">Contract or spec</th><td>The document that rules over the code.</td></tr>
@@ -108,15 +108,15 @@ claude plugin install huddle@huddle</code></pre>
       </section>
 
       <section id="first-day">
-        <h2>4. A developer's first day</h2>
+        <h2>4. A Player's first day</h2>
         <ol class="prose">
           <li><strong>Set up your machine.</strong> Install Claude Code, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the two commands above. Never paste a token into a chat, a file or an Issue.</li>
-          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the AI Manager: only they run <code>huddle labels</code>.</li>
-          <li><strong>Take an Issue.</strong> The AI Manager's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
-          <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the AI Manager.</li>
+          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the Coach: only they run <code>huddle labels</code>.</li>
+          <li><strong>Take an Issue.</strong> The Coach's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
+          <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the Coach.</li>
           <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
         </ol>
-        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the AI Manager's requested changes on its own. The waiting is a small Node process on the developer's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. On the other side, the AI Manager can run <code>/huddle-watch</code> to let their session review what waits every few minutes.</p>
+        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the Coach's requested changes on its own. The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. On the other side, the Coach can run <code>/huddle-watch</code> to let their session review what waits every few minutes.</p>
         <p class="prose">Next: <a href="../how-it-works/">how it works</a>, with the roles, the labels and the reviews.</p>
       </section>
     </article>

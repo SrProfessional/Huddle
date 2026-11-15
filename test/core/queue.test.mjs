@@ -1,4 +1,4 @@
-// Issue #88, docs/design.md §19: what waits for the AI Manager. Pure: no network.
+// Issue #88, docs/design.md §19: what waits for the Coach. Pure: no network.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { waitingFor } from '../../lib/core/queue.mjs';
@@ -11,7 +11,7 @@ test('an open Issue with an open non-draft PR and no request waits for review, w
   assert.deepEqual(out, [{ issue: 42, title: 'Issue 42', waits: 'review', pr: 51 }]);
 });
 
-test('a pending or a taken request is the developer\'s turn: not a review', () => {
+test('a pending or a taken request is the Player\'s turn: not a review', () => {
   const open = [it(1, { reviews: [11] }), it(2, { reviews: [12] })];
   const requests = new Map([[1, 'pending'], [2, 'taken']]);
   assert.deepEqual(waitingFor({ open, openPrs: new Set([11, 12]), requests }), []);

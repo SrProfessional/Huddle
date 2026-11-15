@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { run } from '../../lib/cli/run.mjs';
 import { harness } from './harness.mjs';
 
-const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
 // The team commands read the platform and never write to it: any other operation of the adapter fails the test.
 const READ_ONLY = new Set(['findUser', 'canAssign', 'me']);
 const readOnly = (adapter) => new Proxy(adapter, {
@@ -18,10 +18,10 @@ const FILE = '{\r\n  "$schema": "./huddle.schema.json",\r\n  "platform": "github
 
 // --- huddle team (list) -----------------------------------------------------------------------------------------------------------------
 
-test('team lists the AI Manager and the assignees, each with ✔ for «exists» and «can be assigned» (GitHub)', async () => {
+test('team lists the Coach and the assignees, each with ✔ for «exists» and «can be assigned» (GitHub)', async () => {
   const h = mk();
   assert.equal(await run(['team'], h.ctx), 0);
-  assert.match(lineOf(h, 'SrProfessional'), /AI Manager.*exists ✔.*can be assigned ✔/);
+  assert.match(lineOf(h, 'SrProfessional'), /Coach.*exists ✔.*can be assigned ✔/);
   assert.match(lineOf(h, 'ana'), /assignee.*exists ✔.*can be assigned ✔/);
   assert.match(lineOf(h, 'luis'), /assignee.*exists ✔.*can be assigned ✔/);
   assert.doesNotMatch(h.text(), /✖/);
@@ -60,11 +60,11 @@ test('team on GitLab: a stranger with an account and a login without one (GitLab
   assert.match(lineOf(h, 'ghost'), /exists ✖.*can be assigned ✖/);
 });
 
-test('team shows the AI Manager once when they are also an assignee, and reports a failed platform call as an error', async () => {
+test('team shows the Coach once when they are also an assignee, and reports a failed platform call as an error', async () => {
   const h = mk({ config: { platform: 'github', project: 'acme/app', ai_manager: 'SrProfessional', assignees: ['SrProfessional'] } });
   assert.equal(await run(['team'], h.ctx), 0);
   assert.equal(h.text().split('\n').filter((l) => l.startsWith('SrProfessional')).length, 1);
-  assert.match(lineOf(h, 'SrProfessional'), /AI Manager.*assignee/);
+  assert.match(lineOf(h, 'SrProfessional'), /Coach.*assignee/);
   const down = mk({ wrap: (a) => ({ ...a, canAssign: async () => { throw new Error('network down'); } }) });
   assert.equal(await run(['team'], down.ctx), 1);
   assert.match(down.errText(), /network down/);

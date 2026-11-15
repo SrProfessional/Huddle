@@ -56,7 +56,7 @@ If it fails, show its message (for example «there is no huddle.json here») and
 ## 4. Questions
 
 Ask **only the pending questions** (`pendingQuestions`), never the five questions of `/huddle-setup` and never one the repo has already
-answered. One message, in the developer's language, one line per question: its `ask`, its `options` when it has them, and its
+answered. One message, in the Player's language, one line per question: its `ask`, its `options` when it has them, and its
 `default` offered as the answer. Never ask for a token.
 
 Then run `node "<new folder>/bin/huddle" update --json --answer <key>=<value>` with one `--answer` for each question (a value is read as
@@ -64,14 +64,14 @@ JSON when it is JSON: `true`, `3`, else text). It writes the answers and refresh
 
 How the labels are kept is never asked: the sessions keep them right, with no cloud job and no CI minutes. When a cloud labels job
 file is left from an older version, a line of `notes` names it: delete it in this same PR, and on GitLab also delete the pipeline schedule
-in CI/CD > Schedules (the AI Manager's session can do it with `glab api`; if it cannot, give the «🙋 Only you» steps).
+in CI/CD > Schedules (the Coach's session can do it with `glab api`; if it cannot, give the «🙋 Only you» steps).
 
 ## 5. The PR
 
 Commit on that branch, push, and open the PR/MR with what changed, from the JSON: the block of `CLAUDE.md` (`claudeMd`), the files in
 `changed`, the templates kept because the project edited them (`skipped`, with the way to get the current one that the `notes` give), and
-every line of `notes` (for example a labels job that pins an older `HUDDLE_REF`: updating that pin is a PR the AI Manager's session
-opens). A developer's session never merges. The AI Manager's session (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` says so) merges it itself, without asking: running `/huddle-update` is the order. Merge commit, keep the branch (`gh pr merge --merge`; GitLab: `glab mr merge` without removing it); if the merge is refused (branch protection, a required review), stop and say so, never look for another way.
+every line of `notes` (for example a labels job that pins an older `HUDDLE_REF`: updating that pin is a PR the Coach's session
+opens). A Player's session never merges. The Coach's session (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` says so) merges it itself, without asking: running `/huddle-update` is the order. Merge commit, keep the branch (`gh pr merge --merge`; GitLab: `glab mr merge` without removing it); if the merge is refused (branch protection, a required review), stop and say so, never look for another way.
 
 ## 6. The last line
 
@@ -79,7 +79,7 @@ Say what was done, the PR link, that the files apply to every branch once the PR
 get them when updated from it; the plugin itself is per machine, not per branch), and how to use `<version>` now, in the person's language:
 
 > To use Huddle <version> in this session, type `/reload-plugins`. This works in the terminal and in VS Code. If the new skills do not show up,
-> restart Claude Code: close `claude` and open it again; in VS Code, run «Developer: Reload Window» from the Command Palette, or close VS Code and open it again.
+> restart Claude Code: close `claude` and open it again; in VS Code, run «Player: Reload Window» from the Command Palette, or close VS Code and open it again.
 
 If nothing changed because the project is up to date, say so and ask for nothing. Do not send the person to a fresh session: `/reload-plugins` comes first.
 

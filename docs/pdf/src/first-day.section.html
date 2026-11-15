@@ -50,7 +50,7 @@
         <p><strong>GitHub:</strong> type <code class="nowrap">gh auth login</code> and choose GitHub.com, HTTPS and «Login with a web browser».</p>
         <p><strong>GitLab:</strong> type <code class="nowrap">glab auth login</code>, choose gitlab.com (or your company's server) and sign in with the browser. Then let Git use <code>glab</code> for gitlab.com, so a Claude Code session can push without opening a browser:</p>
         <pre><code>git config --global --add credential.https://gitlab.com.helper "!glab auth git-credential"</code></pre>
-        <p><strong>Claude Code:</strong> open it and sign in with the Claude account the AI Manager tells you.</p>
+        <p><strong>Claude Code:</strong> open it and sign in with the Claude account the Coach tells you.</p>
       </li>
       <li>
         <h3>Install the Huddle plugin</h3>
@@ -69,7 +69,7 @@
       </li>
       <li>
         <h3>Download the project and open it</h3>
-        <p>In a terminal, go to the folder where you keep your projects and clone it (the AI Manager gives you its name):</p>
+        <p>In a terminal, go to the folder where you keep your projects and clone it (the Coach gives you its name):</p>
         <pre><code>gh repo clone OWNER/PROJECT</code></pre>
         <p>On GitLab: <code class="nowrap">glab repo clone OWNER/PROJECT</code>. Then open that folder in the Claude Code you chose. When it asks whether you trust the folder, say yes.</p>
       </li>
@@ -79,7 +79,7 @@
       </li>
       <li>
         <h3>Check that Huddle sees everything</h3>
-        <p>Ask Claude Code: «run huddle doctor». Every line must show ✔: <code>plugin</code>, <code>huddle.json</code>, <code>login</code>, <code>ai_manager</code> and <code>labels</code>. If one shows ✖, its line says what to do (for <code>login</code>: «not installed or not on the PATH» means <code>gh</code> or <code>glab</code> is missing from this terminal, and the line gives the install command; «not logged in» means run <code>gh auth login</code> or <code>glab auth login</code>); if it is not clear, send it to the AI Manager.</p>
+        <p>Ask Claude Code: «run huddle doctor». Every line must show ✔: <code>plugin</code>, <code>huddle.json</code>, <code>login</code>, <code>ai_manager</code> and <code>labels</code>. If one shows ✖, its line says what to do (for <code>login</code>: «not installed or not on the PATH» means <code>gh</code> or <code>glab</code> is missing from this terminal, and the line gives the install command; «not logged in» means run <code>gh auth login</code> or <code>glab auth login</code>); if it is not clear, send it to the Coach.</p>
       </li>
       <li>
         <h3>Take your first Issue</h3>
@@ -88,8 +88,8 @@
         <p>with the Issue's number instead of <code>N</code>. It checks that the Issue's dependencies are merged, creates your branch in a folder of its own, marks the Issue <code>in progress</code> and starts the Issue's prompt. Answer its questions calmly: that is where your work is.</p>
       </li>
       <li>
-        <h3>When the AI Manager asks for changes</h3>
-        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the AI Manager leaves a request, the session tells you and asks whether to continue: say yes. You can also type <code class="nowrap">/huddle-play N</code> again yourself, with the Issue's number: it picks up the AI Manager's answer. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
+        <h3>When the Coach asks for changes</h3>
+        <p>You do not need to watch GitHub. After its closing message the session keeps waiting for the review. When the Coach leaves a request, the session tells you and asks whether to continue: say yes. You can also type <code class="nowrap">/huddle-play N</code> again yourself, with the Issue's number: it picks up the Coach's answer. If you had closed Claude Code, open a new session in the project: Huddle tells you that a request is waiting (in the CLI you see the line at once; in the desktop app and the VS Code panel Claude says it after your first message).</p>
       </li>
     </ol>
   </section>

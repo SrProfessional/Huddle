@@ -1,4 +1,4 @@
-// Issue #151: a developer's session that stops for a decision keeps waiting for the answer, as it does after opening a PR/MR.
+// Issue #151: a Player's session that stops for a decision keeps waiting for the answer, as it does after opening a PR/MR.
 // The adapters get canned answers: no test calls a real GitHub or GitLab.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -27,15 +27,15 @@ test('the dependency stop starts no wait', () => {
   assert.doesNotMatch(line, /huddle" wait/);
 });
 
-const QUESTION = { id: 900, author: 'ana', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the AI Manager: Stripe or PayPal?' };
+const QUESTION = { id: 900, author: 'ana', createdAt: '2026-11-05T09:00:00Z', body: '❓ Decision for the Coach: Stripe or PayPal?' };
 
-test('wait ends on the AI Manager\'s answer to a decision, and points to huddle take', async () => {
+test('wait ends on the Coach\'s answer to a decision, and points to huddle take', async () => {
   const h = harness({ setup: (w) => { w.issue({ number: 7, labels: ['needs decision'] }); w.comment(7, QUESTION); w.comment(7, request(901)); } });
   assert.equal(await run(['wait', '7'], h.ctx), 0);
   assert.match(h.text(), /left a request on Issue #7.*huddle take 7/s);
 });
 
-test('with only the developer\'s question and no answer, wait keeps waiting', async () => {
+test('with only the Player\'s question and no answer, wait keeps waiting', async () => {
   let rounds = 0;
   const stop = new Error('stop the loop');
   const h = harness({

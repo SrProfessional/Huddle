@@ -58,7 +58,7 @@ test('the report of a refresh says what changed and which templates were kept', 
 
 test('a first install still asks the five questions', () => {
   const ask = section(/^## Ask/m);
-  for (const word of ['Platform', 'Host', 'Project', 'AI Manager', 'Team']) assert.ok(ask.includes(word), `the questions still include ${word}`);
+  for (const word of ['Platform', 'Host', 'Project', 'Coach', 'Team']) assert.ok(ask.includes(word), `the questions still include ${word}`);
 });
 
 // The contract the skill relies on.
@@ -75,14 +75,14 @@ test('setup with no answers on a valid huddle.json refreshes the block and keeps
 }));
 
 test('setup with no answers and no huddle.json fails and names every missing field', () => inTemp((dir) => {
-  assert.throws(() => setup(dir, {}), (e) => ['platform', 'project', 'ai_manager'].every((f) => e.message.includes(`"${f}"`)));
+  assert.throws(() => setup(dir, {}), (e) => ['platform', 'project', 'coach'].every((f) => e.message.includes(`"${f}"`)));
 }));
 
 test('setup with only the missing answer completes a half-configured huddle.json', () => inTemp((dir) => {
   writeFileSync(path.join(dir, 'huddle.json'), JSON.stringify({ platform: 'github', project: 'acme/app' }));
-  assert.throws(() => setup(dir, {}), /ai_manager/);
-  setup(dir, { ai_manager: 'boss' });
+  assert.throws(() => setup(dir, {}), /"coach" is required/);
+  setup(dir, { coach: 'boss' });
   const config = JSON.parse(readFileSync(path.join(dir, 'huddle.json'), 'utf8'));
-  assert.equal(config.ai_manager, 'boss');
+  assert.equal(config.coach, 'boss', 'a repo with no key yet gets coach (Issue #166)');
   assert.equal(config.project, 'acme/app', 'what was there stays');
 }));

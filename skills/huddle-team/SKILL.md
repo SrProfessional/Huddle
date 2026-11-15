@@ -1,12 +1,12 @@
 ---
 name: huddle-team
-description: Use when the AI Manager wants to add a developer to the team or remove one, and to get the message to send the new person.
+description: Use when the Coach wants to add a Player to the team or remove one, and to get the message to send the new person.
 ---
 
 # huddle-team
 
-For the AI Manager only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `ai_manager` login in `huddle.json`, stop; only the
-AI Manager changes the team. Read `platform`, `host`, `project` and `default_branch` from `huddle.json`.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; only the
+Coach changes the team. Read `platform`, `host`, `project` and `default_branch` from `huddle.json`.
 
 ## Do
 
@@ -14,17 +14,17 @@ AI Manager changes the team. Read `platform`, `host`, `project` and `default_bra
 2. `git status` must be clean, or stop and say what is in the way: this change must not carry other work. Then
    `git fetch origin` and `git switch -c team-<add|remove>-<login> origin/<default_branch>`. Never commit to the default branch.
 3. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" team add <login>` (or `team remove <login>`). It edits only `assignees` in `huddle.json`.
-   - If it stops because the login **cannot be assigned**, show the AI Manager its step as it printed it, written as numbered «🙋 Only you» steps (GitHub: Settings → Collaborators → Add people, or
+   - If it stops because the login **cannot be assigned**, show the Coach its step as it printed it, written as numbered «🙋 Only you» steps (GitHub: Settings → Collaborators → Add people, or
      `gh api -X PUT repos/<project>/collaborators/<login>`; GitLab: Manage → Members → Invite members, role Developer). Do **not** do the step yourself and never
-     invite anyone: it sends an invitation to another person and changes platform settings, which is the AI Manager's own act. When they have done it, run the command again. If they
+     invite anyone: it sends an invitation to another person and changes platform settings, which is the Coach's own act. When they have done it, run the command again. If they
      want the file written first, run it with `--anyway`: until the step is done, that person's Issues stay `ready`.
    - If it says the login is already there (add) or not there (remove), nothing changed: tell them and stop.
 4. Check `git diff huddle.json`: only the `assignees` array may differ (a multi-line array changes several lines). Then commit it as `Team: add <login>` (or `Team: remove <login>`) and push
    with `git push -u origin <branch>`.
 5. Open the PR (GitHub: `gh pr create --base <default_branch> --title "Team: add <login>" or "Team: remove <login>" --body ...`) or the MR (GitLab:
    `glab mr create --target-branch <default_branch> --title "Team: add <login>" or "Team: remove <login>" --description ... --yes`), with a one-line reason in the body.
-   **Never merge it.** The AI Manager merges it after looking, like any change. Give them the link.
-6. On **add**, print the message to send the new person, in the AI Manager's language, with the commands as they are:
+   **Never merge it.** The Coach merges it after looking, like any change. Give them the link.
+6. On **add**, print the message to send the new person, in the Coach's language, with the commands as they are:
 
 ````text
 Hi <name>! You are on the <project> team. To start, once, on your machine:
@@ -39,7 +39,7 @@ Hi <name>! You are on the <project> team. To start, once, on your machine:
 ````
 
    Drop step 3 on GitHub, and write `gh` or `glab` only for the platform in use. Say that Issues start arriving after the PR/MR is merged.
-7. On **remove**, say that open Issues already assigned to that person keep them: the AI Manager reassigns them by hand if needed.
+7. On **remove**, say that open Issues already assigned to that person keep them: the Coach reassigns them by hand if needed.
 
 ## Who does each step
 

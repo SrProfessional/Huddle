@@ -61,9 +61,9 @@ test('the continue branch enters the worktree, makes it again without -b, runs p
 
 test('only the ai_manager login counts, «Ready for review again» follows a push, the labels are not touched', () => {
   const t = flat(PLAY);
-  assert.match(t, /`ai_manager`/);
+  assert.match(t, /`coach`/);
   assert.match(t, /Ready for review again/);
-  assert.match(t, /changes requested from AI Manager/);
+  assert.match(t, /changes requested from Coach/);
   assert.match(t, /do not touch|never touch/i);
 });
 
@@ -84,7 +84,7 @@ test('the play skill does not name the old commands', () => {
   assert.doesNotMatch(read(PLAY), /huddle-start|huddle-continue/);
 });
 
-test('the AI Manager prompts start with /huddle-play <n>', () => {
+test('the Coach prompts start with /huddle-play <n>', () => {
   for (const name of ['huddle-review', 'huddle-decide']) {
     const t = read(`skills/${name}/SKILL.md`);
     assert.match(t, /^First run \/huddle-play <n>: it marks this request as taken \(👀\), so the Issue shows «in progress»\./m, name);

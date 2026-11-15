@@ -5,7 +5,7 @@ import { run } from '../../lib/cli/run.mjs';
 import { harness, request, CONFIG } from './harness.mjs';
 
 const NO_DEPS = '## Depends on\n\n- None\n';
-const HUDDLE_LABELS = ['ready', 'blocked', 'assigned', 'in progress', 'in review', 'changes requested from AI Manager', 'needs decision', 'design'];
+const HUDDLE_LABELS = ['ready', 'blocked', 'assigned', 'in progress', 'in review', 'changes requested from Coach', 'needs decision', 'design'];
 const repoLabelCount = (h) => Object.keys(h.world.repoLabels()).length;
 
 // Finding 3: a new repo got its labels but the output said only «0 label change(s)».
@@ -45,12 +45,12 @@ test('labels says «1 label created.» in the singular', async () => {
   assert.match(h.text(), /^1 label created\.$/m);
 });
 
-// Finding 2: additionalContext reaches only Claude, who speaks after the developer types; the developer needs a line of their own.
+// Finding 2: additionalContext reaches only Claude, who speaks after the Player types; the Player needs a line of their own.
 test('hook also gives a visible systemMessage when something is pending', async () => {
   const h = harness({ setup: (w) => { w.issue({ number: 5, assignees: ['SrProfessional'], labels: ['in progress'] }); w.comment(5, request(401)); } });
   assert.equal(await run(['hook'], h.ctx), 0);
   const j = JSON.parse(h.text());
-  assert.match(j.systemMessage, /^Huddle: .*AI Manager.*#5/);
+  assert.match(j.systemMessage, /^Huddle: .*Coach.*#5/);
   assert.ok(!j.systemMessage.includes('\n'), 'one visible line');
   assert.match(j.hookSpecificOutput.additionalContext, /Issue #5/, 'Claude still gets its context');
 });

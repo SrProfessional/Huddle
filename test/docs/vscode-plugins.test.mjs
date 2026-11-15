@@ -11,7 +11,7 @@ import { setup } from '../../lib/setup/index.mjs';
 import { run } from '../../lib/cli/run.mjs';
 import { harness } from '../cli/harness.mjs';
 
-const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'];
+const LABELS = ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'];
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(`../../${rel}`, import.meta.url)), 'utf8');
 const DEAD_END = /has no `?\/plugin`?|no `?\/plugin`? command/i;
@@ -49,7 +49,7 @@ test('the huddle setup install note names /plugins and keeps the terminal comman
   const root = mkdtempSync(path.join(tmpdir(), 'huddle-vsc-'));
   try {
     const { notes } = setup(root, { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana'] });
-    const note = notes.find((n) => /every developer/i.test(n));
+    const note = notes.find((n) => /every Player/i.test(n));
     assert.ok(note, 'the install note exists');
     assert.match(note, /\/plugins/);
     assert.match(note, /claude plugin marketplace add SrProfessional\/Huddle/);

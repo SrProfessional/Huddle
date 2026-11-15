@@ -203,7 +203,7 @@ test('hook: the pending-request line stays, with the progress line after it', as
   assert.equal(await run(['hook'], h.ctx), 0);
   const j = JSON.parse(h.text());
   const [first, second, ...rest] = j.systemMessage.split('\n');
-  assert.match(first, /^Huddle: .*AI Manager.*#7/);
+  assert.match(first, /^Huddle: .*Coach.*#7/);
   assert.equal(second, SUMMARY);
   assert.deepEqual(rest, []);
   assert.match(j.hookSpecificOutput.additionalContext, /Issue #7/, 'Claude still gets the request');

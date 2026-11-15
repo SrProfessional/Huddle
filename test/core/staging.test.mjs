@@ -6,11 +6,11 @@ import { TESTED_COMMENT, isTestedComment, releaseWarnings, stagedIssues, strayCo
 const WHO = { aiManager: 'SrProfessional', testers: ['tess'] };
 const comment = (author, createdAt, body = TESTED_COMMENT) => ({ id: 1, author, createdAt, body });
 
-test('the marker is the comment «✅ Tested in staging» by the AI Manager or by a tester, never by anyone else', () => {
+test('the marker is the comment «✅ Tested in staging» by the Coach or by a tester, never by anyone else', () => {
   assert.equal(isTestedComment(comment('SrProfessional', 'x'), WHO), true);
   assert.equal(isTestedComment(comment('srprofessional', 'x'), WHO), true, 'logins are compared without case');
   assert.equal(isTestedComment(comment('tess', 'x'), WHO), true);
-  assert.equal(isTestedComment(comment('ana', 'x'), WHO), false, 'a developer\'s comment never counts');
+  assert.equal(isTestedComment(comment('ana', 'x'), WHO), false, 'a Player\'s comment never counts');
   assert.equal(isTestedComment(comment('SrProfessional', 'x', 'looks fine to me'), WHO), false, 'other words are not the marker');
   assert.equal(isTestedComment(comment('tess', 'x', '  ✅ Tested in staging  \n'), WHO), true, 'surrounding spaces are fine');
   assert.equal(isTestedComment(comment('tess', 'x', TESTED_COMMENT), { aiManager: 'SrProfessional' }), false, 'no testers key: nobody else counts');

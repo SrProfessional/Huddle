@@ -88,10 +88,10 @@ for (const gitlab of [false, true]) {
     }
   });
 
-  test(`[${kind}] tested refuses a caller who is not the AI Manager, before it reads or changes anything`, async () => {
+  test(`[${kind}] tested refuses a caller who is not the Coach, before it reads or changes anything`, async () => {
     const h = make({ config: { ...config, ai_manager: 'ana' } });
     assert.equal(await run(['tested', '5'], h.ctx), 1);
-    assert.match(h.errText(), /only the AI Manager marks an Issue as tested/);
+    assert.match(h.errText(), /only the Coach marks an Issue as tested/);
     assert.ok(!h.calls().some((c) => c.args.includes('POST')));
   });
 
@@ -148,7 +148,7 @@ for (const gitlab of [false, true]) {
     assert.ok(!h.calls().some((c) => c.args.includes('POST')), 'read only');
   });
 
-  test(`[${kind}] release prints the same in words, and a developer's comment or a tester's count as the rules say`, async () => {
+  test(`[${kind}] release prints the same in words, and a Player's comment or a tester's count as the rules say`, async () => {
     const h = make();
     h.world.comment(6, { id: 602, author: 'tess', body: MARK, createdAt: '2026-11-04T00:00:00Z' }); // a tester, newer than the merge
     assert.equal(await run(['release'], h.ctx), 0);
@@ -244,10 +244,10 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(closing.world.opened(), []);
   });
 
-  test(`[${kind}] release open is for the AI Manager only, and needs a staging branch`, async () => {
+  test(`[${kind}] release open is for the Coach only, and needs a staging branch`, async () => {
     const dev = make({ config: { ...config, ai_manager: 'ana' } });
     assert.equal(await run(['release', 'open'], dev.ctx), 1);
-    assert.match(dev.errText(), /only the AI Manager opens the release/);
+    assert.match(dev.errText(), /only the Coach opens the release/);
     assert.deepEqual(dev.world.opened(), []);
     const none = make({ config: { ...config, staging_branch: '' } });
     assert.equal(await run(['release', 'open'], none.ctx), 1);

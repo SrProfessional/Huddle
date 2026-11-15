@@ -145,7 +145,7 @@ test('without a huddle.json it fails, exit 1, and says to run /huddle-setup', as
 
 // huddle doctor: the `setup` line (the status is canned: doctor reads files only, and these tests have no file system for it).
 
-const healthy = () => harness({ wrap: (a) => ({ ...a, listLabels: async () => ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from AI Manager'] }) });
+const healthy = () => harness({ wrap: (a) => ({ ...a, listLabels: async () => ['ready', 'assigned', 'in progress', 'in review', 'blocked', 'needs decision', 'changes requested from Coach'] }) });
 
 const doctorLine = async (status) => {
   const h = healthy();

@@ -41,17 +41,17 @@ test('CLAUDE block sits between the v1 markers, once, and refers to huddle.json'
   assert.ok(text.trimEnd().endsWith('<!-- huddle:end -->'));
   assert.match(text, /huddle\.json/);
   assert.match(text, /Before starting a task/);
-  assert.match(text, /Decision for the AI Manager/);
-  assert.match(text, /The AI Manager role/);
+  assert.match(text, /Decision for the Coach/);
+  assert.match(text, /The Coach role/);
   assert.doesNotMatch(text, /SrProfessional/);
 });
 
-test('the Huddle block has a «Language» rule: chat in the developer\'s language, the repo in English (Issue #74)', () => {
+test('the Huddle block has a «Language» rule: chat in the Player\'s language, the repo in English (Issue #74)', () => {
   const text = read('CLAUDE.huddle.md');
   const m = text.match(/^###? Language\s*$([\s\S]*?)(?=^###? |<!-- huddle:end)/m);
   assert.ok(m, 'the block has a «Language» heading');
   const rule = m[1];
-  assert.match(rule, /developer's language/i, 'chat in the developer\'s language');
+  assert.match(rule, /Player's language/i, 'chat in the Player\'s language');
   assert.match(rule, /`language`/, 'names the language key');
   assert.match(rule, /~\/\.claude\/settings\.json/, 'of the personal settings file');
   assert.match(rule, /own words/i, 'else the language of their own words');
@@ -124,7 +124,7 @@ test('GitLab job says the label can lag up to 10 minutes after a comment', () =>
   assert.match(comments, /comment/i);
 });
 
-test('nobody is told to add or remove «changes requested from AI Manager» by hand', () => {
+test('nobody is told to add or remove «changes requested from Coach» by hand', () => {
   for (const f of FILES) {
     for (const line of read(f).split('\n')) {
       if (!/changes requested/i.test(line)) continue;
