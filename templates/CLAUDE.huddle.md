@@ -32,15 +32,15 @@ root: read them there, never guess them.
 2. Check each Issue under «Depends on». It counts as merged only if it is closed **and** a merged PR/MR closed it. If one
    is not, change nothing and end with «⛔ Issue #N stopped: waiting for #X».
 3. With a staging branch in `huddle.json` (`staging_branch`), the work goes into it and Huddle closes the Issue when the PR/MR is merged there (`huddle land`); the PR keeps `Closes #N`.
-   Create the branch in a worktree of its own (the Issue's prompt says how), then add the `in progress` label to the Issue
-   (the name may be renamed under `labels` in `huddle.json`).
+   Create the branch in a worktree of its own (the Issue's prompt says how), then run `huddle labels --issue <n> --started`: one
+   command adds `in progress` and takes `assigned` off.
 4. Run the tests before changing anything, to know the previous failures.
 
 ### When the AI Manager must decide
 
 If the work cannot go on without a decision, commit and push what is done. Then comment on the Issue starting with
-«❓ Decision for the AI Manager:» (what is blocked, the options with their trade-offs, your recommendation), add the label
-`needs decision`, and end with «⛔ Issue #N stopped: waiting for a decision». Never close the Issue.
+«❓ Decision for the AI Manager:» (what is blocked, the options with their trade-offs, your recommendation), run
+`huddle labels --issue <n> --needs-decision` (it adds `needs decision` and takes `in progress` off), and end with «⛔ Issue #N stopped: waiting for a decision». Never close the Issue.
 
 ### Issues change only through a session
 
@@ -58,7 +58,7 @@ puts it or takes it off by hand.
 ### The labels
 
 A session keeps the board right itself with `huddle labels --issue <n>` (`n` the Issue of the work), at these steps: a developer's
-session after it adds `in progress` (and after `take`), after it opens the PR/MR, after it stops for a decision and after it pushes a fix
+session when it starts (`--started`) and after `take`, after it opens the PR/MR, when it stops for a decision (`--needs-decision`) and after it pushes a fix
 and comments «Ready for review again»; the AI Manager's session after it requests changes, answers a decision and merges. It is best
 effort: if it fails, say one line with the reason and go on, it never blocks the task. Never edit a Huddle label by hand: the command
 computes them. A developer's session never assigns. The cloud labels job is only a safety net for what no session saw.

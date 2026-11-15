@@ -22,7 +22,8 @@ keep the board right at the moments that matter without reading the whole repo. 
 The sessions run that command themselves at each step (a developer's session when it starts, opens the PR, stops for a decision or
 pushes a fix; the AI Manager's session when it requests changes, answers or merges), so the labels are right within seconds, with no
 cloud job. It needs permission to edit labels on the repo, which a developer's session already has, since the same
-session adds `in progress`. If it fails, the session says one line and goes on; the next session catches up.
+session adds `in progress` (with `huddle labels --issue <n> --started`, which adds it and takes `assigned` off in one step; a question
+uses `--needs-decision`). If it fails, the session says one line and goes on; the next session catches up.
 
 | Label | Meaning |
 |---|---|

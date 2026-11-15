@@ -880,6 +880,15 @@ same way it starts a labels pass in the background, detached, so the session nev
 **Cost on GitLab.** `listOpenIssues` reads `closed_by` once per open Issue, and the scoped run still lists the open Issues to find the
 dependents of a closed `n`. A lighter read is possible if it proves too heavy; it is not part of this command.
 
+**The session's own label, in the same run (Issue #153).** Seen on 2026-11-15 on a real project: a session added `in progress` and ran
+`labels --issue` 5½ minutes later, so `assigned` stayed next to `in progress`; then it added `needs decision` and did not run it, so
+`in progress` stayed next to the stop label until another session did. Two steps can be left half-done; one cannot. So the two labels a
+developer's session sets are flags of the scoped run: `huddle labels --issue <n> --started` adds `in progress` and `--needs-decision`
+adds `needs decision` (each under its `labels` name), then the same run recomputes `n`, which takes `assigned` (or `in progress`) off.
+`--dry-run` writes nothing. Only with `--issue`, only one of the two (else exit 2), only on an open, managed Issue (a closed one: one line,
+nothing changed). `/huddle-play` and the `CLAUDE.md` block use these flags and never say to add the label by hand. Each output line says
+what goes on and what comes off (`#5 → in progress − assigned`, `#6 − in progress`); «(keeps its label)» hid a removal and is gone.
+
 ## 23. The cloud labels job is a safety net: `labels_job` in `huddle.json`
 
 Until 0.7 the labels job ran on **every** Issue, PR and comment event plus every 30 minutes (GitHub), or on every MR pipeline plus a
