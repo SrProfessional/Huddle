@@ -464,6 +464,14 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.8.3
+
+Run of: 2026-11-15, Huddle `staging` with Issue #143 merged (commit a8ff2ac), by the AI Manager's Claude Code session. Only the new part was checked; the 0.8.2 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| The update notice and `huddle doctor` name the install scope (#143) | ✔ | covered by tests | Run from staging against this machine's real `installed_plugins.json`, with a faked newer release and an in-memory cache: the Huddle repo (installed for the user) got `--scope user`, `D:/GitHub/N8N-Automation` (its own project install) got `--scope project inside this project`. The platform plays no part. |
+
 ### Results 0.8.2
 
 Run of: 2026-11-15, Huddle `staging` with Issues #136 and #138 merged (commit a11028b), by the AI Manager's Claude Code session. Only the new parts were checked; the 0.8.1 and older tables below still hold for the rest.
