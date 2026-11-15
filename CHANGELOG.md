@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-11-15
+
 ### Fixed
 
 - One command sets the session's label and recomputes the Issue (Issue #153, H63). `huddle labels --issue <n> --started` adds
