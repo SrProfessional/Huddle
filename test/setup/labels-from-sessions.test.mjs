@@ -82,19 +82,17 @@ test('huddle-review runs labels --issue after the changes comment and after the 
   assert.match(t, /only the AI Manager/i);
 });
 
-test('huddle-watch runs the full labels before queue --json, in each tick and in the first check', () => {
+test('huddle-watch runs the full labels before queue --json in the first check, and each round of the wait runs it by itself', () => {
   const t = flat('skills/huddle-watch/SKILL.md');
   const FULL = `${HUDDLE} labels\``;
   assert.ok(t.includes(FULL), 'the full labels command appears');
   const on = at(t, '## On');
-  const step2 = at(t, 'CronCreate', on);
-  const tick = t.slice(step2, at(t, 'Your first message', step2));
-  assert.ok(tick.indexOf('labels`') >= 0 && tick.indexOf('labels`') < tick.indexOf('queue --json'), 'tick: labels before queue');
+  // Issue #157: the background wait (queue --wait) runs the labels pass in each round; the skill says so.
+  assert.match(t, /Each round of the wait runs the full labels pass by itself/);
   const check = at(t, '**Check now:**', on);
   const checkEnd = at(t, '## Each item', check);
   const checkText = t.slice(check, checkEnd);
   assert.ok(checkText.indexOf('labels`') >= 0 && checkText.indexOf('labels`') < checkText.indexOf('queue --json'), 'first check: labels before queue');
-  assert.match(t, /at most once per tick/i);
   assert.match(t, /queue is read anyway|read the queue anyway/i);
 });
 

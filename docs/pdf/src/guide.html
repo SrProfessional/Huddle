@@ -176,7 +176,7 @@
       </li>
       <li>
         <h3>Let the session review by itself</h3>
-        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the AI Manager's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it. It is turned on by hand in each session. Each check is a short Claude turn even when nothing waits, so it uses some tokens: a longer interval (<code>/huddle-watch 15m</code>) and a fresh, short session spend less. Without it, the AI Manager's session start says what waits.</p>
+        <p>Run <code>/huddle-watch</code> (also <code>/huddle-watch status</code> and <code>/huddle-watch off</code>). Every few minutes the AI Manager's session checks what waits and reviews it. Turning it on is the order to merge what it approves; decisions and bug triage stay with the person. <code>huddle queue</code> lists what waits (ask Claude Code «run huddle queue»). The watch lives only in that session: closing Claude Code ends it. It is turned on by hand in each session. It waits in the background like a developer's session, so it uses no Claude tokens while nothing waits. Without it, the AI Manager's session start says what waits.</p>
       </li>
       <li>
         <h3>Update a project to a new release</h3>
