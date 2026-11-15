@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The website and the PDF guides say effort, capacity and the parallel work (Issue #171, H71): a new «Effort and capacity» section on
+  «How it works», `/huddle-play` alone on «Get started» and in the first-day PDF, and one paragraph in the guide PDF.
 - The Coach's watch reviews several PRs/MRs at once, by effort (Issue #165, H68; `docs/design.md` §19 and §24). Each review is a
   background subagent with a clean context, within `review_capacity` effort points (default 5); the subagents never merge. The watch
   merges one at a time, checking each PR/MR again against the updated base first, and asks for an update instead of merging when it no
