@@ -525,7 +525,12 @@ written before it that names the old commands has to be edited. There is no new 
    request it is and is **not** asked to paste anything. It pushes, comments «Ready for review again» with the real counts (none for a design
    Issue), never touches the status labels, and starts `huddle wait <n>` again.
 3. It closes with the usual message («✅ Issue #N finished» or «⛔ Issue #N stopped»), the link, the counts, what was not done and the next
-   step (a step the session takes, or 🙋 steps), as in §13. «When you cannot go on» and «Who does each step» stay as they are.
+   step (a step the session takes, or 🙋 steps), as in §13. «Who does each step» stays as it is.
+4. **After a decision question (Issue #151).** «When you cannot go on» ends with «⛔ Issue #N stopped: waiting for a decision» and then starts
+   `huddle wait <n>` in the background, as after the PR/MR and after «Ready for review again»: `/huddle-decide` answers with a «Prompt for
+   Claude Code» comment, which `wait` already takes as a pending request, so the session continues by itself (`huddle take <n>`). Before, no
+   wait ran there and the developer had to type `/huddle-play <n>`. A stop for a dependency («waiting for #X») starts no wait: there is no
+   comment to wait for.
 
 Nothing else about the flow changes: `huddle pending`, `huddle take`, `huddle wait`, the labels and the review prompts stay as they are. Only
 the name the person types changes.

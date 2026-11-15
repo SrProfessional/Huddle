@@ -105,7 +105,8 @@ form can apply them.
 It does not guess. It commits and pushes what is done, comments on the Issue starting with «❓ Decision for the AI
 Manager:» (what is blocked, the options with trade-offs, its recommendation), adds `needs decision` and stops with «⛔
 Issue #N stopped: waiting for a decision». The AI Manager answers with `/huddle-decide`, on the Issue and on the PR/MR,
-and the session continues on the same branch. The session never closes the Issue.
+and the session continues on the same branch: it keeps waiting in the background and picks the answer up by itself (leave it open; if
+Claude Code was closed, run `/huddle-play <n>`). The session never closes the Issue.
 
 ## Issues change only through a session
 

@@ -86,7 +86,7 @@ branch in its own worktree, the `in progress` label). Then:
 
 Commit and push what is done. Comment on the Issue starting with «❓ Decision for the AI Manager:» (what is blocked, the
 options with trade-offs, your recommendation), add the `needs decision` label, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`, and end with «⛔ Issue #N stopped: waiting for a
-decision». Never close the Issue.
+decision». Never close the Issue. Then start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>` (tell the developer to leave the session open; it uses no Claude tokens). When it ends, the AI Manager answered: continue as in «Continue an Issue» (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`, then follow the prompt).
 
 ## Who does each step
 
