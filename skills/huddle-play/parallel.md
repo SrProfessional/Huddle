@@ -1,0 +1,52 @@
+# Several Issues at once (`/huddle-play` with no number)
+
+Read by `/huddle-play` when the Player gives no Issue number (Issue #164, docs/design.md §24). This session does not work on any Issue
+itself: it hands each one to a subagent with a clean context, waits for the reviews, and fills the Player's capacity again as work ends.
+So no Issue pays for another one's context. Every command below is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` followed by the words shown.
+
+## 1. What starts now
+
+Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next --json`. Tell the Player, in their language, in a few lines: the capacity and the points in use, each Issue
+that starts now (number, title, effort), and each one that waits with its reason. Nothing starts: say so and stop.
+
+Say once, in plain words: «I work on these Issues in parallel, each with its own helper. Leave this session open: closing it stops them.
+If a helper needs your OK for a command, the question appears here. To use fewer at once: `huddle capacity <points>`.»
+
+## 2. One subagent per Issue
+
+For each Issue in `start`, launch a subagent with the Agent tool, **in the background**, and keep its ID next to the Issue number. Its
+prompt, with `<n>` and the paths filled in:
+
+```text
+You work on Issue #<n> of this repo with Huddle, as a Player session. Read ${CLAUDE_PLUGIN_ROOT}/skills/huddle-play/SKILL.md and follow
+«Start an Issue» for Issue <n> exactly: its own worktree from the up-to-date staging branch (or the default branch when there is none),
+labels --issue <n> --started, TDD, the allowed files only, the PR/MR, labels --issue <n>. Do not start the wait. If you cannot go on,
+follow «When you cannot go on» but do not start the wait either. End with a short summary: the PR/MR link, the test counts in one line,
+what was not done, or why you stopped (a decision, a permission, a dependency).
+```
+
+A Design Issue never goes to a subagent (`huddle next` never lists one to start): it needs the designer in the chat.
+
+## 3. When a subagent ends
+
+Read only its summary; never read the diff or its files here. Then:
+
+- **It opened its PR/MR, or it stopped for a decision:** start `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>` in the background for that Issue.
+- **It stopped for anything else** (a permission, a missing credential, a dependency): tell the Player in one line, and do not retry it.
+
+Then run `huddle next --json` again: an Issue in review uses no room, so the next one that fits can start (step 2).
+
+## 4. When a wait ends
+
+- **A request from the Coach** (a review asked for changes, or a decision was answered): continue **that Issue's** subagent with
+  SendMessage: «The Coach left a request on #<n>: follow «Continue an Issue» of SKILL.md for #<n>, then end with the same short summary.»
+  If SendMessage is not available here, or the subagent's ID is lost, launch a new background subagent with that same message instead.
+  When it ends, go back to step 3.
+- **The Issue is finished** (its PR/MR was merged, or the Issue was closed): say so in one line and run `huddle next --json` again.
+
+## 5. While it runs
+
+Keep a short list for the Player: each Issue, its state (working, in review, waiting for you, stopped) and its PR/MR. Show it when asked
+and after each change. When nothing is left to start, nothing is active and no wait is running, say so and end.
+
+`/huddle-play <n>` still works on one Issue in this session, as before.

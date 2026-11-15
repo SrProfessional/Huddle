@@ -45,6 +45,13 @@ Each Issue says how big it is under «Effort»: **1** small, **2** medium, **3**
 from the Issue's own files, tests and migrations, and warns when an Issue is too big and should be split into parts. `huddle effort <n>`
 shows it. It decides how many Issues a Player works on at once.
 
+**Several Issues at once.** Each Player has a **capacity** of 5 points by default (`capacity`, or `capacity_per_person`, in
+`huddle.json`, set by the Coach). `/huddle-play` with no number works on as many of your assigned Issues as fit, each in a background
+subagent with a clean context, so no Issue pays for another one's context. Work in review uses no room, two Issues that share a file
+never run at once, and the next one starts when room frees. `huddle next` shows what starts and what waits, and why. You can only
+**lower** your capacity, on your machine: `huddle capacity 3` (and `huddle capacity reset`). Keep that session open: closing it stops the
+subagents. Design Issues stay in a session of their own.
+
 ## Dependencies
 
 An Issue lists what it needs under «Depends on», one `- #N` per line. A dependency counts as merged only when the Issue is
