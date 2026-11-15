@@ -9,7 +9,7 @@ the review on its own.
 
 It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** the latest release is [0.8.5](https://github.com/SrProfessional/Huddle/releases/tag/v0.8.5); what came after
+> **Status:** the latest release is [0.9.0](https://github.com/SrProfessional/Huddle/releases/tag/v0.9.0); what came after
 > it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
