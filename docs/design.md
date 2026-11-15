@@ -960,3 +960,35 @@ then. Asking would only offer a person a choice that costs quota. `hourly` and `
 **`huddle doctor`.** One line, `labels job: <mode>`; with `sessions` it says that nothing runs in the cloud and the sessions keep the labels right.
 
 **What does not change.** `huddle labels` itself, the pinned `HUDDLE_REF` of a project (refreshing the file only changes the triggers; moving the pin is a PR the Coach's session opens), and the real cron of a GitLab project (the Coach sets it).
+
+## 24. The effort of an Issue: 1, 2 or 3 points
+
+Asked by the Coach on 2026-11-15 (Issue #162), as the base of two later steps: how many Issues one Player's session works on at once
+(Issue #164) and how many PRs/MRs the Coach's watch reviews at once (Issue #165).
+
+**The scale.** 1 small (a text, a one-file fix), 2 medium (a screen or an endpoint with its tests), 3 large (a migration, several layers,
+many files). Not 5: with a capacity of 5 points, one Issue of 5 would fill it alone, and between 3 and 5 people argue more than they
+estimate. An Issue clearly larger than «large» is a sign to split it into parts with «Depends on» between them.
+
+**The section.** Every Issue template has «## Effort» right after «## Depends on». `effortOf(body)` in `lib/core/effort.mjs` reads `1`, `2`,
+`3`, `S`/`M`/`L` or `small`/`medium`/`large` (HTML comments left out), and gives **2** when the section is missing or unreadable, so old
+Issues keep working.
+
+**The suggestion.** `suggestEffort(body)` reads only what the Issue already says and adds points:
+
+| Signal | Points |
+|---|---|
+| Allowed files | 0-2: 0, 3-6: 1, 7-12: 2, more than 12: 4 |
+| Tests that must pass | 0-2: 0, 3-5: 1, more than 5: 2 |
+| A migration (a path with `migration`, or the word in the goal) | 1 |
+| Top-level folders the allowed files span | 0-2: 0, 3-4: 1, 5 or more: 2 |
+
+0-1 points is effort 1, 2-3 is 2, 4-5 is 3, 6 or more is 3 with `split: true` and a reason that says to split it. A blocking bug never
+changes the effort (it only goes first); the reasons say so. It returns `{ effort, reasons, split }`.
+
+**The command.** `huddle effort <n>` prints «#n: effort E (from its «Effort» section)» or «(the default: it has no «Effort» section)»; an
+Issue that is not open is one line and exit 1. `huddle effort --suggest <file>` prints the suggestion for a draft as JSON. Read-only.
+
+**The skills.** `/huddle-issue` and `/huddle-bug` write the draft to a temporary file outside the repo, run `huddle effort --suggest`,
+write its effort in the section and show the reasons; the Coach may change it. With `split: true` they propose the split before creating
+the Issue.

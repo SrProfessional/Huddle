@@ -14,6 +14,9 @@ not, stop and say so.
 2. Fill the repo's Issue template (`.github/ISSUE_TEMPLATE/task.md` or `.gitlab/issue_templates/Task.md`):
    - **Goal:** one or two sentences.
    - **Depends on:** one `- #N` per line, or `- None`. The labels job reads this section.
+   - **Effort:** 1 small, 2 medium or 3 large. Write the draft to a temporary file outside the repo and run
+     `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" effort --suggest <file>`: write its `effort` in the «Effort» section and show its `reasons`; the
+     Coach may change it. With `split: true`, propose splitting the Issue into parts with «Depends on» between them, before creating it.
    - **Branch:** a short name, created from an up-to-date <staging> (the default branch when there is no staging): read `staging_branch` in `huddle.json`, and write its name in place of «<staging>». With one set, the PR/MR targets it and Huddle closes the Issue when it is merged there.
    - **Prompt for Claude Code:** a text block the Player pastes as is. It must say: read the Issue and the named
      documents; check «Depends on» first; create the branch in its own worktree; TDD; the allowed files only; the tests to

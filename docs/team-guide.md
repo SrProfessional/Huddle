@@ -39,6 +39,12 @@ The names can be changed under `labels` in `huddle.json`.
 
 **Stop labels.** `needs decision` and `changes requested from Coach` mean the work waits for someone else, so they stand alone: `in progress` (a session is working) and `in review` (the Coach is working) are taken off while one of them is on, and come back by themselves once the request is taken or the question is answered. Nobody removes them by hand.
 
+## Effort
+
+Each Issue says how big it is under «Effort»: **1** small, **2** medium, **3** large (2 when it says nothing). `/huddle-issue` suggests it
+from the Issue's own files, tests and migrations, and warns when an Issue is too big and should be split into parts. `huddle effort <n>`
+shows it. It decides how many Issues a Player works on at once.
+
 ## Dependencies
 
 An Issue lists what it needs under «Depends on», one `- #N` per line. A dependency counts as merged only when the Issue is
