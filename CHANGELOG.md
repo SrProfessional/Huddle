@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- The update notice and `huddle doctor` name the scope Huddle is installed in (Issue #143, H60). They read Claude Code's
+  `installed_plugins.json`: a user install gets `claude plugin update huddle@huddle --scope user`, a project install keeps
+  `--scope project`, and the per-project command stays the fallback. Before, a user install was always told `--scope project`.
+
 ## [0.8.2] - 2026-11-15
 
 ### Added
