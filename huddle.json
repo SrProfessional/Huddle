@@ -10,5 +10,5 @@
   "default_branch": "main",
   "staging_branch": "staging",
   "labels_job": "sessions",
-  "setup_version": "0.8.0"
+  "setup_version": "0.8.2"
 }
