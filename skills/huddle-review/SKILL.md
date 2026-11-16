@@ -62,7 +62,7 @@ When the prompt says you review for `/huddle-watch` (a subagent, Issue #165): do
 4. Ask the Coach only for what needs them, as «🙋 Only you» steps: for example a second account, a token, or a
    permission the platform denied. If a merge or a push is refused (branch protection, a missing permission), stop and
    ask; never look for another way.
-5. Tell the Player's next step in one line.
+5. Tell the Player's next step in one line. Follow-up work the review found: write it as Issues right away with `/huddle-issue`.
 
 ## Keeping the labels right
 

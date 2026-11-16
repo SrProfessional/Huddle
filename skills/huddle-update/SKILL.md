@@ -70,7 +70,7 @@ in CI/CD > Schedules (the Coach's session can do it with `glab api`; if it canno
 
 Commit on that branch, push, and open the PR/MR with what changed, from the JSON: the block of `CLAUDE.md` (`claudeMd`), the files in
 `changed`, the templates kept because the project edited them (`skipped`, with the way to get the current one that the `notes` give), and
-every line of `notes` (for example a labels job that pins an older `HUDDLE_REF`: updating that pin is a PR the Coach's session
+every line of `notes` (a note about old role names in `CLAUDE.md`: rewrite them in this same PR, «AI Manager» to Coach and the role «developer» to Player, keeping GitLab's member role «Developer») (for example a labels job that pins an older `HUDDLE_REF`: updating that pin is a PR the Coach's session
 opens). A Player's session never merges. The Coach's session (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` says so) merges it itself, without asking: running `/huddle-update` is the order. Merge commit, keep the branch (`gh pr merge --merge`; GitLab: `glab mr merge` without removing it); if the merge is refused (branch protection, a required review), stop and say so, never look for another way.
 
 ## 6. The last line

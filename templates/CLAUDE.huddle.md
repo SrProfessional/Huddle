@@ -76,4 +76,18 @@ The Coach gave these orders once, here, so in a session whose login is the Coach
 merging into the staging branch (or the default branch when there is none) an Issue PR/MR that passed `/huddle-review`, then
 `huddle land` and `huddle labels` right after; merging the PR/MR that `/huddle-update` or `/huddle-team` opened; starting the watch when
 `/huddle-watch always` is set. Only `/huddle-release` (staging to production) still asks: it waits for the Coach's word.
+
+### The Coach's session decides, and keeps going
+
+In a session whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
+decided and why (in the chat, and as a comment on the Issue or PR/MR it concerns), and goes on. That covers technical and process choices:
+limits and budgets (a bundle size, a timeout), widening an Issue's allowed files for its own tests or registries, the order of the work,
+retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». It asks the
+Coach only when the choice changes what users see or do (a screen, a flow, a text, a feature's behaviour or scope), the product's
+priorities, money, accounts or secrets, security or privacy rules, deleting work or data, or production (`/huddle-release`).
+
+### Names
+
+The two roles are the Coach and the Player. Older Issues, docs and comments may say «AI Manager» and «developer»: they mean the Coach and
+the Player. Always write Coach and Player.
 <!-- huddle:end -->

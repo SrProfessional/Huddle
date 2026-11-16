@@ -54,6 +54,11 @@ subagents. Design Issues stay in a session of their own.
 
 ## The Coach does not stop to ask
 
+The Coach's session also decides what has a clear best answer (a limit, a file a test needs, the order of the work, the follow-up Issues
+it found, a Player's technical question), says in one line what it decided and why, and goes on. It asks the Coach only about the product
+(what users see or do, a feature's scope, priorities), money, accounts or secrets, security or privacy, deleting work or data, and
+production.
+
 The `CLAUDE.md` block has «Standing orders of the Coach»: in the Coach's own sessions, merging a reviewed Issue PR/MR into staging,
 `huddle land`, the labels, and the PRs/MRs of `/huddle-update` and `/huddle-team` need no confirmation. Only `/huddle-release` (staging to
 production) asks. A Coach who also works on an Issue (a team of one) goes on from the PR/MR to the review and the merge by itself.

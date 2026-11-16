@@ -54,7 +54,8 @@ function texts() {
 }
 
 test('no text a person reads says «AI Manager» any more (history aside)', () => {
-  const hits = texts().filter((f) => /AI Manager/.test(read(f)));
+  // Quoted as «AI Manager» it only explains the old name (Issue #189): allowed. The role itself is never called that.
+  const hits = texts().filter((f) => /AI Manager/.test(read(f).replaceAll('«AI Manager»', '')));
   assert.deepEqual(hits, []);
   const smoke = read('docs/smoke-test.md').split(/^### Results/m)[0];
   assert.doesNotMatch(smoke, /AI Manager/, 'docs/smoke-test.md, before the results tables');
