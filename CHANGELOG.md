@@ -5,6 +5,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- Huddle works on every branch of a set-up repo (Issue #179). On a branch with no `huddle.json` (made before Huddle was set up) it reads
+  the default branch's copy from git, with no network, and says so in one line; `huddle doctor` says which copy it read. `huddle update`
+  and setup change nothing there and say how to bring the file. The session start says when the branch has no Huddle block in
+  `CLAUDE.md` and where the team's rules are. Huddle no longer looks for `huddle.json` outside the git repo, so a worktree under
+  `.claude/worktrees/` never takes the main checkout's file.
+
 ## [0.9.1] - 2026-11-15
 
 ### Fixed
