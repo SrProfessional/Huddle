@@ -103,5 +103,5 @@ priorities, money, accounts or secrets, security or privacy rules, deleting work
 ### Names
 
 The two roles are the Coach and the Player. Older Issues, docs and comments may say «AI Manager» and «developer»: they mean the Coach and
-the Player. Always write Coach and Player.
+the Player. Always write Coach and Player. When anyone asks what waits for the Coach or what is in review, read it now with `huddle queue`, never from memory.
 <!-- huddle:end -->
