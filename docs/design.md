@@ -1045,3 +1045,9 @@ Issue removes its entry). `huddle status [--json]` reads them with no network an
 interval plus a minute: «the session that ran it is closed or stopped: run /huddle-watch») or off, with whether «always» is set; each wait
 is on or stale («run /huddle-play <n>»). `huddle doctor` shows the same lines. `/huddle-watch status` runs `huddle status`, so it answers right
 even when its session lost track, and `/huddle-play` with no number adds it to its list.
+
+**One repo, one id (Issue #185).** The per-repo files on the machine (the labels stamp, the watch's stop mark, «always», the heartbeats,
+the capacity) are named by an id of the repo's root. It is the hash of the real path (symlinks and 8.3 short names resolved), with forward
+slashes and no trailing slash, lower-cased on Windows and macOS, so `d:\x\repo` from VS Code and `D:\x\repo` from a terminal are one repo.
+Until 0.9.2 the id hashed the path as it came; a mark or a heartbeat left under that older id (the drive letter in either case) is still
+read, and `/huddle-watch off` clears it too.
