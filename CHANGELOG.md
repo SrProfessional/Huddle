@@ -5,6 +5,15 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-15
+
+### Fixed
+
+- The Coach's session merges a reviewed Issue PR/MR without stopping to ask (Issue #175, H72). The `CLAUDE.md` block has «Standing
+  orders of the Coach»: merging into staging after `/huddle-review`, `huddle land`, the labels, and the PRs/MRs of `/huddle-update` and
+  `/huddle-team` need no confirmation; only `/huddle-release` (staging to production) asks. A Coach who works on an Issue (a team of one)
+  goes on from the PR/MR to the review and the merge by itself. Run `/huddle-update` in each repo to get the new block.
+
 ## [0.9.0] - 2026-11-15
 
 ### Added

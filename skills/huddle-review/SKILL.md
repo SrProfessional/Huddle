@@ -52,7 +52,7 @@ When the prompt says you review for `/huddle-watch` (a subagent, Issue #165): do
 
 0. With `staging_branch` set in `huddle.json`, for an Issue PR/MR: run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr> --check` first (it changes nothing). If the base is not staging, do not merge: ask for it to be retargeted to staging. Meta PRs (setup, update, team) keep targeting the default branch.
 1. Approve with a comment (self-approval may be disabled). Your approval in this session is the Coach's approval, so
-   merge it yourself with the platform's merge commit and keep the branch (`gh pr merge --merge`; on GitLab merge without
+   merge it yourself, now, without asking: the standing order of the `CLAUDE.md` block is the Coach's authorization (only `/huddle-release` asks). Use the platform's merge commit and keep the branch (`gh pr merge --merge`; on GitLab merge without
    removing the source branch). Do not hand the merge command to the person: never hand over a step you can do.
 2. Confirm the Issue closed (a merged PR/MR; `CLOSED` with `COMPLETED` on GitHub). With a staging branch it is `huddle land` that closes it: right after the merge run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" land <pr>`, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` once. Without a staging branch run it right after the merge. The Issue is closed by then, so for it the command recomputes the Issues that wait for it and **assigns** the ones that come out ready: only the Coach assigns, and you are the Coach here.
 3. **A release PR** (versions and `CHANGELOG.md` at a new version): after the merge, check that every cell of the smoke test is ✔

@@ -83,4 +83,11 @@ computes them. A Player's session never assigns. The cloud labels job is only a 
 - Hands out Issues, answers every «❓ Decision for the Coach», reviews each PR/MR and merges it.
 - Is the only person who touches production, settings and secrets. A session that does not belong to the Coach never
   merges, deploys or changes settings.
+
+### Standing orders of the Coach
+
+The Coach gave these orders once, here, so in a session whose login is the Coach (`huddle doctor` says so) they need no confirmation:
+merging into the staging branch (or the default branch when there is none) an Issue PR/MR that passed `/huddle-review`, then
+`huddle land` and `huddle labels` right after; merging the PR/MR that `/huddle-update` or `/huddle-team` opened; starting the watch when
+`/huddle-watch always` is set. Only `/huddle-release` (staging to production) still asks: it waits for the Coach's word.
 <!-- huddle:end -->

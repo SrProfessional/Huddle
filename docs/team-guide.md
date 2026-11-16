@@ -52,6 +52,12 @@ never run at once, and the next one starts when room frees. `huddle next` shows 
 **lower** your capacity, on your machine: `huddle capacity 3` (and `huddle capacity reset`). Keep that session open: closing it stops the
 subagents. Design Issues stay in a session of their own.
 
+## The Coach does not stop to ask
+
+The `CLAUDE.md` block has «Standing orders of the Coach»: in the Coach's own sessions, merging a reviewed Issue PR/MR into staging,
+`huddle land`, the labels, and the PRs/MRs of `/huddle-update` and `/huddle-team` need no confirmation. Only `/huddle-release` (staging to
+production) asks. A Coach who also works on an Issue (a team of one) goes on from the PR/MR to the review and the merge by itself.
+
 ## Dependencies
 
 An Issue lists what it needs under «Depends on», one `- #N` per line. A dependency counts as merged only when the Issue is
