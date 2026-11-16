@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-11-15
+
 ### Added
 
 - `huddle status`: is the watch alive, and are the review waits? (Issue #181). The watch and each Player's wait leave a heartbeat every round
