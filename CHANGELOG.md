@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- One repo, one id on the machine, whatever the case of its path (Issue #185). On Windows the same folder can come as `d:\...` or `D:\...`
+  (VS Code and a terminal differ), and Huddle saw two repos: `/huddle-watch always` set from one was not seen from the other, and
+  `huddle status` could miss a live watch. The id now comes from the normalized path; what was set under the older id still counts.
+
 ## [0.9.2] - 2026-11-15
 
 ### Added
