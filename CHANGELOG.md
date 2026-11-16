@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-11-15
+
 ### Fixed
 
 - One repo, one id on the machine, whatever the case of its path (Issue #185). On Windows the same folder can come as `d:\...` or `D:\...`
