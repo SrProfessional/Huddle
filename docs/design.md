@@ -1051,3 +1051,21 @@ the capacity) are named by an id of the repo's root. It is the hash of the real 
 slashes and no trailing slash, lower-cased on Windows and macOS, so `d:\x\repo` from VS Code and `D:\x\repo` from a terminal are one repo.
 Until 0.9.2 the id hashed the path as it came; a mark or a heartbeat left under that older id (the drive letter in either case) is still
 read, and `/huddle-watch off` clears it too.
+
+**The Coach's session decides, and keeps going (Issue #189).** Seen on 2026-11-16: the Coach's session waited about two hours on questions
+with an obvious recommended answer (a bundle budget raised a little, a test registry file allowed for three lines, writing the follow-up
+Issues it had itself proposed). The `CLAUDE.md` block now says: a question with a clear best answer is not asked; the session takes it,
+says in one line what it decided and why (in the chat and as a comment on the Issue or PR/MR), and goes on. Technical and process choices
+are its own (limits and budgets, allowed files for its own tests or registries, the order of the work, retargeting, follow-up Issues,
+a Player's technical decision); it asks the Coach only about what users see or do, a feature's scope, priorities, money, accounts or
+secrets, security or privacy, deleting work or data, and production. `/huddle-decide`, `/huddle-watch`, `/huddle-review` and
+`/huddle-issue` follow it. The block also says that «AI Manager» and «developer» in older text mean the Coach and the Player, and
+`huddle update` notes the lines of the project's own `CLAUDE.md` text that still use them, which `/huddle-update` rewrites in its PR.
+
+**On time, and a failing round shows (Issue #191).** Seen on 2026-11-16: four PRs became ready between 19:50 and 19:54 UTC, the watch's
+last round had been at 19:48, and the Coach's session said «nothing is left in review» at 19:55. The watch was alive but late: each round
+read the queue, ran the full labels pass (about 5 minutes on that project) and then slept the whole interval, so rounds came every ~10
+minutes. Now a round starts every interval from the start of the previous one (it sleeps only what is left), and the labels pass runs at
+most every 15 minutes inside the loop. The heartbeat of the watch and of a Player's wait is written after a round read the queue (or the
+Issue) without an error; a failing round keeps the last good time and records `lastError`, which `huddle status` shows («last round
+failed … ; last good check …»). And when anyone asks what waits, the Coach's session reads `huddle queue` first, never its memory.

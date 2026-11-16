@@ -13,7 +13,9 @@ session never answers its own decision.
 1. List the Issues with the `needs decision` label (name in `huddle.json` under `labels.decision` if renamed). Open the
    one the Coach picks and read the newest comment that starts with «❓ Decision for the Coach:».
 2. Read the options, their trade-offs and the recommendation. Read the pushed branch if the answer depends on the code.
-   If the choice is really the Coach's, ask them with the options; do not decide for them.
+   A technical question (a limit, a file to allow, the order of the work, how to build something already decided) has a clear best answer:
+   take it (usually the Player's recommendation) without asking the Coach, and say in one line what you decided and why. Only a product
+   question (what users see or do, a feature's scope, priorities, money, secrets, security, deleting data) goes to the Coach, with the options.
 3. Post the answer on the Issue **and** on its PR/MR (if one exists), starting with the heading and a text block:
 
 ````text

@@ -86,14 +86,14 @@ test('a review item runs /huddle-review with its usual rules: merge when good, t
   assert.match(t, /oldest first/i);
 });
 
-test('a decision or triage item is only reported, once per Issue, and never answered', () => {
+test('a triage item is only reported; a decision is answered when technical (Issue #189), only reported when it is a product question', () => {
   const t = flat(WATCH);
   assert.match(t, /`decision`/);
   assert.match(t, /`triage`/);
   assert.match(t, /never answered/i);
   assert.match(t, /waits for your decision/);
   assert.match(t, /once per Issue/i);
-  assert.doesNotMatch(t, /\/huddle-decide/, 'it must not run the decision skill');
+  assert.match(t, /technical, answer it as `\/huddle-decide` does/);
 });
 
 test('a review that stops is said once with its reason, and is not retried on the same head; a new commit is a new item', () => {

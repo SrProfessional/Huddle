@@ -37,7 +37,8 @@ not, stop and say so.
      design system, or the guide or brand file to follow), **Content** (real texts, never lorem ipsum) and **Deliverable** (what «done» means).
      **Allowed files** are always `design/<issue number>-<slug>/`, and a design Issue never changes code. The prompt must also say that
      changes are asked for in the chat and never by hand on the canvas, and that «ready» makes the session save the design and open the PR.
-3. Show the draft, with its milestone, and wait for the Coach's OK. Create it with `gh issue create --milestone "<title>"`
+3. Show the draft, with its milestone, and wait for the Coach's OK only when the Issue changes the product's design, behaviour or scope;
+   otherwise create it and show its link (the Coach's session decides, and keeps going). Create it with `gh issue create --milestone "<title>"`
    (or `glab issue create --milestone "<title>"`) using the repo from `huddle.json`; a Design Issue also gets `--label design`
    (the `design` label exists once `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels` has run). Do not add them by hand (the status
    labels and the assignee): the command in step 4 does. The issue number is known only after creating it, so edit the Issue once to write it in the allowed files path.

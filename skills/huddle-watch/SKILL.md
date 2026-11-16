@@ -57,13 +57,15 @@ anything. Docs/design.md §19 and §22.
 - **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,
   with the reason, and do **not** try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes
   `head` and makes it a new item (a `head` of `null` means it could not be read: use the PR/MR number alone).
-- **`decision` and `triage`:** never answered by the watch: those are the person's decisions. Say one line per new item («#47 waits for your
-  decision», «#53 waits for your triage») once per Issue, add `#<issue>` to the keys, and leave it.
+- **`decision`:** when the question is technical, answer it as `/huddle-decide` does (the Coach's session decides, and keeps going). A
+  product question is only reported: one line («#47 waits for your decision») once per Issue; add `#<issue>` to the keys.
+- **`triage`:** never answered by the watch: one line («#53 waits for your triage») once per Issue; add `#<issue>` to the keys.
 
 ## Off (`/huddle-watch off`) and status (`/huddle-watch status`)
 
 - **Off:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait-off` (the wait stops at its next round, even if this session lost its ID), stop
   the background command too when its ID is known, and say it is off. Off also forgets «always»: it will not start again by itself. Nothing running: say so.
+- **What waits:** when someone asks what waits or what is in review, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue` first and answer from it; never answer from memory.
 - **Status:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" status` and say what it prints: whether the watch is alive (its last check, from the heartbeat each round leaves, so the answer is right even when this session lost track of it), whether «always» is set, and the Players' waits on this machine.
 
 ## Who does each step
