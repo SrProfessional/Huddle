@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- `huddle status`: is the watch alive, and are the review waits? (Issue #181). The watch and each Player's wait leave a heartbeat every round
+  on the machine; `huddle status` (no network, no login) and `huddle doctor` say each one's last check, and a stale one says how to start it
+  again. `/huddle-watch status` uses it, so it answers right even when its session lost track.
+
 ### Fixed
 
 - Huddle works on every branch of a set-up repo (Issue #179). On a branch with no `huddle.json` (made before Huddle was set up) it reads
