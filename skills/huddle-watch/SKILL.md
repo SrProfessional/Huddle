@@ -65,6 +65,7 @@ anything. Docs/design.md §19 and §22.
 
 - **Off:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait-off` (the wait stops at its next round, even if this session lost its ID), stop
   the background command too when its ID is known, and say it is off. Off also forgets «always»: it will not start again by itself. Nothing running: say so.
+- **What waits:** when someone asks what waits or what is in review, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue` first and answer from it; never answer from memory.
 - **Status:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" status` and say what it prints: whether the watch is alive (its last check, from the heartbeat each round leaves, so the answer is right even when this session lost track of it), whether «always» is set, and the Players' waits on this machine.
 
 ## Who does each step

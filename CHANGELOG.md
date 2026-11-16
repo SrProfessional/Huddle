@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- The watch comes on time, and a failing round shows (Issue #191). A round now starts every interval from the start of the previous one,
+  and the full labels pass runs at most every 15 minutes, so a ready PR waits at most one interval (it could wait ~10 minutes on a big
+  project). The heartbeat of the watch and of the Players' waits is written only after a good round; a failing round records its error,
+  and `huddle status` shows it. The Coach's session reads `huddle queue` before saying what waits, never its memory.
+
 ### Changed
 
 - The Coach's session decides what has a clear best answer and keeps going (Issue #189). It no longer stops on technical or process

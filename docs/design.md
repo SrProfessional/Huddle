@@ -1061,3 +1061,11 @@ a Player's technical decision); it asks the Coach only about what users see or d
 secrets, security or privacy, deleting work or data, and production. `/huddle-decide`, `/huddle-watch`, `/huddle-review` and
 `/huddle-issue` follow it. The block also says that «AI Manager» and «developer» in older text mean the Coach and the Player, and
 `huddle update` notes the lines of the project's own `CLAUDE.md` text that still use them, which `/huddle-update` rewrites in its PR.
+
+**On time, and a failing round shows (Issue #191).** Seen on 2026-11-16: four PRs became ready between 19:50 and 19:54 UTC, the watch's
+last round had been at 19:48, and the Coach's session said «nothing is left in review» at 19:55. The watch was alive but late: each round
+read the queue, ran the full labels pass (about 5 minutes on that project) and then slept the whole interval, so rounds came every ~10
+minutes. Now a round starts every interval from the start of the previous one (it sleeps only what is left), and the labels pass runs at
+most every 15 minutes inside the loop. The heartbeat of the watch and of a Player's wait is written after a round read the queue (or the
+Issue) without an error; a failing round keeps the last good time and records `lastError`, which `huddle status` shows («last round
+failed … ; last good check …»). And when anyone asks what waits, the Coach's session reads `huddle queue` first, never its memory.
