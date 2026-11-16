@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-15
+
 ### Fixed
 
 - The Coach's session merges a reviewed Issue PR/MR without stopping to ask (Issue #175, H72). The `CLAUDE.md` block has «Standing
