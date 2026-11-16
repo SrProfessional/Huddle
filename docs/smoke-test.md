@@ -461,6 +461,14 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.9.1
+
+Run of: 2026-11-15, Huddle `staging` with Issue #175 merged, by the Coach's Claude Code session. Only the new part was checked; the 0.9.0 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Standing orders of the Coach: a reviewed Issue PR/MR is merged without asking (#175) | ✔ | covered by tests | Found on a new repo with a staging branch: after its first Issue the session said «if you say merge…» and waited. The fix is text in the `CLAUDE.md` block and the play and review skills, tested as text; this release's own review of #175 merged into staging without asking under the new order. The platform plays no part. |
+
 ### Results 0.9.0
 
 Run of: 2026-11-15, Huddle `staging` with Issues #157, #160, #162, #164, #165, #166 and #171 merged (commit 7a0f262), by the Coach's Claude Code session. Only the new parts were checked; the 0.8.5 and older tables below still hold for the rest.
