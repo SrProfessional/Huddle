@@ -461,6 +461,15 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.9.2
+
+Run of: 2026-11-15, Huddle `staging` with Issues #179 and #181 merged, by the Coach's Claude Code session. Only the new parts were checked; the 0.9.1 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Huddle on a branch with no `huddle.json` (#179) | ✔ | covered by tests | On a worktree of this repo at a commit before `huddle.json` existed: `doctor` said «read from origin/main (this branch has none)», `update --check` changed nothing and said how to bring the file, `queue` printed the note on stderr, and the hook said the branch has no Huddle block in `CLAUDE.md`. The run also found that a worktree inside the main checkout took the main checkout's file: fixed (the search stops at the git top-level) and tested. Git only; the platform plays no part. |
+| `huddle status` and the heartbeats (#181) | ✔ | covered by tests | In this repo: `status` said «watch: off», then «on, last check 19 seconds ago» from another command while a `queue --wait` ran, then «off» after `--wait-off`. The Players' waits: covered by tests. Local files only. |
+
 ### Results 0.9.1
 
 Run of: 2026-11-15, Huddle `staging` with Issue #175 merged, by the Coach's Claude Code session. Only the new part was checked; the 0.9.0 and older tables below still hold for the rest.

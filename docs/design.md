@@ -128,6 +128,17 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
   only written by hand. See §23.
 - `labels`: optional renames. The defaults are the seven labels of §3.
 
+**On a branch with no `huddle.json` (Issue #179).** A branch made before Huddle was set up has no `huddle.json` (and no Huddle block in
+`CLAUDE.md`), but the repo is set up on its default branch. The root is found inside the git repo only (`findRoot` stops at
+`git rev-parse --show-toplevel`, so a worktree under `.claude/worktrees/` never takes the main checkout's file). With no file there, the
+config is read from the default branch with git and no network: `git show <ref>:huddle.json`, where `<ref>` is what `origin/HEAD` points
+to, else `origin/main`, else `origin/master` (`defaultBranchFile` in `lib/cli/config.mjs`). It is validated the same way, the commands
+print one line on stderr («this branch has no huddle.json; using the one on origin/main»), and `huddle doctor` says which copy it read.
+`huddle update` and setup write only a real file on the current branch: there they change nothing and say «this branch has no
+huddle.json: update it from <ref> (git merge <ref>) or run /huddle-update from a branch made from it». The SessionStart hook says when
+the branch has no Huddle block in `CLAUDE.md` but the default branch has one, and tells Claude to read it with `git show <ref>:CLAUDE.md`.
+A repo whose default branch has no `huddle.json` either is still not set up.
+
 `bin/huddle doctor` checks the setup: the file is valid, `gh`/`glab` is logged in to that host, the labels exist, and the
 Coach can be found.
 
@@ -1026,3 +1037,11 @@ labels` right after, the PRs/MRs of `/huddle-update` and `/huddle-team`, and sta
 confirmation. Only `/huddle-release` (staging to production) still waits for the Coach's word. And a Coach who works on an Issue (a team
 of one) does not stop after opening the PR/MR: `/huddle-play` runs `/huddle-review` on it right away, in a fresh worktree with the tests
 run again, and merges on all good. A Player who is not the Coach never merges.
+
+**Heartbeats (Issue #181).** Only the session that started the watch or a wait knew it was running; if it hung, closed or lost its context,
+nobody could tell. Each round, `huddle queue --wait` writes `{ at, every }` to `huddle-watch-<repo id>.beat` next to the update cache (never in
+the repo; `--wait-off` and a stop clear it), and `huddle wait <n>` writes its entry in `huddle-waits-<repo id>.beat`, a map by Issue (a finished
+Issue removes its entry). `huddle status [--json]` reads them with no network and no login: the watch is on, stale (older than twice its
+interval plus a minute: «the session that ran it is closed or stopped: run /huddle-watch») or off, with whether «always» is set; each wait
+is on or stale («run /huddle-play <n>»). `huddle doctor` shows the same lines. `/huddle-watch status` runs `huddle status`, so it answers right
+even when its session lost track, and `/huddle-play` with no number adds it to its list.
