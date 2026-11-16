@@ -57,8 +57,9 @@ anything. Docs/design.md §19 and §22.
 - **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,
   with the reason, and do **not** try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes
   `head` and makes it a new item (a `head` of `null` means it could not be read: use the PR/MR number alone).
-- **`decision` and `triage`:** never answered by the watch: those are the person's decisions. Say one line per new item («#47 waits for your
-  decision», «#53 waits for your triage») once per Issue, add `#<issue>` to the keys, and leave it.
+- **`decision`:** when the question is technical, answer it as `/huddle-decide` does (the Coach's session decides, and keeps going). A
+  product question is only reported: one line («#47 waits for your decision») once per Issue; add `#<issue>` to the keys.
+- **`triage`:** never answered by the watch: one line («#53 waits for your triage») once per Issue; add `#<issue>` to the keys.
 
 ## Off (`/huddle-watch off`) and status (`/huddle-watch status`)
 

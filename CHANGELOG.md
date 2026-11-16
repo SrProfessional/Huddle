@@ -5,6 +5,14 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- The Coach's session decides what has a clear best answer and keeps going (Issue #189). It no longer stops on technical or process
+  questions (a budget, a file a test needs, the order of the work, the follow-up Issues it proposed, a Player's technical decision): it
+  takes the best option and says in one line what and why. It still asks about the product, money, secrets, security, deleting and
+  production. Old names: the block says «AI Manager» and «developer» in older text mean the Coach and the Player, and `/huddle-update`
+  rewrites them in the project's own `CLAUDE.md` text.
+
 ## [0.9.3] - 2026-11-15
 
 ### Fixed
