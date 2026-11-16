@@ -461,6 +461,14 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.9.3
+
+Run of: 2026-11-15, Huddle `staging` with Issue #185 merged, by the Coach's Claude Code session. Only the new part was checked; the 0.9.2 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| One repo, one id on the machine, whatever the case of its path (#185) | ✔ | covered by tests | Found right after 0.9.2 on this machine: «always» set from `D:\GitHub\huddle` was not seen from `d:\GitHub\huddle`. With the fix, the mark left under the older id is read from either form; both forms give one id (tested). Local files only. |
+
 ### Results 0.9.2
 
 Run of: 2026-11-15, Huddle `staging` with Issues #179 and #181 merged, by the Coach's Claude Code session. Only the new parts were checked; the 0.9.1 and older tables below still hold for the rest.
