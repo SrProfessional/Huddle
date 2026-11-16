@@ -5,12 +5,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
-### Fixed
-
-- The watch comes on time, and a failing round shows (Issue #191). A round now starts every interval from the start of the previous one,
-  and the full labels pass runs at most every 15 minutes, so a ready PR waits at most one interval (it could wait ~10 minutes on a big
-  project). The heartbeat of the watch and of the Players' waits is written only after a good round; a failing round records its error,
-  and `huddle status` shows it. The Coach's session reads `huddle queue` before saying what waits, never its memory.
+## [0.9.4] - 2026-11-16
 
 ### Changed
 
@@ -19,6 +14,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   takes the best option and says in one line what and why. It still asks about the product, money, secrets, security, deleting and
   production. Old names: the block says «AI Manager» and «developer» in older text mean the Coach and the Player, and `/huddle-update`
   rewrites them in the project's own `CLAUDE.md` text.
+
+### Fixed
+
+- The watch comes on time, and a failing round shows (Issue #191). A round now starts every interval from the start of the previous one,
+  and the full labels pass runs at most every 15 minutes, so a ready PR waits at most one interval (it could wait ~10 minutes on a big
+  project). The heartbeat of the watch and of the Players' waits is written only after a good round; a failing round records its error,
+  and `huddle status` shows it. The Coach's session reads `huddle queue` before saying what waits, never its memory.
 
 ## [0.9.3] - 2026-11-15
 
