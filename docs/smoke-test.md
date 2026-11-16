@@ -461,6 +461,15 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.9.4
+
+Run of: 2026-11-16, Huddle `staging` with Issues #189 and #191 merged, by the Coach's Claude Code session. Only the new parts were checked; the 0.9.3 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| The Coach's session decides and keeps going; Coach and Player everywhere (#189) | ✔ | covered by tests | Found on a real project: the Coach's session waited about two hours on three technical questions with an obvious answer. The rule is text in the `CLAUDE.md` block and the skills, tested as text. On a copy of that project's `CLAUDE.md`, `huddle update --dry-run` noted the 17 lines that still say the old names outside the block. |
+| The watch comes on time, and a failing round shows (#191) | ✔ | covered by tests | Found on a real project: four PRs ready between 19:50 and 19:54 UTC, the watch's last round at 19:48 and the next one due near 19:58. The round timing and the error heartbeat are tested with a fake clock; live in this repo, `huddle status` read a running watch from another command («on, last check 9 seconds ago»). |
+
 ### Results 0.9.3
 
 Run of: 2026-11-15, Huddle `staging` with Issue #185 merged, by the Coach's Claude Code session. Only the new part was checked; the 0.9.2 and older tables below still hold for the rest.
