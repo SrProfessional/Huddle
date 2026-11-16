@@ -128,6 +128,17 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
   only written by hand. See §23.
 - `labels`: optional renames. The defaults are the seven labels of §3.
 
+**On a branch with no `huddle.json` (Issue #179).** A branch made before Huddle was set up has no `huddle.json` (and no Huddle block in
+`CLAUDE.md`), but the repo is set up on its default branch. The root is found inside the git repo only (`findRoot` stops at
+`git rev-parse --show-toplevel`, so a worktree under `.claude/worktrees/` never takes the main checkout's file). With no file there, the
+config is read from the default branch with git and no network: `git show <ref>:huddle.json`, where `<ref>` is what `origin/HEAD` points
+to, else `origin/main`, else `origin/master` (`defaultBranchFile` in `lib/cli/config.mjs`). It is validated the same way, the commands
+print one line on stderr («this branch has no huddle.json; using the one on origin/main»), and `huddle doctor` says which copy it read.
+`huddle update` and setup write only a real file on the current branch: there they change nothing and say «this branch has no
+huddle.json: update it from <ref> (git merge <ref>) or run /huddle-update from a branch made from it». The SessionStart hook says when
+the branch has no Huddle block in `CLAUDE.md` but the default branch has one, and tells Claude to read it with `git show <ref>:CLAUDE.md`.
+A repo whose default branch has no `huddle.json` either is still not set up.
+
 `bin/huddle doctor` checks the setup: the file is valid, `gh`/`glab` is logged in to that host, the labels exist, and the
 Coach can be found.
 
