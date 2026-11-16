@@ -46,7 +46,8 @@ Then run `huddle next --json` again: an Issue in review uses no room, so the nex
 
 ## 5. While it runs
 
-Keep a short list for the Player: each Issue, its state (working, in review, waiting for you, stopped) and its PR/MR. Show it when asked
+Keep a short list for the Player: each Issue, its state (working, in review, waiting for you, stopped) and its PR/MR, and add what
+`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" status` says about the waits (each one's last check, so a wait that died shows). Show it when asked
 and after each change. When nothing is left to start, nothing is active and no wait is running, say so and end.
 
 `/huddle-play <n>` still works on one Issue in this session, as before.

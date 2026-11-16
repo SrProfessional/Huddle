@@ -260,7 +260,8 @@ about it.
 Actions or CI minutes, and wakes the session only when a request arrives. It needs the session open and the computer on; otherwise the
 next session start says a request is pending. `/huddle-watch` is turned on by hand in each session, because turning it on is the Coach's order to review and merge; it stops with `/huddle-watch off` or when Claude Code closes. It waits in the background the same
 way (`huddle queue --wait`), so it uses no Claude tokens while nothing waits, and wakes the Coach's session only when something
-waits. Without it, the Coach's session start says what waits for them. `/huddle-watch always` keeps it on: it starts again in each of When several PRs/MRs wait, the
+waits. Without it, the Coach's session start says what waits for them. `/huddle-watch always` keeps it on: it starts again in each of When several PRs/MRs wait, the To check from any terminal that the watch and the waits are alive, run `huddle status`
+(or `huddle doctor`): each one says its last check, and a stale one says which command starts it again.
 watch reviews them at once, each in a background subagent, within `review_capacity` effort points (default 5), and still merges them
 one at a time, checking each one again against the updated base.
 the Coach's sessions of that repo on that machine (a mark on the machine, not a file of the repo), until `/huddle-watch off`.

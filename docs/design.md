@@ -1037,3 +1037,11 @@ labels` right after, the PRs/MRs of `/huddle-update` and `/huddle-team`, and sta
 confirmation. Only `/huddle-release` (staging to production) still waits for the Coach's word. And a Coach who works on an Issue (a team
 of one) does not stop after opening the PR/MR: `/huddle-play` runs `/huddle-review` on it right away, in a fresh worktree with the tests
 run again, and merges on all good. A Player who is not the Coach never merges.
+
+**Heartbeats (Issue #181).** Only the session that started the watch or a wait knew it was running; if it hung, closed or lost its context,
+nobody could tell. Each round, `huddle queue --wait` writes `{ at, every }` to `huddle-watch-<repo id>.beat` next to the update cache (never in
+the repo; `--wait-off` and a stop clear it), and `huddle wait <n>` writes its entry in `huddle-waits-<repo id>.beat`, a map by Issue (a finished
+Issue removes its entry). `huddle status [--json]` reads them with no network and no login: the watch is on, stale (older than twice its
+interval plus a minute: «the session that ran it is closed or stopped: run /huddle-watch») or off, with whether «always» is set; each wait
+is on or stale («run /huddle-play <n>»). `huddle doctor` shows the same lines. `/huddle-watch status` runs `huddle status`, so it answers right
+even when its session lost track, and `/huddle-play` with no number adds it to its list.
