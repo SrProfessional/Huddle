@@ -51,6 +51,20 @@ test('the watch answers a conflicting PR by itself: one request on the PR and it
   assert.match(onPr[0].body, /Ready for review again/);
 });
 
+test('a restarted watch does not ask again for a head it already asked about (the marker on the PR)', async () => {
+  const first = watching(world('CONFLICTING'), 2);
+  await run(['queue', '--wait', '300'], first.ctx).catch(() => {});
+  const asked = first.world.commentsOf(51).find((c) => /🔁 Changes requested/.test(c.body));
+  assert.match(asked.body, /<!-- huddle: update requested for aaa111 -->/);
+  const again = watching((w) => {
+    world('CONFLICTING')(w);
+    w.comment(51, { id: 900, author: 'coach', body: asked.body, createdAt: '2026-11-17T00:00:00Z' });
+  }, 2);
+  await run(['queue', '--wait', '300'], again.ctx).catch(() => {});
+  assert.equal(again.world.commentsOf(51).filter((c) => /🔁 Changes requested/.test(c.body)).length, 1, 'no second request on the PR');
+  assert.equal(again.world.commentsOf(42).filter((c) => /🔁 Changes requested/.test(c.body)).length, 0, 'none on the Issue either');
+});
+
 test('a clean PR wakes the session as before', async () => {
   const h = watching(world('MERGEABLE'));
   assert.equal(await run(['queue', '--wait', '300'], h.ctx), 0);

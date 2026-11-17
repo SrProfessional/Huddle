@@ -1080,7 +1080,8 @@ PRs fell behind the base branch and were reviewed again after each update. Four 
   not wake the Coach's session: it posts on the PR/MR and on its Issue a «🔁 Changes requested: update the branch» comment whose «Prompt
   for Claude Code» block asks the Player to run `git fetch origin` and `git merge origin/<base>` (the staging branch, else the default
   branch), resolve the conflicts, run the tests, push and comment «Ready for review again» with the counts; then it runs
-  `labels --issue <n>`. It posts once per PR/MR head in a running loop; the Player's wait picks it up as any request. A `clean` or
+  `labels --issue <n>`. It posts once per PR/MR head: a hidden marker in the comment (`<!-- huddle: update requested for <sha> -->`)
+  keeps a restarted watch from asking again. The Player's wait picks it up as any request. A `clean` or
   `unknown` item wakes the session as before (GitHub computes `mergeable` lazily, so `unknown` is never treated as a conflict).
 - **The Player brings the base in first.** `/huddle-play` merges `origin/<base>` before opening the PR/MR and before «Ready for review
   again», and reports the test counts after that merge.
