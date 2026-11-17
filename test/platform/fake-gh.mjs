@@ -156,9 +156,10 @@ export function fakeGithub({ project = PROJECT } = {}) {
     }
     if (a === 'pr' && b === 'view') {
       const fields = values(args, '--json')[0];
-      need(fields === 'headRefOid' || fields === 'number,state,baseRefName,body,mergedAt', args);
+      need(fields === 'headRefOid' || fields === 'mergeable' || fields === 'number,state,baseRefName,body,mergedAt', args);
       const r = reviews.get(Number(args[2]));
       if (fields === 'headRefOid') { need(r, args); return JSON.stringify({ headRefOid: r.head }); }
+      if (fields === 'mergeable') { need(r, args); if (r.mergeable === 'FAIL') throw new Error(`gh ${args.join(' ')} failed: HTTP 502`); return JSON.stringify({ mergeable: r.mergeable }); }
       if (!r) throw new Error(`gh ${args.join(' ')} failed: GraphQL: Could not resolve to a PullRequest with the number of ${args[2]}. (repository.pullRequest)`);
       return JSON.stringify({ number: r.number, state: r.open ? 'OPEN' : r.merged ? 'MERGED' : 'CLOSED', baseRefName: r.base, body: r.body, mergedAt: r.merged ? r.mergedAt : null });
     }
@@ -340,8 +341,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
       issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing], milestone });
     },
     // base: the branch the PR targets; body: its text; merged: it was merged (so it is not open).
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt = '2026-11-10T00:00:00Z' }) {
-      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, commits: [...commits], head, mergedAt });
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt = '2026-11-10T00:00:00Z', mergeable = 'MERGEABLE' }) {
+      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, commits: [...commits], head, mergedAt, mergeable });
     },
     /** A branch that exists on the remote (`main` always does). */
     branch(name) { branches.add(name); },
@@ -369,6 +370,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
     repoLabels: () => Object.fromEntries(repoLabels),
     repoLabel(name) { repoLabels.set(name, { color: 'ededed', description: '' }); },
     commentBody: (id) => comments.get(id)?.body,
+    commentsOf: (n) => [...comments.values()].filter((c) => c.issue === n).map((c) => ({ id: c.id, body: c.body })),
     isTaken: (id) => comments.get(id).reactions.eyes > 0,
     merged: () => [...merged],
     /** The PRs opened through `openReview`, in order. */
