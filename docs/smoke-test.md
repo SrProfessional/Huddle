@@ -461,6 +461,14 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 0.9.5
+
+Run of: 2026-11-17, Huddle `staging` with Issue #195 merged, by the Coach's Claude Code session. Only the new parts were checked; the 0.9.4 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Reviews cost less: the merge state with no tokens, the watch's own update request, the base merged before review, delta reviews (#195) | ✔ | covered by tests | Found on a real project: 19 PRs in review and the Coach's account at its usage limit twice, from PRs reviewed again after falling behind the base. `reviewMerge`, the queue's `merge` field and the watch's request (once per head, also after a restart) are tested on both fakes; live in this repo, `huddle queue --json` ran and `reviewMerge` read real PRs through `gh` (merged PRs read `unknown`, as GitHub gives no mergeable state for them). |
+
 ### Results 0.9.4
 
 Run of: 2026-11-16, Huddle `staging` with Issues #189 and #191 merged, by the Coach's Claude Code session. Only the new parts were checked; the 0.9.3 and older tables below still hold for the rest.
