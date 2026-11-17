@@ -243,7 +243,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       const r = reviews.get(Number(m[1]));
       need(method === 'GET', args);
       if (!r) throw new Error(`glab ${args.join(' ')} failed: 404 Not Found`);
-      return JSON.stringify({ ...mrJson(r), sha: r.head, diff_refs: { base_sha: 'base', start_sha: 'start', head_sha: r.head } });
+      if (r.mergeable === 'FAIL') throw new Error('glab api failed: HTTP 502');
+      return JSON.stringify({ ...mrJson(r), sha: r.head, diff_refs: { base_sha: 'base', start_sha: 'start', head_sha: r.head }, has_conflicts: r.mergeable === 'CONFLICTING', detailed_merge_status: r.mergeable === 'CONFLICTING' ? 'conflict' : r.mergeable === 'UNKNOWN' ? 'checking' : 'mergeable' });
     }
     if ((m = /^merge_requests\/(\d+)\/merge$/.exec(rest))) {
       const r = reviews.get(Number(m[1]));
@@ -290,8 +291,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       addSystemNote(number, `changed title to «${title}»`);
     },
     // base: the branch the MR targets; body: its description; merged: it was merged (so it is not open).
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt }) {
-      reviews.set(number, { iid: number, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head, mergedAt });
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt, mergeable = 'MERGEABLE' }) {
+      reviews.set(number, { iid: number, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head, mergedAt, mergeable });
     },
     /** A branch that exists on the remote (`main` always does). */
     branch(name) { branches.add(name); },
@@ -326,6 +327,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     assigneesOf: (n) => [...issues.get(n).assignees],
     repoLabels: () => Object.fromEntries([...labels.values()].map((l) => [l.name, { color: l.color.replace(/^#/, ''), description: l.description }])),
     commentBody: (id) => notes.get(id)?.body,
+    commentsOf: (n, { mr } = {}) => [...notes.values()].filter((c) => c.issue === n && !c.system && (mr === undefined || c.mr === mr)).map((c) => ({ id: c.id, body: c.body })),
     isTaken: (id) => notes.get(id).eyes,
     merged: () => [...merged],
     /** The MRs opened through `openReview`, in order. */

@@ -5,6 +5,13 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- Reviews cost less (Issue #195). A PR/MR that no longer merges cleanly into its base is not reviewed: the watch sees it with no Claude
+  tokens (`huddle queue` now carries each review's `merge` state) and asks the Player itself to bring in the base branch, once per head.
+  The Player's session merges the base in before opening the PR/MR and before «Ready for review again». A later review round reads only
+  the diff since the head it reviewed (`Reviewed head: <sha>`), and the review keeps only the summary lines of the test output.
+
 ## [0.9.4] - 2026-11-16
 
 ### Changed
