@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [0.9.5] - 2026-11-17
+
 ### Changed
 
 - Reviews cost less (Issue #195). A PR/MR that no longer merges cleanly into its base is not reviewed: the watch sees it with no Claude
