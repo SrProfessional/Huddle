@@ -166,6 +166,7 @@ All network access goes through one interface. The core never calls `gh` or `gla
 | `mergedReviews(base, { limit })` → `[{ number, base, body, mergedAt }]` (§21) | `gh pr list --state merged --base <base> --limit <limit>`, sorted by `mergedAt`, newest first | `GET /merge_requests?state=merged&target_branch=<base>&order_by=updated_at&sort=desc`, sorted by `merged_at` |
 | with `staging_branch` set (§21): `reviews`, `reviewsClosing(n)`, `issueForBranch(branch)` | the open PRs into staging whose body closes the Issue (one `gh pr list --base <staging>` per run) join `closedByPullRequestsReferences`; `issueForBranch` also reads the body of a PR into staging | `GET /issues/:iid/related_merge_requests` replaces `closed_by` (same one call per Issue, same `memo`); an MR is kept when it targets staging or the default branch and its description closes the Issue; `issueForBranch` reads the description of an MR into staging |
 | with `staging_branch` set (§21): `issueState(n)` and `listMilestones()` `merged` | today's rule **or** a merged PR whose base is staging and whose body closes the Issue (a second, aliased `CROSS_REFERENCED_EVENT` timeline in the same GraphQL query) | today's rule **or** a merged MR into staging whose description closes the Issue (the same `related_merge_requests` read) |
+| `reviewMerge(n)` → `clean`, `conflicting` or `unknown` (Issue #195, §19); a failed read is `unknown`, never an error | `gh pr view <n> --json mergeable` (`MERGEABLE`, `CONFLICTING`, else unknown) | `GET /merge_requests/:iid`: `has_conflicts` or `detailed_merge_status` `conflict`; `mergeable` (or `merge_status` `can_be_merged`) is clean |
 | every call | retried on 429 (and 5xx except a POST), at most 3 tries and 60 s (`lib/platform/retry.mjs`) | same |
 
 **The staging rule.** With `staging_branch` unset (`""`), the table above is exact: the same calls with the same arguments, the same
@@ -593,7 +594,9 @@ Waiting for the Coach:
 or `Nothing is waiting for the Coach.` (on GitLab the reference reads `MR !51`). `--json` prints
 `{ "waiting": [{ "issue": 42, "title": "...", "waits": "review", "pr": 51, "head": "<the PR's head commit sha>" }, ...] }`; `pr` and `head`
 only for `review`. `head` comes from the adapter operation `reviewHead(n)` (§7), the head commit sha of PR/MR `n` (GitHub: `gh pr view <n> --json headRefOid`;
-GitLab: `diff_refs.head_sha` of the MR), one call per `review` item. It is best effort: if one cannot be read, that item prints
+GitLab: `diff_refs.head_sha` of the MR), one call per `review` item. Each `review` item also carries `merge`, from the adapter operation
+`reviewMerge(n)` (§7, Issue #195): `clean`, `conflicting` or `unknown` (GitHub: `gh pr view <n> --json mergeable`; GitLab: `has_conflicts`
+and `detailed_merge_status` of the MR); a failed read is `unknown`, never an error of the queue. It is best effort: if one cannot be read, that item prints
 `head: null` and one line goes to stderr (`huddle queue: could not read the head of PR #51 (Issue #42): <reason>`), and the exit is still 0.
 Exit 0 when it ran, with or without items; 1 on a platform error, with one clear line; 2 on a bad flag. A repo without `huddle.json`
 gets the same «not configured» error as the other commands.
@@ -1069,3 +1072,18 @@ minutes. Now a round starts every interval from the start of the previous one (i
 most every 15 minutes inside the loop. The heartbeat of the watch and of a Player's wait is written after a round read the queue (or the
 Issue) without an error; a failing round keeps the last good time and records `lastError`, which `huddle status` shows («last round
 failed … ; last good check …»). And when anyone asks what waits, the Coach's session reads `huddle queue` first, never its memory.
+
+**Reviews cost less (Issue #195).** Seen on 2026-11-17: with 19 PRs in review, the Coach's account hit its usage limit twice, because
+PRs fell behind the base branch and were reviewed again after each update. Four savings, none of them a change of what is checked:
+
+- **The watch answers a conflict itself, with no tokens.** When `queue --wait` finds a `review` item with `merge: 'conflicting'`, it does
+  not wake the Coach's session: it posts on the PR/MR and on its Issue a «🔁 Changes requested: update the branch» comment whose «Prompt
+  for Claude Code» block asks the Player to run `git fetch origin` and `git merge origin/<base>` (the staging branch, else the default
+  branch), resolve the conflicts, run the tests, push and comment «Ready for review again» with the counts; then it runs
+  `labels --issue <n>`. It posts once per PR/MR head in a running loop; the Player's wait picks it up as any request. A `clean` or
+  `unknown` item wakes the session as before (GitHub computes `mergeable` lazily, so `unknown` is never treated as a conflict).
+- **The Player brings the base in first.** `/huddle-play` merges `origin/<base>` before opening the PR/MR and before «Ready for review
+  again», and reports the test counts after that merge.
+- **A later round reads only what changed.** `/huddle-review` ends each review comment with `Reviewed head: <sha>`; on the next round it
+  reads the Player's answer to each item and `git diff <old>..<new>`, not the whole PR again. The tests still run in a fresh worktree.
+- **Test output is summarized.** The review keeps only the summary lines of the test output (the counts and the failures).
