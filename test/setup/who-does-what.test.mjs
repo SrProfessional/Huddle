@@ -28,7 +28,7 @@ test('a refresh and huddle update on a set-up repo leave them out', () => inTemp
   const again = setup(dir, {});
   assert.ok(!has(again.notes, LABELS_NOTE) && !has(again.notes, INSTALL_NOTE), 'refresh');
   const c = JSON.parse(readFileSync(path.join(dir, 'huddle.json'), 'utf8'));
-  writeFileSync(path.join(dir, 'huddle.json'), JSON.stringify({ ...c, staging_branch: '', setup_version: '0.5.1' }));
+  writeFileSync(path.join(dir, 'huddle.json'), JSON.stringify({ ...c, staging_branch: '', language: '', setup_version: '0.5.1' }));
   const up = update(dir);
   assert.equal(up.status, 'updated');
   assert.ok(!has(up.notes, LABELS_NOTE) && !has(up.notes, INSTALL_NOTE), 'update');

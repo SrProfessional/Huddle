@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Each person's language, in Claude Code and Codex (Issue #209). The session start names it, so even a session opened with only a
+  command answers in it: the person's own (`huddle language <lang>`), else the team's (`language` in `huddle.json`, asked by
+  `/huddle-setup` and once by `/huddle-update`), else the machine's. The repo stays in English.
 - Codex hook trust (Issue #207): the VS Code chat has no `/hooks`, so Players trust Huddle's SessionStart hook once in terminal Codex,
   which shares its configuration; the team guide gives the Windows `--no-daemon` steps and the same check after an update.
 - A mixed team (Issue #202): the README and the team guide say how a Player works in OpenAI Codex while the Coach stays in Claude Code,

@@ -178,7 +178,7 @@ test('Issue #130: labels_job is not a question any more: the registry never asks
 });
 
 /** A repo set up under 0.7.0: no staging_branch and no labels_job, with the every-event labels file of that time. */
-const oldRepo = (dir, platform = GH) => { setup(dir, { ...platform, staging_branch: '', labels_job: 'events' }); patch(dir, { setup_version: '0.7.0' }, ['staging_branch', 'labels_job']); };
+const oldRepo = (dir, platform = GH) => { setup(dir, { ...platform, staging_branch: '', language: '', labels_job: 'events' }); patch(dir, { setup_version: '0.7.0' }, ['staging_branch', 'labels_job']); };
 
 test('update: a 0.7.0 repo with no labels_job is asked only the staging branch; huddle.json gets no labels_job key and the old file is named for deletion', () => inTemp((dir) => {
   oldRepo(dir);
