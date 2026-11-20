@@ -1121,13 +1121,29 @@ same time, on two plans.
   The live checks above used `codex exec --dangerously-bypass-hook-trust` for one run only, which saves nothing.
 - **The model.** A ChatGPT account may refuse the model set in the Player's `config.toml` («The 'gpt-5.5' model is not supported when using
   Codex with a ChatGPT account»); `codex debug models` lists the ones offered.
-- **Not proven yet:** whether an interactive Codex session can leave `huddle wait <n>` running in the background and be woken when it ends.
-  Issue #201 decides that; without it, the session-start notice says a request is pending, as when a session is closed.
+- **Waking a Codex session (Issue #201).** `codex queue --thread <id> --message <text>` queues a message into a session; with the session
+  open in the VS Code extension, the chat took the message and answered it by itself (2026-11-20, twice: once from `codex queue`, once from
+  Huddle's own `codexQueue`). `--resume` warns «could not resume thread … start a local daemon» and the message is still delivered. The
+  commands the Codex agent runs get the session id as `CODEX_THREAD_ID` (and `CODEX_HOME`, `CODEX_VERSION`), not `PLUGIN_ROOT`.
 
 **The hook in Codex.** `huddle` tells Codex apart by `PLUGIN_ROOT`, which only Codex sets (`toolOf` in `lib/cli/main.mjs`). In Codex the
 hook always adds one line of context, even when nothing waits: «Huddle (OpenAI Codex): the huddle command is node "<plugin>/bin/huddle".
 Where a Huddle skill writes node "${CLAUDE_PLUGIN_ROOT}/bin/huddle", run that instead.» In Claude Code the hook's output does not change. The Coach's `/huddle-watch always` mark never asks a Codex session to start the watch
 (the same login may play there): the watch runs in Claude Code.
+
+**The wait in Codex (Issue #201).** `huddle wait <n> --codex`, run by the Codex agent, starts the same wait as a process of its own,
+tagged with `--codex-thread <CODEX_THREAD_ID>`, and returns at once (a Codex command must not block the session). That process polls as
+`huddle wait` always does, with no tokens; when the Coach leaves a request it queues «Huddle: the Coach left a request on Issue #n (<url>). Run
+$huddle-play n and follow it.» into the session, and when the Issue is finished it queues one line saying so. `--codex` outside a Codex
+session (no `CODEX_THREAD_ID`) says so and exits 1. `findCodex` finds the command: the `codex` on the PATH (not an npm `.cmd` shim, which
+would need a shell), else the newest one bundled with the OpenAI extension under `~/.vscode`, `~/.vscode-insiders` or `~/.cursor`. If the
+session is closed, the message waits in its queue, and the next session start says a request waits, as in Claude Code.
+
+**The skills in Codex (Issue #201).** `/huddle-play` has one paragraph for Codex: the `huddle` command the session start named, a plain
+`git worktree add` instead of `EnterWorktree`, `huddle wait <n> --codex` for every background wait, a Design Issue that stops («this Issue
+is done in Claude Code (it needs Claude Design)»), and **no review or merge in Codex**, even on the Coach's login (a team of one keeps the
+Coach in Claude Code, whose watch reviews). The Coach's skills (decide, review, watch, release, issue, bug, areas, team) stop in Codex with one
+line: «/huddle-<name> runs in Claude Code, where the Coach works.»
 
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 

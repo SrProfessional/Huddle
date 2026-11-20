@@ -8,6 +8,8 @@ description: Use when an Issue has the needs decision label and the Coach must a
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; a Player
 session never answers its own decision.
 
+In OpenAI Codex, stop with one line: «/huddle-decide runs in Claude Code, where the Coach works.» (Issue #201)
+
 ## Do
 
 1. List the Issues with the `needs decision` label (name in `huddle.json` under `labels.decision` if renamed). Open the

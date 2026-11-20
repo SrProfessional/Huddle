@@ -5,7 +5,7 @@ description: Use when the Coach reviews a Player's PR/MR and must either request
 
 # huddle-review
 
-For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop. In OpenAI Codex, stop with one line: «/huddle-review runs in Claude Code, where the Coach works.» (Issue #201)
 
 ## Review
 

@@ -8,6 +8,8 @@ description: Use when the Coach wants to add a Player to the team or remove one,
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; only the
 Coach changes the team. Read `platform`, `host`, `project` and `default_branch` from `huddle.json`.
 
+In OpenAI Codex, stop with one line: «/huddle-team runs in Claude Code, where the Coach works.» (Issue #201)
+
 ## Do
 
 1. Ask two things: **add or remove**, and the **login** (the platform login, not the name).

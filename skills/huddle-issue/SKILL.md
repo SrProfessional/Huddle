@@ -8,6 +8,8 @@ description: Use when the Coach wants to write a new Issue for a Player from the
 For the Coach (the `coach` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that login; if
 not, stop and say so.
 
+In OpenAI Codex, stop with one line: «/huddle-issue runs in Claude Code, where the Coach works.» (Issue #201)
+
 ## Do
 
 1. Ask what the task is (goal, the document that rules over it). Read that document and the code it touches.

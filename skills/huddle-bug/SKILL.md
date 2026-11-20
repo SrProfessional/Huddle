@@ -8,6 +8,8 @@ description: Use when the Coach wants to turn a bug description, a capture, a li
 For the Coach (the `coach` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that
 login; if not, stop and say so.
 
+In OpenAI Codex, stop with one line: «/huddle-bug runs in Claude Code, where the Coach works.» (Issue #201)
+
 ## Two ways in
 
 - `/huddle-bug` followed by a plain description, a capture or a link: «approving a carousel in the inbox shows an error».
