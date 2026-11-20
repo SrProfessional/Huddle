@@ -1117,8 +1117,10 @@ same time, on two plans.
   `${CLAUDE_PLUGIN_ROOT}` in the command itself, and sets both `PLUGIN_ROOT` and `CLAUDE_PLUGIN_ROOT` to the installed plugin folder. Its
   input is `{ session_id, transcript_path: null, cwd, hook_event_name: "SessionStart", model, permission_mode, source }`. The
   `hookSpecificOutput.additionalContext` it prints reaches the model (asked, the model quoted it back).
-- **The hook must be trusted once** in the Player's Codex (`/hooks`): Codex skips an untrusted hook, and a changed hook needs trust again.
-  The live checks above used `codex exec --dangerously-bypass-hook-trust` for one run only, which saves nothing.
+- **The hook must be trusted once in terminal Codex.** The VS Code chat has no `/hooks`, but terminal Codex shares its configuration:
+  start it with `codex --no-daemon` (or the extension's executable on Windows), choose «Review hooks» at «Hooks need review», then
+  review and trust Huddle's `SessionStart` command. Codex skips an untrusted hook, and a changed hook needs trust again. Trust was given
+  this way on 2026-11-20 and checked with a `codex exec` run with no bypass: the model quoted the hook's line.
 - **The model.** A ChatGPT account may refuse the model set in the Player's `config.toml` («The 'gpt-5.5' model is not supported when using
   Codex with a ChatGPT account»); `codex debug models` lists the ones offered.
 - **Waking a Codex session (Issue #201).** `codex queue --thread <id> --message <text>` queues a message into a session; with the session
