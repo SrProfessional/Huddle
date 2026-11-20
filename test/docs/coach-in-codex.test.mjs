@@ -19,3 +19,13 @@ test('the team guide: the Coach works in Codex or Claude Code, one watch per rep
 test('the README says the Coach can work in Codex too', () => {
   assert.match(read('README.md'), /The Coach can work in Codex too/);
 });
+
+test('the README heading no longer says «for Players», and §25 records the live Coach run of 2026-11-20 (review round of #214)', () => {
+  const r = read('README.md');
+  assert.match(r, /### In OpenAI Codex /);
+  assert.doesNotMatch(r, /In OpenAI Codex \(for Players\)/);
+  const d = read('docs/design.md');
+  assert.match(d, /\*\*The Coach in Codex, end to end \(Issue #214\)\.\*\* On 2026-11-20/);
+  assert.match(d, /Claude Code did not start a second watch/);
+  assert.match(d, /the Codex review asked for a change/);
+});

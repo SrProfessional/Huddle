@@ -65,7 +65,7 @@ If you use only the VS Code extension, it puts no `claude` command in the termin
 marketplace `SrProfessional/Huddle` in the **Marketplaces** tab, and install `huddle` from the **Plugins** tab with
 **Install for this project** (not «Install for you»). Each person does this once per clone. The same dialog updates it.
 
-### In OpenAI Codex (for Players)
+### In OpenAI Codex (Players and the Coach)
 
 Anyone may work in [OpenAI Codex](https://developers.openai.com/codex) instead of Claude Code. The Coach can work in Codex too: the watch, the
 reviews and the releases; only design work needs Claude Code. In Codex: same Issues, same rules (Huddle writes them

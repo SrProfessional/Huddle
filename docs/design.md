@@ -1197,6 +1197,14 @@ machine: trusting the project, that one command, and trusting the hook (#207). `
 Codex: ✔ when its `CODEX_HOME/plugins/cache/huddle` exists, ⚠ with the command otherwise, and a Claude Code session start says the ⚠ once per
 repo. Not checked: whether the VS Code extension runs the upgrade by itself when it opens the repo.
 
+**The Coach in Codex, end to end (Issue #214).** On 2026-11-20, on the Coach's machine, a Claude Code session played #214 as the Player and
+opened PR #220 while the Coach's watch ran in Codex. From Claude Code, `huddle status` said «watch: on, in Codex» and `queue --wait` refused:
+Claude Code did not start a second watch. The Codex watch woke its chat with «Huddle's watch: 1 item waits for the Coach…» and the review
+began; it stopped once on the Coach's OpenAI usage limit and went on in the same chat when the quota came back. A second Codex chat opened
+meanwhile refused to start the watch, since the first one held it (the stuck-owner case Issue H90 handles). Then the Codex review asked for a
+change (this note and the README heading); the Player's `huddle wait` in Claude Code woke on it, and the change was pushed for review again.
+The Coach's Codex session then reviews this round and merges and lands it.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
