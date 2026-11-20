@@ -347,14 +347,30 @@ line. A Codex session never reviews or merges, even on the Coach's login.
    $codex = (Get-ChildItem "$HOME\.vscode\extensions\openai.chatgpt-*\bin\*\codex.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
    & $codex plugin marketplace add SrProfessional/Huddle; & $codex plugin add huddle@huddle
    ```
-3. 🙋 Open the Codex chat in the repo and type `/hooks`. Trust the Huddle hook. You should see it listed as trusted.
-4. 🙋 Let Codex reach GitHub or GitLab: when Codex asks to run `git push`, `gh`, `glab` or `huddle` with network access, approve it.
+3. 🙋 Open the repo folder in VS Code, then choose **Terminal → New Terminal**. The Codex chat in VS Code has no `/hooks`; use this
+   terminal Codex once to trust the hook. Paste:
+   ```text
+   codex --no-daemon
+   ```
+   On Windows, if `codex` is not recognized, paste the line that finds the extension's Codex, then start it:
+   ```text
+   $codex = (Get-ChildItem "$HOME\.vscode\extensions\openai.chatgpt-*\bin\*\codex.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
+   & $codex --no-daemon
+   ```
+   Do not leave off `--no-daemon`: without it, Codex stops with «this CLI has no complete local package».
+4. 🙋 When terminal Codex shows «Hooks need review», choose **Review hooks**. Go to the **SessionStart** row: the list does not name the
+   plugin, so Huddle is the row with **Review 1**. Press Enter. Check that its command is
+   `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" hook` and its plugin is `huddle`, then trust it.
+5. 🙋 You should see: **SessionStart** has **Active 1** and **Review 0**. Press Esc, type `/exit`, then open a new Codex chat in the
+   repo. The hook runs when that session starts. If you see something else, leave with `/exit` and repeat steps 3 and 4, checking that
+   you opened the terminal in the repo folder.
+6. 🙋 Let Codex reach GitHub or GitLab: when Codex asks to run `git push`, `gh`, `glab` or `huddle` with network access, approve it.
    Codex's sandbox has no network, so without that the PR cannot be opened and the wait cannot see the Coach's answer.
-5. Work as usual: `$huddle-play <n>`. When the PR is open, the session waits in the background with no tokens
+7. Work as usual: `$huddle-play <n>`. When the PR is open, the session waits in the background with no tokens
    (`huddle wait <n> --codex`); when the Coach answers, the open Codex chat gets a message and goes on by itself.
 
-**Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`, then trust the hook again
-in `/hooks` (a changed hook needs trust again).
+**Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`. A changed hook needs
+trust again, so repeat steps 3–5 in terminal Codex (not the VS Code chat, which has no `/hooks`).
 
 ## Add or remove someone
 

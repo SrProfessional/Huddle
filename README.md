@@ -76,7 +76,9 @@ codex plugin marketplace add SrProfessional/Huddle
 codex plugin add huddle@huddle
 ```
 
-Then open Codex in the repo, type `/hooks` and trust the Huddle hook once. Work on an Issue with `$huddle-play <n>`.
+The Codex chat in VS Code has no `/hooks`. Open a terminal in the repo and trust the Huddle hook once in terminal Codex instead: it
+uses the same configuration. The [team guide has the steps](docs/team-guide.md#a-mixed-team-claude-code-and-codex). Then work on an
+Issue with `$huddle-play <n>`.
 
 ### The settings snippet is a helper
 

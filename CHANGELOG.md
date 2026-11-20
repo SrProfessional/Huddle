@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Codex hook trust (Issue #207): the VS Code chat has no `/hooks`, so Players trust Huddle's SessionStart hook once in terminal Codex,
+  which shares its configuration; the team guide gives the Windows `--no-daemon` steps and the same check after an update.
 - A mixed team (Issue #202): the README and the team guide say how a Player works in OpenAI Codex while the Coach stays in Claude Code,
   one person on two plans if they like, with the Player's setup in plain steps. `huddle wait --codex` refuses with one clear line inside a
   Codex sandbox with no network, and `/huddle-play` runs the commands that reach the platform with network access.
