@@ -1175,6 +1175,13 @@ already runs in <tool> (another session), last check <ago>: this session does no
 fresh, or while the owner reviews: when the watch returns items it keeps the watch for 45 minutes, since the loop ends while its session
 reviews. The same session restarts its own watch freely; `queue --wait-off` from any session frees it; `huddle status` names the tool.
 
+**The watch in Codex (Issue #212).** `queue --wait <s> [--seen <keys>] --codex`, run by the Codex agent, starts the watch as a process of its
+own with `--codex-thread <CODEX_THREAD_ID>` and returns at once (as `wait --codex`, #201); it refuses outside Codex, with no network, and
+when another session holds the watch (#211). The process runs the usual loop with no tokens; when items wait it prints them as always and
+queues «Huddle's watch: N item(s) wait for the Coach (seen keys: …). Run $huddle-watch and review them.» into the Codex chat. The
+session-start hook no longer skips the Coach's «always» in Codex (#199 did): it asks the Codex session to start the watch the Codex way, or,
+when another session holds it, names that session in the visible line and asks for nothing. `/huddle-watch` has its Codex steps.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

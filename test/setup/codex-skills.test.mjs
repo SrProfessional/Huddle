@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(`../../${rel}`, import.meta.url)), 'utf8').replace(/\s+/g, ' ');
-const COACH = ['decide', 'review', 'watch', 'release', 'issue', 'bug', 'areas', 'team'];
+const COACH = ['decide', 'review', 'release', 'issue', 'bug', 'areas', 'team']; // the watch works in Codex since Issue #212
 
 test('the play skill says how to work in Codex: the command the session start named, and a plain worktree', () => {
   const t = read('skills/huddle-play/SKILL.md');
@@ -35,4 +35,11 @@ for (const name of COACH) {
 
 test('in Codex the play skill runs the commands that reach the platform with network access (Issue #202)', () => {
   assert.match(read('skills/huddle-play/SKILL.md'), /with network access \(approve it when Codex asks\)/);
+});
+
+test('the watch skill runs in Codex with the --codex wait, and stops when another session holds the watch (Issue #212)', () => {
+  const t = read('skills/huddle-watch/SKILL.md');
+  assert.match(t, /queue --wait <seconds> \[--seen <keys>\] --codex/);
+  assert.match(t, /already runs in another session, say so in one line and stop/);
+  assert.doesNotMatch(t, /huddle-watch runs in Claude Code, where the Coach works/);
 });
