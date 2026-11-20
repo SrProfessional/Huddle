@@ -9,9 +9,9 @@ import { harness } from './harness.mjs';
 
 const MANAGED = '## Depends on\n\n- None\n';
 const review = (w) => { w.issue({ number: 214, body: MANAGED, assignees: ['ana'], reviews: [220] }); w.review({ number: 220, head: 'db42' }); };
-function mk({ clock, session, setup = review, files }) {
+function mk({ clock, session, setup = review, files, me = async () => 'SrProfessional' }) {
   let n = 0;
-  const h = harness({ setup, wrap: (a) => ({ ...a, me: async () => 'SrProfessional' }), sleep: async () => { n += 1; if (n >= 1) throw new Error('stop'); } });
+  const h = harness({ setup, wrap: (a) => ({ ...a, me }), sleep: async () => { n += 1; if (n >= 1) throw new Error('stop'); } });
   Object.assign(h.ctx, { updateCachePath: '/data/huddle-update.json', sharedDir: '/home/.huddle', session, now: () => clock.t });
   if (files) { h.ctx.readFile = files.ctx.readFile; h.ctx.writeFile = files.ctx.writeFile; }
   return h;
@@ -80,6 +80,25 @@ test('with --codex, when the old owner claims the watch back in the meantime, th
   assert.match(taker.text(), /The watch was not taken over: another session claimed it meanwhile\./);
   assert.deepEqual(started, []);
 });
+
+for (const [label, me] of [['a login that is not the Coach', async () => 'ana'], ['a failed authentication', async () => { throw new Error('gh: not logged in'); }]]) {
+  test(`with --codex --take-over, ${label} keeps the owner and its heartbeat, says no success and starts nothing (third review of PR #224)`, async () => {
+    const clock = { t: T0 };
+    const first = mk({ clock, session: { tool: 'codex', id: 'T1' } });
+    await run(['queue', '--wait', '300'], first.ctx);
+    const files = labelsFiles(first.ctx);
+    const owner = first.ctx.readFile(files.watchOwner);
+    const beat = first.ctx.readFile(files.watchBeat);
+    const started = [];
+    const taker = mk({ clock, session: { tool: 'codex', id: 'T2' }, files: first, me });
+    Object.assign(taker.ctx, { codexThread: 'T2', startDetached: (a) => started.push(a) });
+    assert.notEqual(await run(['queue', '--wait', '300', '--codex', '--take-over'], taker.ctx), 0);
+    assert.equal(first.ctx.readFile(files.watchOwner), owner);
+    assert.equal(first.ctx.readFile(files.watchBeat), beat);
+    assert.doesNotMatch(taker.text(), /Took over|waits in the background/);
+    assert.deepEqual(started, []);
+  });
+}
 
 const skill = readFileSync(fileURLToPath(new URL('../../skills/huddle-watch/SKILL.md', import.meta.url)), 'utf8').replace(/\s+/g, ' ');
 test('the watch skill asks the person before --take-over, and the «always» start never passes it', () => {
