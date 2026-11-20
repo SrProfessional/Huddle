@@ -10,6 +10,8 @@ stop with one clear line («/huddle-watch is for the Coach») and change nothing
 
 **In OpenAI Codex** (Issue #212): run the background wait as `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait <seconds> [--seen <keys>] --codex` (the `huddle` command the session start named; approve network access). It returns at once and the watch waits with no tokens; when this chat gets «Huddle's watch: … Run $huddle-watch», read `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` and go on as below, then start the wait again the same way. If it says the watch already runs in another session, say so in one line and stop: that session reviews.
 
+**Another session holds the watch** (Issue #222, in Claude Code and in Codex): «already runs» means its loop is alive: say so in one line and stop. «took … to review … and has not checked since» means that session may be stuck (closed, or out of quota): when the person ran `/huddle-watch` themselves, ask the person «Another session took <what> <when> and has not come back. Take over?» and pass `--take-over` only on yes (with `--codex` too in Codex); on no, stop. The «always» start at a session start never passes `--take-over`: it only names the other session.
+
 The watch waits in the background with a small Node process (`queue --wait`), as a Player's session waits for its review: it uses
 **no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself, unless
 the Coach chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
