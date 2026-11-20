@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- `/huddle-play` works in OpenAI Codex (Issue #201). `huddle wait <n> --codex` waits in a process of its own with no tokens and, when the
+  Coach answers, sends the Codex session a message to go on (`codex queue`; an open Codex chat in VS Code answers it by itself). In Codex
+  the Player never reviews or merges, even on the Coach's login; Design Issues and the Coach's skills stop there with one line.
 - Huddle installs in OpenAI Codex (Issue #199): `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`.
   The skills and the session-start hook run there; in Codex the hook always tells the session where the `huddle` command is. Proven on a
   real Codex (docs/design.md §25). For Players; the Coach stays in Claude Code.

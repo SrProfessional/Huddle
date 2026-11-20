@@ -19,7 +19,8 @@ test('the play skill says how to work in Codex: the command the session start na
 test('in Codex the play skill never reviews or merges, even on the Coach\'s login, and says how the wait goes', () => {
   const t = read('skills/huddle-play/SKILL.md');
   assert.match(t, /never review or merge in Codex, even on the Coach's login: the Coach's Claude Code session does it/);
-  assert.match(t, /run `\$huddle-play <n>` again when the Coach answers/);
+  assert.match(t, /every background wait is `node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle" wait <n> --codex`/);
+  assert.match(t, /sends this session a message to run `\$huddle-play <n>`/);
 });
 
 test('in Codex a Design Issue stops with one clear line: it is done in Claude Code', () => {
