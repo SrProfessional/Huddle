@@ -320,14 +320,17 @@ when `huddle.json` has a host). The SessionStart hook stays silent in both cases
 
 ## A mixed team: Claude Code and Codex
 
-A Player may work in **OpenAI Codex**, and the Coach in **Claude Code**, at the same time. One person can be both, on two plans: the
-work (and its tokens) sits with the Players' plan, the reviews with the Coach's. The two tools never talk to each other directly: they
-talk through GitHub or GitLab, as every Huddle session does. A Player in Codex opens the PR; the Coach's watch in Claude Code reviews
-it; the Coach's request wakes the Player's Codex session, which goes on.
+The Coach and the Players may each work in **Claude Code** or in **OpenAI Codex**, at the same time. One person can be both, on two
+plans: for example the Players' work (and its tokens) in Codex and the reviews in Claude Code, or the other way round. The two tools never
+talk to each other directly: they talk through GitHub or GitLab, as every Huddle session does. A Player opens the PR; the Coach's watch
+reviews it; the Coach's request wakes the Player's session, which goes on.
+
+**One watch per repo:** with Claude Code and Codex open at once on the Coach's login, the first session that turns the watch on reviews and
+merges; the other says where it runs («The watch already runs in Codex…») and does not start a second one. `huddle status` names the tool.
 
 | Who | Where | Runs |
 |---|---|---|
-| The Coach | Claude Code | `/huddle-watch always`, `/huddle-review`, `/huddle-issue`, `/huddle-release` and the other Coach skills |
+| The Coach | Claude Code or Codex | `/huddle-watch always`, `/huddle-review`, `/huddle-issue`, `/huddle-release` and the other Coach skills (`$huddle-watch` and so on in Codex) |
 | A Player | Codex or Claude Code | `$huddle-play <n>` in Codex, `/huddle-play <n>` in Claude Code |
 
 **The language.** Every session, in Claude Code and in Codex, chats with each person in their language from the first message. Huddle
@@ -335,8 +338,7 @@ takes the first that is set: the person's own (`huddle language es`, once on the
 removes it), then the team's (asked by `/huddle-setup`, kept as `language` in `huddle.json`), then the machine's. The repo itself
 stays in English.
 
-**What stays in Claude Code in this release:** the Coach's skills and Design Issues (they need Claude Design). In Codex they stop with one
-line. A Codex session never reviews or merges, even on the Coach's login.
+**What stays in Claude Code:** Design Issues and the review of a design PR (they need Claude Design). In Codex they stop with one line.
 
 **A repo set up with Huddle comes nearly ready in Codex.** `/huddle-setup` and `/huddle-update` write `.codex/config.toml`, which declares
 Huddle for Codex in that repo only. On a machine where Codex is new, open the repo in Codex, trust the project when it asks, and run
