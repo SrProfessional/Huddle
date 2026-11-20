@@ -50,6 +50,8 @@ test('--take-over works with --codex too: the detached watch is started for this
   Object.assign(taker.ctx, { codexThread: 'T2', startDetached: (args) => started.push(args) });
   assert.equal(await run(['queue', '--wait', '300', '--codex', '--take-over'], taker.ctx), 0);
   assert.deepEqual(started, [['queue', '--wait', '300', '--take-over', '--codex-thread', 'T2']]);
+  // Review of PR #224: the detached worker's output is discarded, so the Codex caller itself must see the takeover.
+  assert.match(taker.text(), /Took over the watch from another Codex session \(it took PR #220 to review and did not come back\)\./);
 });
 
 const skill = readFileSync(fileURLToPath(new URL('../../skills/huddle-watch/SKILL.md', import.meta.url)), 'utf8').replace(/\s+/g, ' ');
