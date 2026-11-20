@@ -54,6 +54,33 @@ test('--take-over works with --codex too: the detached watch is started for this
   assert.match(taker.text(), /Took over the watch from another Codex session \(it took PR #220 to review and did not come back\)\./);
 });
 
+test('with --codex the takeover is confirmed only after this session is recorded as the owner (second review of PR #224)', async () => {
+  const clock = { t: T0 };
+  const first = mk({ clock, session: { tool: 'codex', id: 'T1' } });
+  await run(['queue', '--wait', '300'], first.ctx);
+  const taker = mk({ clock, session: { tool: 'codex', id: 'T2' }, files: first });
+  Object.assign(taker.ctx, { codexThread: 'T2', startDetached: () => {} });
+  assert.equal(await run(['queue', '--wait', '300', '--codex', '--take-over'], taker.ctx), 0);
+  assert.equal(JSON.parse(first.ctx.readFile(labelsFiles(first.ctx).watchOwner)).session, 'T2', 'recorded before it says so');
+});
+
+test('with --codex, when the old owner claims the watch back in the meantime, the takeover is never reported and nothing starts', async () => {
+  const clock = { t: T0 };
+  const first = mk({ clock, session: { tool: 'codex', id: 'T1' } });
+  await run(['queue', '--wait', '300'], first.ctx);
+  const ownerFile = labelsFiles(first.ctx).watchOwner;
+  const started = [];
+  const taker = mk({ clock, session: { tool: 'codex', id: 'T2' }, files: first });
+  const write = taker.ctx.writeFile;
+  // The old owner resumes right after this session writes its claim: its own record wins.
+  taker.ctx.writeFile = (p, t) => { write(p, t); if (p === ownerFile && t.includes('"T2"')) write(p, JSON.stringify({ tool: 'codex', session: 'T1' })); };
+  Object.assign(taker.ctx, { codexThread: 'T2', startDetached: (a) => started.push(a) });
+  assert.equal(await run(['queue', '--wait', '300', '--codex', '--take-over'], taker.ctx), 1);
+  assert.doesNotMatch(taker.text(), /Took over/);
+  assert.match(taker.text(), /The watch was not taken over: another session claimed it meanwhile\./);
+  assert.deepEqual(started, []);
+});
+
 const skill = readFileSync(fileURLToPath(new URL('../../skills/huddle-watch/SKILL.md', import.meta.url)), 'utf8').replace(/\s+/g, ' ');
 test('the watch skill asks the person before --take-over, and the «always» start never passes it', () => {
   assert.match(skill, /has not checked since/);
