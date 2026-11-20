@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- One watch per repo, whatever the tool (Issue #211): with Claude Code and Codex open at once on the Coach's login, the first session
+  that turns the watch on keeps it (also while it reviews), and the other says where it runs and does not start a second one. The watch's
+  marks now live in `~/.huddle`, read by both tools; the ones set before are kept. `huddle status` names the tool of the running watch.
 - Each person's language, in Claude Code and Codex (Issue #209). The session start names it, so even a session opened with only a
   command answers in it: the person's own (`huddle language <lang>`), else the team's (`language` in `huddle.json`, asked by
   `/huddle-setup` and once by `/huddle-update`), else the machine's. The repo stays in English.
