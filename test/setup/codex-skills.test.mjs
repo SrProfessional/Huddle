@@ -32,3 +32,7 @@ for (const name of COACH) {
     assert.match(read(`skills/huddle-${name}/SKILL.md`), new RegExp(`In OpenAI Codex, stop with one line: «/huddle-${name} runs in Claude Code, where the Coach works\\.»`));
   });
 }
+
+test('in Codex the play skill runs the commands that reach the platform with network access (Issue #202)', () => {
+  assert.match(read('skills/huddle-play/SKILL.md'), /with network access \(approve it when Codex asks\)/);
+});

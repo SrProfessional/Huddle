@@ -1145,6 +1145,13 @@ is done in Claude Code (it needs Claude Design)»), and **no review or merge in 
 Coach in Claude Code, whose watch reviews). The Coach's skills (decide, review, watch, release, issue, bug, areas, team) stop in Codex with one
 line: «/huddle-<name> runs in Claude Code, where the Coach works.»
 
+**The Codex sandbox (Issue #202).** Proven on 2026-11-20 with `codex exec --sandbox workspace-write`: `CODEX_SANDBOX_NETWORK_DISABLED=1`
+is set and `gh` cannot even start (`spawnSync gh EPERM`), so every command that reaches the platform needs network access, which the
+Player approves when Codex asks; a detached child started by the agent's command did outlive it (it wrote its file 20 s later). So
+`huddle wait <n> --codex` refuses with one clear line when `CODEX_SANDBOX_NETWORK_DISABLED` is `1` («run it again with network access:
+approve it when Codex asks»), and `/huddle-play` says the same for `git fetch`, `git push`, `gh`, `glab` and `huddle`. The team guide's
+«A mixed team» section gives the Player's setup.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
