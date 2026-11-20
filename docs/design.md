@@ -1182,6 +1182,12 @@ queues «Huddle's watch: N item(s) wait for the Coach (seen keys: …). Run $hud
 session-start hook no longer skips the Coach's «always» in Codex (#199 did): it asks the Codex session to start the watch the Codex way, or,
 when another session holds it, names that session in the visible line and asks for nothing. `/huddle-watch` has its Codex steps.
 
+**The Coach's skills in Codex (Issue #213).** The stop lines of #201 go: decide, review, release, issue, bug, areas and team work in Codex,
+each with one note: the `huddle` command the session start named, `git worktree add` for worktrees, and network access for `gh`, `glab`,
+`git push` and `huddle`. `parallel.md` says a subagent is a Codex subagent there. What still needs Claude Code: a Design Issue (`/huddle-play`
+stops) and a design PR in review (`/huddle-review` stops: it needs Claude Design to look at). `/huddle-play` on the Coach's login reviews and
+merges in Codex as in Claude Code, unless another session holds the watch (#211), which reviews instead.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

@@ -18,7 +18,8 @@ test('the play skill says how to work in Codex: the command the session start na
 
 test('in Codex the play skill never reviews or merges, even on the Coach\'s login, and says how the wait goes', () => {
   const t = read('skills/huddle-play/SKILL.md');
-  assert.match(t, /never review or merge in Codex, even on the Coach's login: the Coach's Claude Code session does it/);
+  assert.match(t, /on the Coach's login it reviews and merges as in Claude Code, unless another session holds the watch \(it then reviews\)/);
+  assert.doesNotMatch(t, /never review or merge in Codex/);
   assert.match(t, /every background wait is `node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle" wait <n> --codex`/);
   assert.match(t, /sends this session a message to run `\$huddle-play <n>`/);
 });
@@ -28,10 +29,19 @@ test('in Codex a Design Issue stops with one clear line: it is done in Claude Co
 });
 
 for (const name of COACH) {
-  test(`huddle-${name} stops in Codex: the Coach works in Claude Code`, () => {
-    assert.match(read(`skills/huddle-${name}/SKILL.md`), new RegExp(`In OpenAI Codex, stop with one line: «/huddle-${name} runs in Claude Code, where the Coach works\\.»`));
+  test(`huddle-${name} works in Codex (Issue #213): its Codex note, and no stop line`, () => {
+    const t = read(`skills/huddle-${name}/SKILL.md`);
+    assert.match(t, /\*\*In OpenAI Codex\*\* \(Issue #213\): run the `huddle` command the session start named wherever this skill writes `node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access \(approve it when Codex asks\)\./);
+    assert.doesNotMatch(t, /runs in Claude Code, where the Coach works/);
   });
 }
+
+test('a design PR is still reviewed in Claude Code, and the review uses Codex subagents for the watch (Issue #213)', () => {
+  const t = read('skills/huddle-review/SKILL.md');
+  assert.match(t, /a design PR stops there: «A design PR is reviewed in Claude Code \(it needs Claude Design to look at\)\.»/);
+  const p = read('skills/huddle-play/parallel.md');
+  assert.match(p, /In OpenAI Codex, a subagent is a Codex subagent/);
+});
 
 test('in Codex the play skill runs the commands that reach the platform with network access (Issue #202)', () => {
   assert.match(read('skills/huddle-play/SKILL.md'), /with network access \(approve it when Codex asks\)/);
