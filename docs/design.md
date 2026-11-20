@@ -1188,6 +1188,15 @@ each with one note: the `huddle` command the session start named, `git worktree 
 stops) and a design PR in review (`/huddle-review` stops: it needs Claude Design to look at). `/huddle-play` on the Coach's login reviews and
 merges in Codex as in Claude Code, unless another session holds the watch (#211), which reviews instead.
 
+**A set-up repo comes nearly ready in Codex (Issue #215).** Proven on 2026-11-20 (codex-cli 0.171, an isolated `CODEX_HOME`): in a trusted
+project, a repo file `.codex/config.toml` with `[marketplaces.huddle]` (git, `https://github.com/SrProfessional/Huddle.git`) and
+`[plugins."huddle@huddle"] enabled = true` makes Codex see the marketplace in that repo only; after one `codex plugin marketplace upgrade
+huddle` it lists `huddle@huddle  installed, enabled`, and outside the repo it is not listed. Setup and update write that file (the project's
+own tables kept, the Huddle ones added once; a hand-written `huddle` marketplace with another source is kept and reported). What stays per
+machine: trusting the project, that one command, and trusting the hook (#207). `huddle doctor` shows a «codex» line when `findCodex` finds a
+Codex: ✔ when its `CODEX_HOME/plugins/cache/huddle` exists, ⚠ with the command otherwise, and a Claude Code session start says the ⚠ once per
+repo. Not checked: whether the VS Code extension runs the upgrade by itself when it opens the repo.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

@@ -67,8 +67,9 @@ marketplace `SrProfessional/Huddle` in the **Marketplaces** tab, and install `hu
 
 ### In OpenAI Codex (for Players)
 
-A Player may work in [OpenAI Codex](https://developers.openai.com/codex) instead of Claude Code: same Issues, same rules (Huddle writes them
-into `AGENTS.md` too), same `huddle` command. The Coach stays in Claude Code. Install once, from a terminal (the VS Code extension of Codex
+Anyone may work in [OpenAI Codex](https://developers.openai.com/codex) instead of Claude Code: same Issues, same rules (Huddle writes them
+into `AGENTS.md` too), same `huddle` command. A set-up repo has `.codex/config.toml`, which declares Huddle for Codex in that repo: on a new
+machine, trust the project when Codex asks and run `codex plugin marketplace upgrade huddle` once in the repo. Without that file, install once, from a terminal (the VS Code extension of Codex
 brings its own `codex`; if `codex` is not found, see [the team guide](docs/team-guide.md#a-mixed-team-claude-code-and-codex)):
 
 ```text

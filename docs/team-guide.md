@@ -338,6 +338,11 @@ stays in English.
 **What stays in Claude Code in this release:** the Coach's skills and Design Issues (they need Claude Design). In Codex they stop with one
 line. A Codex session never reviews or merges, even on the Coach's login.
 
+**A repo set up with Huddle comes nearly ready in Codex.** `/huddle-setup` and `/huddle-update` write `.codex/config.toml`, which declares
+Huddle for Codex in that repo only. On a machine where Codex is new, open the repo in Codex, trust the project when it asks, and run
+`codex plugin marketplace upgrade huddle` once in a terminal in the repo; then trust the hook once (step 4 below). A Claude Code session
+says once when this machine has Codex but no Huddle in it, and `huddle doctor` shows a «codex» line.
+
 **Setting up a Player's Codex, once** (written for someone with no technical background):
 
 1. 🙋 Install Codex: in VS Code, open **Extensions**, search «Codex», install the one by OpenAI and sign in.

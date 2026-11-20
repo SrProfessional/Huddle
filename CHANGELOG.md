@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- A set-up repo comes nearly ready in Codex (Issue #215): setup and update write `.codex/config.toml`, which declares Huddle for Codex in
+  that repo; a new machine needs one `codex plugin marketplace upgrade huddle` and the hook trust. `huddle doctor` and the session start say
+  when this machine has Codex without Huddle.
 - The Coach's skills work in Codex (Issue #213): review, issue, bug, decide, areas, team and release. Design Issues and design reviews
   still need Claude Code.
 - The Coach's watch in Codex (Issue #212): `/huddle-watch` waits with no tokens in a process of its own and wakes the Codex chat when
