@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The Coach's watch in Codex (Issue #212): `/huddle-watch` waits with no tokens in a process of its own and wakes the Codex chat when
+  something waits; `/huddle-watch always` starts it in each Codex session too, unless another session already holds the watch.
 - One watch per repo, whatever the tool (Issue #211): with Claude Code and Codex open at once on the Coach's login, the first session
   that turns the watch on keeps it (also while it reviews), and the other says where it runs and does not start a second one. The watch's
   marks now live in `~/.huddle`, read by both tools; the ones set before are kept. `huddle status` names the tool of the running watch.
