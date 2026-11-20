@@ -28,7 +28,7 @@ test('a round of queue --wait writes the watch heartbeat; status says on; later 
   h.out.length = 0;
   h.clock.now = T0 + 2 * MIN;
   assert.equal(await run(['status'], h.ctx), 0);
-  assert.match(h.text(), /watch: on, last check 2 minutes ago/);
+  assert.match(h.text(), /watch: on, (in Claude Code, )?last check 2 minutes ago/);
   h.out.length = 0;
   h.clock.now = T0 + 3 * 60 * MIN;
   await run(['status'], h.ctx);
@@ -71,7 +71,7 @@ test('status --json gives the same, and doctor shows the lines', async () => {
   assert.deepEqual(j.waits, []);
   h.out.length = 0;
   await run(['doctor'], h.ctx);
-  assert.match(h.text(), /✔ watch: on, last check 1 minute ago/);
+  assert.match(h.text(), /✔ watch: on, (in Claude Code, )?last check 1 minute ago/);
 });
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(`../../${rel}`, import.meta.url)), 'utf8').replace(/\s+/g, ' ');

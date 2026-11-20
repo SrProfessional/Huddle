@@ -1166,6 +1166,15 @@ failed with `spawnSync sh ENOENT`; outside the sandbox, after network access was
 Player in English: there were no words to go by, Windows said `en-US` and no `language` was set. Now the session start names the language
 (§6), so the first answer is in it.
 
+**One watch per repo, whatever the tool (Issue #211).** Decided by the Coach on 2026-11-20: with Claude Code and Codex open at once on the
+Coach's login, the first session that turns the watch on reviews and merges; the other says so and does not start. The per-repo files
+(«always», the stop mark, the heartbeats, the capacity, and now the owner) live in one tool-neutral folder, `~/.huddle`; the old folder
+next to a tool's update cache is still read, as the old ids are (#185), so an «always» set before is kept. `queue --wait` writes the owner
+(`{ tool, session }`: `CODEX_THREAD_ID` in Codex, else `CLAUDE_CODE_SESSION_ID`). Another session's `queue --wait` stops with «The watch
+already runs in <tool> (another session), last check <ago>: this session does not start a second one.» while the owner's heartbeat is
+fresh, or while the owner reviews: when the watch returns items it keeps the watch for 45 minutes, since the loop ends while its session
+reviews. The same session restarts its own watch freely; `queue --wait-off` from any session frees it; `huddle status` names the tool.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
