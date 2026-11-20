@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- The Huddle rules in `AGENTS.md` too (Issue #200), the first step for OpenAI Codex: setup and update write the same managed block into
+  `CLAUDE.md` and `AGENTS.md`, keeping the project's own text outside the markers. A repo set up before gets `AGENTS.md` on its next
+  `/huddle-update`.
+
 ## [0.9.5] - 2026-11-17
 
 ### Changed
