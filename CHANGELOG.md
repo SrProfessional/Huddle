@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- A mixed team (Issue #202): the README and the team guide say how a Player works in OpenAI Codex while the Coach stays in Claude Code,
+  one person on two plans if they like, with the Player's setup in plain steps. `huddle wait --codex` refuses with one clear line inside a
+  Codex sandbox with no network, and `/huddle-play` runs the commands that reach the platform with network access.
 - `/huddle-play` works in OpenAI Codex (Issue #201). `huddle wait <n> --codex` waits in a process of its own with no tokens and, when the
   Coach answers, sends the Codex session a message to go on (`codex queue`; an open Codex chat in VS Code answers it by itself). In Codex
   the Player never reviews or merges, even on the Coach's login; Design Issues and the Coach's skills stop there with one line.

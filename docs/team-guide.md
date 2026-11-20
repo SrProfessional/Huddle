@@ -318,6 +318,44 @@ installed or not on the PATH of this terminal» (with the install command for th
 terminal, or reload the PATH») and «is not logged in» (with `gh auth login` or `glab auth login`, plus `--hostname <host>`
 when `huddle.json` has a host). The SessionStart hook stays silent in both cases.
 
+## A mixed team: Claude Code and Codex
+
+A Player may work in **OpenAI Codex**, and the Coach in **Claude Code**, at the same time. One person can be both, on two plans: the
+work (and its tokens) sits with the Players' plan, the reviews with the Coach's. The two tools never talk to each other directly: they
+talk through GitHub or GitLab, as every Huddle session does. A Player in Codex opens the PR; the Coach's watch in Claude Code reviews
+it; the Coach's request wakes the Player's Codex session, which goes on.
+
+| Who | Where | Runs |
+|---|---|---|
+| The Coach | Claude Code | `/huddle-watch always`, `/huddle-review`, `/huddle-issue`, `/huddle-release` and the other Coach skills |
+| A Player | Codex or Claude Code | `$huddle-play <n>` in Codex, `/huddle-play <n>` in Claude Code |
+
+**What stays in Claude Code in this release:** the Coach's skills and Design Issues (they need Claude Design). In Codex they stop with one
+line. A Codex session never reviews or merges, even on the Coach's login.
+
+**Setting up a Player's Codex, once** (written for someone with no technical background):
+
+1. 🙋 Install Codex: in VS Code, open **Extensions**, search «Codex», install the one by OpenAI and sign in.
+2. 🙋 Open a terminal (**Terminal → New Terminal**) and paste:
+   ```text
+   codex plugin marketplace add SrProfessional/Huddle
+   codex plugin add huddle@huddle
+   ```
+   You should see: «Added plugin `huddle`». If you see «codex is not recognized»: the extension brings its own `codex`, not on the PATH.
+   On Windows, in PowerShell, paste this instead (it finds that `codex` and runs the same two commands):
+   ```text
+   $codex = (Get-ChildItem "$HOME\.vscode\extensions\openai.chatgpt-*\bin\*\codex.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
+   & $codex plugin marketplace add SrProfessional/Huddle; & $codex plugin add huddle@huddle
+   ```
+3. 🙋 Open the Codex chat in the repo and type `/hooks`. Trust the Huddle hook. You should see it listed as trusted.
+4. 🙋 Let Codex reach GitHub or GitLab: when Codex asks to run `git push`, `gh`, `glab` or `huddle` with network access, approve it.
+   Codex's sandbox has no network, so without that the PR cannot be opened and the wait cannot see the Coach's answer.
+5. Work as usual: `$huddle-play <n>`. When the PR is open, the session waits in the background with no tokens
+   (`huddle wait <n> --codex`); when the Coach answers, the open Codex chat gets a message and goes on by itself.
+
+**Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`, then trust the hook again
+in `/hooks` (a changed hook needs trust again).
+
 ## Add or remove someone
 
 Only the Coach changes the team (see [the roles](roles.md)). Adding a person takes three steps:

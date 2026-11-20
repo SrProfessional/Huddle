@@ -59,3 +59,15 @@ test('findCodex: the codex on the PATH first, else the newest one bundled with a
   assert.equal(findCodex({ home: 'H', platform: 'win32', onPath: () => null, ...fsx }), 'H/.vscode/extensions/openai.chatgpt-26.1117.31558-win32-x64/bin/windows-x86_64/codex.exe');
   assert.equal(findCodex({ home: 'H', platform: 'win32', onPath: () => null, readdir: () => { throw new Error('ENOENT'); }, exists: () => false }), null);
 });
+
+test('wait --codex inside a Codex sandbox with no network refuses, says how, and starts nothing (Issue #202)', async () => {
+  const started = [];
+  const h = harness({ setup: (w) => w.issue({ number: 5 }) });
+  h.ctx.codexThread = 'T1';
+  h.ctx.codexNoNetwork = true;
+  h.ctx.startDetached = (args) => started.push(args);
+  assert.equal(await run(['wait', '5', '--codex'], h.ctx), 1);
+  assert.deepEqual(started, []);
+  assert.match(h.errText(), /no network/);
+  assert.match(h.errText(), /approve/);
+});

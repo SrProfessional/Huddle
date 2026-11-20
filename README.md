@@ -65,6 +65,19 @@ If you use only the VS Code extension, it puts no `claude` command in the termin
 marketplace `SrProfessional/Huddle` in the **Marketplaces** tab, and install `huddle` from the **Plugins** tab with
 **Install for this project** (not «Install for you»). Each person does this once per clone. The same dialog updates it.
 
+### In OpenAI Codex (for Players)
+
+A Player may work in [OpenAI Codex](https://developers.openai.com/codex) instead of Claude Code: same Issues, same rules (Huddle writes them
+into `AGENTS.md` too), same `huddle` command. The Coach stays in Claude Code. Install once, from a terminal (the VS Code extension of Codex
+brings its own `codex`; if `codex` is not found, see [the team guide](docs/team-guide.md#a-mixed-team-claude-code-and-codex)):
+
+```text
+codex plugin marketplace add SrProfessional/Huddle
+codex plugin add huddle@huddle
+```
+
+Then open Codex in the repo, type `/hooks` and trust the Huddle hook once. Work on an Issue with `$huddle-play <n>`.
+
 ### The settings snippet is a helper
 
 `/huddle-setup` also writes this into the project's `.claude/settings.json`. It enables the plugin for the project and,
