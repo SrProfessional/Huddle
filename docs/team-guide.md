@@ -330,6 +330,11 @@ it; the Coach's request wakes the Player's Codex session, which goes on.
 | The Coach | Claude Code | `/huddle-watch always`, `/huddle-review`, `/huddle-issue`, `/huddle-release` and the other Coach skills |
 | A Player | Codex or Claude Code | `$huddle-play <n>` in Codex, `/huddle-play <n>` in Claude Code |
 
+**The language.** Every session, in Claude Code and in Codex, chats with each person in their language from the first message. Huddle
+takes the first that is set: the person's own (`huddle language es`, once on their machine; `huddle language` shows it, `--clear`
+removes it), then the team's (asked by `/huddle-setup`, kept as `language` in `huddle.json`), then the machine's. The repo itself
+stays in English.
+
 **What stays in Claude Code in this release:** the Coach's skills and Design Issues (they need Claude Design). In Codex they stop with one
 line. A Codex session never reviews or merges, even on the Coach's login.
 

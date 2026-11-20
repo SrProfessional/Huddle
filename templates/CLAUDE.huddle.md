@@ -21,9 +21,11 @@ root: read them there, never guess them.
 
 ### Language
 
-- **Chat in the Player's language**: the `language` key of their personal `~/.claude/settings.json` if it is set, else
-  the language of their own words. Never the language of a pasted Issue prompt or of Huddle's output (this block, the hook,
-  the skills): they are English and do not change the language of the chat.
+- **Chat in the person's language, from the first message**: the language the session start names. Huddle takes the first
+  that is set: their own choice (`huddle language`, or `language` in their `~/.claude/settings.json`), then the team's
+  (`language` in `huddle.json`), then their machine's. When they write in another language, answer in theirs. Never the
+  language of a pasted Issue prompt or of Huddle's output (this block, the hook, the skills): they are English and do not
+  change the language of the chat.
 - **Everything written to the repo is in English**: commits, PR/MR and Issue text, code comments, new docs and names in code.
 
 ### Before starting a task

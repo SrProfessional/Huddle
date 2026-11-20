@@ -128,6 +128,11 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
   set they must name the same login. Setup writes `coach` on a new repo and leaves an existing `ai_manager` as it is. The code reads it
   in one place (`coachOf` in `lib/cli/config.mjs`), so a list of Coaches (one per area) can come later.
 - `default_branch`: the branch Issues are merged into (default `main`).
+- `language`: optional (Issue #209); the language the sessions chat in with the team, for example `es`. Absent or `""` means each
+  person's machine language. A person's own choice wins: `huddle language <lang>` (a file of their own, `~/.huddle/language.json`, read by
+  Claude Code and Codex alike) or Claude Code's `language` in `~/.claude/settings.json`. The order, first that is set: the person's, the
+  team's, the machine's locale (`Intl`). The session-start hook names it in one line of context, in both tools; when the person writes in
+  another language, the session answers in theirs. `huddle language` prints it and where it came from; `--clear` removes the person's own.
 - `staging_branch`: optional; the branch where changes are tested before they go to the default branch. Absent or `""` means none
   (today's behaviour). Stored and validated only for now; see §21.
 - `labels_job`: optional; how the cloud labels job runs: `sessions` (the default when absent), `hourly` or `events`. Never asked:
@@ -464,7 +469,7 @@ asked once. Setup writes it too, except when a question is still pending: then i
 **pending** when `since` is newer than the repo's `setup_version` **and** `needed(config)` is true (the key is not set yet). A
 question never repeats: once its key is in `huddle.json` it is not asked again, whatever the version. The registry is **empty
 in 0.4.x** (no release asks anything yet): the mechanism ships first, and the tests use a fake registry. The first release that
-needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21). 0.8.0 also asked `labels-job` (§23); Issue #130
+needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21), `language` (`since: 0.9.6`, §6, Issue #209). 0.8.0 also asked `labels-job` (§23); Issue #130
 removed it, so it is never pending again.
 
 **The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
@@ -1156,6 +1161,10 @@ approve it when Codex asks»), and `/huddle-play` says the same for `git fetch`,
 
 **The GitLab template test in Codex (Issue #207).** Inside the Codex sandbox, the four runtime checks in `test/templates/gitlab-job.test.mjs`
 failed with `spawnSync sh ENOENT`; outside the sandbox, after network access was approved and Git's `sh` was on `PATH`, all seven passed.
+
+**The language (Issue #209).** Seen on 2026-11-20: a Codex session opened with only `$huddle-play 207` answered a Spanish-speaking
+Player in English: there were no words to go by, Windows said `en-US` and no `language` was set. Now the session start names the language
+(§6), so the first answer is in it.
 
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 

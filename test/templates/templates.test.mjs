@@ -51,10 +51,10 @@ test('the Huddle block has a «Language» rule: chat in the Player\'s language, 
   const m = text.match(/^###? Language\s*$([\s\S]*?)(?=^###? |<!-- huddle:end)/m);
   assert.ok(m, 'the block has a «Language» heading');
   const rule = m[1];
-  assert.match(rule, /Player's language/i, 'chat in the Player\'s language');
+  assert.match(rule, /person's language/i, 'chat in the person\'s language (Issue #209: Players and the Coach alike)');
   assert.match(rule, /`language`/, 'names the language key');
   assert.match(rule, /~\/\.claude\/settings\.json/, 'of the personal settings file');
-  assert.match(rule, /own words/i, 'else the language of their own words');
+  assert.match(rule, /When they write in another language, answer in theirs/i, 'their own words still win (Issue #209)');
   assert.match(rule, /never[^.]*pasted Issue prompt/i, 'never the language of a pasted Issue prompt');
   assert.match(rule, /Huddle's output/i, 'nor of Huddle\'s output');
   assert.match(rule, /English/, 'everything written to the repo is in English');
