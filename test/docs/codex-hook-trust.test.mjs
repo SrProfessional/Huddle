@@ -39,4 +39,5 @@ test('Codex update repeats terminal hook trust and the design records the live v
   assert.match(flat(design), /2026-11-20/);
   assert.match(flat(design), /codex exec.*no bypass/i);
   assert.match(flat(design), /model.*hook.*line/i);
+  assert.match(flat(design), /test\/templates\/gitlab-job\.test\.mjs.*spawnSync sh ENOENT.*outside the sandbox.*pass/i);
 });

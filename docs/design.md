@@ -1154,6 +1154,9 @@ Player approves when Codex asks; a detached child started by the agent's command
 approve it when Codex asks»), and `/huddle-play` says the same for `git fetch`, `git push`, `gh`, `glab` and `huddle`. The team guide's
 «A mixed team» section gives the Player's setup.
 
+**The GitLab template test in Codex (Issue #207).** Inside the Codex sandbox, the four runtime checks in `test/templates/gitlab-job.test.mjs`
+failed with `spawnSync sh ENOENT`; outside the sandbox, after network access was approved and Git's `sh` was on `PATH`, all seven passed.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
