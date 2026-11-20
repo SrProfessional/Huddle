@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Huddle: Decision-led development for teams coding with AI</title>
-<meta name="description" content="Huddle is a Claude Code plugin for teams. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
+<meta name="description" content="Huddle is a plugin for teams in Claude Code and OpenAI Codex. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
 <link rel="canonical" href="https://srprofessional.github.io/Huddle/">
 <meta name="theme-color" content="#4336d8">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Huddle">
 <meta property="og:title" content="Huddle: Decision-led development for teams coding with AI">
-<meta property="og:description" content="Huddle is a Claude Code plugin for teams. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
+<meta property="og:description" content="Huddle is a plugin for teams in Claude Code and OpenAI Codex. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
 <meta property="og:url" content="https://srprofessional.github.io/Huddle/">
 <meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Huddle: Decision-led development for teams coding with AI">
-<meta name="twitter:description" content="Huddle is a Claude Code plugin for teams. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
+<meta name="twitter:description" content="Huddle is a plugin for teams in Claude Code and OpenAI Codex. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
 <meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -31,7 +31,7 @@
   "@type": "SoftwareApplication",
   "name": "Huddle",
   "alternateName": "Huddle: Decision-led development for teams coding with AI",
-  "description": "A Claude Code plugin for teams on GitHub and GitLab. One Coach hands out Issues, each Player's Claude Code session works on one, and nothing is dropped silently.",
+  "description": "A plugin for teams in Claude Code and OpenAI Codex, on GitHub and GitLab. One Coach hands out Issues, each Player's session works on one, and nothing is dropped silently.",
   "url": "https://srprofessional.github.io/Huddle/",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Windows, macOS, Linux",
@@ -79,7 +79,7 @@
     </div>
     <div class="wrap hero-copy">
       <h1><span class="w" style="--i:0">Decision-led</span> <span class="w" style="--i:1">development</span> <span class="w" style="--i:2">for</span> <span class="w" style="--i:3">teams</span> <span class="w" style="--i:4">coding</span> <span class="w" style="--i:5">with</span> <span class="w" style="--i:6">AI</span></h1>
-      <p class="lead">Huddle is a Claude Code plugin for teams. One person hands out the tasks, every Player's AI session does one, and the people spend their time deciding and reviewing instead of typing.</p>
+      <p class="lead">Huddle is a plugin for teams in Claude Code and OpenAI Codex. One person hands out the tasks, every Player's AI session does one, and the people spend their time deciding and reviewing instead of typing.</p>
       <div class="actions">
         <a class="btn" href="get-started/">Get started</a>
         <a class="btn ghost" href="https://github.com/SrProfessional/Huddle" target="_blank" rel="noopener">View on GitHub<span class="sr-only"> (opens in a new tab)</span></a>
@@ -89,7 +89,7 @@
 
   <section id="problem" data-scene="problem">
     <div class="wrap">
-      <h2>Five Players, five Claude Code sessions</h2>
+      <h2>Five Players, five Claude Code or Codex sessions</h2>
       <p class="prose">AI tools made writing code cheap. They did not make a team faster on their own. When each person prompts the AI in their own way, each session understands the project differently, and the trouble shows up late, in review or in production.</p>
       <div class="orbs deco" aria-hidden="true">
         <div class="orb deco" aria-hidden="true"><span class="orb-dot">1</span><span class="orb-tag">Issue #1</span><span class="orb-branch">branch h1</span></div>
@@ -227,7 +227,7 @@
   <section id="roles" data-scene="roles">
     <div class="wrap">
       <h2>Two roles, one flow</h2>
-      <p class="prose">Huddle splits the work between a person who decides and a session that does. Each one knows what is theirs.</p>
+      <p class="prose">Huddle splits the work between a person who decides and a session that does. Each one knows what is theirs. Each person works in Claude Code or in OpenAI Codex, whichever they like, at the same time: the sessions talk only through GitHub or GitLab.</p>
       <div class="split">
         <div class="role role-manager">
           <h3>The Coach</h3>
@@ -235,7 +235,7 @@
             <li>Writes the Issues, with the prompt, the allowed files and the tests.</li>
             <li>Answers when a session stops to ask for a decision.</li>
             <li>Reviews every pull request, and is the only one who merges.</li>
-            <li>Can turn on /huddle-watch to let their session review what waits every few minutes.</li>
+            <li>Can turn on /huddle-watch (<code>$huddle-watch</code> in Codex) to let their session review what waits. One watch per repo, whatever the tool.</li>
           </ul>
         </div>
         <div class="role role-dev">
@@ -275,7 +275,7 @@
   <section id="install" data-scene="install">
     <div class="wrap">
       <h2>Install it in two commands</h2>
-      <p class="prose">Every Player installs the plugin once, on their own machine. You need Claude Code, Node 22 or newer, <code>git</code>, and <code>gh</code> or <code>glab</code>. Run these in a terminal, then open a new Claude Code session:</p>
+      <p class="prose">Every Player installs the plugin once, on their own machine. You need Claude Code or OpenAI Codex, Node 22 or newer, <code>git</code>, and <code>gh</code> or <code>glab</code>. For Claude Code, run these in a terminal, then open a new Claude Code session:</p>
       <div class="terminal">
         <div class="term-bar">
           <span class="dots deco" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -286,6 +286,7 @@
 <span class="prompt deco" aria-hidden="true">$ </span><span class="tl">claude plugin install huddle@huddle<span class="tl-mask deco" aria-hidden="true"></span></span></code></pre>
         <p class="sr-only" role="status" data-status></p>
       </div>
+      <p class="prose">For OpenAI Codex, the same marketplace: <code>codex plugin marketplace add SrProfessional/Huddle</code> and <code>codex plugin add huddle@huddle</code>, then trust the hook once in terminal Codex and open a new chat. The skills are <code>$huddle-play</code> and so on.</p>
       <p class="prose">Then, in your repo, the Coach runs <code>/huddle-setup</code>. The <a href="get-started/">get started guide</a> has every step. Huddle has no runtime dependencies and nothing to <code>npm install</code>.</p>
     </div>
   </section>
@@ -295,11 +296,19 @@
       <h2>Questions people ask</h2>
       <details>
         <summary>What is Huddle?</summary>
-        <p>A team method and a Claude Code plugin. One person, the Coach, hands out tasks as Issues. Each Player's Claude Code session works on one task in its own branch, asks when a decision is not its to make, and opens a pull request for review.</p>
+        <p>A team method and a plugin for Claude Code and OpenAI Codex. One person, the Coach, hands out tasks as Issues. Each Player's session works on one task in its own branch, asks when a decision is not its to make, and opens a pull request for review.</p>
       </details>
       <details>
         <summary>How do teams use Claude Code together?</summary>
-        <p>By giving every session the same context and the same rules. The Issue holds the goal, the allowed files and the tests, and the repo's CLAUDE.md holds the rules, so sessions started by different people behave the same way.</p>
+        <p>By giving every session the same context and the same rules. The Issue holds the goal, the allowed files and the tests, and the repo's CLAUDE.md (and AGENTS.md, for Codex) holds the rules, so sessions started by different people behave the same way.</p>
+      </details>
+      <details>
+        <summary>Does it work with OpenAI Codex?</summary>
+        <p>Yes, in the Codex command line and its VS Code extension: the same Issues, the same rules and the same <code>huddle</code> command. The Coach and each Player may use either tool, at the same time, and one person can be both. A Player's session in Codex waits with no tokens and wakes the open chat when the Coach answers; the Coach's <code>$huddle-watch</code> wakes the chat when something waits, then reviews and merges. Only design work still needs Claude Code. Not yet tried live in Codex: bug triage, areas, team changes, parallel play, GitLab and macOS.</p>
+      </details>
+      <details>
+        <summary>Does it speak my language?</summary>
+        <p>Yes. Every session, in Claude Code and in Codex, chats with each person in their language from the first message: their own choice (<code>huddle language es</code>), else the team's (asked once by <code>/huddle-setup</code>), else their computer's. Everything written to the repo stays in English, so the whole team can read it.</p>
       </details>
       <details>
         <summary>Does it work with GitLab?</summary>
@@ -311,7 +320,7 @@
       </details>
       <details>
         <summary>Does Huddle need a server, an account or a token?</summary>
-        <p>No server and no account. It runs on your machine with Node and the GitHub or GitLab command line you already log in to. The only token is a GitLab CI variable the Coach sets up for the label job.</p>
+        <p>No server and no account. It runs on your machine with Node and the GitHub or GitLab command line you already log in to. There is no token to set up: the sessions keep the labels right themselves, so no cloud job runs unless a project asks for one.</p>
       </details>
       <details>
         <summary>Is it free?</summary>

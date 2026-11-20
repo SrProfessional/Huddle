@@ -2,12 +2,13 @@
 
 [![Website](https://img.shields.io/badge/website-srprofessional.github.io%2FHuddle-4336d8)](https://srprofessional.github.io/Huddle/)
 
-Huddle is a Claude Code plugin and a decision-led team workflow for AI coding. One person, the Coach, hands out
-tasks as Issues. Each Player pastes the Issue's «Prompt for Claude Code» into a session. The session works on its own
-branch, stops to ask when a decision is not its to make, opens a pull request (a merge request on GitLab) and waits for
-the review on its own.
+Huddle is a plugin for Claude Code and OpenAI Codex and a decision-led team workflow for AI coding. One person, the
+Coach, hands out tasks as Issues. Each Player runs the Issue (`/huddle-play <n>` in Claude Code, `$huddle-play <n>` in
+Codex) in a session. The session works on its own branch, stops to ask when a decision is not its to make, opens a pull
+request (a merge request on GitLab) and waits for the review on its own.
 
-It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
+The Coach and each Player may use either tool, at the same time: the sessions talk only through GitHub or GitLab. It
+works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
 > **Status:** the latest release is [0.9.5](https://github.com/SrProfessional/Huddle/releases/tag/v0.9.5); what came after
 > it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
@@ -80,7 +81,11 @@ codex plugin add huddle@huddle
 
 The Codex chat in VS Code has no `/hooks`. Open a terminal in the repo and trust the Huddle hook once in terminal Codex instead: it
 uses the same configuration. The [team guide has the steps](docs/team-guide.md#a-mixed-team-claude-code-and-codex). Then work on an
-Issue with `$huddle-play <n>`.
+Issue with `$huddle-play <n>`. Codex has no `/reload-plugins`: after installing or updating, open a new chat. Codex's sandbox has no
+network, so approve network access when Codex asks to run `git push`, `gh`, `glab` or `huddle`. `huddle doctor` shows a «codex» line.
+
+Adapted but not yet tried live in Codex: `/huddle-bug`, `/huddle-areas`, `/huddle-team`, playing several Issues in parallel, GitLab, and
+Codex on macOS. Design Issues and the review of a design PR stay in Claude Code (they need Claude Design).
 
 ### The settings snippet is a helper
 
@@ -236,7 +241,7 @@ session cannot touch what customers use.
 - **No production and no secrets.** If a permission or a key is missing, stop and tell. Do not look for another way.
 - **Nothing is dropped silently.** Everything the Issue asks for ends up done, or noted under «What was NOT done» with the
   reason.
-- **Chat in your language; the repository is in English.** You talk to Claude Code in the language you prefer. Commit
+- **Chat in your language; the repository is in English.** You talk to Claude Code or Codex in the language you prefer. Commit
   messages, pull requests, Issues, code comments and documents are in English.
 
 ## Commands
