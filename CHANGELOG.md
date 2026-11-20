@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Huddle installs in OpenAI Codex (Issue #199): `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`.
+  The skills and the session-start hook run there; in Codex the hook always tells the session where the `huddle` command is. Proven on a
+  real Codex (docs/design.md §25). For Players; the Coach stays in Claude Code.
 - The Huddle rules in `AGENTS.md` too (Issue #200), the first step for OpenAI Codex: setup and update write the same managed block into
   `CLAUDE.md` and `AGENTS.md`, keeping the project's own text outside the markers. A repo set up before gets `AGENTS.md` on its next
   `/huddle-update`.

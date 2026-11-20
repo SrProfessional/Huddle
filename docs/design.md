@@ -1094,3 +1094,42 @@ PRs fell behind the base branch and were reviewed again after each update. Four 
 - **A later round reads only what changed.** `/huddle-review` ends each review comment with `Reviewed head: <sha>`; on the next round it
   reads the Player's answer to each item and `git diff <old>..<new>`, not the whole PR again. The tests still run in a fresh worktree.
 - **Test output is summarized.** The review keeps only the summary lines of the test output (the counts and the failures).
+
+## 25. OpenAI Codex
+
+Decided by the Coach on 2026-11-20: Huddle also runs in OpenAI Codex. The first delivery is for **Players**; the Coach stays in Claude Code
+(the watch, parallel reviews, releases), and Design Issues stay in Claude Code (they need Claude Design). One repo serves both tools: the
+same skills, the same `huddle` command and the same marketplace file. Sessions of the two tools never talk to each other directly: they talk
+through GitHub or GitLab (Issues, PRs/MRs, comments, labels), so one person can run the Coach in Claude Code and Players in Codex at the
+same time, on two plans.
+
+**What was proven on a real Codex (Issue #199).** `codex-cli 0.171.0-alpha.13`, bundled with the VS Code extension (not on the PATH:
+`<extension>/bin/windows-x86_64/codex.exe`), on Windows, 2026-11-20:
+
+- **No Codex manifest is needed.** `codex plugin marketplace add <path or owner/repo>` reads `.claude-plugin/marketplace.json` as it is,
+  and `codex plugin add huddle@huddle` installs the plugin («installed, enabled 0.9.5»). From GitHub:
+  `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`. Updating: `codex plugin marketplace upgrade
+  huddle`, then `codex plugin add huddle@huddle` again. There must be no `plugin.json` at the repo root (openai/codex#39895: Codex then
+  drops every hook of the plugin silently); a test keeps it so.
+- **The skills load** as `huddle:huddle-play` and so on (`codex debug prompt-input` lists all eleven). Codex gives the model the folder of
+  the plugin's `skills/`, but it does not replace `${CLAUDE_PLUGIN_ROOT}` inside a `SKILL.md`.
+- **The session-start hook runs** (`hooks/hooks.json`, the same file Claude Code reads). Codex runs it through `cmd.exe` on Windows, replaces
+  `${CLAUDE_PLUGIN_ROOT}` in the command itself, and sets both `PLUGIN_ROOT` and `CLAUDE_PLUGIN_ROOT` to the installed plugin folder. Its
+  input is `{ session_id, transcript_path: null, cwd, hook_event_name: "SessionStart", model, permission_mode, source }`. The
+  `hookSpecificOutput.additionalContext` it prints reaches the model (asked, the model quoted it back).
+- **The hook must be trusted once** in the Player's Codex (`/hooks`): Codex skips an untrusted hook, and a changed hook needs trust again.
+  The live checks above used `codex exec --dangerously-bypass-hook-trust` for one run only, which saves nothing.
+- **The model.** A ChatGPT account may refuse the model set in the Player's `config.toml` («The 'gpt-5.5' model is not supported when using
+  Codex with a ChatGPT account»); `codex debug models` lists the ones offered.
+- **Not proven yet:** whether an interactive Codex session can leave `huddle wait <n>` running in the background and be woken when it ends.
+  Issue #201 decides that; without it, the session-start notice says a request is pending, as when a session is closed.
+
+**The hook in Codex.** `huddle` tells Codex apart by `PLUGIN_ROOT`, which only Codex sets (`toolOf` in `lib/cli/main.mjs`). In Codex the
+hook always adds one line of context, even when nothing waits: «Huddle (OpenAI Codex): the huddle command is node "<plugin>/bin/huddle".
+Where a Huddle skill writes node "${CLAUDE_PLUGIN_ROOT}/bin/huddle", run that instead.» In Claude Code the hook's output does not change. The Coach's `/huddle-watch always` mark never asks a Codex session to start the watch
+(the same login may play there): the watch runs in Claude Code.
+
+**The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
+
+**Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
+Codex session live there, apart from Claude Code's: `huddle status` run from one tool does not see the other tool's waits.
