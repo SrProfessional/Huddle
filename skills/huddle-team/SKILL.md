@@ -8,7 +8,7 @@ description: Use when the Coach wants to add a Player to the team or remove one,
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; only the
 Coach changes the team. Read `platform`, `host`, `project` and `default_branch` from `huddle.json`.
 
-In OpenAI Codex, stop with one line: «/huddle-team runs in Claude Code, where the Coach works.» (Issue #201)
+**In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
 
 ## Do
 

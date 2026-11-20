@@ -5,7 +5,7 @@ description: Use when the Coach reviews a Player's PR/MR and must either request
 
 # huddle-review
 
-For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop. In OpenAI Codex, stop with one line: «/huddle-review runs in Claude Code, where the Coach works.» (Issue #201)
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop. **In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks). In Codex, a design PR stops there: «A design PR is reviewed in Claude Code (it needs Claude Design to look at).»
 
 ## Review
 

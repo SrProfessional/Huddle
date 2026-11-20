@@ -14,6 +14,8 @@ If a helper needs your OK for a command, the question appears here. To use fewer
 
 ## 2. One subagent per Issue
 
+In OpenAI Codex, a subagent is a Codex subagent (Codex runs them by default); the rest is the same (Issue #213).
+
 For each Issue in `start`, launch a subagent with the Agent tool, **in the background**, and keep its ID next to the Issue number. Its
 prompt, with `<n>` and the paths filled in:
 
