@@ -1,5 +1,5 @@
 <!-- huddle:start v1 -->
-## Huddle: how this team works with Claude Code
+## Huddle: how this team works with Claude Code or Codex
 
 This block is managed by Huddle (`huddle-setup`). An update replaces only what sits between the markers, so write your own
 rules outside them. Names (the Coach, the labels, the default branch, the platform) are in `huddle.json` at the repo

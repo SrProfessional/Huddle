@@ -96,6 +96,12 @@ Node ≥ 22 and no runtime dependencies. The only tools it calls are `git` plus 
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->`. An update replaces only that block, so the project's own text is never
 touched. The block refers to `huddle.json` for names (the Coach, labels), never to SocialCortex.
 
+**The same block in `AGENTS.md` (Issue #200).** OpenAI Codex reads `AGENTS.md`, not `CLAUDE.md`, so `huddle-setup` and `huddle-update`
+write the same block, with the same markers, into both files at the repo root (the result says `claudeMd` and `agentsMd`: created, inserted
+or updated). A repo set up before gets `AGENTS.md` on its next `/huddle-update`. Both files are built before anything is written, so a file
+with half a marker stops setup with nothing changed and names that file. Codex reads at most 32 KiB of `AGENTS.md` text in all; the block is
+about 7 KB, and a test keeps it under 16 KiB. Its heading says «Claude Code or Codex».
+
 ## 6. Configuration: `huddle.json` at the repo root
 
 Replaces `docs/equipo/team.json`. No secrets ever go in it.
@@ -464,7 +470,7 @@ removed it, so it is never pending again.
 **The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
 only files, never the network.
 
-- No flags: refreshes the block of `CLAUDE.md`, the templates and the labels job exactly as setup does (a template the
+- No flags: refreshes the block of `CLAUDE.md` and of `AGENTS.md` (§5), the templates and the labels job exactly as setup does (a template the
   project edited is kept and reported), writes `setup_version`, and prints what changed. Exit 0.
 - Pending questions without answers: it changes **nothing**, prints each question (`--json`: `pendingQuestions: [{ id, key,
   ask, options, default }]`) and exits **3**, so the skill knows to ask.
