@@ -9,6 +9,8 @@ For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you
 stop with one clear line («/huddle-release is for the Coach») and change nothing; you never merge when you are not that session.
 A repo with no `staging_branch` has nothing to release this way: say so and stop. The rules are in docs/design.md §21.
 
+In OpenAI Codex, stop with one line: «/huddle-release runs in Claude Code, where the Coach works.» (Issue #201)
+
 Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` followed by the words shown.
 
 1. **What is in staging.** Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" release --json` and show the staged Issues with and without the

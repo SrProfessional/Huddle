@@ -8,6 +8,8 @@ description: Use when the Coach wants to define the project's areas, put Issues 
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; only the
 Coach defines the areas. It works the same on GitHub and GitLab.
 
+In OpenAI Codex, stop with one line: «/huddle-areas runs in Claude Code, where the Coach works.» (Issue #201)
+
 **Areas are milestones.** Each Issue goes in one milestone, and the milestone description holds a one-line purpose and a line of its own,
 `Huddle remaining: N`, the estimate of the Issues not written yet (docs/design.md §12). **The number of areas depends on the project and is never fixed:**
 one project has 3, another more or fewer. Never start from a number; start from the project.

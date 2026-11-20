@@ -8,6 +8,8 @@ description: Use when the Coach wants its session to check by itself what waits 
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`,
 stop with one clear line («/huddle-watch is for the Coach») and change nothing. The rules are in docs/design.md §19.
 
+In OpenAI Codex, stop with one line: «/huddle-watch runs in Claude Code, where the Coach works.» (Issue #201)
+
 The watch waits in the background with a small Node process (`queue --wait`), as a Player's session waits for its review: it uses
 **no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself, unless
 the Coach chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
