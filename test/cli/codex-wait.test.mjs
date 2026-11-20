@@ -71,3 +71,12 @@ test('wait --codex inside a Codex sandbox with no network refuses, says how, and
   assert.match(h.errText(), /no network/);
   assert.match(h.errText(), /approve/);
 });
+
+test('the messages queued into a Codex chat end with the person\'s language (Issue #221)', async () => {
+  const queued = [];
+  const h = harness({ setup: (w) => { w.issue({ number: 5 }); w.comment(5, request(501)); } });
+  Object.assign(h.ctx, { codexQueue: (t, m) => queued.push(m), languageFile: '/home/.huddle/language.json' });
+  h.ctx.writeFile('/home/.huddle/language.json', JSON.stringify({ language: 'es' }));
+  await run(['wait', '5', '--codex-thread', 'T1'], h.ctx);
+  assert.match(queued[0], /Answer the person in Spanish\.$/);
+});
