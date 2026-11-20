@@ -1212,6 +1212,11 @@ review, the owner record keeps what it took and since when, and the refusal says
 ago and has not checked since. If it is stuck, take over with --take-over (ask the person first).» `queue --wait … --take-over` (with
 `--codex` too) then takes it and says so. `/huddle-watch` asks the person before passing it; the «always» start never passes it.
 
+**The language holds (Issue #221).** Seen in the live run of 2026-11-20: with `huddle language es` set, a Codex chat still answered in English
+until the Coach wrote in Spanish: «es» was terse, and the message that wakes the chat («Huddle's watch: …», in English) arrives as if the
+person wrote it. Now the session-start line names the language in full (`Intl.DisplayNames`: «Spanish (es; …)») and says that messages from
+Huddle itself and slash commands never change it, and every message Huddle queues into a Codex chat ends with «Answer the person in Spanish.».
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

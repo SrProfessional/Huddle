@@ -51,8 +51,8 @@ for (const tool of ['claude', 'codex']) {
     h.ctx.pluginRoot = '/plugin';
     assert.equal(await run(['hook'], h.ctx), 0);
     const out = JSON.parse(h.text());
-    assert.match(out.hookSpecificOutput.additionalContext, /Huddle: chat with this person in es \(the team's language, from huddle\.json\)/);
-    assert.match(out.hookSpecificOutput.additionalContext, /everything written to the repo stays in English/);
+    assert.match(out.hookSpecificOutput.additionalContext, /Huddle: write every chat message to this person in Spanish \(es; the team's language, from huddle\.json\)/);
+    assert.match(out.hookSpecificOutput.additionalContext, /Everything written to the repo stays in English/);
     assert.equal(out.systemMessage, undefined, 'the person does not see it');
   });
 }
@@ -78,4 +78,15 @@ test('the setup skill asks the team language on a first install and passes it as
   const t = readFileSync(fileURLToPath(new URL('../../skills/huddle-setup/SKILL.md', import.meta.url)), 'utf8').replace(/\s+/g, ' ');
   assert.match(t, /\*\*Language:\*\* «In which language should the sessions chat with the team/);
   assert.match(t, /`--language <code>`/);
+});
+
+test('the language line names the language in full, and Huddle\'s own messages never change it (Issue #221)', async () => {
+  const h = mk({ personal: 'es' });
+  h.ctx.tool = 'codex';
+  h.ctx.pluginRoot = 'D:/Codex/huddle/0.9.6/';
+  assert.equal(await run(['hook'], h.ctx), 0);
+  const c = JSON.parse(h.text()).hookSpecificOutput.additionalContext;
+  assert.match(c, /write every chat message to this person in Spanish \(es;/);
+  assert.match(c, /Messages from Huddle itself \(they start with «Huddle»\) and slash commands are not the person's words/);
+  assert.doesNotMatch(c, /\/\/bin\/huddle/);
 });
