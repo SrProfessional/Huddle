@@ -1205,6 +1205,13 @@ meanwhile refused to start the watch, since the first one held it (the stuck-own
 change (this note and the README heading); the Player's `huddle wait` in Claude Code woke on it, and the change was pushed for review again.
 The Coach's Codex session then reviews this round and merges and lands it.
 
+**Taking over a stuck watch (Issue #222).** Seen in the live run of 2026-11-20: the Codex session that held the watch took PR #220 and hit
+the OpenAI usage limit, and a new chat could not start the watch for 45 minutes. Decided by the Coach: two refusals. While the owner's loop
+runs (no `reviewingUntil`, fresh heartbeat), «The watch already runs in <tool>…», and nobody takes it. While the owner only holds it to
+review, the owner record keeps what it took and since when, and the refusal says «Another session (<tool>) took PR #220 to review 30 minutes
+ago and has not checked since. If it is stuck, take over with --take-over (ask the person first).» `queue --wait … --take-over` (with
+`--codex` too) then takes it and says so. `/huddle-watch` asks the person before passing it; the «always» start never passes it.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

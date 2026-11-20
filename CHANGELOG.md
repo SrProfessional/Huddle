@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Take over a stuck watch, when the person asks (Issue #222): if the session that holds the watch took something to review and never came
+  back (closed, or out of quota), `/huddle-watch` in another session says what it took and when, and asks «Take over?».
 - The docs say the Coach can work in Codex too (Issue #214), with one watch per repo whatever the tool; only design work needs Claude Code.
 - A set-up repo comes nearly ready in Codex (Issue #215): setup and update write `.codex/config.toml`, which declares Huddle for Codex in
   that repo; a new machine needs one `codex plugin marketplace upgrade huddle` and the hook trust. `huddle doctor` and the session start say
