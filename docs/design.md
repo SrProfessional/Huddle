@@ -1205,6 +1205,11 @@ meanwhile refused to start the watch, since the first one held it (the stuck-own
 change (this note and the README heading); the Player's `huddle wait` in Claude Code woke on it, and the change was pushed for review again.
 The Coach's Codex session then reviews this round and merges and lands it.
 
+**The language holds (Issue #221).** Seen in the live run of 2026-11-20: with `huddle language es` set, a Codex chat still answered in English
+until the Coach wrote in Spanish: «es» was terse, and the message that wakes the chat («Huddle's watch: …», in English) arrives as if the
+person wrote it. Now the session-start line names the language in full (`Intl.DisplayNames`: «Spanish (es; …)») and says that messages from
+Huddle itself and slash commands never change it, and every message Huddle queues into a Codex chat ends with «Answer the person in Spanish.».
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The language holds in Codex (Issue #221): the session start names it in full («Spanish»), Huddle's own messages never change it, and the
+  messages Huddle sends into a Codex chat end with «Answer the person in Spanish.».
 - The docs say the Coach can work in Codex too (Issue #214), with one watch per repo whatever the tool; only design work needs Claude Code.
 - A set-up repo comes nearly ready in Codex (Issue #215): setup and update write `.codex/config.toml`, which declares Huddle for Codex in
   that repo; a new machine needs one `codex plugin marketplace upgrade huddle` and the hook trust. `huddle doctor` and the session start say
