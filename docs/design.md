@@ -1126,7 +1126,8 @@ same time, on two plans.
 
 **The hook in Codex.** `huddle` tells Codex apart by `PLUGIN_ROOT`, which only Codex sets (`toolOf` in `lib/cli/main.mjs`). In Codex the
 hook always adds one line of context, even when nothing waits: «Huddle (OpenAI Codex): the huddle command is node "<plugin>/bin/huddle".
-Where a Huddle skill writes node "${CLAUDE_PLUGIN_ROOT}/bin/huddle", run that instead.» In Claude Code the hook's output does not change.
+Where a Huddle skill writes node "${CLAUDE_PLUGIN_ROOT}/bin/huddle", run that instead.» In Claude Code the hook's output does not change. The Coach's `/huddle-watch always` mark never asks a Codex session to start the watch
+(the same login may play there): the watch runs in Claude Code.
 
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 

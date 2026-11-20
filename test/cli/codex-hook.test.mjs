@@ -27,6 +27,19 @@ test('in Codex the hook always gives the path of the huddle command, as context'
   assert.match(out.hookSpecificOutput.additionalContext, /\$\{CLAUDE_PLUGIN_ROOT\}/);
 });
 
+test('in Codex the Coach\'s «always» mark does not ask to start the watch: the watch runs in Claude Code', async () => {
+  const h = harness({ setup: quiet, wrap: (a) => ({ ...a, me: async () => 'SrProfessional' }) });
+  h.ctx.updateCachePath = '/data/huddle-update.json';
+  assert.equal(await run(['queue', '--always'], h.ctx), 0);
+  h.out.length = 0;
+  h.ctx.tool = 'codex';
+  h.ctx.pluginRoot = 'D:/Codex/huddle';
+  assert.equal(await run(['hook'], h.ctx), 0);
+  const all = h.text();
+  assert.doesNotMatch(all, /the watch starts now|start the watch exactly as/);
+  assert.match(all, /Huddle \(OpenAI Codex\): the huddle command is/);
+});
+
 test('in Claude Code a quiet start still prints nothing', async () => {
   const h = harness({ setup: quiet });
   h.ctx.tool = 'claude';
