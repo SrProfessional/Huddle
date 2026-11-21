@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The session start never offers a request another session already took (Issue #239): before asking «Do you want me to continue?» the session runs
+  `huddle pending` again, and `huddle take` on a request already marked 👀 says so in one line and exits 1.
 - The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
   and keeps one Player watch (`huddle next --wait`, `--codex` in Codex) that wakes the session when there is something to do, with no tokens.
 
