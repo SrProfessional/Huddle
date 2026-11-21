@@ -148,3 +148,21 @@ test('a Codex session in a sibling of the checkout, or in a case variant that is
   const rows = await collectUsage({ root, claudeConfigDir: claude, codexHome: codex, issueForBranch: async () => 1 });
   assert.equal(rows.reduce((n, r) => n + r.input, 0), sameFolder ? 4 : 0, 'a case variant counts only where the filesystem says it is the same folder');
 });
+
+test('a Codex session keeps its recorded branch for the checkout that recorded it, and a later checkout uses its own evidence', async () => {
+  const { root, claude, codex } = setup();
+  const wt = (name) => path.join(root, '.claude', 'worktrees', name).replaceAll('\\', '/');
+  const token = (input) => JSON.stringify({ type: 'event_msg', timestamp: '2026-11-20T12:00:00Z', payload: { type: 'token_count', info: { last_token_usage: { input_tokens: input, output_tokens: 1 } } } });
+  const turn = (cwd) => JSON.stringify({ type: 'turn_context', payload: { cwd, model: 'gpt-5' } });
+  mkdirSync(path.join(codex, 'sessions'), { recursive: true });
+  writeFileSync(path.join(codex, 'sessions', 's.jsonl'), [
+    JSON.stringify({ type: 'session_meta', payload: { cwd: wt('alias'), model: 'gpt-5', git: { branch: 'feature/104' } } }), token(1),
+    turn(wt('h105-y')), token(2), // a second (removed) worktree: its folder is its evidence
+    turn(root.replaceAll('\\', '/')), token(3), // the default checkout: git's branch for it
+    turn(wt('alias')), token(4), // back to the checkout that recorded the branch
+  ].join('\n'));
+  const rows = await collectUsage({
+    root, checkoutBranches: new Map([[root, 'main']]), claudeConfigDir: claude, codexHome: codex, issueForBranch: async (b) => b,
+  });
+  assert.deepEqual(rows.map((r) => [r.issue, r.input]), [['feature/104', 5], ['h105-y', 2], ['main', 3]]);
+});
