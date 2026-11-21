@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach
+  and the Players may use either, the Codex install and update, one watch per repo, and what is adapted but not yet tried live in Codex.
 - Take over a stuck watch, when the person asks (Issue #222): if the session that holds the watch took something to review and never came
   back (closed, or out of quota), `/huddle-watch` in another session says what it took and when, and asks «Take over?».
 - The language holds in Codex (Issue #221): the session start names it in full («Spanish»), Huddle's own messages never change it, and the

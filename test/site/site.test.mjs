@@ -235,7 +235,7 @@ test('the Pages workflow deploys site/ from main with pinned actions', () => {
 test('the README opens with the words people search for, links the site and has a Website badge', () => {
   const t = read('README.md');
   const top = t.split('\n').slice(0, 14).join('\n');
-  assert.match(top, /Claude Code plugin/i);
+  assert.match(top, /plugin for Claude Code and OpenAI Codex/i);
   assert.match(top, /AI coding/i);
   assert.match(top, /decision-led/i);
   assert.match(top, /https:\/\/srprofessional\.github\.io\/Huddle\//);
@@ -302,7 +302,7 @@ test('H27: the home page has the eight scenes, in order, and every scene has its
     assert.match(p, /<h[12][\s>]/, `scene ${order[i]} has no heading`);
     assert.ok(strip(p.split(/<footer/)[0]).length >= 150, `scene ${order[i]} has too little text in the HTML`);
   });
-  for (const s of ['Five Players, five Claude Code sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The Coach', "The Player's session"]) {
+  for (const s of ['Five Players, five Claude Code or Codex sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The Coach', "The Player's session"]) {
     assert.ok(t.includes(s), `missing text «${s}»`);
   }
   // the label-flow scene has a text equivalent that names every stop and both side roads
