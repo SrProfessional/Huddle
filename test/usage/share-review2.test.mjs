@@ -125,3 +125,21 @@ test('competing callers when the reservation becomes eligible: exactly one wins,
   assert.equal(results.filter((r) => r === 'true').length, 1, results.join(','));
   assert.equal(reserveWindow(file, Date.now(), H), false, 'after the race, the winner\'s time holds');
 });
+
+test('a writer suspended right before it links never wins after others moved on, even when cleanup freed its name (sixth review of PR #245)', async () => {
+  const { reserveWindow } = await import('../../lib/cli/main.mjs');
+  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-suspended-'));
+  const file = path.join(dir, 'huddle-usage-x.pushed');
+  const H = 3600000;
+  const t0 = Date.parse('2026-11-21T08:00:00Z');
+  assert.equal(reserveWindow(file, t0, H), true, 'seed .1');
+  const b = [];
+  const a = reserveWindow(file, t0 + H, H, {
+    beforeLink: () => { // A is paused here, its successor (.2) chosen; B takes .2, .3 and .4 at successive hours
+      b.push(reserveWindow(file, t0 + H, H), reserveWindow(file, t0 + 2 * H, H), reserveWindow(file, t0 + 3 * H, H));
+    },
+  });
+  assert.deepEqual(b, [true, true, true]);
+  assert.equal(a, false, 'A resumes after .4 exists: it must not reserve');
+  assert.equal(reserveWindow(file, t0 + 3 * H + 1, H), false, 'and .4 still holds the hour');
+});
