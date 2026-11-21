@@ -41,4 +41,5 @@ and the repo's own tools). If you can, do it and report what you did. Only a ste
 person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must
 approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical
 background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see
-something else:». If a permission is denied or a credential is missing, stop and ask; never look for another way.
+something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those
+🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.
