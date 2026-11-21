@@ -615,7 +615,7 @@ gets the same «not configured» error as the other commands.
 **The skill `/huddle-watch [interval|off|status]`.** For the Coach only: it runs `huddle doctor` first and stops with a clear line
 if the login is not `coach`.
 
-1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). If this session already runs the watch's
+1. **On** (no argument, or an interval such as `5m`; default 2 minutes, allowed 2 to 60). If this session already runs the watch's
    background wait, it is already on and no second one starts. **Check now (Issue #107):** the session runs the full `huddle labels` and
    then `huddle queue --json` once and handles what it lists (step 3 and 4); when nothing waits it says «Nothing is waiting for the Coach.», so the person sees that it ran. **Then it waits in the background (Issue #157).** Until 0.8.5 the watch was a recurring job
    (`CronCreate`): each tick woke the session for a Claude turn that re-read its context only to run `labels` and `queue`, and most ticks
@@ -626,7 +626,7 @@ if the login is not `coach`.
    failure does not stop it). Found in staging on a real project: the labels pass took 4m46s and the queue 15 s, so running the labels
    first made every wake about five minutes late. The session handles
    them and starts the wait again. Keys: `<pr>@<head>` for a review that stopped (a new commit makes it new again) and `#<issue>` for a
-   decision or a triage already said. Interval: default 300 seconds, 120 to 3600. It refuses a login that is not `coach`. The API
+   decision or a triage already said. Interval: default 120 seconds (Issue #243: each review round lost up to 5 minutes to the old default; the wait spends no Claude tokens, and the full labels pass still runs at most every 15 minutes), 120 to 3600. It refuses a login that is not `coach`. The API
    use per hour is the same as the old job at the same interval; the Claude tokens while nothing waits go to zero.
 2. The first message says that **turning the watch on is the Coach's order to review and merge, as if they asked for each review**,
    that it uses no Claude tokens while nothing waits, and what stops it (`/huddle-watch off`, or closing Claude Code, because the wait

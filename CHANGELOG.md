@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- The Coach's watch checks every 2 minutes by default instead of 5 (Issue #243), so a ready PR waits less. No setting in `huddle.json`; `/huddle-watch 10m` still sets another interval.
+
 ### Fixed
 
 - Parallel play never goes over the Player's capacity (Issue #240): a request that came back with changes requested and waits for room still
