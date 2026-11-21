@@ -56,7 +56,7 @@ anything. Docs/design.md §19 and §22.
   watch» section». A subagent never merges. When it ends with «needs changes», it already posted the comment and the item leaves the queue by itself.
 - **Merges, one at a time, in this session.** For each «ready to merge», in order: check it again against the updated base (it still
   merges cleanly, and its tests pass on the branch updated with the base, in a fresh worktree). If not, post the usual «🔁 Changes
-  requested» comment asking to update the branch from the base, and nothing is merged. If it does, approve and merge it, and land it, as
+  requested» comment asking to update the branch from the base, and nothing is merged. Write the comment to a temporary UTF-8 file and use `gh pr comment <pr> --body-file <file>` and `gh issue comment <n> --body-file <file>`, or `glab api … -F 'body=@file'` on both notes endpoints. Never pass it inline. If the recheck passes, approve and merge it, and land it, as
   «All good» of `/huddle-review` says. Then start the next review that fits.
 - **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,
   with the reason, and do **not** try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes

@@ -23,6 +23,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   steps (`codex plugin marketplace upgrade huddle`, `codex plugin add huddle@huddle`, a new chat) instead of Claude Code's.
 - The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach
   and the Players may use either, the Codex install and update, one watch per repo, and what is adapted but not yet tried live in Codex.
+- The README, team guide and get-started page give Mac setup steps for Huddle in Codex and explain how a Coach switches the watch
+  between two computers (Issue #246).
 - Take over a stuck watch, when the person asks (Issue #222): if the session that holds the watch took something to review and never came
   back (closed, or out of quota), `/huddle-watch` in another session says what it took and when, and asks «Take over?».
 - The language holds in Codex (Issue #221): the session start names it in full («Spanish»), Huddle's own messages never change it, and the
@@ -55,6 +57,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 - The Huddle rules in `AGENTS.md` too (Issue #200), the first step for OpenAI Codex: setup and update write the same managed block into
   `CLAUDE.md` and `AGENTS.md`, keeping the project's own text outside the markers. A repo set up before gets `AGENTS.md` on its next
   `/huddle-update`.
+
+### Fixed
+
+- Huddle skills send Issue, PR/MR and comment text from temporary files in Claude Code and Codex (Issue #241), preserving line breaks and backslashes on Windows.
 
 ## [0.9.5] - 2026-11-17
 

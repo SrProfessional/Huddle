@@ -71,6 +71,7 @@ claude plugin install huddle@huddle</code></pre>
         <pre tabindex="0"><code>/huddle-update</code></pre>
         <p class="prose">It updates the plugin (<code>claude plugin marketplace update huddle</code> and <code>claude plugin update huddle@huddle --scope project</code>), refreshes the templates and the <code>CLAUDE.md</code> block in a branch of its own, asks only the questions a new release added, and opens the PR. It ends by telling you to type <code>/reload-plugins</code>; if the new skills do not show up, restart Claude Code. A project can be on an older version than another. <code>/huddle-play</code> and <code>/huddle-update</code> tell you in the chat when a newer release exists, at most once a day.</p>
         <h3 id="codex">In OpenAI Codex</h3>
+        <p class="prose">On macOS, follow the <a href="#mac-codex">Mac setup steps</a>.</p>
         <p class="prose">The same marketplace, the same skills and the same <code>huddle</code> command. Run this once in a terminal (the VS Code extension of Codex brings its own <code>codex</code>; the team guide says how to find it if <code>codex</code> is not recognized):</p>
         <pre tabindex="0"><code>codex plugin marketplace add SrProfessional/Huddle
 codex plugin add huddle@huddle</code></pre>
@@ -80,7 +81,89 @@ codex plugin add huddle@huddle</code></pre>
           <li><strong>Allow network access.</strong> Codex's sandbox has no network: approve it when Codex asks to run <code>git push</code>, <code>gh</code>, <code>glab</code> or <code>huddle</code>.</li>
           <li><strong>Open a new chat.</strong> Codex has no <code>/reload-plugins</code>. In Codex the skills start with <code>$</code>: <code>$huddle-play &lt;n&gt;</code>, <code>$huddle-watch</code> and so on. <code>huddle doctor</code> shows a «codex» line.</li>
         </ol>
-        <p class="prose">To update in Codex: <code>codex plugin marketplace upgrade huddle</code>, then <code>codex plugin add huddle@huddle</code>, then a new chat (and trust the hook again if it changed). Only design work still needs Claude Code. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/team-guide.md#a-mixed-team-claude-code-and-codex" target="_blank" rel="noopener">team guide<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> has every step, with the hook trust walkthrough. Adapted but not yet tried live in Codex: <code>$huddle-bug</code>, <code>$huddle-areas</code>, <code>$huddle-team</code>, playing several Issues in parallel, GitLab, and Codex on macOS.</p>
+        <p class="prose">To update in Codex: <code>codex plugin marketplace upgrade huddle</code>, then <code>codex plugin add huddle@huddle</code>, then a new chat (and trust the hook again if it changed). Only design work still needs Claude Code. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/team-guide.md#a-mixed-team-claude-code-and-codex" target="_blank" rel="noopener">team guide<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> has every step, with the hook trust walkthrough. Adapted but not yet tried live in Codex: <code>$huddle-bug</code>, <code>$huddle-areas</code>, <code>$huddle-team</code>, playing several Issues in parallel, and GitLab.</p>
+        <h4 id="mac-codex">Set up Huddle on a Mac with Codex</h4>
+        <p class="prose">Codex on macOS is adapted for Huddle but not yet tried live.</p>
+        <ol class="prose">
+          <li>🙋 <strong>Install Homebrew.</strong> If you need it, follow the installation and <strong>Next steps</strong> at <a href="https://brew.sh/" target="_blank" rel="noopener">Homebrew<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>. Homebrew installs tools on your Mac.
+            <p>You should see: The installer finishes and tells you how to make <code>brew</code> available in Terminal (the app where you paste commands).<br>
+              If you see something else: Follow the installer's instructions before continuing.</p>
+          </li>
+          <li>🙋 <strong>Install the tools.</strong> Open <strong>Terminal</strong> from <strong>Applications → Utilities</strong>, then paste this command.
+            <pre tabindex="0"><code>brew install node gh git</code></pre>
+            <p>You should see: Homebrew installs Node (which runs Huddle), GitHub CLI (which signs you in to GitHub from Terminal) and Git
+              (which copies and tracks your project files), or reports that they are already installed.<br>
+              If you see something else: If <code>brew</code> is missing, complete Homebrew's <strong>Next steps</strong> and open Terminal again.</p>
+          </li>
+          <li>🙋 <strong>Sign in to GitHub.</strong> In Terminal, paste the following. Choose <strong>GitHub.com</strong>, <strong>HTTPS</strong>, and <strong>Login with a web browser</strong> when prompted.
+            <pre tabindex="0"><code>gh auth login</code></pre>
+            <p>You should see: GitHub CLI confirms that you are logged in.<br>
+              If you see something else: Complete the browser prompt and return to Terminal.</p>
+          </li>
+          <li>🙋 <strong>Install the Codex command.</strong> In Terminal, paste this command. The global install adds <code>codex</code> to your PATH (where new terminals look for commands).
+            <pre tabindex="0"><code>npm install -g @openai/codex</code></pre>
+            <p>You should see: npm reports that it added or updated Codex.<br>
+              If you see something else: If a new Terminal window cannot find <code>codex</code>, check that Homebrew's <strong>Next steps</strong> were applied.</p>
+          </li>
+          <li>🙋 <strong>Sign in to the Codex extension.</strong> In VS Code, open <strong>Extensions</strong>, search for <strong>Codex</strong>, install the extension published by OpenAI and sign in.
+            <p>You should see: The Codex sidebar opens with your account signed in.<br>
+              If you see something else: Choose <strong>Sign in</strong> in the sidebar and finish in your browser.</p>
+          </li>
+          <li>🙋 <strong>Clone your repo.</strong> In Terminal, copy the repo (your team's project) to this Mac. The example copies Huddle to the <strong>Huddle</strong> folder in your home folder. For your own repo, replace <code>SrProfessional/Huddle</code> with the name from GitHub and <code>Huddle</code> in the destination with your project folder name.
+            <pre tabindex="0"><code>gh repo clone SrProfessional/Huddle "$HOME/Huddle"</code></pre>
+            <p>You should see: Git reports that it is cloning into your project folder.<br>
+              If you see something else: For an access error, check the repo name and the account you signed in with.</p>
+          </li>
+          <li>🙋 <strong>Open a terminal in the repo.</strong> In VS Code, choose <strong>File → Open Folder</strong>, select the folder you just cloned, then choose <strong>Terminal → New Terminal</strong>.
+            <p>You should see: The new terminal opens in the repo folder.<br>
+              If you see something else: Check that you opened the folder created by the clone command.</p>
+          </li>
+          <li>🙋 <strong>Trust the project folder.</strong> Start terminal Codex and approve the project trust prompt for your repo if it appears. Sign in if prompted. Close the chat with <code>/exit</code> before running the next terminal command.
+            <pre tabindex="0"><code>codex --no-daemon</code></pre>
+            <p>You should see: Codex opens the repo without a warning that its project settings are ignored.<br>
+              If you see something else: Reopen terminal Codex from the repo folder and review the trust prompt.</p>
+          </li>
+          <li>🙋 <strong>Add the Huddle marketplace if needed.</strong> If the repo has no <code>.codex/config.toml</code> and you haven't already added the marketplace, paste this in the repo terminal. The marketplace tells Codex where to find Huddle.
+            <pre tabindex="0"><code>codex plugin marketplace add SrProfessional/Huddle</code></pre>
+            <p>You should see: Codex reports that it added the marketplace.<br>
+              If you see something else: If it is already configured, continue to the next step.</p>
+          </li>
+          <li>🙋 <strong>Refresh the marketplace.</strong> In the repo terminal, paste this command.
+            <pre tabindex="0"><code>codex plugin marketplace upgrade huddle</code></pre>
+            <p>You should see: Codex refreshes the Huddle marketplace.<br>
+              If you see something else: If Codex cannot find it, check folder trust and whether the repo has <code>.codex/config.toml</code>, or complete the previous step.</p>
+          </li>
+          <li>🙋 <strong>Install Huddle.</strong> In the repo terminal, paste this command.
+            <pre tabindex="0"><code>codex plugin add huddle@huddle</code></pre>
+            <p>You should see: Codex reports that it added Huddle.<br>
+              If you see something else: If it cannot find Huddle, repeat the marketplace refresh.</p>
+          </li>
+          <li>🙋 <strong>Open terminal Codex.</strong> In the repo terminal, paste this command before reviewing the hook (a command that runs when a chat starts).
+            <pre tabindex="0"><code>codex --no-daemon</code></pre>
+            <p>You should see: Codex opens in the repo and may say <strong>Hooks need review</strong>.<br>
+              If you see something else: If it cannot find the command, reopen the terminal after installing the Codex command.</p>
+          </li>
+          <li>🙋 <strong>Trust Huddle's startup hook.</strong> In terminal Codex, type this command. Select <strong>SessionStart</strong>, open Huddle's row, confirm that it runs <code>node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" hook</code> for the <code>huddle</code> plugin, and choose <strong>Trust</strong>.
+            <pre tabindex="0"><code>/hooks</code></pre>
+            <p>You should see: <strong>SessionStart</strong> shows the Huddle hook as active.<br>
+              If you see something else: If the Huddle row is missing, check that you started Codex in the repo after installing Huddle.</p>
+          </li>
+          <li>🙋 <strong>Leave terminal Codex.</strong> Press Esc to return to the chat, then type this command.
+            <pre tabindex="0"><code>/exit</code></pre>
+            <p>You should see: You are back at the terminal prompt.<br>
+              If you see something else: If the hook list is still open, press Esc again first.</p>
+          </li>
+          <li>🙋 <strong>Set your personal language if the team has none.</strong> Run the following in the terminal for Spanish. Change <code>es</code> to your own language code if needed.
+            <pre tabindex="0"><code>node ~/.codex/plugins/cache/huddle/huddle/*/bin/huddle language es</code></pre>
+            <p>You should see: Huddle confirms your language.<br>
+              If you see something else: If several versions are installed, replace <code>*</code> with the installed version you want to use.</p>
+          </li>
+          <li>🙋 <strong>Start a new Codex chat.</strong> In the repo, open a new Codex chat in VS Code or terminal Codex.
+            <p>You should see: Huddle introduces itself when the chat starts.<br>
+              If you see something else: If it does not, review the Huddle hook again in terminal Codex.</p>
+          </li>
+        </ol>
+        <p class="prose">There is <strong>one watch per repo per machine</strong>. Huddle keeps its watch marks in <code>~/.huddle</code> on that machine. If you use two computers as Coach, keep the watch on one at a time. Run <code>$huddle-watch off</code> in Codex (or <code>/huddle-watch off</code> in Claude Code) on the first computer before starting the watch on the other. Players may work on both computers.</p>
       </section>
 
       <section id="setup">

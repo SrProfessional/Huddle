@@ -16,7 +16,7 @@ Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle
 1. **What is in staging.** Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" release --json` and show the staged Issues with and without the
    marker, and the two warnings. Nothing in staging: say so and stop.
    - If the default branch is ahead of staging (a hotfix went straight to production), say that the back-merge comes first: a PR/MR from the
-     default branch into staging, merged before this release. Offer to open that PR/MR, and stop until it is merged.
+     default branch into staging, merged before this release. Offer to open that PR/MR with its body in a temporary UTF-8 file (`gh pr create --body-file <file>` or `glab mr create --description-file <file>`, never inline), and stop until it is merged.
    - If staging received commits that belong to no listed Issue after the newest test, show them and ask the Coach to confirm them.
 2. **Each untested Issue.** Say it plainly («#N has no «tested in staging» mark») and ask: has it been tested in staging? Run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` only on a yes from the Coach. On a no, stop for that Issue. You may release it
@@ -33,7 +33,7 @@ Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle
 ## Reopening an Issue
 
 Only the Coach's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
-Run `gh issue reopen <n>` (or `glab issue reopen <n>`) with a comment that says why. Then run
+Run `gh issue reopen <n>` (or `glab issue reopen <n>`). Write the reason to a temporary UTF-8 file and post it with `gh issue comment <n> --body-file <file>` or `glab api … -F 'body=@file'` on the Issue notes endpoint. Never pass it inline. Then run
 `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` and, once, the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, so the «tested in
 staging» label goes and the Issues that depend on it are blocked again. Both are best effort, as above. The fix is a new PR/MR on the same Issue,
 landed as usual.
