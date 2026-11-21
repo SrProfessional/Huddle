@@ -92,30 +92,36 @@ test('only unambiguous remotes count: ordinary SSH and HTTPS pass; local paths a
   ]) assert.equal(pushGoesTo([bad], gh), false, bad);
 });
 
-// Fourth review of PR #245: no lock and so nothing to recover. Each hour is a file of its own, created exclusively ('wx'): the
-// operating system lets exactly one caller create a given name, a reservation is never moved or deleted by another caller, and a
-// leftover file (a crashed session, an old hour) only ever stands for its own hour.
-test('one reservation per hour: the first caller of an hour reserves it, every later one in that hour does not, the next hour is free again', async () => {
+// Fifth review of PR #245: a full 60 minutes between reservations, across clock-hour boundaries, with no lock. Reservations form a
+// chain: the next one is published under the name the last one determines (`<mark>.<n+1>`), fully written first and then linked into
+// place, which exactly one caller can do; a losing caller reads the winner's time.
+test('a full hour between reservations, across a UTC hour boundary', async () => {
   const { reserveWindow } = await import('../../lib/cli/main.mjs');
   const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-hour-'));
   const file = path.join(dir, 'huddle-usage-x.pushed');
   const H = 3600000;
-  const t = Date.parse('2026-11-21T10:05:00Z');
-  assert.equal(reserveWindow(file, t, H), true);
-  assert.equal(reserveWindow(file, t + 1000, H), false, 'a second session in the same hour');
-  assert.equal(reserveWindow(file, t + 54 * 60 * 1000, H), false, 'still the same hour');
-  assert.equal(reserveWindow(file, t + 56 * 60 * 1000, H), true, 'the next hour (11:01)');
+  assert.equal(reserveWindow(file, Date.parse('2026-11-21T10:59:59.999Z'), H), true);
+  assert.equal(reserveWindow(file, Date.parse('2026-11-21T11:00:00.000Z'), H), false, 'one millisecond later, another clock hour: still refused');
+  assert.equal(reserveWindow(file, Date.parse('2026-11-21T11:59:59.998Z'), H), false, 'one millisecond short of the hour');
+  assert.equal(reserveWindow(file, Date.parse('2026-11-21T11:59:59.999Z'), H), true, 'exactly an hour later');
+  assert.equal(reserveWindow(file, Date.parse('2026-11-21T12:30:00.000Z'), H), false, 'counted from the new reservation');
 });
 
-test('a reservation left by a crashed session never blocks or is moved by a later caller: it stands only for its own hour', async () => {
+test('competing callers when the reservation becomes eligible: exactly one wins, and the loser sees the winner (real processes)', async () => {
   const { reserveWindow } = await import('../../lib/cli/main.mjs');
-  const { writeFileSync, readdirSync } = await import('node:fs');
-  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-left-'));
+  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-race-'));
   const file = path.join(dir, 'huddle-usage-x.pushed');
   const H = 3600000;
-  const t = Date.parse('2026-11-21T10:05:00Z');
-  writeFileSync(`${file}.${Math.floor(t / H) - 3}`, ''); // an hour three hours ago, left behind
-  assert.equal(reserveWindow(file, t, H), true);
-  assert.ok(readdirSync(dir).includes(`huddle-usage-x.pushed.${Math.floor(t / H)}`), 'this hour\'s reservation stays valid');
-  assert.equal(reserveWindow(file, t + 1, H), false);
+  const start = Date.now() - 2 * H;
+  assert.equal(reserveWindow(file, start, H), true); // the previous reservation, now expired
+  const main = fileURLToPath(new URL('../../lib/cli/main.mjs', import.meta.url));
+  const child = () => new Promise((resolve) => {
+    const p = spawn(process.execPath, ['--input-type=module', '-e', `import { reserveWindow } from ${JSON.stringify(pathToFileURL(main).href)}; process.stdout.write(String(reserveWindow(${JSON.stringify(file)}, Date.now(), ${H})));`]);
+    let out = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.on('close', () => resolve(out.trim()));
+  });
+  const results = await Promise.all([child(), child(), child(), child(), child()]);
+  assert.equal(results.filter((r) => r === 'true').length, 1, results.join(','));
+  assert.equal(reserveWindow(file, Date.now(), H), false, 'after the race, the winner\'s time holds');
 });
