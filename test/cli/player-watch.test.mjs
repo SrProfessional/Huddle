@@ -58,9 +58,11 @@ test('an empty queue stays idle on a 120-second poll and wakes when an Issue bec
 test('in Codex, next --wait --codex starts the watch as a process of its own and returns at once; outside Codex it says why', async () => {
   const started = [];
   const h = mk();
-  h.ctx.startDetached = (a) => started.push(a);
+  h.ctx.startDetached = (a) => { started.push(a); return 4242; };
   assert.equal(await run(['next', '--wait', '--codex'], h.ctx), 0);
-  assert.deepEqual(started, [['next', '--wait', '120', '--codex-thread', 'P1']]);
+  assert.equal(started.length, 1);
+  assert.deepEqual(started[0].slice(0, 5), ['next', '--wait', '120', '--codex-thread', 'P1']);
+  assert.equal(started[0][5], '--run', 'the child gets the run its launcher claimed');
   assert.match(h.text(), /The Player's watch waits in the background/);
   const c = mk({ session: { tool: 'claude', id: 'S1' } });
   c.ctx.startDetached = () => assert.fail('nothing starts');

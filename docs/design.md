@@ -1108,9 +1108,16 @@ also lists `resume`: each active Issue with a pending Coach request, keyed `resu
 is the Player's watch, like the Coach's: no tokens; every 120 s by default it re-reads the plan and wakes the session (prints
 `{ actionable }`) when something not seen can start or must be resumed; `--codex` runs it as a process of its own that queues «Huddle
 (Player): … Run $huddle-play and do it» into the Codex chat, and a failed delivery is recorded in its heartbeat and retried next round,
-never marked seen. One per Player and repo on a machine (an owner file and a heartbeat under `~/.huddle`); `next --wait-off` stops it;
-`huddle status` shows «player watch». Parallel play resumes first, then starts, and never ends on an empty queue: it keeps that one watch,
-which replaces the per-Issue waits of parallel play.
+never marked seen. One per Player and repo on a machine: under `~/.huddle`, an owner record `{ run, pid, tool, session, stopped }`
+changed only under an exclusive lock file, and a heartbeat. Each launch makes a run id and claims before its child starts; the child
+gets `--run <id>`. A live, not stopped run refuses a second launch; a dead one frees it. `next --wait-off` marks the run stopped (it
+keeps its ownership until it exits). At every round and right before telling anything, a run that is stopped, or that another launch
+took over, ends without waking anyone. `huddle status` shows «player watch», with a note when Codex only queued the message (it could
+not resume the session). A resume is scheduled like a start: against the work already running (an active Issue whose request was
+taken), the capacity and the open dependencies, never a Design Issue. An Issue the watch followed is told finished (`actionable.finished`,
+key `done:#n`) only when it really closed, and stays pending until a delivery succeeds. Parallel play resumes first, then starts, and
+never ends on an empty queue: it keeps that one watch, which replaces the per-Issue waits of parallel play. This holds in Claude Code
+as in Codex, by the Coach's decision on #248 (numbered play keeps its per-Issue wait).
 
 ## 25. OpenAI Codex
 
