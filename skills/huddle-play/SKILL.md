@@ -69,7 +69,7 @@ branch in its own worktree, `labels --issue <n> --started`). Then:
 
 1. Enter the Issue's worktree, `.claude/worktrees/<branch>`, with your `EnterWorktree` tool. If the folder is gone but the branch
    exists, create it again with `git worktree add .claude/worktrees/<branch> <branch>` (without `-b`) and enter it.
-2. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" pending <n>`. If nothing is pending, say so, change nothing, and offer to wait with
+2. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" pending <n>` again, even if the session start already said a request waits (that line may be minutes old). If nothing is pending, say in one line that another session took it, go on with the person's own request, change nothing, and offer to wait with
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`.
 3. If a request is pending, tell the Player which one it is (one line), then run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`. It marks the request 👀 and prints the Coach's prompt. Follow that
