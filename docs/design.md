@@ -1251,6 +1251,8 @@ installed version is read from the running plugin's own `plugin.json`, in Codex 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
 Codex session live there, apart from Claude Code's: `huddle status` run from one tool does not see the other tool's waits.
 
+**A request another session already took (Issue #239).** The session start line may be minutes old: with two sessions on one login (a Claude Code session and a Codex chat) the other one may have taken the request meanwhile. Before it asks «Do you want me to continue?», the session runs `huddle pending <n>` again; with nothing pending it says in one line that another session took it and goes on with the person's own request. `huddle take <n>` on a request already marked 👀 prints one line saying so and exits 1, instead of printing the prompt again.
+
 ## 26. The dashboard
 
 The first dashboard data is local-only token accounting. `huddle usage [--json] [--since <YYYY-MM-DD>]` reads the Claude Code project
