@@ -1,53 +1,30 @@
-/* Huddle website. One accent (indigo), two typefaces, light and dark. No build step, no dependencies. */
-
-/* The two typefaces are served from this site (SIL Open Font License, see fonts/): no third-party request, and with the
-   preload in each page no swap that moves the text. Latin subset; both files are variable fonts. */
-@font-face {
-  font-family: "Bricolage Grotesque";
-  src: url(fonts/bricolage-grotesque-latin.woff2) format("woff2");
-  font-weight: 600 800;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Source Serif 4";
-  src: url(fonts/source-serif-4-latin.woff2) format("woff2");
-  font-weight: 400 600;
-  font-display: swap;
-}
+/* Huddle website. A dark dashboard surface, local motion and no build step. */
 
 :root {
-  --bg: #f7f7fb;
-  --surface: #ffffff;
-  --ink: #12142b;
-  --muted: #4b4f6b;
-  --line: #d5d7e8;
-  --accent: #4336d8;
-  --on-accent: #ffffff;
-  --board: #14163a;
-  --board-ink: #ecedff;
-  --board-muted: #b4b7dc;
-  --board-line: #3b3f78;
-  --board-accent: #a29bff;
-  --display: "Bricolage Grotesque", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
-  --text: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --bg: #0F1117;
+  --surface: #1A1D26;
+  --surfaceRaised: #1D2130;
+  --ink: #F2F4F8;
+  --muted: #A3A8B6;
+  --line: #292E3B;
+  --accent: #2F6BFF;
+  --accentBright: #4C8DFF;
+  --link: #8FB8FF;
+  --on-accent: #000000;
+  --progress: #F5A524;
+  --changes: #F0476B;
+  --done: #5FD068;
+  --board: var(--surfaceRaised);
+  --board-ink: var(--ink);
+  --board-muted: var(--muted);
+  --board-line: #343A4A;
+  --board-accent: var(--accentBright);
+  --sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --display: var(--sans);
+  --text: var(--sans);
   --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
   --measure: 66ch;
   --gutter: clamp(1rem, 4vw, 2.5rem);
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0c0d1f;
-    --surface: #15173a;
-    --ink: #ecedfa;
-    --muted: #aeb1cf;
-    --line: #2a2d57;
-    --accent: #a29bff;
-    --on-accent: #0c0d1f;
-    --board: #15173a;
-    --board-line: #3b3f78;
-  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -56,7 +33,12 @@ html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 12% 8%, rgb(76 141 255 / 0.16), transparent 28rem),
+    radial-gradient(circle at 88% 32%, rgb(240 71 107 / 0.12), transparent 32rem),
+    radial-gradient(circle at 54% 94%, rgb(135 92 255 / 0.13), transparent 30rem),
+    var(--bg);
+  background-size: 130% 130%;
   color: var(--ink);
   font-family: var(--text);
   font-size: 1.125rem;
@@ -66,11 +48,11 @@ body {
 
 img, svg { max-width: 100%; height: auto; }
 
-a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 0.08em; }
+a { color: var(--link); text-underline-offset: 0.18em; text-decoration-thickness: 0.08em; }
 a:hover { text-decoration-thickness: 0.16em; }
 
 :focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--link);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -94,7 +76,7 @@ a:hover { text-decoration-thickness: 0.16em; }
 section { padding-block: clamp(3rem, 8vw, 6rem); }
 
 /* Header */
-.site-header { border-bottom: 1px solid var(--line); }
+.site-header { border-bottom: 1px solid rgb(242 244 248 / 0.07); background: rgb(15 17 23 / 0.72); backdrop-filter: blur(18px); }
 .site-header .wrap {
   display: flex;
   flex-wrap: wrap;
@@ -166,8 +148,9 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
   color: var(--on-accent);
   display: inline-block;
 }
-.btn:hover { text-decoration: none; filter: brightness(1.08); }
-.btn.ghost { background: transparent; color: var(--accent); }
+.btn { background: linear-gradient(135deg, var(--accent), var(--accentBright)); box-shadow: 0 0 24px rgb(47 107 255 / 0.36); }
+.btn:hover, .btn:focus-visible, .btn:active { box-shadow: 0 0 32px rgb(76 141 255 / 0.52); }
+.btn.ghost { background: transparent; color: var(--link); }
 
 /* Hero */
 .hero { padding-block: clamp(3rem, 9vw, 7rem) clamp(2.5rem, 6vw, 4rem); }
@@ -181,7 +164,7 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 }
 .board h2 { color: var(--board-ink); }
 .board .lead { color: var(--board-muted); }
-.board a { color: var(--board-accent); }
+.board a { color: var(--link); }
 .flow { margin-top: 2.5rem; }
 .flow svg { display: block; width: 100%; }
 .flow .wide { display: block; }
@@ -195,7 +178,7 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 .f-arrow { fill: var(--board-accent); }
 .f-node { fill: var(--board); stroke: var(--board-ink); stroke-width: 3; }
 .f-node-end { fill: var(--board-accent); stroke: var(--board-accent); stroke-width: 3; }
-.f-box { fill: none; stroke: var(--board-accent); stroke-width: 2; }
+.f-box { fill: var(--surface); stroke: var(--board-accent); stroke-width: 2; }
 .f-label { fill: var(--board-ink); font-family: var(--display); font-weight: 700; font-size: 20px; }
 .f-note { fill: var(--board-muted); font-family: var(--text); font-size: 15px; }
 .f-branch-label { fill: var(--board-accent); font-family: var(--display); font-weight: 700; font-size: 17px; }
@@ -224,11 +207,11 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 .steps p { color: var(--muted); margin: 0; }
 
 .two { display: grid; gap: 2.5rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); margin-top: 2rem; }
-.two > div { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1.4rem; }
+.two > div, .only-you { background: var(--surface); border: 1px solid rgb(242 244 248 / 0.07); border-radius: 24px; padding: 1.4rem; box-shadow: 0 20px 45px rgb(0 0 0 / 0.18); }
 .two h3 { margin-bottom: 0.4em; }
 .two p:last-child { margin-bottom: 0; }
 
-.band { background: var(--surface); border-block: 1px solid var(--line); }
+.band { background: rgb(26 29 38 / 0.78); border-block: 1px solid rgb(242 244 248 / 0.07); }
 
 /* FAQ */
 details { border-bottom: 1px solid var(--line); max-width: 48rem; }
@@ -249,7 +232,7 @@ summary::after {
   right: 0.2rem;
   top: 0.85rem;
   font-size: 1.5rem;
-  color: var(--accent);
+  color: var(--link);
   transition: transform 0.15s ease;
 }
 details[open] summary::after { transform: rotate(45deg); }
@@ -267,7 +250,7 @@ th, td { text-align: left; vertical-align: top; padding: 0.7rem 0.8rem 0.7rem 0;
 th { font-family: var(--display); font-weight: 700; }
 .table-wrap { overflow-x: auto; max-width: 100%; }
 .note { border-left: 4px solid var(--accent); padding: 0.2rem 0 0.2rem 1.1rem; max-width: var(--measure); }
-.only-you { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1.2rem 1.4rem; max-width: var(--measure); }
+.only-you { max-width: var(--measure); }
 .only-you h3 { margin-bottom: 0.4em; }
 
 /* Footer */
@@ -324,14 +307,14 @@ html.lenis, html.lenis body { height: auto; }
   font-size: 0.95rem;
   line-height: 1;
   color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  background: var(--surfaceRaised);
+  border: 1px solid rgb(242 244 248 / 0.07);
+  border-radius: 24px;
   padding: 0.6rem 0.85rem;
-  box-shadow: 0 14px 34px -16px rgb(67 54 216 / 0.45);
+  box-shadow: 0 14px 34px -16px rgb(0 0 0 / 0.62);
   white-space: nowrap;
 }
-.float-card b { color: var(--accent); margin-right: 0.3rem; }
+.float-card b { color: var(--link); margin-right: 0.3rem; }
 .fc1 { top: 14%; right: 9%; }
 .fc2 { top: 38%; right: 26%; }
 .fc3 { top: 60%; right: 6%; }
@@ -339,8 +322,8 @@ html.lenis, html.lenis body { height: auto; }
 @media (max-width: 44rem) {
   .layer-grid { -webkit-mask-image: none; mask-image: none; opacity: 0.6; }
   .fc2, .fc4, .o1, .o2 { display: none; }
-  .fc1 { top: 4%; right: 4%; opacity: 0.8; }
-  .fc3 { top: auto; bottom: 3%; right: 4%; opacity: 0.8; }
+  .fc1 { top: 4%; right: 4%; }
+  .fc3 { top: auto; bottom: 3%; right: 4%; }
 }
 
 /* 2. The problem: five session orbs */
@@ -365,8 +348,8 @@ html.lenis, html.lenis body { height: auto; }
   font-weight: 800;
   font-size: 1.2rem;
 }
-.orb:nth-child(2) .orb-dot { background-color: color-mix(in srgb, var(--accent) 82%, var(--surface)); }
-.orb:nth-child(3) .orb-dot { background-color: color-mix(in srgb, var(--accent) 66%, var(--surface)); }
+.orb:nth-child(2) .orb-dot { background-color: color-mix(in srgb, var(--accent) 82%, var(--accentBright)); }
+.orb:nth-child(3) .orb-dot { background-color: color-mix(in srgb, var(--accent) 66%, var(--accentBright)); }
 .orb:nth-child(4) .orb-dot { background-color: color-mix(in srgb, var(--accent) 90%, var(--ink)); }
 .orb:nth-child(5) .orb-dot { background-color: color-mix(in srgb, var(--accent) 74%, var(--ink)); }
 .orb-tag { font-weight: 700; font-size: 0.95rem; }
@@ -393,10 +376,10 @@ html.lenis, html.lenis body { height: auto; }
 .f-line-lit { stroke: var(--board-accent); stroke-width: 3; fill: none; transform-box: fill-box; transform-origin: 0 50%; }
 .f-ring { stroke: var(--board-accent); stroke-width: 2.5; }
 .f-bubble rect { fill: var(--board-accent); }
-.f-bubble text { fill: #14163a; font-family: var(--display); font-weight: 700; font-size: 16px; }
+.f-bubble text { fill: var(--on-accent); font-family: var(--display); font-weight: 700; font-size: 16px; }
 .f-a rect, .f-c rect { fill: var(--board-ink); }
-.f-card rect { fill: #ffffff; stroke: var(--board-accent); stroke-width: 2.5; }
-.f-card text { fill: #14163a; font-family: var(--display); font-weight: 800; font-size: 15px; }
+.f-card rect { fill: var(--surface); stroke: var(--board-accent); stroke-width: 2.5; }
+.f-card text { fill: var(--ink); font-family: var(--display); font-weight: 800; font-size: 15px; }
 .f-card { filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.35)); }
 .fx-flow .board { min-height: 100svh; display: flex; align-items: center; padding-block: 1.5rem; }
 .fx-flow .board .wrap { width: min(100% - 2 * var(--gutter), 72rem); }
@@ -429,13 +412,13 @@ html.lenis, html.lenis body { height: auto; }
 
 /* 5. Two roles */
 .split { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); margin-top: 2.5rem; }
-.role { border-radius: 8px; padding: 1.8rem; }
+.role { border-radius: 24px; padding: 1.8rem; box-shadow: 0 20px 45px rgb(0 0 0 / 0.18); }
 .role h3 { margin-bottom: 0.6em; font-size: 1.5rem; }
 .role ul { margin: 0; padding-left: 1.2rem; }
 .role li + li { margin-top: 0.6rem; }
 .role-manager { background: var(--board); color: var(--board-ink); }
 .role-manager h3 { color: var(--board-ink); }
-.role-dev { background: var(--surface); border: 1px solid var(--line); }
+.role-dev { background: var(--surface); border: 1px solid rgb(242 244 248 / 0.07); }
 @media (min-width: 48em) {
   .role-dev { margin-top: 3rem; }
 }
@@ -452,7 +435,7 @@ html.lenis, html.lenis body { height: auto; }
   border: 2px solid var(--ink);
   border-radius: 999px;
 }
-.same { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--accent); text-align: center; }
+.same { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--link); text-align: center; }
 .is-active .mark, .is-active .same { will-change: transform, opacity; }
 
 /* 7. Install: a terminal that types its own commands */
@@ -460,11 +443,11 @@ html.lenis, html.lenis body { height: auto; }
   background: var(--board);
   color: var(--board-ink);
   border: 1px solid var(--board-line);
-  border-radius: 10px;
+  border-radius: 24px;
   overflow: hidden;
   max-width: 46rem;
   margin: 0 0 1.5rem;
-  box-shadow: 0 26px 50px -30px rgb(20 22 58 / 0.7);
+  box-shadow: 0 26px 50px -30px rgb(0 0 0 / 0.78);
 }
 .term-bar { position: relative; display: flex; align-items: center; gap: 0.9rem; height: 2.7rem; padding-inline: 1rem; border-bottom: 1px solid var(--board-line); }
 .dots { display: inline-flex; gap: 0.4rem; }
@@ -485,10 +468,9 @@ html.lenis, html.lenis body { height: auto; }
   padding: 0.22rem 0.9rem;
   cursor: pointer;
 }
-.copy:hover { background: var(--board-line); }
-.terminal :focus-visible { outline-color: var(--board-accent); }
+.copy:hover, .copy:focus-visible, .copy:active { background: var(--board-line); }
 .terminal pre { background: none; border: 0; border-radius: 0; margin: 0; color: inherit; padding: 1.2rem 1.3rem 1.3rem; }
-.prompt { color: var(--board-accent); user-select: none; }
+.prompt { color: var(--link); user-select: none; }
 .tl { position: relative; display: inline-block; }
 .tl-mask {
   position: absolute;
@@ -509,18 +491,30 @@ html.lenis, html.lenis body { height: auto; }
 /* Motion. The hero says its words one after the other, then the buttons come in; that part is CSS only, so the
    headline is on screen at once even if the script never loads. The rest is the script's job. */
 @media (prefers-reduced-motion: no-preference) {
+  body { animation: ambient-drift 22s ease-in-out infinite alternate; }
+  .two > div, .role, .only-you, .float-card { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+  .two > div:hover, .role:hover, .only-you:hover, .float-card:hover { transform: translateY(-5px); border-color: rgb(76 141 255 / 0.48); box-shadow: 0 26px 52px rgb(0 0 0 / 0.3); }
   .hero h1 .w { display: inline-block; animation: word 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i) * 55ms); }
   .hero .actions { animation: rise 0.5s ease both; animation-delay: 0.55s; }
   .hero-layers { animation: layers-in 1.2s ease both; }
 }
+@keyframes ambient-drift { to { background-position: 12% 8%, 88% 32%, 54% 94%, 0 0; } }
 @keyframes word { from { opacity: 0; transform: translateY(0.5em); } to { opacity: 1; transform: none; } }
 @keyframes rise { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
 @keyframes layers-in { from { opacity: 0.2; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
   html { scroll-behavior: auto; }
   summary::after { transition: none; }
   .hero h1 .w, .hero .actions, .hero-layers { animation: none; }
   .deco { animation: none; transition: none; }
   .tl-mask { display: none; }
 }
+
+/* Shared label colours for the dashboard-style status pills. */
+.status-pill { display: inline-block; background: var(--surface); border-radius: 999px; padding-inline: 0.65em; }
+.status-in-progress { color: var(--progress); }
+.status-changes, .status-decision { color: var(--changes); }
+.status-done { color: var(--done); }
+.flow text[class*="status-"] { fill: currentColor; }
