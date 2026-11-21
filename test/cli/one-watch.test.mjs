@@ -42,7 +42,7 @@ test('the owner keeps the watch while it reviews (up to 45 minutes after it retu
   clock.t += 30 * 60 * 1000; // 30 minutes later, the Claude session is still reviewing: its heartbeat is old, but it holds the watch
   const codex = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
   assert.equal(await run(['queue', '--wait', '300'], codex.ctx), 1);
-  assert.match(codex.text(), /already runs in Claude Code/);
+  assert.match(codex.text(), /Another session \(Claude Code\) took PR #51 to review 30 minutes ago and has not checked since/); // Issue #222
   clock.t += 20 * 60 * 1000; // 50 minutes: the Claude session is gone
   const later = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
   await run(['queue', '--wait', '300'], later.ctx).catch(() => {});
