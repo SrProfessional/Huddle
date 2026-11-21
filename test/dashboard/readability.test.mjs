@@ -67,11 +67,12 @@ test('the daily chart exposes every UTC date and count, including zero, and loca
   const date = { dataset: { date: '2026-11-21' }, textContent: '' };
   const month = { dataset: { month: '2026-11-01' }, textContent: '' };
   const bar = { dataset: { date: '2026-11-21', count: '2' }, attrs: {}, setAttribute(k, v) { this.attrs[k] = v; } };
+  const friday = { dataset: { date: '2026-11-20', count: '0' }, setAttribute() {} };
   const detail = { textContent: 'Chart hint' };
   const activate = {};
   const chart = {
     querySelector: () => detail,
-    querySelectorAll: (selector) => ({ '[data-day-label]': [date], '[data-month]': [month], '.day-bar': [bar] })[selector],
+    querySelectorAll: (selector) => ({ '[data-day-label]': [date], '[data-month]': [month], '.day-bar': [friday, bar] })[selector],
     addEventListener: (event, handler) => { activate[event] = handler; },
   };
   for (const [language, label, heading] of [['en-US', 'Sat 21 Nov', 'November'], ['es-CO', 'sáb 21 nov', 'noviembre'], ['!', 'Sat 21 Nov', 'November']]) {
@@ -93,4 +94,14 @@ test('the daily chart exposes every UTC date and count, including zero, and loca
   assert.match(detail.textContent, /2 Issues closed/);
   activate.click({ target: { closest: () => bar } });
   assert.equal(bar.attrs['aria-pressed'], 'false');
+
+  const fridayTarget = { closest: () => friday };
+  activate.pointerover({ target: fridayTarget, pointerType: 'mouse' });
+  assert.equal(detail.textContent, 'Friday, 20 November 2026: No Issues closed');
+  activate.focusin({ target });
+  assert.equal(detail.textContent, 'Saturday, 21 November 2026: 2 Issues closed');
+  activate.pointerout({ pointerType: 'mouse' });
+  assert.equal(detail.textContent, 'Saturday, 21 November 2026: 2 Issues closed');
+  activate.pointerover({ target: fridayTarget, pointerType: 'mouse' });
+  assert.equal(detail.textContent, 'Friday, 20 November 2026: No Issues closed');
 });
