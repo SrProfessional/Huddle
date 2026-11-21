@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Five base skills adapted from MIT-licensed Superpowers (Issue #235): `huddle-tdd`, `huddle-debug`, `huddle-verify`,
+  `huddle-answer-review`, and Coach-only `huddle-brainstorm`. They are concise, work in Claude Code and Codex, retain
+  Huddle's Issue/worktree/review rules, and carry their upstream attribution in `skills/THIRD-PARTY.md`.
 - The website now uses Huddle's dark dashboard palette, system typography, glowing controls and drifting colour.
 - API and subscription prices (Issue #231): the new prices command reports the daily OpenRouter/LiteLLM API table and dated Claude and
   ChatGPT plans; the plan command stores each person's selections locally, and `huddle.json` can carry negotiated plan overrides.

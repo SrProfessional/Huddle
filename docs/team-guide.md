@@ -80,6 +80,11 @@ in the labels run, not a failure; that Issue stays `blocked`.
 
 ## How a task goes
 
+Huddle includes `/huddle-tdd`, `/huddle-debug`, `/huddle-verify`, and `/huddle-answer-review` to guide a Player through
+implementation and Coach feedback. The Coach uses `/huddle-brainstorm` to turn an uncertain request into an Issue; a
+Player does not brainstorm a replacement scope. All five work in Claude Code and Codex and never replace the Coach's
+review and merge role.
+
 1. The Coach writes the Issue (`/huddle-issue`).
 2. `huddle labels`, run by the Coach's session, assigns it when it is ready.
 3. The Player runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
