@@ -9,6 +9,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 - The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
   and keeps one Player watch (`huddle next --wait`, `--codex` in Codex) that wakes the session when there is something to do, with no tokens.
+
+- The Coach merges when the PR/MR is correct and safe (Issue #252): a review asks for changes only for what blocks; a rarer edge case or
+  extra hardening is merged and written right away as a new Issue, instead of another round.
+- Each person's token summary is shared on the `huddle-usage` branch (Issue #230), numbers only, at most once an hour from the session
+  start, written without touching the working tree or the current branch; `huddle usage --team` sums the team and keeps each person apart.
+  Only in a private repo by default: a public one shares nothing unless `share_usage` is `true` in `huddle.json`.
 - Five base skills adapted from MIT-licensed Superpowers (Issue #235): `huddle-tdd`, `huddle-debug`, `huddle-verify`,
   `huddle-answer-review`, and Coach-only `huddle-brainstorm`. They are concise, work in Claude Code and Codex, retain
   Huddle's Issue/worktree/review rules, and carry their upstream attribution in `skills/THIRD-PARTY.md`.

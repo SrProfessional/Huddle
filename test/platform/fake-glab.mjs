@@ -11,6 +11,7 @@ const PROJECT = 'acme/app';
 export const PAGE_SIZE = 2;
 
 export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
+  let visibility = 'private'; // Issue #230: what GET projects/<id> says
   const issues = new Map(); // iid -> { iid, title, description, assignees[login], labels[], state, reviews[], hand }
   const reviews = new Map(); // iid -> { iid, draft, state: 'opened' | 'closed' | 'merged', branch, base, body }
   const branches = new Set(['main']); // the branches that exist on the remote
@@ -78,6 +79,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     if (paginate) need(q.get('per_page') === '100', args);
 
     if (path === 'user') return JSON.stringify(user('SrProfessional'));
+    if (path === `projects/${encodeURIComponent(project)}` && method === 'GET') return JSON.stringify({ path_with_namespace: project, visibility });
     if (path === 'users') {
       need(method === 'GET' && q.get('username'), args);
       const login = q.get('username');
@@ -279,6 +281,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   }
 
   const world = {
+    visibility(v) { visibility = v; },
     issue({ number, title = '', body = '', assignees = [], labels: names = [], state = 'open', reviews: closing = [], milestone = null }) {
       const it = { iid: number, title, description: body, assignees: [...assignees], labels: [...names], state: state === 'open' ? 'opened' : 'closed', reviews: [...closing], milestone };
       // GitLab has no «closed as completed»: an Issue counts as merged only because a merged MR closes it.

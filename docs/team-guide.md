@@ -339,6 +339,20 @@ starts what fits in the capacity, and then **keeps watching** with no tokens; wh
 wakes and goes on. Leave the session open and the computer on; `huddle next --wait-off` stops it, and `huddle status` shows it as
 «player watch». One per person and repo on a machine.
 
+## What the dashboard shares
+
+The Huddle dashboard shows the team's tokens and each person's. For that, each session leaves a summary of its tokens on the branch
+`huddle-usage`, at most once an hour: per day, tool, model and Issue, **numbers only** (never the text of a conversation). That branch
+never mixes with the code, and it has the repo's own visibility: in a private repo only the team sees it. **In a public repo nothing is
+shared** unless the team sets `"share_usage": true` in `huddle.json` (then anyone can see those numbers); `false` turns it off anywhere.
+
+To compare the cost with your plan, say your plan once on your machine: `huddle plan claude=max5 codex=plus`. `huddle prices` shows the API
+prices in use (and where they came from) and the plan table; `huddle usage` shows your own numbers, `huddle usage --team` the team's.
+
+**When the Coach asks for changes.** Only for what blocks: a requirement not done, a failing test, a bug a user would hit, a security or
+privacy hole, data loss, a broken rule. Anything else (a rarer edge case, extra hardening, a nicer structure) does not hold the merge: the
+Coach merges and writes it as a new Issue on the spot.
+
 ## A mixed team: Claude Code and Codex
 
 The Coach and the Players may each work in **Claude Code** or in **OpenAI Codex**, at the same time. One person can be both, on two
