@@ -10,7 +10,7 @@ const read = (rel) => readFileSync(fileURLToPath(new URL(`../../${rel}`, import.
 test('the team guide: the Coach works in Codex or Claude Code, one watch per repo, design work still in Claude Code', () => {
   const t = read('docs/team-guide.md');
   assert.match(t, /\| The Coach \| Claude Code or Codex \|/);
-  assert.match(t, /One watch per repo:/);
+  assert.match(t, /one watch per repo per machine/i);
   assert.match(t, /\*\*What stays in Claude Code:\*\* Design Issues and the review of a design PR/);
   assert.doesNotMatch(t, /A Codex session never reviews or merges/);
   assert.doesNotMatch(t, /What stays in Claude Code in this release:\*\* the Coach's skills/);

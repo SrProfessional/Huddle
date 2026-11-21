@@ -79,6 +79,8 @@ codex plugin marketplace add SrProfessional/Huddle
 codex plugin add huddle@huddle
 ```
 
+[Follow the Mac setup steps](docs/team-guide.md#set-up-huddle-on-a-mac-with-codex) to install the tools and trust the Huddle hook on macOS.
+
 The Codex chat in VS Code has no `/hooks`. Open a terminal in the repo and trust the Huddle hook once in terminal Codex instead: it
 uses the same configuration. The [team guide has the steps](docs/team-guide.md#a-mixed-team-claude-code-and-codex). Then work on an
 Issue with `$huddle-play <n>`. Codex has no `/reload-plugins`: after installing or updating, open a new chat. Codex's sandbox has no
@@ -88,9 +90,12 @@ Adapted but not yet tried live in Codex: `/huddle-bug`, `/huddle-areas`, `/huddl
 Codex on macOS. Design Issues and the review of a design PR stay in Claude Code (they need Claude Design).
 
 In Codex the Coach's skills start with `$` too: `$huddle-setup`, `$huddle-issue`, `$huddle-review`, `$huddle-update`, `$huddle-watch`.
-**One watch per repo**, whatever the tool: on a machine, the first session that turns the watch on reviews and merges; another one says
-«The watch already runs in Codex…» (or in Claude Code) and does not start a second. If the owner goes quiet while it reviews, `/huddle-watch`
-(`$huddle-watch` in Codex) in another session asks «Take over?».
+**One watch per repo per machine.** Huddle keeps its watch marks in `~/.huddle` on that machine. If you use two
+computers as Coach, keep the watch on one at a time. Run `$huddle-watch off` in Codex (or `/huddle-watch off` in Claude
+Code) on the first computer before starting the watch on the other. Players may work on both computers.
+On the same machine, the first session that turns the watch on reviews and merges. A second session reports where the watch is
+running. If the owner goes quiet while it reviews, running
+`$huddle-watch` in Codex (or `/huddle-watch` in Claude Code) in another session asks «Take over?».
 
 ### The settings snippet is a helper
 
