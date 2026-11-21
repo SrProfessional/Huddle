@@ -92,20 +92,30 @@ test('only unambiguous remotes count: ordinary SSH and HTTPS pass; local paths a
   ]) assert.equal(pushGoesTo([bad], gh), false, bad);
 });
 
-test('recovering an expired lock is safe when several sessions do it at once: exactly one reserves (real processes)', async () => {
-  const { writeFileSync, utimesSync } = await import('node:fs');
-  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-stale-'));
+// Fourth review of PR #245: no lock and so nothing to recover. Each hour is a file of its own, created exclusively ('wx'): the
+// operating system lets exactly one caller create a given name, a reservation is never moved or deleted by another caller, and a
+// leftover file (a crashed session, an old hour) only ever stands for its own hour.
+test('one reservation per hour: the first caller of an hour reserves it, every later one in that hour does not, the next hour is free again', async () => {
+  const { reserveWindow } = await import('../../lib/cli/main.mjs');
+  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-hour-'));
   const file = path.join(dir, 'huddle-usage-x.pushed');
-  writeFileSync(`${file}.lock`, 'a crashed holder');
-  const old = new Date(Date.now() - 10 * 60 * 1000);
-  utimesSync(`${file}.lock`, old, old);
-  const main = fileURLToPath(new URL('../../lib/cli/main.mjs', import.meta.url));
-  const child = () => new Promise((resolve) => {
-    const p = spawn(process.execPath, ['--input-type=module', '-e', `import { reserveWindow } from ${JSON.stringify(pathToFileURL(main).href)}; process.stdout.write(String(reserveWindow(${JSON.stringify(file)}, Date.now(), 3600000)));`]);
-    let out = '';
-    p.stdout.on('data', (d) => { out += d; });
-    p.on('close', () => resolve(out.trim()));
-  });
-  const results = await Promise.all([child(), child(), child(), child(), child(), child()]);
-  assert.equal(results.filter((r) => r === 'true').length, 1, results.join(','));
+  const H = 3600000;
+  const t = Date.parse('2026-11-21T10:05:00Z');
+  assert.equal(reserveWindow(file, t, H), true);
+  assert.equal(reserveWindow(file, t + 1000, H), false, 'a second session in the same hour');
+  assert.equal(reserveWindow(file, t + 54 * 60 * 1000, H), false, 'still the same hour');
+  assert.equal(reserveWindow(file, t + 56 * 60 * 1000, H), true, 'the next hour (11:01)');
+});
+
+test('a reservation left by a crashed session never blocks or is moved by a later caller: it stands only for its own hour', async () => {
+  const { reserveWindow } = await import('../../lib/cli/main.mjs');
+  const { writeFileSync, readdirSync } = await import('node:fs');
+  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-left-'));
+  const file = path.join(dir, 'huddle-usage-x.pushed');
+  const H = 3600000;
+  const t = Date.parse('2026-11-21T10:05:00Z');
+  writeFileSync(`${file}.${Math.floor(t / H) - 3}`, ''); // an hour three hours ago, left behind
+  assert.equal(reserveWindow(file, t, H), true);
+  assert.ok(readdirSync(dir).includes(`huddle-usage-x.pushed.${Math.floor(t / H)}`), 'this hour\'s reservation stays valid');
+  assert.equal(reserveWindow(file, t + 1, H), false);
 });
