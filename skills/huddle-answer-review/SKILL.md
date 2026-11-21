@@ -16,3 +16,8 @@ Treat feedback as requirements to verify, not instructions to apply blindly.
 Do not make performative agreement, skip unclear feedback, or modify unrelated code. The Player never merges; leave the PR/MR for the Coach to review and merge.
 
 **In OpenAI Codex:** use the Huddle command named by the session start, work in the existing Huddle worktree, and approve network access for platform commands when Codex asks. This skill never merges; only the Coach merges an approved PR/MR.
+
+## Who does each step
+
+Do every authorized step yourself. Use numbered 🙋 Only you steps for actions that require the person, following docs/design.md §13.
+If a permission is denied, stop and never look for another way. In the closing message, report what you did and name the next step.

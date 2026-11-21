@@ -18,3 +18,8 @@ Never write production code first, keep it as a reference, or turn a test that p
 For a defect, first reproduce it in a failing test. If the cause is unclear, use `huddle-debug` before changing code. Before any completion claim, use `huddle-verify`.
 
 **In OpenAI Codex:** use the Huddle command named by the session start, make the Issue worktree with `git worktree add`, and approve network access for platform commands when Codex asks. This skill never merges; only the Coach merges an approved PR/MR.
+
+## Who does each step
+
+Do every authorized step yourself. Use numbered 🙋 Only you steps for actions that require the person, following docs/design.md §13.
+If a permission is denied, stop and never look for another way. In the closing message, report what you did and name the next step.

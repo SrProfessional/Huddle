@@ -16,3 +16,8 @@ This skill is for the Coach. A Player must stop with: `huddle-brainstorm is for 
 Keep the result small enough for a Player to execute independently, or split it into ordered Issues with dependencies. The resulting Issue remains the shared record for Claude Code and Codex.
 
 **In OpenAI Codex:** use the Huddle command named by the session start and approve network access for platform commands when Codex asks. This skill never merges; only the Coach merges an approved PR/MR.
+
+## Who does each step
+
+Do every authorized step yourself. Use numbered 🙋 Only you steps for actions that require the person, following docs/design.md §13.
+If a permission is denied, stop and never look for another way. In the closing message, report what you did and name the next step.

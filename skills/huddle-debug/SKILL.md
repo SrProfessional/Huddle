@@ -17,3 +17,8 @@ Do not stack guesses, hide warnings, or call a symptom patch a fix. If an experi
 If the Issue cannot continue without a product, security, or architecture decision, follow Huddle's decision flow: preserve the work, explain options and a recommendation to the Coach, and do not invent the answer. Use `huddle-verify` before saying the problem is solved.
 
 **In OpenAI Codex:** use the Huddle command named by the session start and approve network access for platform commands when Codex asks. This skill never merges; only the Coach merges an approved PR/MR.
+
+## Who does each step
+
+Do every authorized step yourself. Use numbered 🙋 Only you steps for actions that require the person, following docs/design.md §13.
+If a permission is denied, stop and never look for another way. In the closing message, report what you did and name the next step.
