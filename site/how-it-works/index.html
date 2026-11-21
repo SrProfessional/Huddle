@@ -84,11 +84,12 @@
             <tbody>
               <tr><th scope="row"><code>ready</code></th><td>Everything it depends on is merged. Waiting for someone.</td></tr>
               <tr><th scope="row"><code>assigned</code></th><td>A Player has it. Not started.</td></tr>
-              <tr><th scope="row"><code>in progress</code></th><td>A session is working on it.</td></tr>
+              <tr><th scope="row"><code class="status-pill status-in-progress">in progress</code></th><td>A session is working on it.</td></tr>
               <tr><th scope="row"><code>in review</code></th><td>A pull request is open and waits for the Coach.</td></tr>
               <tr><th scope="row"><code>blocked</code></th><td>It depends on an Issue that is not merged yet.</td></tr>
-              <tr><th scope="row"><code>needs decision</code></th><td>The session asked the Coach and waits.</td></tr>
-              <tr><th scope="row"><code>changes requested from Coach</code></th><td>The Coach asked for changes and nobody has taken the request yet.</td></tr>
+              <tr><th scope="row"><code class="status-pill status-decision">needs decision</code></th><td>The session asked the Coach and waits.</td></tr>
+              <tr><th scope="row"><code class="status-pill status-changes">changes requested from Coach</code></th><td>The Coach asked for changes and nobody has taken the request yet.</td></tr>
+              <tr><th scope="row"><code class="status-pill status-done">merged</code></th><td>The Coach merged the pull request.</td></tr>
             </tbody>
           </table>
         </div>

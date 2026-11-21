@@ -207,12 +207,45 @@ test('the style sheet uses the approved dark tokens, accessible card text, visib
   }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
   const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
   assert.ok(contrast('#F2F4F8', '#1A1D26') >= 4.5, 'card text contrast is below 4.5:1');
+  const token = (name) => {
+    const value = css.match(new RegExp('--' + name + ':\\s*([^;]+);'))?.[1];
+    assert.ok(value, `missing --${name}`);
+    return value.startsWith('var(--') ? token(value.slice(6, -1)) : value;
+  };
+  const assertPair = (fg, bg) => {
+    const ratio = contrast(token(fg), token(bg));
+    assert.ok(ratio >= 4.5, `--${fg} on --${bg}: ${ratio.toFixed(2)}:1`);
+  };
+  for (const surface of ['bg', 'surface', 'surfaceRaised']) {
+    for (const fg of ['ink', 'muted', 'link']) assertPair(fg, surface);
+  }
+  for (const surface of ['accent', 'accentBright', 'board-ink']) assertPair('on-accent', surface);
+  assertPair('board-ink', 'board-line'); // Copy on hover and active.
+  for (const fg of ['progress', 'done']) assertPair(fg, 'board');
+  for (const fg of ['progress', 'changes', 'done']) assertPair(fg, 'surface');
+  assert.match(css, /\.btn\.ghost\s*\{[^}]*color:\s*var\(--link\)/);
+  assert.match(css, /\.f-box\s*\{[^}]*fill:\s*var\(--surface\)/);
+  assert.match(css, /\.f-bubble text\s*\{[^}]*fill:\s*var\(--on-accent\)/);
+  const landing = read('site/js/landing.js');
+  assert.doesNotMatch(landing, /(?:set|to)\(stops\b[^\n]*opacity/);
+  assert.match(landing, /\.f-side-a \.f-branch/);
+  assert.match(landing, /\.f-side-b \.f-branch/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion/);
   for (const p of pages) {
     const t = html(p);
     assert.match(t, /<meta\s+name="color-scheme"\s+content="dark"/i, `${p}: color-scheme`);
     assert.doesNotMatch(t, /google-analytics|googletagmanager|plausible|hotjar|segment\.com/i, `${p}: tracker`);
+  }
+});
+
+test('status colors appear on both flow layouts and in the label reference', () => {
+  const home = html('index.html');
+  for (const [status, label] of [['in-progress', 'in progress'], ['done', 'merged'],
+    ['decision', 'needs decision'], ['changes', 'changes requested']]) {
+    const tags = home.match(new RegExp('<text class="[^"]*status-' + status + '[^"]*"[^>]*>' + label + '</text>', 'g'));
+    assert.equal(tags?.length, 2, `${label}: expected a colored label in both layouts`);
+    assert.match(html('how-it-works/index.html'), new RegExp('<code class="status-pill status-' + status + '">'));
   }
 });
 

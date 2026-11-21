@@ -9,7 +9,8 @@
   --line: #292E3B;
   --accent: #2F6BFF;
   --accentBright: #4C8DFF;
-  --on-accent: #FFFFFF;
+  --link: #8FB8FF;
+  --on-accent: #000000;
   --progress: #F5A524;
   --changes: #F0476B;
   --done: #5FD068;
@@ -47,11 +48,11 @@ body {
 
 img, svg { max-width: 100%; height: auto; }
 
-a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 0.08em; }
+a { color: var(--link); text-underline-offset: 0.18em; text-decoration-thickness: 0.08em; }
 a:hover { text-decoration-thickness: 0.16em; }
 
 :focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--link);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -148,8 +149,8 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
   display: inline-block;
 }
 .btn { background: linear-gradient(135deg, var(--accent), var(--accentBright)); box-shadow: 0 0 24px rgb(47 107 255 / 0.36); }
-.btn:hover { text-decoration: none; filter: brightness(1.08); box-shadow: 0 0 32px rgb(76 141 255 / 0.52); }
-.btn.ghost { background: transparent; color: var(--accent); }
+.btn:hover, .btn:focus-visible, .btn:active { box-shadow: 0 0 32px rgb(76 141 255 / 0.52); }
+.btn.ghost { background: transparent; color: var(--link); }
 
 /* Hero */
 .hero { padding-block: clamp(3rem, 9vw, 7rem) clamp(2.5rem, 6vw, 4rem); }
@@ -163,7 +164,7 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 }
 .board h2 { color: var(--board-ink); }
 .board .lead { color: var(--board-muted); }
-.board a { color: var(--board-accent); }
+.board a { color: var(--link); }
 .flow { margin-top: 2.5rem; }
 .flow svg { display: block; width: 100%; }
 .flow .wide { display: block; }
@@ -177,7 +178,7 @@ pre code { background: none; border: 0; padding: 0; font-size: inherit; }
 .f-arrow { fill: var(--board-accent); }
 .f-node { fill: var(--board); stroke: var(--board-ink); stroke-width: 3; }
 .f-node-end { fill: var(--board-accent); stroke: var(--board-accent); stroke-width: 3; }
-.f-box { fill: none; stroke: var(--board-accent); stroke-width: 2; }
+.f-box { fill: var(--surface); stroke: var(--board-accent); stroke-width: 2; }
 .f-label { fill: var(--board-ink); font-family: var(--display); font-weight: 700; font-size: 20px; }
 .f-note { fill: var(--board-muted); font-family: var(--text); font-size: 15px; }
 .f-branch-label { fill: var(--board-accent); font-family: var(--display); font-weight: 700; font-size: 17px; }
@@ -231,7 +232,7 @@ summary::after {
   right: 0.2rem;
   top: 0.85rem;
   font-size: 1.5rem;
-  color: var(--accent);
+  color: var(--link);
   transition: transform 0.15s ease;
 }
 details[open] summary::after { transform: rotate(45deg); }
@@ -313,7 +314,7 @@ html.lenis, html.lenis body { height: auto; }
   box-shadow: 0 14px 34px -16px rgb(0 0 0 / 0.62);
   white-space: nowrap;
 }
-.float-card b { color: var(--accent); margin-right: 0.3rem; }
+.float-card b { color: var(--link); margin-right: 0.3rem; }
 .fc1 { top: 14%; right: 9%; }
 .fc2 { top: 38%; right: 26%; }
 .fc3 { top: 60%; right: 6%; }
@@ -321,8 +322,8 @@ html.lenis, html.lenis body { height: auto; }
 @media (max-width: 44rem) {
   .layer-grid { -webkit-mask-image: none; mask-image: none; opacity: 0.6; }
   .fc2, .fc4, .o1, .o2 { display: none; }
-  .fc1 { top: 4%; right: 4%; opacity: 0.8; }
-  .fc3 { top: auto; bottom: 3%; right: 4%; opacity: 0.8; }
+  .fc1 { top: 4%; right: 4%; }
+  .fc3 { top: auto; bottom: 3%; right: 4%; }
 }
 
 /* 2. The problem: five session orbs */
@@ -347,8 +348,8 @@ html.lenis, html.lenis body { height: auto; }
   font-weight: 800;
   font-size: 1.2rem;
 }
-.orb:nth-child(2) .orb-dot { background-color: color-mix(in srgb, var(--accent) 82%, var(--surface)); }
-.orb:nth-child(3) .orb-dot { background-color: color-mix(in srgb, var(--accent) 66%, var(--surface)); }
+.orb:nth-child(2) .orb-dot { background-color: color-mix(in srgb, var(--accent) 82%, var(--accentBright)); }
+.orb:nth-child(3) .orb-dot { background-color: color-mix(in srgb, var(--accent) 66%, var(--accentBright)); }
 .orb:nth-child(4) .orb-dot { background-color: color-mix(in srgb, var(--accent) 90%, var(--ink)); }
 .orb:nth-child(5) .orb-dot { background-color: color-mix(in srgb, var(--accent) 74%, var(--ink)); }
 .orb-tag { font-weight: 700; font-size: 0.95rem; }
@@ -434,7 +435,7 @@ html.lenis, html.lenis body { height: auto; }
   border: 2px solid var(--ink);
   border-radius: 999px;
 }
-.same { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--accent); text-align: center; }
+.same { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--link); text-align: center; }
 .is-active .mark, .is-active .same { will-change: transform, opacity; }
 
 /* 7. Install: a terminal that types its own commands */
@@ -467,10 +468,9 @@ html.lenis, html.lenis body { height: auto; }
   padding: 0.22rem 0.9rem;
   cursor: pointer;
 }
-.copy:hover { background: var(--board-line); }
-.terminal :focus-visible { outline-color: var(--board-accent); }
+.copy:hover, .copy:focus-visible, .copy:active { background: var(--board-line); }
 .terminal pre { background: none; border: 0; border-radius: 0; margin: 0; color: inherit; padding: 1.2rem 1.3rem 1.3rem; }
-.prompt { color: var(--board-accent); user-select: none; }
+.prompt { color: var(--link); user-select: none; }
 .tl { position: relative; display: inline-block; }
 .tl-mask {
   position: absolute;
@@ -513,6 +513,8 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 /* Shared label colours for the dashboard-style status pills. */
+.status-pill { display: inline-block; background: var(--surface); border-radius: 999px; padding-inline: 0.65em; }
 .status-in-progress { color: var(--progress); }
 .status-changes, .status-decision { color: var(--changes); }
 .status-done { color: var(--done); }
+.flow text[class*="status-"] { fill: currentColor; }
