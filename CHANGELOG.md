@@ -11,6 +11,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   fresh worktree (never a merge without that run); a docs-only round is approved without a new run; the Player runs the tests of the area it
   touched while it fixes and the full suite once, right before pushing. No workflow is added.
 
+- The Coach's watch checks every 2 minutes by default instead of 5 (Issue #243), so a ready PR waits less. No setting in `huddle.json`; `/huddle-watch 10m` still sets another interval.
+
 ### Fixed
 
 - Parallel play never goes over the Player's capacity (Issue #240): a request that came back with changes requested and waits for room still
