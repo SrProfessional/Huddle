@@ -136,7 +136,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
       if (fields === 'closedByPullRequestsReferences') return JSON.stringify({ closedByPullRequestsReferences: it.reviews.map((number) => ({ number })) });
       need(false, args);
     }
-    if (a === 'pr' && b === 'list' && args.includes('--head')) {
+    if (a === 'pr' && b === 'list' && args.includes('--head') && values(args, '--state')[0] !== 'merged') {
       // Without a staging branch the fields are exactly today's; with one, the base and the body come too (the link is read from the body).
       const fields = values(args, '--json')[0];
       need(values(args, '--state')[0] === 'open' && (fields === 'number,closingIssuesReferences' || fields === 'number,closingIssuesReferences,baseRefName,body'), args);
@@ -167,11 +167,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
     }
     if (a === 'pr' && b === 'list' && values(args, '--state')[0] === 'merged') {
       // The merged PRs into one base, in the order GitHub lists them (by creation, newest first): the adapter sorts by mergedAt itself.
-      need(values(args, '--json')[0] === 'number,baseRefName,body,mergedAt,mergeCommit' && values(args, '--base').length === 1, args);
+      need(values(args, '--json')[0] === 'number,baseRefName,headRefName,body,mergedAt,mergeCommit' && values(args, '--base').length === 1, args);
       const base = values(args, '--base')[0];
+      const head = values(args, '--head')[0];
       const limit = Number(values(args, '--limit')[0]);
-      return JSON.stringify([...reviews.values()].filter((r) => r.merged && r.base === base).sort((x, y) => y.number - x.number).slice(0, limit)
-        .map((r) => ({ number: r.number, baseRefName: r.base, body: r.body, mergedAt: r.mergedAt, mergeCommit: { oid: `merge${r.number}` } })));
+      return JSON.stringify([...reviews.values()].filter((r) => r.merged && r.base === base && (head === undefined || r.branch === head)).sort((x, y) => y.number - x.number).slice(0, limit)
+        .map((r) => ({ number: r.number, baseRefName: r.base, headRefName: r.branch ?? '', body: r.body, mergedAt: r.mergedAt, mergeCommit: { oid: `merge${r.number}` } })));
     }
     if (a === 'pr' && b === 'merge') {
       need(args.includes('--merge') && !args.includes('--delete-branch'), args);

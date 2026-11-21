@@ -224,7 +224,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
     if (rest === 'merge_requests' && method === 'GET' && q.get('state') === 'merged') {
       // The merged MRs into one target branch, most recently updated first; per_page caps a page (a call without --paginate is one page).
       need(q.get('target_branch') && q.get('order_by') === 'updated_at' && q.get('sort') === 'desc', args);
-      const found = [...reviews.values()].filter((r) => r.state === 'merged' && r.base === q.get('target_branch')).sort((x, y) => y.iid - x.iid).map(mrJson);
+      const found = [...reviews.values()].filter((r) => r.state === 'merged' && r.base === q.get('target_branch') && (q.get('source_branch') === null || r.branch === q.get('source_branch'))).sort((x, y) => y.iid - x.iid).map(mrJson);
       return paginate ? pages(found, true) : JSON.stringify(found.slice(0, Math.min(Number(q.get('per_page') ?? 20), 100)));
     }
     if (rest === 'merge_requests' && method === 'GET') {

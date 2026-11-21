@@ -1274,10 +1274,13 @@ The command includes this checkout and every one of its Git worktrees. Claude Co
 id) so streaming repeats count once. Cache creation uses the reported total or the sum of the 5-minute and 1-hour counts when only
 the breakdown is present. Codex sessions count only when their saved `cwd` is one of those folders. Repeated token snapshots count once,
 and the checkout's Git branch supplies attribution when the event has no branch. The platform adapter resolves each distinct recorded
-branch through its PR or MR: the open one first, and when there is none, the merged ones into the staging and default branches, matched by the head
-branch kept in the subject of the merge commit and read through the same closing keywords as §21 (Issue #266). A finished worktree is removed (§16) but its
-transcripts stay: the Claude Code folders and the Codex sessions of `<checkout>/.claude/worktrees/<name>` still count, and the transcript's own branch (or, failing
-that, the folder name) is the branch. An unresolved branch, such as the default branch, is `no Issue`. A broken or half-written JSONL line
+branch through its PR or MR: the open one first, and when there is none, the merged ones into the staging and default branches, matched by their own
+source branch (`mergedReviews` returns `head`: GitHub's `headRefName`, GitLab's `source_branch`; no merge commit has to be local) and read through the
+same closing keywords as §21. The newest 200 are read once; a branch not among them is asked for by name (`mergedReviews(base, { head })`) (Issue #266). A finished worktree is removed (§16) but its
+transcripts stay: the Claude Code folders and the Codex sessions of `<checkout>/.claude/worktrees/<name>` still count, and the branch the transcript or
+Codex's `session_meta` records (or, failing that, the folder name) is the branch. A folder name is ambiguous (`repo--claude-worktrees-x` is also a sibling
+of `repo`), so a line whose `cwd` is not inside this checkout's `.claude/worktrees/` is not counted, and a path differing only in case counts only where the
+filesystem says it is the same folder. An unresolved branch, such as the default branch, is `no Issue`. A broken or half-written JSONL line
 is skipped and named once on stderr, without stopping the report.
 
 `--json` writes exactly `{ person, rows }`: `person` is the platform login read once, and a row is
