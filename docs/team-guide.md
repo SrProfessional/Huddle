@@ -89,10 +89,10 @@ review and merge role.
 2. `huddle labels`, run by the Coach's session, assigns it when it is ready.
 3. The Player runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
 4. It opens the PR/MR with `Closes #N`, the real test counts and «What was NOT done», and ends with «✅ Issue #N finished».
-5. CI runs the tests. The Coach reviews (`/huddle-review`): either requests changes or merges.
+5. The Coach reviews (`/huddle-review`): it reads the change and either requests changes or, about to approve, runs the full suite on the exact head and merges. A docs-only round is approved without a new run (Issue #244).
 6. A request comes as a comment with a `## Prompt for Claude Code` heading. The session picks it up (`huddle take <n>`),
-   pushes the fix and comments «Ready for review again» with the counts. Before the PR/MR and before «Ready for review again», the
-   session merges the base branch in and runs the tests again, so the Coach reviews a branch that is up to date (Issue #195).
+   pushes the fix and comments «Ready for review again» with the counts. While it works it runs the tests of the area it touched; before the PR/MR and before «Ready for review again», the
+   session merges the base branch in and runs the full suite once, so the Coach reviews a branch that is up to date (Issue #195).
 
 ## Who does each step
 

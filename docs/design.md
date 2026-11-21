@@ -664,6 +664,15 @@ two minutes with their own login: no Claude tokens and no CI minutes while it wa
 (`huddle queue --wait`): no Claude tokens while nothing waits; the session's model works only on what waits. The guides and the website
 say both.
 
+**Faster review rounds (Issue #244, decided 2026-11-21).** Each round used to run the whole suite twice (the Player before pushing, the Coach
+again in a clean copy), about 8 minutes of tests for even a one-line change. Now, and never CI (its minutes end up paid, so no workflow is added
+or widened, for this repo or a project's): the Coach reads the change first and runs the full suite **only when it is about to approve**; when it
+already has something to ask for, it asks without running the tests, since another round follows anyway. Before any approval and merge the
+full suite runs in a fresh worktree on the exact head it merges (the watch's recheck too): never a merge without that run. A docs-only round
+(the delta since `Reviewed head:` touches no code and no test) is approved without a new run, saying so in the review: the head's last full run
+by the Coach, in an earlier round of the same PR, stands. The Player runs the tests of the area it touches while it fixes and the full suite once,
+right before pushing, after merging the base; the counts it reports are that last full run's.
+
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
 computer off, starting the watch when a session opens, a cheaper model for the reviews (the review and the merge are the steps that need
 the most judgment).

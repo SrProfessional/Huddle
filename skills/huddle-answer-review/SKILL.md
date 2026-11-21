@@ -10,7 +10,7 @@ Treat feedback as requirements to verify, not instructions to apply blindly.
 1. Continue the Issue with `/huddle-play <n>` so Huddle takes the Coach's pending prompt. Read every item and the affected code before changing anything.
 2. For each item, check it against the Issue, tests, existing behavior, and the reason for the current code. Ask the Coach only when the request is ambiguous, conflicts with a settled product decision, or needs authority the Player does not have.
 3. State a concise technical reason when a suggestion is unsafe or unnecessary; do not implement it merely because it was suggested.
-4. Implement accepted corrections one at a time with `huddle-tdd`, then run the relevant tests and the required suite with `huddle-verify`.
+4. Implement accepted corrections one at a time with `huddle-tdd`, then run focused tests while you fix, and the full suite once, right before pushing, with `huddle-verify`.
 5. Push the work, write `Ready for review again` with real counts to a temporary UTF-8 file, and post it with `gh pr comment <pr> --body-file <file>` or `glab api … -F 'body=@file'` on the MR notes endpoint. Never pass the comment inline. Run Huddle labels as `huddle-play` requires.
 
 Do not make performative agreement, skip unclear feedback, or modify unrelated code. The Player never merges; leave the PR/MR for the Coach to review and merge.
