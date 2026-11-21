@@ -1227,3 +1227,11 @@ installed version is read from the running plugin's own `plugin.json`, in Codex 
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
 Codex session live there, apart from Claude Code's: `huddle status` run from one tool does not see the other tool's waits.
+
+## 26. API and plan prices
+
+Decided by the Coach on 2026-11-20: the dashboard compares API token cost with the subscriptions a team pays. The `prices --json` command
+returns the table used, its source and date, plus the dated plan table. API prices come from OpenRouter without a key and are kept for one
+day under `~/.huddle`; when it is unavailable Huddle tries LiteLLM, then uses the last kept copy offline. A model not present in a source is
+`no price`, never an estimate. `lib/usage/plans.json` is the dated USD monthly list; `huddle.json` may override a negotiated plan price or
+seat count under `plans`. Each person stores their own selection once with `plan claude=max5 codex=plus`.
