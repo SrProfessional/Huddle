@@ -80,8 +80,10 @@ test('the detached Player watch queues one message into the Codex chat; a failed
 
 test('one Player watch per repo: another session is refused while it runs; --wait-off stops it and frees it', async () => {
   const a = mk({ setup: () => {} });
-  await run(['next', '--wait'], a.ctx).catch(() => {});
+  Object.assign(a.ctx, { pid: 100, isAlive: () => true, startDetached: () => 101 });
+  assert.equal(await run(['next', '--wait', '--codex'], a.ctx), 0);
   const b = mk({ setup: () => {}, session: { tool: 'codex', id: 'P2' } });
+  Object.assign(b.ctx, { pid: 200, isAlive: () => true });
   b.ctx.readFile = a.ctx.readFile; b.ctx.writeFile = a.ctx.writeFile;
   assert.equal(await run(['next', '--wait'], b.ctx), 1);
   assert.match(b.text(), /The Player's watch already runs in Codex \(another session\)/);

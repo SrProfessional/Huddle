@@ -20,7 +20,8 @@ test('in Codex the play skill never reviews or merges, even on the Coach\'s logi
   const t = read('skills/huddle-play/SKILL.md');
   assert.match(t, /on the Coach's login it reviews and merges as in Claude Code, unless another session holds the watch \(it then reviews\)/);
   assert.doesNotMatch(t, /never review or merge in Codex/);
-  assert.match(t, /every background wait is `node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle" wait <n> --codex`/);
+  assert.match(t, /the background wait of `\$huddle-play <n>` \(one Issue\) is `node "\$\{CLAUDE_PLUGIN_ROOT\}\/bin\/huddle" wait <n> --codex`/);
+  assert.match(t, /`\$huddle-play` with no number uses the Player's watch instead \(`next --wait --codex`, see parallel\.md\), never one wait per Issue/);
   assert.match(t, /sends this session a message to run `\$huddle-play <n>`/);
 });
 
