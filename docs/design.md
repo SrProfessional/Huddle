@@ -1228,10 +1228,40 @@ installed version is read from the running plugin's own `plugin.json`, in Codex 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
 Codex session live there, apart from Claude Code's: `huddle status` run from one tool does not see the other tool's waits.
 
-## 26. API and plan prices
+## 26. The dashboard
 
-Decided by the Coach on 2026-11-20: the dashboard compares API token cost with the subscriptions a team pays. The `prices --json` command
-returns the table used, its source and date, plus the dated plan table. API prices come from OpenRouter without a key and are kept for one
-day under `~/.huddle`; when it is unavailable Huddle tries LiteLLM, then uses the last kept copy offline. A model not present in a source is
-`no price`, never an estimate. `lib/usage/plans.json` is the dated USD monthly list; `huddle.json` may override a negotiated plan price or
-seat count under `plans`. Each person stores their own selection once with `plan claude=max5 codex=plus`.
+The first dashboard data is local-only token accounting. `huddle usage [--json] [--since <YYYY-MM-DD>]` reads the Claude Code project
+transcripts below `<CLAUDE_CONFIG_DIR or ~/.claude>/projects/` and Codex sessions below `<CODEX_HOME or ~/.codex>/sessions/`. It never
+sends a transcript, prompt, answer, path outside this checkout, or token total to the platform.
+
+The command includes this checkout and every one of its Git worktrees. Claude Code assistant entries are keyed by `requestId` (or message
+id) so streaming repeats count once. Cache creation uses the reported total or the sum of the 5-minute and 1-hour counts when only
+the breakdown is present. Codex sessions count only when their saved `cwd` is one of those folders. Repeated token snapshots count once,
+and the checkout's Git branch supplies attribution when the event has no branch. The platform adapter resolves each distinct recorded
+branch through its PR or MR. An unresolved branch is `no Issue`. A broken or half-written JSONL line
+is skipped and named once on stderr, without stopping the report.
+
+`--json` writes exactly `{ person, rows }`: `person` is the platform login read once, and a row is
+`{ day, tool, model, issue, input, output, cacheRead, cacheWrite, reasoning }`. The rows group totals by day, tool, model and Issue;
+every usage value is a number and no message text appears in the output. The plain report shows those same columns. `--since` keeps days on
+or after the inclusive date.
+
+### API and plan prices
+
+The dashboard compares API token cost with subscriptions. `prices --json` returns the API table, its source and date, and the dated plan
+table. Huddle keeps OpenRouter prices for one day under `~/.huddle` and tries LiteLLM if OpenRouter is unavailable. If both fail, it uses
+the last kept copy. An unknown model or ambiguous bare name without an exact match or explicit alias is reported as `no price`.
+
+The 2026-11-20 snapshot in `lib/usage/plans.json` uses US list prices in USD. `monthly_usd` is the monthly-billed rate, per seat where
+marked. `annual_monthly_equivalent_usd` is the public monthly equivalent for annual billing where available.
+
+- Claude Pro is $20 monthly or $200 per year (about $16.67 per month). The `max5` key maps to Max at $100, and `max20` maps to Ultra
+  (formerly Max 20x) at $200, both billed monthly. [Claude pricing](https://claude.com/pricing), [Ultra plan](https://support.claude.com/en/articles/17728952-what-is-the-ultra-plan).
+- Claude Team Standard and Premium are $25 and $125 per seat with monthly billing, and $20 and $100 per seat per month with annual
+  billing. [Claude Team plan](https://support.claude.com/en/articles/9266767-what-is-the-team-plan).
+- ChatGPT Plus is $20 monthly. The `pro` key represents Pro 200 at $200 monthly. The `business` key represents a Standard seat at $25
+  with monthly billing or $20 per month with annual billing. [Plus](https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus),
+  [Pro tiers](https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers), [Business pricing](https://openai.com/business/pricing/).
+
+`huddle.json` may override the rate used for monthly cost calculations or the seat count under `plans`. The annual equivalents remain
+public reference figures. Each person stores their selection with `plan claude=max5 codex=plus`.

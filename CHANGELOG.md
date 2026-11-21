@@ -9,7 +9,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 - API and subscription prices (Issue #231): the new prices command reports the daily OpenRouter/LiteLLM API table and dated Claude and
   ChatGPT plans; the plan command stores each person's selections locally, and `huddle.json` can carry negotiated plan overrides.
-
+- Local token accounting for the dashboard (Issue #229): the new usage command reads Claude Code and Codex transcripts
+  from this machine, across the checkout and its worktrees, grouping numeric totals by day, tool, model and Issue. It never sends the
+  transcript data to the platform; broken or half-written lines are skipped with a stderr warning.
 - Updating Huddle works in Codex (Issue #225): in a Codex session the version notice, `huddle doctor` and `/huddle-update` give Codex's
   steps (`codex plugin marketplace upgrade huddle`, `codex plugin add huddle@huddle`, a new chat) instead of Claude Code's.
 - The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach

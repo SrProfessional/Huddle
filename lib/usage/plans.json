@@ -2,13 +2,13 @@
   "dated": "2026-11-20",
   "currency": "USD",
   "plans": [
-    { "tool": "claude", "plan": "pro", "monthly_usd": 20 },
+    { "tool": "claude", "plan": "pro", "monthly_usd": 20, "annual_monthly_equivalent_usd": 16.67 },
     { "tool": "claude", "plan": "max5", "monthly_usd": 100 },
     { "tool": "claude", "plan": "max20", "monthly_usd": 200 },
-    { "tool": "claude", "plan": "team_standard", "monthly_usd": 30, "per_seat": true },
-    { "tool": "claude", "plan": "team_premium", "monthly_usd": 150, "per_seat": true },
+    { "tool": "claude", "plan": "team_standard", "monthly_usd": 25, "annual_monthly_equivalent_usd": 20, "per_seat": true },
+    { "tool": "claude", "plan": "team_premium", "monthly_usd": 125, "annual_monthly_equivalent_usd": 100, "per_seat": true },
     { "tool": "codex", "plan": "plus", "monthly_usd": 20 },
     { "tool": "codex", "plan": "pro", "monthly_usd": 200 },
-    { "tool": "codex", "plan": "business", "monthly_usd": 25, "per_seat": true }
+    { "tool": "codex", "plan": "business", "monthly_usd": 25, "annual_monthly_equivalent_usd": 20, "per_seat": true }
   ]
 }
