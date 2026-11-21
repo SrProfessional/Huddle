@@ -89,3 +89,73 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(h.world.labelsOf(11), ['assigned']);
   });
 }
+
+// The Coach's review of PR #260: the board and `huddle next` classify active work the same way, and a scoped run on the blocker reconciles its file waiters.
+const PROMPT = '## Prompt for Claude Code\n\n```text\nFix it\n```';
+for (const gitlab of [false, true]) {
+  const kind = gitlab ? 'gitlab' : 'github';
+  const ana = (setup) => {
+    const h = harness({ gitlab, setup, wrap: (a) => ({ ...a, me: async () => 'ana' }) });
+    h.ctx.updateCachePath = '/data/u.json';
+    return h;
+  };
+  const waiter = (w) => w.issue({ number: 239, title: 'Waits', body: body(1, ['lib/cli/run.mjs']), assignees: ['ana'], labels: ['assigned'] });
+  const nextWhy = async (h, n) => {
+    h.out.length = 0;
+    await run(['next', '--json'], h.ctx);
+    return JSON.parse(h.text()).wait.find((w) => w.issue === n)?.why;
+  };
+
+  for (const taken of [false, true]) {
+    test(`[${kind}] ${taken ? 'a taken' : 'a pending'} Coach request on an Issue with an open PR holds its files, as huddle next says`, async () => {
+      const h = ana((w) => {
+        w.issue({ number: 5, title: 'Has a PR', body: body(1, ['lib/cli/run.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [50] });
+        w.review({ number: 50 });
+        w.comment(5, { id: 900, author: 'SrProfessional', body: PROMPT, createdAt: '2026-11-05T10:00:00Z', taken });
+        waiter(w);
+      });
+      assert.match(await nextWhy(h, 239), /shares lib\/cli\/run\.mjs with #5/);
+      assert.equal(await run(['labels'], h.ctx), 0, h.errText());
+      assert.deepEqual(h.world.labelsOf(239), ['blocked']);
+    });
+  }
+
+  test(`[${kind}] a PR that is only awaiting review holds nothing, on the board and in huddle next`, async () => {
+    const h = ana((w) => {
+      w.issue({ number: 5, title: 'Awaiting review', body: body(1, ['lib/cli/run.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [50] });
+      w.review({ number: 50 });
+      waiter(w);
+    });
+    assert.equal(await nextWhy(h, 239), undefined);
+    assert.equal(await run(['labels'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(239), ['assigned']);
+  });
+
+  test(`[${kind}] in-progress work with an unmet dependency holds no files, as huddle next says`, async () => {
+    const h = ana((w) => {
+      w.issue({ number: 99, title: 'Open dependency', body: body(1, ['d.mjs']), labels: ['ready'] });
+      w.issue({ number: 5, title: 'Started, waits again', body: body(1, ['lib/cli/run.mjs'], '- #99'), assignees: ['ana'], labels: ['in progress', 'blocked'] });
+      waiter(w);
+    });
+    assert.equal(await nextWhy(h, 239), undefined, 'next can start #239');
+    assert.equal(await run(['labels', '--no-assign'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(239), ['assigned']);
+  });
+
+  test(`[${kind}] labels --issue on the blocker moves its file waiter: start blocks it, closing frees it, the assignee stays`, async () => {
+    const h = ana((w) => {
+      w.issue({ number: 5, title: 'Blocker', body: body(1, ['lib/cli/run.mjs']), assignees: ['ana'], labels: ['assigned'] });
+      waiter(w);
+    });
+    assert.equal(await run(['labels', '--issue', '5', '--started'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(5), ['in progress']);
+    assert.deepEqual(h.world.labelsOf(239), ['blocked'], 'assigned → blocked');
+    assert.deepEqual(h.world.assigneesOf(239), ['ana']);
+    h.world.issue({ number: 5, title: 'Blocker', body: body(1, ['lib/cli/run.mjs']), assignees: ['ana'], labels: ['in progress'], state: 'merged' });
+    h.out.length = 0;
+    assert.equal(await run(['labels', '--issue', '5'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(239), ['assigned'], 'blocked → assigned');
+    assert.deepEqual(h.world.assigneesOf(239), ['ana']);
+    assert.match(h.text(), /#239 → assigned − blocked/);
+  });
+}
