@@ -1,0 +1,5 @@
+{"type":"session_meta","payload":{"cwd":"/repo/.claude/worktrees/h229-usage-collectors","model":"gpt-5"}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":12,"cached_input_tokens":5,"output_tokens":3,"reasoning_output_tokens":2}},"model":"gpt-5"},"timestamp":"2026-11-20T12:00:00Z"}
+{"type":"event_msg","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":12,"cached_input_tokens":5,"output_tokens":3,"reasoning_output_tokens":2}},"model":"gpt-5"},"timestamp":"2026-11-20T12:00:00Z"}
+{"type":"session_meta","payload":{"cwd":"/other","model":"gpt-5"}}
+{"type":"event_msg","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":99,"cached_input_tokens":0,"output_tokens":0,"reasoning_output_tokens":0}}},"timestamp":"2026-11-20T13:00:00Z"}
