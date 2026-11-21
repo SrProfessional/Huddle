@@ -1297,7 +1297,7 @@ or when the visibility cannot be read, it shares nothing and says so, unless `sh
 
 ### API and plan prices
 
-The dashboard compares API token cost with subscriptions. `prices --json` returns the API table, its source and date, and the dated plan
+The dashboard shows API token cost only; it does not compare it with subscriptions. `prices --json` returns the API table, its source and date, and the dated plan
 table. Huddle keeps OpenRouter prices for one day under `~/.huddle` and tries LiteLLM if OpenRouter is unavailable. If both fail, it uses
 the last kept copy. An unknown model or ambiguous bare name without an exact match or explicit alias is reported as `no price`.
 
@@ -1326,11 +1326,9 @@ network read of the command is the API price list (§26 prices), through the sam
 **Data.** The token rows are every person's from the huddle-usage branch, with my own days replaced by the ones read from this machine's transcripts.
 The API cost of a row is its tokens times the price of its model; a model with no price counts nothing and is named, a cache price the source does
 not list charges nothing, and a Codex row's cached tokens (already inside its input) are charged once, at the cache rate; reasoning tokens are part of the
-output. «Paid in plans» is the monthly price of the plan, prorated to the days of the range: my own plan is the one I chose with `plan`; anyone else's is the
-only plan with `seats` that `huddle.json` sets under `plans` for that tool, split per seat when it is one plan for several people; with none, the person and
-tool are named as «plan not set», never guessed. The difference is the API cost minus what the plans cost, shown only when both sides are
-complete. When prices are missing, the API subtotal is marked partial and names the missing tools and models. The summary and the per-person
-tables separate incomplete API costs from plan costs. The token table columns wrap within their cards.
+output. The page shows the API cost only («Would cost by API», per person, tool, model and Issue): it has no plan column, no plan figure and no
+verdict about plans, because the Coach already knows the plan they pay. `huddle plan` and the plan table stay as commands, outside the page. When prices are
+missing, the API subtotal is marked partial and names the missing tools and models. The token table columns wrap within their cards.
 
 **Cost per Issue** groups the rows by Issue (tokens without an Issue are one line apart), sorted by API cost, and divides by the Issue's effort points (its
 «Effort» section, read with the adapter's `issueBody` for a closed Issue). **Pace** reads the last 60 merged PRs/MRs into the staging branch (the default

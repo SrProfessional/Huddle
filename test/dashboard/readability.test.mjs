@@ -23,32 +23,26 @@ const section = (html, id) => html.match(new RegExp('<section id="' + id + '"[^>
 test('token grids fit their cards with a column per header and wrap long values', () => {
   const html = page({ complete: true });
   const tokens = section(html, 'tokens');
-  assert.match(tokens, /Each person<\/h3><div class="table" style="--cols:4">/);
+  assert.match(tokens, /Each person<\/h3><div class="table" style="--cols:3">/);
   assert.match(tokens, /Each tool<\/h3><div class="table" style="--cols:3">/);
-  assert.match(tokens, /Paid in plans/);
+  assert.doesNotMatch(tokens, /Paid in plans/);
   assert.match(html, /\.thead,\.trow\{[^}]*repeat\(calc\(var\(--cols\) - 1\),minmax\(0,1fr\)\)/);
   assert.match(html, /\.thead > span,\.trow > span\{[^}]*overflow-wrap:anywhere/);
 });
 
-test('partial API data names the missing tool and model and separates plan costs', () => {
+test('partial API data names the missing tool and model', () => {
   const html = page();
   const summary = section(html, 'summary');
-  const tokens = section(html, 'tokens');
   assert.match(summary, /\$18\.12<\/span> partial|\$18\.12 partial<\/span>/);
   assert.match(summary, /Claude Code: missing-claude/);
-  assert.match(summary, /class="cost-breakdown"/);
-  assert.doesNotMatch(summary, /Difference|plans cost (less|more)/);
-  assert.doesNotMatch(tokens, /class="thead"[^>]*>[^\n]*Would cost by API[^\n]*Paid in plans<\/span><\/div>[^\n]*class="trow"/);
-  for (const content of [summary, tokens]) {
-    assert.match(content, /what these tokens would cost at API list prices/i);
-    assert.match(content, /what the plans cost for the period/i);
-  }
+  assert.doesNotMatch(summary, /Difference|plans cost (less|more)|cost-breakdown/);
+  for (const content of [summary, section(html, 'tokens')]) assert.match(content, /what these tokens would cost at API list prices/i);
 });
 
-test('complete costs retain the comparison and both columns', () => {
+test('complete costs show the API cost with no comparison', () => {
   const html = page({ complete: true });
-  assert.match(section(html, 'summary'), /Difference/);
-  assert.match(section(html, 'tokens'), /Would cost by API<\/span><span class="num">Paid in plans/);
+  assert.doesNotMatch(section(html, 'summary'), /Difference|Paid in plans/);
+  assert.match(section(html, 'tokens'), /Would cost by API<\/span><\/div>/);
 });
 
 test('the daily chart exposes every UTC date and count, including zero, and localizes the axis', () => {

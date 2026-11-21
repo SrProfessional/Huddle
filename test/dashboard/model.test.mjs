@@ -1,7 +1,7 @@
 // Issue #232: the numbers of the dashboard, from canned rows and canned Issues and PRs. Pure: no network, no files.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildModel, costOf, median, paceOf, paidInPlans, perIssue } from '../../lib/dashboard/model.mjs';
+import { buildModel, costOf, median, paceOf, perIssue } from '../../lib/dashboard/model.mjs';
 
 const MODELS = {
   'anthropic/claude-sonnet-4.5': { input: 0.000003, output: 0.000015, cacheRead: 0.0000003, cacheWrite: 0.00000375 },
@@ -87,23 +87,6 @@ const PLANS = { plans: [
   { tool: 'codex', plan: 'plus', monthly_usd: 20 },
   { tool: 'codex', plan: 'shared', monthly_usd: 60, seats: 3, monthly_total_usd: 180 },
 ], personal: { claude: 'max5', codex: 'plus' } };
-
-test('paid in plans: my own plan, the shared Team plan for the others, split per seat, prorated to the days', () => {
-  const people = { ana: [row({ tool: 'Claude Code' })], me: [row({ tool: 'Claude Code' }), row({ tool: 'Codex' })] };
-  const plans = { ...PLANS, plans: PLANS.plans.filter((p) => p.plan !== 'shared') };
-  const paid = paidInPlans({ people, plans, me: 'me', days: 30 });
-  // me: max5 100 + plus 20; ana: no personal plan, the only Team plan with seats for Claude: 25 per seat
-  assert.equal(paid.total, 145);
-  assert.deepEqual(paid.unknown, []);
-  assert.equal(paidInPlans({ people, plans, me: 'me', days: 15 }).total, 72.5);
-});
-
-test('a plan shared by several people costs each one its share; no plan known is named, not guessed', () => {
-  const people = { ana: [row({ tool: 'Codex' })], luis: [row({ tool: 'Codex' })], me: [row({ tool: 'Claude Code' })] };
-  const paid = paidInPlans({ people, plans: { plans: [{ tool: 'codex', plan: 'shared', monthly_usd: 60, seats: 3 }], personal: {} }, me: 'me', days: 30 });
-  assert.equal(paid.total, 40, 'ana and luis: 60 ÷ 3 each');
-  assert.deepEqual(paid.unknown, ['me: claude']);
-});
 
 test('the model has one block per range, and each range keeps only its days', () => {
   const m = buildModel({
