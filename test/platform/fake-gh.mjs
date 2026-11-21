@@ -132,6 +132,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
         return JSON.stringify({ labels: found.labels.map((name) => ({ name })) });
       }
       const it = issueOf(args[2], args);
+      if (fields === 'body') return JSON.stringify({ body: it.body });
       if (fields === 'closedByPullRequestsReferences') return JSON.stringify({ closedByPullRequestsReferences: it.reviews.map((number) => ({ number })) });
       need(false, args);
     }

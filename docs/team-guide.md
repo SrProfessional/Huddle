@@ -339,6 +339,22 @@ starts what fits in the capacity, and then **keeps watching** with no tokens; wh
 wakes and goes on. Leave the session open and the computer on; `huddle next --wait-off` stops it, and `huddle status` shows it as
 «player watch». One per person and repo on a machine.
 
+## The dashboard
+
+`/huddle-dashboard` (`$huddle-dashboard` in Codex; in a terminal, the `dashboard` command of the CLI) writes one private page, `.huddle/dashboard/index.html`, and opens it in
+your browser. Add `--no-open` to only write it. It is dark, it works with no internet (its three scripts are copied next to it), and it
+stays on your machine: `.huddle/` is ignored by git, which setup and `/huddle-update` add to the `.gitignore`. It shows:
+
+- **Summary**: Issues closed, the team's tokens, what those tokens would cost by API, what the plans cost for the same days, and the difference.
+- **Progress by area**, the same numbers as the «Huddle progress» Issue.
+- **Who does what now**: what is in progress, waiting for review or for a decision, and whether the watch and the waits are alive.
+- **Tokens and cost**: each person, each tool, each model. A model with no price says so.
+- **Cost per Issue**: tokens and API cost of each Issue, per effort point, the most expensive first.
+- **Pace**: Issues closed per day (per week for all time), the median time from the first commit to the merge, and the review rounds (requests for changes) per PR/MR.
+- **Releases**: what is in staging, how much of it was tested, and the last release.
+
+The 7 days, 30 days and all-time buttons change every number that has days. With the operating system set to reduce motion, the page does not move.
+
 ## What the dashboard shares
 
 The Huddle dashboard shows the team's tokens and each person's. For that, each session leaves a summary of its tokens on the branch

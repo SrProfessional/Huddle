@@ -17,6 +17,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The dashboard (Issue #232): `/huddle-dashboard` (`$huddle-dashboard` in Codex; the `dashboard [--no-open]` command of the CLI) writes a private dark page to
+  `.huddle/dashboard/index.html` and opens it: summary (Issues closed, team tokens, would cost by API, paid in plans, the difference), progress by area,
+  who does what now, tokens and cost per person, tool and model, cost per Issue and per effort point, pace (Issues closed per day, median time from start
+  to merge, review rounds) and releases, with a 7 days / 30 days / all filter. Nothing is loaded from the network, and `prefers-reduced-motion` gets a
+  still, complete page. Setup and update add `.huddle/` to `.gitignore`, and the progress Issue says how to open it. The adapters gain `issueBody`.
 - The session start never offers a request another session already took (Issue #239): before asking «Do you want me to continue?» the session runs
   `huddle pending` again, and `huddle take` on a request already marked 👀 says so in one line and exits 1.
 - The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
