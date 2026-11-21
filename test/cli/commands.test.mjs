@@ -56,7 +56,7 @@ test('labels respects max_open_per_person', async () => {
   assert.deepEqual(h.world.assigneesOf(2), [], 'ana already has one open Issue and the cap is 1');
 });
 
-test('take marks each pending request with 👀 and prints the newest prompt; a second take prints nothing', async () => {
+test('take marks each pending request with 👀 and prints the newest prompt; a second take says another session took it and exits 1', async () => {
   const h = harness({ setup: (w) => {
     w.issue({ number: 5, title: 't' });
     w.comment(5, request(101, { body: '## Prompt for Claude Code\n\n```text\nold\n```' }));
@@ -68,8 +68,9 @@ test('take marks each pending request with 👀 and prints the newest prompt; a 
   assert.match(h.text(), /👀/);
   assert.ok(h.world.isTaken(101) && h.world.isTaken(102));
   h.out.length = 0;
-  assert.equal(await run(['take', '5'], h.ctx), 0);
-  assert.equal(h.text(), '');
+  assert.equal(await run(['take', '5'], h.ctx), 1);
+  assert.match(h.text(), /already taken \(👀\) by another session/);
+  assert.doesNotMatch(h.text(), /newest/, 'the prompt is not printed again');
 });
 
 test('only the Coach of huddle.json counts', async () => {

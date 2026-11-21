@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- Parallel play never goes over the Player's capacity (Issue #240): a request that came back with changes requested and waits for room still
+  holds its points, so `huddle next` no longer starts an Issue that would put the used points above the capacity; over capacity it starts nothing
+  and says «6 of 5 points in use: finish one first».
+
 ### Added
 
 - The dashboard (Issue #232): `/huddle-dashboard` (`$huddle-dashboard` in Codex; the `dashboard [--no-open]` command of the CLI) writes a private dark page to
@@ -12,6 +18,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   who does what now, tokens and cost per person, tool and model, cost per Issue and per effort point, pace (Issues closed per day, median time from start
   to merge, review rounds) and releases, with a 7 days / 30 days / all filter. Nothing is loaded from the network, and `prefers-reduced-motion` gets a
   still, complete page. Setup and update add `.huddle/` to `.gitignore`, and the progress Issue says how to open it. The adapters gain `issueBody`.
+- The session start never offers a request another session already took (Issue #239): before asking «Do you want me to continue?» the session runs
+  `huddle pending` again, and `huddle take` on a request already marked 👀 says so in one line and exits 1.
 - The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
   and keeps one Player watch (`huddle next --wait`, `--codex` in Codex) that wakes the session when there is something to do, with no tokens.
 

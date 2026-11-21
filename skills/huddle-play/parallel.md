@@ -39,6 +39,7 @@ Read only its summary; never read the diff or its files here. Then:
 - **It stopped for anything else** (a permission, a missing credential, a dependency): tell the Player in one line, and do not retry it.
 
 Then run `huddle next --json` again: an Issue in review uses no room, so the next one that fits can start (step 2).
+When `used` is above `capacity` (a request came back), nothing new starts: wait for the work to end, then run `huddle next --json` again.
 
 ## 4. Resume an Issue (the Coach answered)
 
