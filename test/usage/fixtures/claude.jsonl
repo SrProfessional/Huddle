@@ -1,0 +1,4 @@
+{"type":"assistant","requestId":"request-1","timestamp":"2026-11-19T10:00:00Z","gitBranch":"h229-usage-collectors","message":{"model":"claude-sonnet-4-5","usage":{"input_tokens":10,"output_tokens":4,"cache_creation_input_tokens":6,"cache_creation":{"ephemeral_5m_input_tokens":2,"ephemeral_1h_input_tokens":4},"cache_read_input_tokens":3}}}
+{"type":"assistant","requestId":"request-1","timestamp":"2026-11-19T10:00:01Z","gitBranch":"h229-usage-collectors","message":{"model":"claude-sonnet-4-5","usage":{"input_tokens":10,"output_tokens":4,"cache_creation_input_tokens":6,"cache_read_input_tokens":3}}}
+{"type":"assistant","requestId":"request-2","timestamp":"2026-11-20T10:00:00Z","gitBranch":"other","message":{"model":"claude-haiku","usage":{"input_tokens":2,"output_tokens":1,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}
+{broken
