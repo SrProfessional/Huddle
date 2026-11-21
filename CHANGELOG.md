@@ -5,6 +5,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- Parallel play never goes over the Player's capacity (Issue #240): a request that came back with changes requested and waits for room still
+  holds its points, so `huddle next` no longer starts an Issue that would put the used points above the capacity; over capacity it starts nothing
+  and says «6 of 5 points in use: finish one first».
+
 ### Added
 
 - The session start never offers a request another session already took (Issue #239): before asking «Do you want me to continue?» the session runs

@@ -1033,6 +1033,10 @@ docs do not promise it in the VS Code extension), and runs `huddle next` again w
 in the main session; closing the main session stops them. Each subagent makes its own worktree from the staging branch with git (the
 Agent tool's worktree isolation starts from the default branch).
 
+**Never above the capacity (Issue #240).** A request that came back (changes requested) is active work again even while it waits for room or a shared file, so
+its points count in `used` and a new start is weighed against them (only a request that waits for an open dependency holds nothing). When `used` is
+already above the capacity, `schedule` starts nothing and says why on each Issue: «6 of 5 points in use: finish one first» (before any shared-file reason), and `next` also gives the overall reason in words («Over capacity: …») and in `--json` (`over`).
+
 **Parallel reviews (Issue #165).** When several PRs/MRs wait, the Coach's watch reviews them at once, each in a background subagent with
 a clean context, while the sum of their efforts stays within `review_capacity` in `huddle.json` (default **5** points; a PR/MR bigger than
 it is reviewed alone). Each review item of `huddle queue --json` and `queue --wait` carries its Issue's `effort` (2 when it has none). A
