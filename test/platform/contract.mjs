@@ -516,17 +516,19 @@ export function contract({ name, create }) {
 
   t('mergedReviews(base, { limit }) lists the merged PRs/MRs into that base, newest first, at most limit', async ({ adapter, world }) => {
     world.review({ number: 40, base: 'staging', body: 'Closes #1', merged: true, mergedAt: '2026-11-01T00:00:00Z' });
-    world.review({ number: 41, base: 'staging', body: 'Closes #2', merged: true, mergedAt: '2026-11-03T00:00:00Z' });
+    world.review({ number: 41, base: 'staging', branch: 'h41', body: 'Closes #2', merged: true, mergedAt: '2026-11-03T00:00:00Z' });
     world.review({ number: 42, base: 'staging', body: 'Closes #3', merged: true, mergedAt: '2026-11-02T00:00:00Z' });
     world.review({ number: 43, base: 'main', body: 'Closes #4', merged: true, mergedAt: '2026-11-04T00:00:00Z' });
     world.review({ number: 44, base: 'staging', body: 'Closes #5' });
     world.review({ number: 45, base: 'staging', open: false, body: 'Closes #6' });
     const all = await adapter.mergedReviews('staging');
     assert.deepEqual(all.map((r) => r.number), [41, 42, 40], 'merged into staging only, newest first');
-    assert.deepEqual(all[0], { number: 41, base: 'staging', body: 'Closes #2', mergedAt: '2026-11-03T00:00:00Z', mergeSha: 'merge41' }, 'with the sha of its merge commit');
+    assert.deepEqual(all[0], { number: 41, base: 'staging', head: 'h41', body: 'Closes #2', mergedAt: '2026-11-03T00:00:00Z', mergeSha: 'merge41' }, 'with the sha of its merge commit');
     assert.deepEqual((await adapter.mergedReviews('staging', { limit: 2 })).map((r) => r.number), [41, 42]);
     assert.deepEqual((await adapter.mergedReviews('main')).map((r) => r.number), [43]);
     assert.deepEqual(await adapter.mergedReviews('other'), []);
+    assert.deepEqual((await adapter.mergedReviews('staging', { head: 'h41' })).map((r) => r.number), [41], 'only those from the source branch asked for (Issue #266)');
+    assert.deepEqual(await adapter.mergedReviews('staging', { head: 'nobody' }), []);
   });
 
   t('openReview({ base, head, title, body }) opens a PR/MR and gives its number and url; it is open, not merged, and carries the body (H49)', async ({ adapter, world }) => {

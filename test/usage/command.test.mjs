@@ -44,7 +44,7 @@ test('usage resolves checkout and worktree branches through canned staging PR re
   assert.equal(await run(['usage', '--json'], h.ctx), 0);
   const rows = JSON.parse(h.text()).rows;
   assert.deepEqual(rows.map(({ issue, input }) => [issue, input]), [[229, 12], ['no Issue', 7]]);
-  assert.deepEqual(h.calls().filter(({ args }) => args.includes('--head')).map(({ args }) => args[args.indexOf('--head') + 1]).sort(),
+  assert.deepEqual(h.calls().filter(({ args }) => args.includes('--head') && args.includes('open')).map(({ args }) => args[args.indexOf('--head') + 1]).sort(),
     ['h94-usage-collectors', 'h95-unresolved']);
   assert.doesNotMatch(h.text(), /synthetic private text/);
 });
