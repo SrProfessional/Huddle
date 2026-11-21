@@ -399,7 +399,7 @@ says once when this machine has Codex but no Huddle in it, and `huddle doctor` s
 
 **Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`, then open a new chat. A
 changed hook needs trust again, so repeat steps 3–5 in terminal Codex (not the VS Code chat, which has no `/hooks`). The Coach then runs
-`/huddle-update` in each repo, as after any update.
+`$huddle-update` in each repo (`/huddle-update` in Claude Code), as after any update.
 
 ## Add or remove someone
 

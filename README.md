@@ -87,6 +87,11 @@ network, so approve network access when Codex asks to run `git push`, `gh`, `gla
 Adapted but not yet tried live in Codex: `/huddle-bug`, `/huddle-areas`, `/huddle-team`, playing several Issues in parallel, GitLab, and
 Codex on macOS. Design Issues and the review of a design PR stay in Claude Code (they need Claude Design).
 
+In Codex the Coach's skills start with `$` too: `$huddle-setup`, `$huddle-issue`, `$huddle-review`, `$huddle-update`, `$huddle-watch`.
+**One watch per repo**, whatever the tool: on a machine, the first session that turns the watch on reviews and merges; another one says
+«The watch already runs in Codex…» (or in Claude Code) and does not start a second. If the owner goes quiet while it reviews, `/huddle-watch`
+(`$huddle-watch` in Codex) in another session asks «Take over?».
+
 ### The settings snippet is a helper
 
 `/huddle-setup` also writes this into the project's `.claude/settings.json`. It enables the plugin for the project and,

@@ -75,3 +75,45 @@ test('the home page says each person gets their language, and no longer asks for
   assert.match(home, /chats with each person in their language from the first message/);
   assert.doesNotMatch(home, /only token is a GitLab CI variable/);
 });
+
+// Review round of PR #228: the Codex entry points are the $-commands, and the pages signpost the rest of the contract.
+test('the home page shows $huddle-setup for Codex next to /huddle-setup', () => {
+  const t = flat('site/index.html');
+  assert.match(t, /\/huddle-setup/);
+  assert.match(t, /\$huddle-setup/);
+});
+
+test('the get-started page shows $huddle-setup and $huddle-issue for Codex, and signposts language, one watch and the tested scope', () => {
+  const r = raw('site/get-started/index.html');
+  const t = flat('site/get-started/index.html');
+  for (const c of ['/huddle-setup', '$huddle-setup', '/huddle-issue', '$huddle-issue']) assert.ok(t.includes(c), c);
+  assert.match(t, /in (their|your) language/i);
+  assert.match(t, /one watch per repo/i);
+  assert.match(t, /not yet tried live in Codex/i);
+  assert.match(r, /<h3 id="codex">In OpenAI Codex<\/h3>/);
+  assert.match(r, /href="https:\/\/github\.com\/SrProfessional\/Huddle\/blob\/main\/docs\/team-guide\.md#a-mixed-team-claude-code-and-codex"/);
+});
+
+test('the how-it-works page uses $huddle-play, $huddle-review and $huddle-watch for Codex, and signposts language, the tested scope and the install', () => {
+  const r = raw('site/how-it-works/index.html');
+  const t = flat('site/how-it-works/index.html');
+  assert.match(t, /\$huddle-play <n>\s*in Codex/);
+  assert.match(t, /\$huddle-review\s*in a Codex Coach session/);
+  assert.match(t, /\$huddle-watch\s*in Codex\s*\)\s*in another session asks «Take over\?»/);
+  assert.match(t, /in their language/i);
+  assert.match(t, /not yet tried live in Codex/i);
+  assert.match(r, /href="\.\.\/get-started\/#codex"/);
+});
+
+test('the team guide\'s Codex update paragraph runs $huddle-update', () => {
+  const p = raw('docs/team-guide.md').split(/\r?\n\r?\n/).find((x) => x.startsWith('**Updating Huddle in Codex:**'));
+  assert.ok(p, 'no «Updating Huddle in Codex» paragraph');
+  assert.match(p, /\$huddle-update/);
+});
+
+test('the README\'s Codex section states the one-watch rule', () => {
+  const m = raw('README.md').match(/^### In OpenAI Codex[^\n]*\n([\s\S]*?)(?=^### )/m);
+  assert.ok(m, 'no Codex section');
+  assert.match(m[1], /One watch per repo/);
+  assert.match(m[1], /\$huddle-setup|\$huddle-watch/);
+});
