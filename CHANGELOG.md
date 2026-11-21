@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- Claude Code model names find their API price (Issue #265): `claude-opus-5-5` (with an optional date suffix) matches `anthropic/claude-opus-5.5` by a general rule, so the dashboard stops saying «no price» for them. The old aliases still work, and an unknown family or version still has no price.
+
 ### Changed
 
 - An assigned Issue that waits for a file it shares with an active Issue shows `blocked` on the board (Issue #250), as a dependency wait does, with the Issue and the file in the output of `huddle labels` and `huddle next`; it goes back to `assigned` when the conflict clears. No new label; a wait for capacity alone stays `assigned`.
