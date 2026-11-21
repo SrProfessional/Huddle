@@ -1227,3 +1227,21 @@ installed version is read from the running plugin's own `plugin.json`, in Codex 
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
 Codex session live there, apart from Claude Code's: `huddle status` run from one tool does not see the other tool's waits.
+
+## 26. The dashboard
+
+The first dashboard data is local-only token accounting. `huddle usage [--json] [--since <YYYY-MM-DD>]` reads the Claude Code project
+transcripts below `<CLAUDE_CONFIG_DIR or ~/.claude>/projects/` and Codex sessions below `<CODEX_HOME or ~/.codex>/sessions/`. It never
+sends a transcript, prompt, answer, path outside this checkout, or token total to the platform.
+
+The command includes this checkout and every one of its Git worktrees. Claude Code assistant entries are keyed by `requestId` (or message
+id) so streaming repeats count once. Cache creation uses the reported total or the sum of the 5-minute and 1-hour counts when only
+the breakdown is present. Codex sessions count only when their saved `cwd` is one of those folders. Repeated token snapshots count once,
+and the checkout's Git branch supplies attribution when the event has no branch. The platform adapter resolves each distinct recorded
+branch through its PR or MR. An unresolved branch is `no Issue`. A broken or half-written JSONL line
+is skipped and named once on stderr, without stopping the report.
+
+`--json` writes exactly `{ person, rows }`: `person` is the platform login read once, and a row is
+`{ day, tool, model, issue, input, output, cacheRead, cacheWrite, reasoning }`. The rows group totals by day, tool, model and Issue;
+every usage value is a number and no message text appears in the output. The plain report shows those same columns. `--since` keeps days on
+or after the inclusive date.
