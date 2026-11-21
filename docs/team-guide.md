@@ -332,6 +332,13 @@ installed or not on the PATH of this terminal» (with the install command for th
 terminal, or reload the PATH») and «is not logged in» (with `gh auth login` or `glab auth login`, plus `--hostname <host>`
 when `huddle.json` has a host). The SessionStart hook stays silent in both cases.
 
+## The Player keeps working by itself
+
+`/huddle-play` (`$huddle-play` in Codex) with no number works like the Coach's watch: it first resumes what the Coach answered, then
+starts what fits in the capacity, and then **keeps watching** with no tokens; when an Issue can start or the Coach answers one, the session
+wakes and goes on. Leave the session open and the computer on; `huddle next --wait-off` stops it, and `huddle status` shows it as
+«player watch». One per person and repo on a machine.
+
 ## A mixed team: Claude Code and Codex
 
 The Coach and the Players may each work in **Claude Code** or in **OpenAI Codex**, at the same time. One person can be both, on two
