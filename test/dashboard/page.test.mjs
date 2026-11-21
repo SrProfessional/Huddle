@@ -29,7 +29,7 @@ const page = (over) => renderPage(buildModel(data(over)));
 test('every section is on the page, with the filter of 7 days, 30 days and all', () => {
   const html = page();
   for (const id of ['summary', 'progress', 'now', 'tokens', 'per-issue', 'pace', 'releases']) assert.match(html, new RegExp(`<section[^>]*id="${id}"`), id);
-  for (const text of ['Issues closed', 'Team tokens', 'Would cost by API', 'Paid in plans', 'Difference', 'Progress by area', 'Who does what now', 'Tokens and cost', 'Cost per Issue', 'Pace', 'Releases']) assert.ok(html.includes(text), text);
+  for (const text of ['Issues closed', 'Team tokens', 'Would cost by API', 'Paid in plans', 'Progress by area', 'Who does what now', 'Tokens and cost', 'Cost per Issue', 'Pace', 'Releases']) assert.ok(html.includes(text), text);
   for (const key of ['7', '30', 'all']) assert.match(html, new RegExp(`data-range="${key}"`));
   assert.match(html, />7 days</);
   assert.match(html, />30 days</);

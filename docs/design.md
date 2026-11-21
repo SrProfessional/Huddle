@@ -1328,13 +1328,17 @@ The API cost of a row is its tokens times the price of its model; a model with n
 not list charges nothing, and a Codex row's cached tokens (already inside its input) are charged once, at the cache rate; reasoning tokens are part of the
 output. «Paid in plans» is the monthly price of the plan, prorated to the days of the range: my own plan is the one I chose with `plan`; anyone else's is the
 only plan with `seats` that `huddle.json` sets under `plans` for that tool, split per seat when it is one plan for several people; with none, the person and
-tool are named as «plan not set», never guessed. The difference is the API cost minus what the plans cost.
+tool are named as «plan not set», never guessed. The difference is the API cost minus what the plans cost, shown only when both sides are
+complete. When prices are missing, the API subtotal is marked partial and names the missing tools and models. The summary and the per-person
+tables separate incomplete API costs from plan costs. The token table columns wrap within their cards.
 
 **Cost per Issue** groups the rows by Issue (tokens without an Issue are one line apart), sorted by API cost, and divides by the Issue's effort points (its
 «Effort» section, read with the adapter's `issueBody` for a closed Issue). **Pace** reads the last 60 merged PRs/MRs into the staging branch (the default
 branch with none) that close Issues: Issues closed per day (per week for all time), the median hours from the PR/MR's first commit to its merge, and the
 review rounds, which are the Coach's «Prompt for Claude Code» requests on the PR/MR or its Issues before the merge. The first commit stands for «in progress»
-because the platform gives no timestamp for a label through the adapters; a read that fails leaves only that number out.
+because the platform gives no timestamp for a label through the adapters; a read that fails leaves only that number out. The daily chart
+labels its UTC dates and months in the browser's language, with English as the fallback. Each day shows its date and count on hover, focus
+or tap, including days with zero Issues, and exposes that information to screen readers.
 
 **Style and motion.** Dark only: background #0F1117 with drifting light, cards #1A1D26 and #1D2130 with 24 px radius, text #F2F4F8 and #A3A8B6, blue
 #2F6BFF to #4C8DFF, orange #F5A524 (in progress), pink #F0476B (changes or decision; its text is #F25A7A, for 4.5:1 on both cards) and green #5FD068 (done).
