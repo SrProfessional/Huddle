@@ -60,6 +60,13 @@ it found, a Player's technical question), says in one line what it decided and w
 (what users see or do, a feature's scope, priorities), money, accounts or secrets, security or privacy, deleting work or data, and
 production.
 
+## Prices
+
+Run `plan claude=max5 codex=plus` once to save the subscriptions you personally use, then `prices --json` for the API-price
+source and date plus every plan. API prices refresh daily from OpenRouter, fall back to LiteLLM, and keep the last good copy for offline
+work. Unknown models say `no price`; Huddle never invents one. The Coach can put a negotiated per-seat price or seat count under `plans`
+in `huddle.json`.
+
 The `CLAUDE.md` block has «Standing orders of the Coach»: in the Coach's own sessions, merging a reviewed Issue PR/MR into staging,
 `huddle land`, the labels, and the PRs/MRs of `/huddle-update` and `/huddle-team` need no confirmation. Only `/huddle-release` (staging to
 production) asks. A Coach who also works on an Issue (a team of one) goes on from the PR/MR to the review and the merge by itself.

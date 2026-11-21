@@ -37,6 +37,7 @@ test('brainstorming is Coach-only and creates an Issue instead of a local spec',
 test('the attribution keeps the MIT notice and locks the upstream revision', () => {
   const text = read('skills/THIRD-PARTY.md');
   assert.match(text, /MIT License/);
+  assert.match(text, /^Copyright \(c\) 2025 Jesse Vincent$/m);
   assert.match(text, /obra\/superpowers/);
   assert.match(text, /22f0b463e7a5e579904dd6211a520321035526f7/);
 });

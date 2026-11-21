@@ -1245,3 +1245,23 @@ is skipped and named once on stderr, without stopping the report.
 `{ day, tool, model, issue, input, output, cacheRead, cacheWrite, reasoning }`. The rows group totals by day, tool, model and Issue;
 every usage value is a number and no message text appears in the output. The plain report shows those same columns. `--since` keeps days on
 or after the inclusive date.
+
+### API and plan prices
+
+The dashboard compares API token cost with subscriptions. `prices --json` returns the API table, its source and date, and the dated plan
+table. Huddle keeps OpenRouter prices for one day under `~/.huddle` and tries LiteLLM if OpenRouter is unavailable. If both fail, it uses
+the last kept copy. An unknown model or ambiguous bare name without an exact match or explicit alias is reported as `no price`.
+
+The 2026-11-20 snapshot in `lib/usage/plans.json` uses US list prices in USD. `monthly_usd` is the monthly-billed rate, per seat where
+marked. `annual_monthly_equivalent_usd` is the public monthly equivalent for annual billing where available.
+
+- Claude Pro is $20 monthly or $200 per year (about $16.67 per month). The `max5` key maps to Max at $100, and `max20` maps to Ultra
+  (formerly Max 20x) at $200, both billed monthly. [Claude pricing](https://claude.com/pricing), [Ultra plan](https://support.claude.com/en/articles/17728952-what-is-the-ultra-plan).
+- Claude Team Standard and Premium are $25 and $125 per seat with monthly billing, and $20 and $100 per seat per month with annual
+  billing. [Claude Team plan](https://support.claude.com/en/articles/9266767-what-is-the-team-plan).
+- ChatGPT Plus is $20 monthly. The `pro` key represents Pro 200 at $200 monthly. The `business` key represents a Standard seat at $25
+  with monthly billing or $20 per month with annual billing. [Plus](https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus),
+  [Pro tiers](https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers), [Business pricing](https://openai.com/business/pricing/).
+
+`huddle.json` may override the rate used for monthly cost calculations or the seat count under `plans`. The annual equivalents remain
+public reference figures. Each person stores their selection with `plan claude=max5 codex=plus`.

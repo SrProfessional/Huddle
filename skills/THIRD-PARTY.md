@@ -7,9 +7,9 @@
 [obra/superpowers](https://github.com/obra/superpowers), at upstream commit
 [22f0b463e7a5e579904dd6211a520321035526f7](https://github.com/obra/superpowers/tree/22f0b463e7a5e579904dd6211a520321035526f7).
 
-Copyright (c) Jesse Vincent and the Superpowers contributors.
-
 MIT License
+
+Copyright (c) 2025 Jesse Vincent
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
