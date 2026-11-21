@@ -664,6 +664,15 @@ two minutes with their own login: no Claude tokens and no CI minutes while it wa
 (`huddle queue --wait`): no Claude tokens while nothing waits; the session's model works only on what waits. The guides and the website
 say both.
 
+**Faster review rounds (Issue #244, decided 2026-11-21).** Each round used to run the whole suite twice (the Player before pushing, the Coach
+again in a clean copy), about 8 minutes of tests for even a one-line change. Now, and never CI (its minutes end up paid, so no workflow is added
+or widened, for this repo or a project's): the Coach reads the change first and runs the full suite **only when it is about to approve**; when it
+already has something to ask for, it asks without running the tests, since another round follows anyway. Before any approval and merge the
+full suite runs in a fresh worktree on the exact head it merges (the watch's recheck too): never a merge without that run. A docs-only round
+(the delta since `Reviewed head:` touches no code and no test) is approved without a new run, saying so in the review: the head's last full run
+by the Coach, in an earlier round of the same PR, stands. The Player runs the tests of the area it touches while it fixes and the full suite once,
+right before pushing, after merging the base; the counts it reports are that last full run's.
+
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
 computer off, starting the watch when a session opens, a cheaper model for the reviews (the review and the merge are the steps that need
 the most judgment).
@@ -1305,3 +1314,30 @@ marked. `annual_monthly_equivalent_usd` is the public monthly equivalent for ann
 
 `huddle.json` may override the rate used for monthly cost calculations or the seat count under `plans`. The annual equivalents remain
 public reference figures. Each person stores their selection with `plan claude=max5 codex=plus`.
+
+### The dashboard page (Issue #232)
+
+The `dashboard [--no-open]` command of the CLI (`/huddle-dashboard` in Claude Code, `$huddle-dashboard` in Codex) writes `.huddle/dashboard/index.html` and copies
+`gsap.min.js`, `ScrollTrigger.min.js` and `lenis.min.js` from `site/vendor/` next to it, then opens the page with the system's program (`start`, `open`
+or `xdg-open`); `--no-open` only writes it. `.huddle/` is ignored by git: setup and update add it to the repo's `.gitignore` (any of `.huddle`,
+`.huddle/`, `/.huddle`, `/.huddle/` already there counts, and the line takes the file's own line ending). The page loads nothing from the network; the only
+network read of the command is the API price list (§26 prices), through the same daily cache.
+
+**Data.** The token rows are every person's from the huddle-usage branch, with my own days replaced by the ones read from this machine's transcripts.
+The API cost of a row is its tokens times the price of its model; a model with no price counts nothing and is named, a cache price the source does
+not list charges nothing, and a Codex row's cached tokens (already inside its input) are charged once, at the cache rate; reasoning tokens are part of the
+output. «Paid in plans» is the monthly price of the plan, prorated to the days of the range: my own plan is the one I chose with `plan`; anyone else's is the
+only plan with `seats` that `huddle.json` sets under `plans` for that tool, split per seat when it is one plan for several people; with none, the person and
+tool are named as «plan not set», never guessed. The difference is the API cost minus what the plans cost.
+
+**Cost per Issue** groups the rows by Issue (tokens without an Issue are one line apart), sorted by API cost, and divides by the Issue's effort points (its
+«Effort» section, read with the adapter's `issueBody` for a closed Issue). **Pace** reads the last 60 merged PRs/MRs into the staging branch (the default
+branch with none) that close Issues: Issues closed per day (per week for all time), the median hours from the PR/MR's first commit to its merge, and the
+review rounds, which are the Coach's «Prompt for Claude Code» requests on the PR/MR or its Issues before the merge. The first commit stands for «in progress»
+because the platform gives no timestamp for a label through the adapters; a read that fails leaves only that number out.
+
+**Style and motion.** Dark only: background #0F1117 with drifting light, cards #1A1D26 and #1D2130 with 24 px radius, text #F2F4F8 and #A3A8B6, blue
+#2F6BFF to #4C8DFF, orange #F5A524 (in progress), pink #F0476B (changes or decision; its text is #F25A7A, for 4.5:1 on both cards) and green #5FD068 (done).
+Motion: header and summary cards enter in a stagger with numbers counting up, sections reveal on scroll, rows slide in, bars grow; the light, the pulse of the
+watch dot, the breathing savings card and the hover lift are CSS. Each element has one tween with explicit end values and its styles cleared at the end, and a
+3 s safety ends any unfinished tween. With `prefers-reduced-motion: reduce` no script moves anything and the page is complete.

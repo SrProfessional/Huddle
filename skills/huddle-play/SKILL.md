@@ -30,8 +30,8 @@ With no number (`/huddle-play`): read and follow `${CLAUDE_PLUGIN_ROOT}/skills/h
 2. Check each Issue under «Depends on»: it counts only if it is closed **and** a merged PR/MR closed it. If one is not, change
    nothing and end with «⛔ Issue #N stopped: waiting for #X».
 3. Create the branch in a worktree of its own, as the Issue says, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n> --started`: one command adds `in progress` and takes `assigned` off (never add it by hand). With `staging_branch` set in `huddle.json`, the branch starts from the up-to-date staging branch (`origin/<staging_branch>`), not from the default branch; without it, from the up-to-date default branch.
-4. Run the tests before changing anything. Then work with TDD, touching only the allowed files.
-5. Bring in the base branch first (Issue #195): before opening the PR/MR and before commenting «Ready for review again», run `git fetch origin` and `git merge origin/<base>` (the staging branch, or the default branch when there is none), resolve the conflicts, run the tests again, and report the counts after the merge. Open the PR/MR with `Closes #N`, using the template (with `staging_branch` set, open it **against** the staging branch; Huddle closes the Issue when it is merged there): what changed, the real test counts, **What was NOT done**. Right after it is opened, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`.
+4. Run the tests before changing anything. Then work with TDD, touching only the allowed files; while you work, run the tests of the area you touched, not the whole suite (Issue #244).
+5. Bring in the base branch first (Issue #195): before opening the PR/MR and before commenting «Ready for review again», run `git fetch origin` and `git merge origin/<base>` (the staging branch, or the default branch when there is none), resolve the conflicts, then run the full suite once, right before pushing: the counts you report are that last full run's, after the merge. Open the PR/MR with `Closes #N`, using the template (with `staging_branch` set, open it **against** the staging branch; Huddle closes the Issue when it is merged there): what changed, the real test counts, **What was NOT done**. Right after it is opened, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`.
 6. End with «✅ Issue #N finished» (or «⛔ Issue #N stopped»), the link, the counts, what was not done, the next step. The next step is
    one the session takes, or numbered «🙋 Only you» steps when only the person can do it (see «Who does each step»).
 7. Start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`. When it ends, a review request is
@@ -75,7 +75,7 @@ branch in its own worktree, `labels --issue <n> --started`). Then:
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`. It marks the request 👀 and prints the Coach's prompt. Follow that
    prompt as if the Player had pasted it; same rules. Only comments by the `coach` login count. The Player is not asked
    to paste anything. Right after `take`, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`.
-4. Push, then comment «Ready for review again» with the real test counts (a Design Issue has none: say «no code, no tests»), then run
+4. Fix with focused tests, bring in the base, run the full suite once right before pushing, push, then comment «Ready for review again» with that run's real test counts (a Design Issue has none: say «no code, no tests»), then run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`. Do not touch the `changes requested from Coach` label or any other by hand.
 5. End with «✅ Issue #N finished» (or «⛔ Issue #N stopped»), the link, the counts, what was not done and the next step. The next step is
    one the session takes, or numbered «🙋 Only you» steps when only the person can do it (see «Who does each step»).

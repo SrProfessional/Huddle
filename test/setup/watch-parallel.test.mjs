@@ -21,7 +21,7 @@ test('subagents review but never merge; the main session merges one at a time af
   assert.match(watch, /never merges/);
   assert.match(watch, /one at a time/);
   assert.match(watch, /merges? cleanly/);
-  assert.match(watch, /tests pass on the branch updated with the base/);
+  assert.match(watch, /full suite passes on the exact head it merges, updated with the base/);
   assert.match(watch, /«🔁 Changes requested».*update the branch/);
   assert.match(watch, /nothing is merged/);
 });

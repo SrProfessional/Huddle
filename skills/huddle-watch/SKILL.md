@@ -55,7 +55,7 @@ anything. Docs/design.md §19 and §22.
   Agent tool, **in the background**, with a clean context, told: «Review <pr> with /huddle-review, following its «Reviewing for the
   watch» section». A subagent never merges. When it ends with «needs changes», it already posted the comment and the item leaves the queue by itself.
 - **Merges, one at a time, in this session.** For each «ready to merge», in order: check it again against the updated base (it still
-  merges cleanly, and its tests pass on the branch updated with the base, in a fresh worktree). If not, post the usual «🔁 Changes
+  merges cleanly, and the full suite passes on the exact head it merges, updated with the base, in a fresh worktree; a docs-only delta since your last full run needs no new run, as `/huddle-review` says). If not, post the usual «🔁 Changes
   requested» comment asking to update the branch from the base, and nothing is merged. Write the comment to a temporary UTF-8 file and use `gh pr comment <pr> --body-file <file>` and `gh issue comment <n> --body-file <file>`, or `glab api … -F 'body=@file'` on both notes endpoints. Never pass it inline. If the recheck passes, approve and merge it, and land it, as
   «All good» of `/huddle-review` says. Then start the next review that fits.
 - **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,

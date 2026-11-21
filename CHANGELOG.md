@@ -8,6 +8,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 ### Changed
 
 - An assigned Issue that waits for a file it shares with an active Issue shows `blocked` on the board (Issue #250), as a dependency wait does, with the Issue and the file in the output of `huddle labels` and `huddle next`; it goes back to `assigned` when the conflict clears. No new label; a wait for capacity alone stays `assigned`.
+- Faster review rounds, never CI (Issue #244): the Coach runs the full suite only when it is about to approve, on the exact head it merges in a
+  fresh worktree (never a merge without that run); a docs-only round is approved without a new run; the Player runs the tests of the area it
+  touched while it fixes and the full suite once, right before pushing. No workflow is added.
 - The Coach's watch checks every 2 minutes by default instead of 5 (Issue #243), so a ready PR waits less. No setting in `huddle.json`; `/huddle-watch 10m` still sets another interval.
 
 ### Fixed
@@ -18,6 +21,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The dashboard (Issue #232): `/huddle-dashboard` (`$huddle-dashboard` in Codex; the `dashboard [--no-open]` command of the CLI) writes a private dark page to
+  `.huddle/dashboard/index.html` and opens it: summary (Issues closed, team tokens, would cost by API, paid in plans, the difference), progress by area,
+  who does what now, tokens and cost per person, tool and model, cost per Issue and per effort point, pace (Issues closed per day, median time from start
+  to merge, review rounds) and releases, with a 7 days / 30 days / all filter. Nothing is loaded from the network, and `prefers-reduced-motion` gets a
+  still, complete page. Setup and update add `.huddle/` to `.gitignore`, and the progress Issue says how to open it. The adapters gain `issueBody`.
 - The session start never offers a request another session already took (Issue #239): before asking «Do you want me to continue?» the session runs
   `huddle pending` again, and `huddle take` on a request already marked 👀 says so in one line and exits 1.
 - The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
