@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The Coach merges when the PR/MR is correct and safe (Issue #252): a review asks for changes only for what blocks; a rarer edge case or
+  extra hardening is merged and written right away as a new Issue, instead of another round.
 - Each person's token summary is shared on the `huddle-usage` branch (Issue #230), numbers only, at most once an hour from the session
   start, written without touching the working tree or the current branch; `huddle usage --team` sums the team and keeps each person apart.
   Only in a private repo by default: a public one shares nothing unless `share_usage` is `true` in `huddle.json`.
