@@ -1,6 +1,6 @@
 ---
 name: huddle-test
-description: Use when the Coach wants to test what is in staging, guided Issue by Issue: it orders the untested Issues, gives the steps to test each one and marks it «tested in staging» when the Coach says it passed. Run it as `/huddle-test` (Claude Code) or `$huddle-test` (Codex).
+description: Use when the Coach wants to test what is in staging, guided Issue by Issue. It orders the untested Issues, gives the steps to test each one and marks it «tested in staging» when the Coach says it passed. Run it as `/huddle-test` (Claude Code) or `$huddle-test` (Codex).
 ---
 
 # huddle-test

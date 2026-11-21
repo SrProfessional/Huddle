@@ -18,7 +18,7 @@ Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle
    - If the default branch is ahead of staging (a hotfix went straight to production), say that the back-merge comes first: a PR/MR from the
      default branch into staging, merged before this release. Offer to open that PR/MR with its body in a temporary UTF-8 file (`gh pr create --body-file <file>` or `glab mr create --description-file <file>`, never inline), and stop until it is merged.
    - If staging received commits that belong to no listed Issue after the newest test, show them and ask the Coach to confirm them.
-2. **Each untested Issue.** When several are untested, point the Coach to `/huddle-test` (a guided test, one Issue at a time, which marks each one) instead of asking Issue by Issue, and go on when it is done. For a single one, say it plainly («#N has no «tested in staging» mark») and ask: has it been tested in staging? Run
+2. **Each untested Issue.** When any staged Issue is untested, even exactly one, point the Coach to `/huddle-test` (a guided test, one Issue at a time, which marks each one) instead of asking Issue by Issue, and go on when it is done. Only if the Coach declines the guided test, say it plainly («#N has no «tested in staging» mark») and ask: has it been tested in staging? Run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` only on a yes from the Coach. On a no, stop for that Issue. You may release it
    anyway with `--untested <n> --reason "<why>"` in step 4, only if the Coach gives the reason: never make up a reason yourself.
 3. **The project's clean check on staging.** Run the check the project documents in its `CLAUDE.md`: a fresh worktree of `origin/<staging>`,

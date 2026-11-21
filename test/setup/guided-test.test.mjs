@@ -15,6 +15,18 @@ test('the skill exists with its front matter and names the command in both forms
   assert.match(t, /`\$huddle-test`/);
 });
 
+test('the front matter is valid YAML: the description is one plain scalar with no «: » inside', () => {
+  const raw = readFileSync(fileURLToPath(new URL('../../skills/huddle-test/SKILL.md', import.meta.url)), 'utf8');
+  const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)[1].split(/\r?\n/);
+  assert.equal(fm.length, 2);
+  for (const line of fm) {
+    const m = line.match(/^(name|description): (.*)$/);
+    assert.ok(m, line);
+    assert.doesNotMatch(m[2], /: | #/, `a plain YAML scalar cannot hold «: » or « #»: ${m[2]}`);
+    assert.doesNotMatch(m[2], /^[`'"\[{&*!|>%@]/);
+  }
+});
+
 test('the skill is for the Coach only: huddle doctor first, one line and no change otherwise', () => {
   const t = skill();
   assert.match(t, /For the Coach only/);
@@ -102,6 +114,8 @@ test('huddle-issue asks for the section, and huddle-release points to /huddle-te
   const rel = read('skills/huddle-release/SKILL.md');
   assert.match(rel, /`\/huddle-test`/);
   assert.match(rel, /instead of asking Issue by Issue/);
+  assert.match(rel, /even exactly one/); // a single untested Issue also gets the guided steps
+  assert.match(rel, /--untested <n> --reason/); // the explicit untested-reason option stays
 });
 
 test('the docs say it: design §21, README, the team guide, in both forms, and the changelog under Unreleased', () => {
