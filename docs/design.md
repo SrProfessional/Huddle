@@ -1235,8 +1235,10 @@ transcripts below `<CLAUDE_CONFIG_DIR or ~/.claude>/projects/` and Codex session
 sends a transcript, prompt, answer, path outside this checkout, or token total to the platform.
 
 The command includes this checkout and every one of its Git worktrees. Claude Code assistant entries are keyed by `requestId` (or message
-id) so streaming repeats count once. Codex sessions count only when their saved `cwd` is one of those folders; each token-count turn is
-counted once. A branch named `h<issue>-...` belongs to that Issue; every other branch is `no Issue`. A broken or half-written JSONL line
+id) so streaming repeats count once. Cache creation uses the reported total or the sum of the 5-minute and 1-hour counts when only
+the breakdown is present. Codex sessions count only when their saved `cwd` is one of those folders. Repeated token snapshots count once,
+and the checkout's Git branch supplies attribution when the event has no branch. The platform adapter resolves each distinct recorded
+branch through its PR or MR. An unresolved branch is `no Issue`. A broken or half-written JSONL line
 is skipped and named once on stderr, without stopping the report.
 
 `--json` writes exactly `{ person, rows }`: `person` is the platform login read once, and a row is
