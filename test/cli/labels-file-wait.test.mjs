@@ -184,3 +184,24 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(h.world.labelsOf(239), ['assigned'], 'the last overlap cleared');
   });
 }
+
+// Review round 3 of PR #260: the assignee chosen in the same scoped run counts when the active work that overlaps the new Issue is read.
+for (const gitlab of [false, true]) {
+  test(`[${gitlab ? 'gitlab' : 'github'}] a waiter assigned by the scoped run is blocked in that same run by active work with a merged dependency`, async () => {
+    const h = harness({
+      gitlab,
+      config: { platform: gitlab ? 'gitlab' : 'github', project: 'acme/app', ai_manager: 'SrProfessional', assignees: ['ana'] },
+      wrap: (a) => ({ ...a, me: async () => 'SrProfessional' }),
+      setup: (w) => {
+        w.issue({ number: 90, title: 'Merged dependency', state: 'merged' });
+        w.issue({ number: 5, title: 'Merged now', body: body(1, ['a.mjs']), state: 'merged', labels: ['in review'] });
+        w.issue({ number: 6, title: 'Ana is on it', body: body(1, ['b.mjs'], '- #90'), assignees: ['ana'], labels: ['in progress'] });
+        w.issue({ number: 239, title: 'Depends on 5', body: body(1, ['b.mjs'], '- #5'), labels: ['blocked'] });
+      },
+    });
+    h.ctx.updateCachePath = '/data/u.json';
+    assert.equal(await run(['labels', '--issue', '5'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.assigneesOf(239), ['ana']);
+    assert.deepEqual(h.world.labelsOf(239), ['blocked'], 'assigned to Ana and blocked by #6 in the same run');
+  });
+}
