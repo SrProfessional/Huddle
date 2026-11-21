@@ -1100,6 +1100,18 @@ PRs fell behind the base branch and were reviewed again after each update. Four 
   reads the Player's answer to each item and `git diff <old>..<new>`, not the whole PR again. The tests still run in a fresh worktree.
 - **Test output is summarized.** The review keeps only the summary lines of the test output (the counts and the failures).
 
+### The Player's watch (Issue #248)
+
+Seen on 2026-11-21: a Player chat in Codex, run with no number, said «no Issue can start» and stopped, while #230 held 2 points with a
+Coach request nobody had taken (its per-Issue wait had died with a closed session) and four Issues waited on its files. Now `huddle next`
+also lists `resume`: each active Issue with a pending Coach request, keyed `resume:#n:<comment id>`. `huddle next --wait [s] [--seen keys]`
+is the Player's watch, like the Coach's: no tokens; every 120 s by default it re-reads the plan and wakes the session (prints
+`{ actionable }`) when something not seen can start or must be resumed; `--codex` runs it as a process of its own that queues «Huddle
+(Player): … Run $huddle-play and do it» into the Codex chat, and a failed delivery is recorded in its heartbeat and retried next round,
+never marked seen. One per Player and repo on a machine (an owner file and a heartbeat under `~/.huddle`); `next --wait-off` stops it;
+`huddle status` shows «player watch». Parallel play resumes first, then starts, and never ends on an empty queue: it keeps that one watch,
+which replaces the per-Issue waits of parallel play.
+
 ## 25. OpenAI Codex
 
 Decided by the Coach on 2026-11-20: Huddle also runs in OpenAI Codex. The first delivery is for **Players**; the Coach stays in Claude Code
