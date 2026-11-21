@@ -85,7 +85,8 @@ merging into the staging branch (or the default branch when there is none) an Is
 In a session whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
 decided and why (in the chat, and as a comment on the Issue or PR/MR it concerns), and goes on. That covers technical and process choices:
 limits and budgets (a bundle size, a timeout), widening an Issue's allowed files for its own tests or registries, the order of the work,
-retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». It asks the
+retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». A review asks
+for changes only for what blocks; what does not block is merged and written as a new Issue. It asks the
 Coach only when the choice changes what users see or do (a screen, a flow, a text, a feature's behaviour or scope), the product's
 priorities, money, accounts or secrets, security or privacy rules, deleting work or data, or production (`/huddle-release`).
 

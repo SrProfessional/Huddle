@@ -11,7 +11,7 @@ For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you
 
 1. Read the PR/MR, the Issue it closes (goal, allowed files, tests that must pass) and the diff. On a later round, when your last review ended with `Reviewed head: <sha>`, read the Player's answer to each requested item and only `git diff <old>..<new>` (Issue #195): not the whole PR again. End every review comment with `Reviewed head: <sha>` (the head you reviewed).
 2. Check out the branch in a worktree and run the tests yourself, keeping only the summary lines of their output (the counts and the failures). Compare the counts with the PR/MR text.
-3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence; no secret, no runtime dependency the rules forbid.
+3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence; no secret, no runtime dependency the rules forbid. Ask for changes only for what blocks: a contract item not done, a failing test, a bug a user would hit, a security or privacy hole, data loss, a broken rule of the repo. Anything else (a rarer edge case, extra hardening, a nicer structure, more tests of the same thing) never holds the merge: approve and merge, and write each one now as a new Issue with `/huddle-issue`, named in the approval comment (Issue #252).
 
 ## A design PR (its Issue has the `design` label, and the PR only touches `design/<n>-<slug>/`)
 
