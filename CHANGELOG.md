@@ -10,6 +10,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 - Five base skills adapted from MIT-licensed Superpowers (Issue #235): `huddle-tdd`, `huddle-debug`, `huddle-verify`,
   `huddle-answer-review`, and Coach-only `huddle-brainstorm`. They are concise, work in Claude Code and Codex, retain
   Huddle's Issue/worktree/review rules, and carry their upstream attribution in `skills/THIRD-PARTY.md`.
+- Local token accounting for the dashboard (Issue #229): the new usage command reads Claude Code and Codex transcripts
+  from this machine, across the checkout and its worktrees, grouping numeric totals by day, tool, model and Issue. It never sends the
+  transcript data to the platform; broken or half-written lines are skipped with a stderr warning.
 - Updating Huddle works in Codex (Issue #225): in a Codex session the version notice, `huddle doctor` and `/huddle-update` give Codex's
   steps (`codex plugin marketplace upgrade huddle`, `codex plugin add huddle@huddle`, a new chat) instead of Claude Code's.
 - The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach
