@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>How Huddle works: roles, labels, decisions and reviews</title>
-<meta name="description" content="Roles, status labels, areas and progress, decisions and reviews: how Players and one Coach work together with Huddle and Claude Code.">
+<meta name="description" content="Roles, labels, areas, decisions and reviews: how Players and one Coach work together with Huddle, in Claude Code or OpenAI Codex.">
 <link rel="canonical" href="https://srprofessional.github.io/Huddle/how-it-works/">
 <meta name="theme-color" content="#4336d8">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Huddle">
 <meta property="og:title" content="How Huddle works: roles, labels, decisions and reviews">
-<meta property="og:description" content="Roles, status labels, areas and progress, decisions and reviews: how Players and one Coach work together with Huddle and Claude Code.">
+<meta property="og:description" content="Roles, labels, areas, decisions and reviews: how Players and one Coach work together with Huddle, in Claude Code or OpenAI Codex.">
 <meta property="og:url" content="https://srprofessional.github.io/Huddle/how-it-works/">
 <meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="How Huddle works: roles, labels, decisions and reviews">
-<meta name="twitter:description" content="Roles, status labels, areas and progress, decisions and reviews: how Players and one Coach work together with Huddle and Claude Code.">
+<meta name="twitter:description" content="Roles, labels, areas, decisions and reviews: how Players and one Coach work together with Huddle, in Claude Code or OpenAI Codex.">
 <meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="preload" href="../fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -62,7 +62,7 @@
     <article>
       <section id="roles">
         <h2>Roles</h2>
-        <p class="prose">Huddle has two roles. They are about people, not about the AI: every person has their own Claude Code session.</p>
+        <p class="prose">Huddle has two roles. They are about people, not about the AI: every person has their own session, in Claude Code or OpenAI Codex, whichever they like. The Coach and the Players may mix the two tools at the same time, and one person can be both, on two plans. The sessions never talk to each other directly: they talk through GitHub or GitLab, with Issues, pull requests, comments and labels. Only design work still needs Claude Code. Every session chats with each person in their language from the first message, while the repo stays in English. To set up Codex (install, trust the hook, network access), see <a href="../get-started/#codex">get started in OpenAI Codex</a>. Adapted but not yet tried live in Codex: bug triage, areas, team changes, playing several Issues in parallel, GitLab, and Codex on macOS.</p>
         <div class="two">
           <div>
             <h3>Coach</h3>
@@ -116,9 +116,10 @@
 
       <section id="reviews">
         <h2>Reviews</h2>
-        <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The Coach reviews with <code>/huddle-review</code> and either merges or asks for changes.</p>
-        <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub Actions or CI minutes. If Claude Code was closed meanwhile, a hook says on the next start that a request is pending. Either way, <code>/huddle-play &lt;n&gt;</code> picks the Issue up again after the Coach answered a review or a decision.</p>
+        <p class="prose">The session works test first: the failing test, then the code, touching only the allowed files. It opens the pull request with the real test counts and «What was NOT done», and ends with a message that starts with «Issue #N finished». CI runs the tests. The Coach reviews with <code>/huddle-review</code> (<code>$huddle-review</code> in a Codex Coach session) and either merges or asks for changes.</p>
+        <p class="prose">A request for changes is a comment with a «Prompt for Claude Code» heading. The session waiting in the background picks it up, pushes the fix and answers «Ready for review again». The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub Actions or CI minutes. In OpenAI Codex the same wait runs as <code>huddle wait &lt;n&gt; --codex</code>, in a process of its own with no tokens, and wakes the open Codex chat when the Coach answers. If the session was closed meanwhile, a hook says on the next start that a request is pending. Either way, <code>/huddle-play &lt;n&gt;</code> (<code>$huddle-play &lt;n&gt;</code> in Codex) picks the Issue up again after the Coach answered a review or a decision.</p>
         <p class="prose">The Coach can also let their session do the checking: <code>/huddle-watch</code> looks every few minutes at what waits and reviews it (<code>/huddle-watch status</code> and <code>/huddle-watch off</code> do what they say). Turning it on is the order to merge what it approves. Decisions and bug triage stay with the person, and <code>huddle queue</code> lists what waits. The watch is turned on by hand in each session. It waits in the background like a Player's session, so it uses no Claude tokens while nothing waits, and wakes the session only when something waits. Without it, the Coach's session start says what waits. <code>/huddle-watch always</code> keeps it on: it starts again in each of the Coach's sessions of that repo on that machine (a mark on the machine, not a file of the repo), until <code>/huddle-watch off</code>. It never starts for a Player.</p>
+        <p class="prose">The Coach may watch from Codex too: <code>$huddle-watch</code> waits with no tokens and wakes the open Codex chat when something waits, and that chat reviews, requests changes, merges and lands. There is one watch per repo on a machine, whatever the tool: the first session that turns it on reviews, and another one says «The watch already runs in Codex…» (or in Claude Code) and does not start a second. If the owner goes quiet while it reviews, <code>/huddle-watch</code> (<code>$huddle-watch</code> in Codex) in another session asks «Take over?» first; the automatic «always» start never takes over.</p>
       </section>
 
       <section id="effort">
@@ -135,7 +136,7 @@
 
       <section id="only-you">
         <h2>«Only you» steps</h2>
-        <p class="prose">The Coach's own Claude Code session does every step it can: merging an approved pull request, tagging a release, running the smoke test on the sandboxes. It hands a step to a person only when it needs something the session cannot have:</p>
+        <p class="prose">The Coach's own session does every step it can: merging an approved pull request, tagging a release, running the smoke test on the sandboxes. It hands a step to a person only when it needs something the session cannot have:</p>
         <ul class="prose">
           <li>a second person's account;</li>
           <li>a payment;</li>

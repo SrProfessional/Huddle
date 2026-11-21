@@ -4,22 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Get started with Huddle: install the Claude Code plugin</title>
-<meta name="description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<title>Get started with Huddle in Claude Code or Codex</title>
+<meta name="description" content="Install Huddle in Claude Code or OpenAI Codex, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
 <link rel="canonical" href="https://srprofessional.github.io/Huddle/get-started/">
 <meta name="theme-color" content="#4336d8">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Huddle">
-<meta property="og:title" content="Get started with Huddle: install the Claude Code plugin">
-<meta property="og:description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta property="og:title" content="Get started with Huddle in Claude Code or Codex">
+<meta property="og:description" content="Install Huddle in Claude Code or OpenAI Codex, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
 <meta property="og:url" content="https://srprofessional.github.io/Huddle/get-started/">
 <meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Get started with Huddle: install the Claude Code plugin">
-<meta name="twitter:description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta name="twitter:title" content="Get started with Huddle in Claude Code or Codex">
+<meta name="twitter:description" content="Install Huddle in Claude Code or OpenAI Codex, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
 <meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="preload" href="../fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -60,10 +60,11 @@
         <h2>1. Install the plugin</h2>
         <p class="prose">Every Player installs Huddle once, on their own machine. A settings file committed to the repo does not do it for them. You need:</p>
         <ul class="prose">
-          <li><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>.</li>
+          <li><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> or <a href="https://developers.openai.com/codex" target="_blank" rel="noopener">OpenAI Codex<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> (its command line or its VS Code extension). Each person picks their own, and the Coach and the Players may mix them.</li>
           <li>Node 22 or newer, and <code>git</code>.</li>
           <li>On GitHub, the <a href="https://cli.github.com" target="_blank" rel="noopener">gh<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> command line, logged in with <code>gh auth login</code>. On GitLab, the <a href="https://gitlab.com/gitlab-org/cli" target="_blank" rel="noopener">glab<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> command line, logged in with <code>glab auth login</code> (add <code>--hostname gitlab.example.com</code> for a self-managed server).</li>
         </ul>
+        <h3>In Claude Code</h3>
         <p class="prose">Run this once in any terminal, then open a new Claude Code session:</p>
         <pre tabindex="0"><code>claude plugin marketplace add SrProfessional/Huddle
 claude plugin install huddle@huddle</code></pre>
@@ -71,16 +72,27 @@ claude plugin install huddle@huddle</code></pre>
         <p class="prose"><strong>To update later.</strong> Install and update are per project, so repeat this in each project that uses Huddle. From the project, type one command:</p>
         <pre tabindex="0"><code>/huddle-update</code></pre>
         <p class="prose">It updates the plugin (<code>claude plugin marketplace update huddle</code> and <code>claude plugin update huddle@huddle --scope project</code>), refreshes the templates and the <code>CLAUDE.md</code> block in a branch of its own, asks only the questions a new release added, and opens the PR. It ends by telling you to type <code>/reload-plugins</code>; if the new skills do not show up, restart Claude Code. A project can be on an older version than another. <code>/huddle-play</code> and <code>/huddle-update</code> tell you in the chat when a newer release exists, at most once a day.</p>
+        <h3 id="codex">In OpenAI Codex</h3>
+        <p class="prose">The same marketplace, the same skills and the same <code>huddle</code> command. Run this once in a terminal (the VS Code extension of Codex brings its own <code>codex</code>; the team guide says how to find it if <code>codex</code> is not recognized):</p>
+        <pre tabindex="0"><code>codex plugin marketplace add SrProfessional/Huddle
+codex plugin add huddle@huddle</code></pre>
+        <p class="prose">In a repo already set up with Huddle, the file <code>.codex/config.toml</code> declares Huddle for Codex: trust the project when Codex asks, and run <code>codex plugin marketplace upgrade huddle</code> once in a terminal in the repo instead. Then, once per machine:</p>
+        <ol class="prose">
+          <li><strong>Trust the hook in terminal Codex.</strong> The Codex chat in VS Code has no <code>/hooks</code>, so open a terminal in the repo, start <code>codex --no-daemon</code>, choose <strong>Review hooks</strong> (or type <code>/hooks</code>), and trust Huddle's row under <strong>SessionStart</strong>. Then type <code>/exit</code>.</li>
+          <li><strong>Allow network access.</strong> Codex's sandbox has no network: approve it when Codex asks to run <code>git push</code>, <code>gh</code>, <code>glab</code> or <code>huddle</code>.</li>
+          <li><strong>Open a new chat.</strong> Codex has no <code>/reload-plugins</code>. In Codex the skills start with <code>$</code>: <code>$huddle-play &lt;n&gt;</code>, <code>$huddle-watch</code> and so on. <code>huddle doctor</code> shows a «codex» line.</li>
+        </ol>
+        <p class="prose">To update in Codex: <code>codex plugin marketplace upgrade huddle</code>, then <code>codex plugin add huddle@huddle</code>, then a new chat (and trust the hook again if it changed). Only design work still needs Claude Code. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/team-guide.md#a-mixed-team-claude-code-and-codex" target="_blank" rel="noopener">team guide<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> has every step, with the hook trust walkthrough. Adapted but not yet tried live in Codex: <code>$huddle-bug</code>, <code>$huddle-areas</code>, <code>$huddle-team</code>, playing several Issues in parallel, GitLab, and Codex on macOS.</p>
       </section>
 
       <section id="setup">
         <h2>2. Set up your repo</h2>
-        <p class="prose">This is the Coach's step, once per repo. Open Claude Code in the repo and create a branch for the setup:</p>
+        <p class="prose">This is the Coach's step, once per repo. Open Claude Code or Codex in the repo and create a branch for the setup:</p>
         <pre tabindex="0"><code>git switch -c huddle-setup</code></pre>
         <ol class="prose">
-          <li>Run <code>/huddle-setup</code>. It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the Coach and the logins of the Players.</li>
+          <li>Run <code>/huddle-setup</code> (<code>$huddle-setup</code> in Codex). It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the Coach and the logins of the Players.</li>
           <li>It also asks whether the project has a staging branch where changes are tested first (<code>staging_branch</code>); answer none if not.</li>
-          <li>It writes <code>huddle.json</code>, the Issue and pull request templates and the Huddle block of <code>CLAUDE.md</code>. There is no cloud job: the sessions keep the labels right. Nothing outside that block is touched.</li>
+          <li>It writes <code>huddle.json</code>, the Issue and pull request templates, the Huddle block of <code>CLAUDE.md</code> and <code>AGENTS.md</code> (which Codex reads), and <code>.codex/config.toml</code>. There is no cloud job: the sessions keep the labels right. Nothing outside the Huddle blocks and tables is touched.</li>
           <li>Run <code>huddle doctor</code>. You want a check mark on the file, the login, the Coach and the labels. If a label is missing, run <code>huddle labels</code> once.</li>
           <li>Commit, push and open a pull request with the setup files. Merge it. The Coach is the only one who merges.</li>
         </ol>
@@ -91,7 +103,7 @@ claude plugin install huddle@huddle</code></pre>
 
       <section id="first-issue">
         <h2>3. Write the first Issue</h2>
-        <p class="prose">Run <code>/huddle-issue</code>. It writes the Issue from the template, so every task arrives complete:</p>
+        <p class="prose">Run <code>/huddle-issue</code> (<code>$huddle-issue</code> in Codex). It writes the Issue from the template, so every task arrives complete:</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Part</th><th scope="col">What it says</th></tr></thead>
@@ -110,13 +122,13 @@ claude plugin install huddle@huddle</code></pre>
       <section id="first-day">
         <h2>4. A Player's first day</h2>
         <ol class="prose">
-          <li><strong>Set up your machine.</strong> Install Claude Code, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the two commands above. Never paste a token into a chat, a file or an Issue.</li>
-          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the Coach: only they run <code>huddle labels</code>.</li>
-          <li><strong>Take an Issue.</strong> The Coach's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
-          <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the Coach.</li>
+          <li><strong>Set up your machine.</strong> Install Claude Code or Codex, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the commands above for your tool. Never paste a token into a chat, a file or an Issue.</li>
+          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code or Codex in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the Coach: only they run <code>huddle labels</code>.</li>
+          <li><strong>Take an Issue.</strong> The Coach's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> (<code>$huddle-play &lt;n&gt;</code> in Codex) with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
+          <li><strong>Answer its questions.</strong> The session chats with you in your language from the first message (set your own once with <code>huddle language es</code>); the repo stays in English. This is the job. If you do not know, say so and let the session ask the Coach.</li>
           <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
         </ol>
-        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the Coach's requested changes on its own. The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. On the other side, the Coach can run <code>/huddle-watch</code> to let their session review what waits every few minutes. With <code>/huddle-play</code> alone, the session works on several of the Player's assigned Issues at once, as many as their capacity allows.</p>
+        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the Coach's requested changes on its own. The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. In Codex the same wait (<code>huddle wait &lt;n&gt; --codex</code>) wakes the open chat when the Coach answers. On the other side, the Coach can run <code>/huddle-watch</code> (<code>$huddle-watch</code> in Codex) to let their session review what waits. There is one watch per repo on a machine, whatever the tool: a second session says where the watch already runs and does not start another. With <code>/huddle-play</code> alone, the session works on several of the Player's assigned Issues at once, as many as their capacity allows.</p>
         <p class="prose">Next: <a href="../how-it-works/">how it works</a>, with the roles, the labels and the reviews.</p>
       </section>
     </article>

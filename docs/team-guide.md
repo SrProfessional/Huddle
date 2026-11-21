@@ -1,6 +1,7 @@
 # Team guide
 
-How a team works with Claude Code under Huddle. The rules live in the Huddle block of your `CLAUDE.md`; this guide
+How a team works under Huddle, in Claude Code and in OpenAI Codex. The rules live in the Huddle block of your `CLAUDE.md`
+(and `AGENTS.md`, which Codex reads); this guide
 explains them. New here? Read [the first day](first-day.md) first, and [the roles](roles.md) for who does what.
 
 ## The idea
@@ -8,7 +9,7 @@ explains them. New here? Read [the first day](first-day.md) first, and [the role
 > Our job is no longer typing code. It is making good decisions. The AI writes, tests and asks; the person decides.
 
 One task is one Issue, one branch and one pull request (merge request on GitLab). Each Issue carries the exact prompt to
-paste into Claude Code, so every session starts with the same goal, limits and tests.
+paste into the session (Claude Code or Codex), so every session starts with the same goal, limits and tests.
 
 ## The seven labels
 
@@ -308,7 +309,8 @@ Every Player installs Huddle once on their own machine, then types `/reload-plug
 `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (in the CLI, `/plugin marketplace add ...`
 and `/plugin install ...` work too). With only the VS Code extension, which puts no `claude` command in the terminal, type `/plugins`,
 add the marketplace `SrProfessional/Huddle` in the **Marketplaces** tab and install `huddle` from the **Plugins** tab with **Install for
-this project** (not «Install for you»), once per clone. The Coach sends both routes to each Player after `/huddle-setup`.
+this project** (not «Install for you»), once per clone. The Coach sends both routes to each Player after `/huddle-setup`. A Player
+(or the Coach) who works in OpenAI Codex installs it the Codex way instead: see [A mixed team](#a-mixed-team-claude-code-and-codex).
 
 The `.claude/settings.json` snippet that setup writes is only a helper. It enables the plugin for the project and, in the
 CLI, registers the marketplace silently, only after the trust dialog of that folder itself. When a parent folder is already
@@ -325,8 +327,15 @@ plans: for example the Players' work (and its tokens) in Codex and the reviews i
 talk to each other directly: they talk through GitHub or GitLab, as every Huddle session does. A Player opens the PR; the Coach's watch
 reviews it; the Coach's request wakes the Player's session, which goes on.
 
-**One watch per repo:** with Claude Code and Codex open at once on the Coach's login, the first session that turns the watch on reviews and
-merges; the other says where it runs («The watch already runs in Codex…») and does not start a second one. `huddle status` names the tool.
+**The Coach in Codex.** `$huddle-watch` waits in a process of its own with no tokens (`huddle queue --wait --codex`) and wakes the open
+Codex chat when something waits; the chat then reviews, requests changes, merges and lands, as in Claude Code. This was tried live on
+2026-11-20, end to end (PR #220 and others). `$huddle-issue`, `$huddle-decide` and `$huddle-release` work in Codex too.
+
+**One watch per repo:** whatever the tool, with Claude Code and Codex open at once on the Coach's login, the first session that turns the
+watch on (on that machine) reviews and merges; the other says where it runs («The watch already runs in Codex…») and does not start a second
+one. `huddle status` names the tool. If the owner goes quiet while it reviews (its chat was closed, or it ran out of quota), `/huddle-watch`
+in another session says so and asks «Take over?»; on a yes it starts with `--take-over`. The automatic start of `/huddle-watch always`
+never takes over.
 
 | Who | Where | Runs |
 |---|---|---|
@@ -335,10 +344,17 @@ merges; the other says where it runs («The watch already runs in Codex…») an
 
 **The language.** Every session, in Claude Code and in Codex, chats with each person in their language from the first message. Huddle
 takes the first that is set: the person's own (`huddle language es`, once on their machine; `huddle language` shows it, `--clear`
-removes it), then the team's (asked by `/huddle-setup`, kept as `language` in `huddle.json`), then the machine's. The repo itself
+removes it), then the team's (asked by `/huddle-setup`, and once by `/huddle-update` in a repo set up before, kept as `language` in
+`huddle.json`), then the machine's. The repo itself
 stays in English.
 
 **What stays in Claude Code:** Design Issues and the review of a design PR (they need Claude Design). In Codex they stop with one line.
+
+**Adapted but not yet tried live in Codex:** `/huddle-bug`, `/huddle-areas`, `/huddle-team`, playing several Issues in parallel
+(`$huddle-play` alone), GitLab, and Codex on macOS. They are written for Codex and should work; tell the Coach if one does not.
+
+**In Codex the skills start with `$`:** `$huddle-play <n>`, `$huddle-watch`, `$huddle-review` and so on, where Claude Code has
+`/huddle-…`. Codex has no `/reload-plugins`: after installing or updating Huddle, open a new chat.
 
 **A repo set up with Huddle comes nearly ready in Codex.** `/huddle-setup` and `/huddle-update` write `.codex/config.toml`, which declares
 Huddle for Codex in that repo only. On a machine where Codex is new, open the repo in Codex, trust the project when it asks, and run
@@ -381,8 +397,9 @@ says once when this machine has Codex but no Huddle in it, and `huddle doctor` s
 7. Work as usual: `$huddle-play <n>`. When the PR is open, the session waits in the background with no tokens
    (`huddle wait <n> --codex`); when the Coach answers, the open Codex chat gets a message and goes on by itself.
 
-**Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`. A changed hook needs
-trust again, so repeat steps 3–5 in terminal Codex (not the VS Code chat, which has no `/hooks`).
+**Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`, then open a new chat. A
+changed hook needs trust again, so repeat steps 3–5 in terminal Codex (not the VS Code chat, which has no `/hooks`). The Coach then runs
+`$huddle-update` in each repo (`/huddle-update` in Claude Code), as after any update.
 
 ## Add or remove someone
 
