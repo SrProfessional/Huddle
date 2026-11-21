@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- A guided test of staging (Issue #269): the `/huddle-test` skill (`$huddle-test` in Codex) walks the Coach through the Issues in staging that are not tested, one at a time and in an order it explains, with plain steps for each, and marks an Issue «tested in staging» only after the Coach says it passed. The Task templates have an optional «How to test in staging» section, `/huddle-issue` asks for it, and `/huddle-release` points to `/huddle-test`.
+
 ### Fixed
 
 - Claude Code model names find their API price (Issue #265): `claude-opus-5-5` (with an optional date suffix) matches `anthropic/claude-opus-5.5` by a general rule, so the dashboard stops saying «no price» for them. The old aliases still work, and an unknown family or version still has no price.

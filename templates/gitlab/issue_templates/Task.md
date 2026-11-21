@@ -24,6 +24,10 @@
 <!-- The text the Player pastes into a new Claude Code session. -->
 ```
 
+## How to test in staging
+
+<!-- Optional. Write one or two steps a person with no technical background can do in staging, and what they should see after each. -->
+
 ## Allowed files
 
 <!-- The only files this task may touch. -->

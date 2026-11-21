@@ -30,7 +30,8 @@ In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary
      (a second person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid
      action, a permission that was denied). Mark each of those with «🙋 Only you» and write it as numbered steps for someone
      with no technical background (docs/design.md §13); every other step stays the session's.
-   - **Allowed files**, **Contract or spec**, **Tests that must pass:** concrete, checkable.
+   - **How to test in staging:** optional. Ask for one or two steps a person with no technical background can do in staging, each with what they should see. `/huddle-test` reads this section to guide the Coach, so write it whenever the Issue changes something a person can see or touch.
+  - **Allowed files**, **Contract or spec**, **Tests that must pass:** concrete, checkable.
    - **Milestone (area):** ask which milestone the Issue goes in. Areas are milestones, and each Issue belongs to one: list the
      open ones with `gh api repos/<project>/milestones --jq '.[].title'` (or `glab api projects/<encoded project>/milestones?state=active`)
      and offer them. If the right one does not exist yet, offer to create it. The Coach keeps its
