@@ -43,3 +43,22 @@ test('Would cost by API stays per person, tool, model and Issue, with partial wh
   assert.match(part, /No price for Claude Code: claude-x/);
   assert.match(part, /what these tokens would cost at API list prices/i);
 });
+
+test('Cost per Issue marks the cost and the cost per point as partial when the Issue has unpriced usage', () => {
+  const html = renderPage(buildModel({
+    now: new Date('2026-11-21T12:00:00Z'), project: 'acme/app', me: 'ana', progress: { areas: [] },
+    usage: { people: { ana: [tokenRow('Claude Code', 'priced-model', 10), tokenRow('Codex', 'unpriced-model', 10), tokenRow('Codex', 'priced-model', 11)] } },
+    prices: { source: 'fixture', date: '2026-11-21', models: { 'priced-model': { input: 0.00001, output: 0 } } },
+    efforts: { 10: 2, 11: 1 }, merged: [],
+  }));
+  const perIssue = html.match(/<section id="per-issue"[^>]*>([\s\S]*?)<\/section>/)[1];
+  const rows = (range) => [...range.matchAll(/<div class="trow"[^>]*>([\s\S]*?)<\/div>/g)].map((m) => m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+  const row10 = rows(perIssue).find((r) => r.startsWith('#10'));
+  const row11 = rows(perIssue).find((r) => r.startsWith('#11'));
+  assert.match(row10, /\$10\.00 partial/);
+  assert.match(row10, /\$5\.00 partial/);
+  assert.doesNotMatch(row11, /partial/);
+  assert.match(perIssue, /Would cost by API/);
+  assert.doesNotMatch(perIssue, />API cost</);
+  assert.match(perIssue, /Partial means some tokens have no API price/);
+});
