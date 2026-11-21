@@ -18,6 +18,7 @@ root: read them there, never guess them.
 6. Commit in small steps, with a message that says what and why.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
+8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
 
 ### Language
 
