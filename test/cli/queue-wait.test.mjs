@@ -82,5 +82,5 @@ test('bad intervals and arguments are exit 2', async () => {
     assert.equal(await run(args, h.ctx), 2, args.join(' '));
   }
   const dflt = looping({ setup: review });
-  assert.equal(await run(['queue', '--wait'], dflt.ctx), 0, 'the interval is optional (default 300)');
+  assert.equal(await run(['queue', '--wait'], dflt.ctx), 0, 'the interval is optional (default 120)');
 });

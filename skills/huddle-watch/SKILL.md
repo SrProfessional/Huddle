@@ -24,7 +24,7 @@ session start says «the watch starts now, as you asked», do the same «On» st
 
 ## On (`/huddle-watch` or `/huddle-watch <interval>`)
 
-An interval is like `5m`: default 5 minutes, allowed 2 to 60 (the wait takes it in seconds: `5m` is `300`).
+An interval is like `5m`: default 2 minutes (always, no setting in `huddle.json`), allowed 2 to 60 (the wait takes it in seconds: `5m` is `300`, the default is `120`).
 
 1. If this session already runs the watch's background wait, the watch is already on: do **not** start a second one; say it is on and its
    interval, and stop.

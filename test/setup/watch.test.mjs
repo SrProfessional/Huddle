@@ -29,7 +29,7 @@ test('on: no second watch, the check now, then the background wait with the inte
   const t = flat(WATCH);
   assert.match(t, /already on/i);
   assert.match(t, /do \*\*not\*\* start a second/i);
-  assert.match(t, /default 5 minutes/i);
+  assert.match(t, /default 2 minutes/i);
   assert.match(t, /2 to 60/);
   const check = t.search(/\*\*Check now:\*\*/);
   const queue = t.indexOf(`${HUDDLE} queue --json`, check);
