@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Each person's token summary is shared on the `huddle-usage` branch (Issue #230), numbers only, at most once an hour from the session
+  start, written without touching the working tree or the current branch; `huddle usage --team` sums the team and keeps each person apart.
+  Only in a private repo by default: a public one shares nothing unless `share_usage` is `true` in `huddle.json`.
 - Five base skills adapted from MIT-licensed Superpowers (Issue #235): `huddle-tdd`, `huddle-debug`, `huddle-verify`,
   `huddle-answer-review`, and Coach-only `huddle-brainstorm`. They are concise, work in Claude Code and Codex, retain
   Huddle's Issue/worktree/review rules, and carry their upstream attribution in `skills/THIRD-PARTY.md`.

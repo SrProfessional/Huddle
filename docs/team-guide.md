@@ -332,6 +332,16 @@ installed or not on the PATH of this terminal» (with the install command for th
 terminal, or reload the PATH») and «is not logged in» (with `gh auth login` or `glab auth login`, plus `--hostname <host>`
 when `huddle.json` has a host). The SessionStart hook stays silent in both cases.
 
+## What the dashboard shares
+
+The Huddle dashboard shows the team's tokens and each person's. For that, each session leaves a summary of its tokens on the branch
+`huddle-usage`, at most once an hour: per day, tool, model and Issue, **numbers only** (never the text of a conversation). That branch
+never mixes with the code, and it has the repo's own visibility: in a private repo only the team sees it. **In a public repo nothing is
+shared** unless the team sets `"share_usage": true` in `huddle.json` (then anyone can see those numbers); `false` turns it off anywhere.
+
+To compare the cost with your plan, say your plan once on your machine: `huddle plan claude=max5 codex=plus`. `huddle prices` shows the API
+prices in use (and where they came from) and the plan table; `huddle usage` shows your own numbers, `huddle usage --team` the team's.
+
 ## A mixed team: Claude Code and Codex
 
 The Coach and the Players may each work in **Claude Code** or in **OpenAI Codex**, at the same time. One person can be both, on two

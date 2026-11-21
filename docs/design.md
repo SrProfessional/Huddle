@@ -1246,6 +1246,19 @@ is skipped and named once on stderr, without stopping the report.
 every usage value is a number and no message text appears in the output. The plain report shows those same columns. `--since` keeps days on
 or after the inclusive date.
 
+### The team's numbers: the huddle-usage branch (Issue #230)
+
+So the dashboard can show the whole team and each person, every session leaves its summary on the orphan branch `huddle-usage`:
+`usage/<login>/<YYYY-MM-DD>.json` = `{ person, day, rows }`, the rows of `huddle usage` for that day. Numbers only: no message text, no
+path. `huddle usage --push` writes it with git plumbing and a private index file (`read-tree` of the branch's tip, `hash-object`,
+`update-index`, `write-tree`, `commit-tree`, `push <commit>:refs/heads/huddle-usage`), so the working tree, the real index and the current
+branch are never touched; a day already there is replaced, other days and other people are kept; a push rejected because someone pushed
+meanwhile fetches and retries once on top. The session-start hook starts `huddle usage --push` as a process of its own at most once an
+hour per repo (a mark under `~/.huddle`). `huddle usage --team [--json]` reads every file of the branch after a fetch: `{ team, people }`,
+the team's rows summed and each login's rows apart; with no branch yet, an empty team. The branch has the repo's own visibility, so the
+Coach decided (2026-11-21): `--push` shares by itself only in a private or internal repo (the adapters' `repoVisibility()`); in a public one,
+or when the visibility cannot be read, it shares nothing and says so, unless `share_usage` in `huddle.json` is `true`; `false` never shares.
+
 ### API and plan prices
 
 The dashboard compares API token cost with subscriptions. `prices --json` returns the API table, its source and date, and the dated plan
