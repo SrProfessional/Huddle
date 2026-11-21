@@ -7,6 +7,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Fixed
 
+- Tokens are attributed to their Issue (Issue #266): `huddle usage` showed `no Issue` for every row because the Issue was looked up only through an open PR/MR, and the transcripts of finished (removed) worktrees were not read at all. It now also finds the Issue through the merged PR/MR of the branch, and reads the Claude Code and Codex transcripts of removed worktrees, using their branch or folder name. The default branch stays `no Issue`.
 - Claude Code model names find their API price (Issue #265): `claude-opus-5-5` (with an optional date suffix) matches `anthropic/claude-opus-5.5` by a general rule, so the dashboard stops saying «no price» for them. The old aliases still work, and an unknown family or version still has no price.
 
 ### Changed
