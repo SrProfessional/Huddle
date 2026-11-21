@@ -7,6 +7,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Changed
 
+- An assigned Issue that waits for a file it shares with an active Issue shows `blocked` on the board (Issue #250), as a dependency wait does, with the Issue and the file in the output of `huddle labels` and `huddle next`; it goes back to `assigned` when the conflict clears. No new label; a wait for capacity alone stays `assigned`.
 - The Coach's watch checks every 2 minutes by default instead of 5 (Issue #243), so a ready PR waits less. No setting in `huddle.json`; `/huddle-watch 10m` still sets another interval.
 
 ### Fixed

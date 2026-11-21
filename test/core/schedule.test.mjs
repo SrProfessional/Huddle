@@ -56,3 +56,10 @@ test('an Issue bigger than the whole capacity runs alone, only when nothing else
 test('nothing to do: empty lists', () => {
   assert.deepEqual(schedule({ active: [], candidates: [], capacity: 5 }), { start: [], wait: [], used: 0, capacity: 5 });
 });
+
+test('a wait for a shared file says which Issue and file (Issue #250), and a wait for room carries no clash', () => {
+  const r = schedule({ active: [it(5, 1, { files: ['a.mjs'] })], candidates: [it(10, 1, { files: ['a.mjs'] })], capacity: 5 });
+  assert.deepEqual(r.wait[0].clash, { with: 5, file: 'a.mjs' });
+  const room = schedule({ active: [it(5, 3)], candidates: [it(10, 3)], capacity: 5 });
+  assert.equal(room.wait[0].clash, undefined);
+});
