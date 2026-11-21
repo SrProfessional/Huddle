@@ -38,3 +38,30 @@ for (const name of ['huddle-update', 'huddle-setup']) {
     assert.match(read(`skills/${name}/SKILL.md`), /\*\*In OpenAI Codex\*\* \(Issue #225\): instead of `claude plugin …`, run `codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle`; instead of `\/reload-plugins`, open a new Codex chat; make the worktree with `git worktree add` instead of `EnterWorktree`/);
   });
 }
+
+test('a Codex clone is told to pull and open a new Codex chat, not to restart Claude Code (review of PR #226)', () => {
+  const t = updateSteps(true, 'project', true);
+  assert.match(t, /git pull/);
+  assert.match(t, /open a new Codex chat/);
+  assert.doesNotMatch(t, /restart Claude Code/);
+  assert.match(updateSteps(true, 'project'), /restart Claude Code/, 'Claude Code keeps its text');
+  assert.match(updateSteps(false, 'project', true), /team guide's «A mixed team» steps/);
+});
+
+test('huddle-update has a concrete Codex path through the plugin, the files and the last line (review of PR #226)', () => {
+  const t = read('skills/huddle-update/codex.md');
+  assert.match(t, /skip `claude plugin list --json`/);
+  assert.match(t, /the VS Code extension's own `codex`/);
+  assert.match(t, /the new version's folder is a sibling of the running plugin's folder/);
+  assert.match(t, /the command the session start named/);
+  assert.match(t, /trust the hook again in terminal Codex/);
+  assert.match(t, /open a new Codex chat/);
+  assert.match(read('skills/huddle-update/SKILL.md'), /read and follow `\$\{CLAUDE_PLUGIN_ROOT\}\/skills\/huddle-update\/codex\.md`/);
+});
+
+test('huddle-setup tells a first Codex install from an upgrade, with the trust step (review of PR #226)', () => {
+  const t = read('skills/huddle-setup/SKILL.md');
+  assert.match(t, /first install in Codex: `codex plugin marketplace add SrProfessional\/Huddle`, then `codex plugin add huddle@huddle`/);
+  assert.match(t, /already added: `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`/);
+  assert.match(t, /trust the hook once in terminal Codex/);
+});

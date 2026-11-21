@@ -6,7 +6,7 @@ description: Use when a repo that already has Huddle set up must be brought to t
 # huddle-update
 
 One command brings Huddle up to date in the project you are in: the plugin, the project's files, and a PR. The person does not switch branch, does not open a terminal and does not run a second command. A repo with no `huddle.json` has not been set up: say so and point
-to `/huddle-setup`. **In OpenAI Codex** (Issue #225): instead of `claude plugin …`, run `codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle`; instead of `/reload-plugins`, open a new Codex chat; make the worktree with `git worktree add` instead of `EnterWorktree`; run `gh`, `glab` and `git push` with network access (approve it when Codex asks).
+to `/huddle-setup`. **In OpenAI Codex** (Issue #225): instead of `claude plugin …`, run `codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle`; instead of `/reload-plugins`, open a new Codex chat; make the worktree with `git worktree add` instead of `EnterWorktree`; run `gh`, `glab` and `git push` with network access (approve it when Codex asks); for sections 2, 3 and 6 read and follow `${CLAUDE_PLUGIN_ROOT}/skills/huddle-update/codex.md`.
 
 ## 1. The version notice
 
