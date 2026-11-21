@@ -10,7 +10,6 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 - Faster review rounds, never CI (Issue #244): the Coach runs the full suite only when it is about to approve, on the exact head it merges in a
   fresh worktree (never a merge without that run); a docs-only round is approved without a new run; the Player runs the tests of the area it
   touched while it fixes and the full suite once, right before pushing. No workflow is added.
-
 - The Coach's watch checks every 2 minutes by default instead of 5 (Issue #243), so a ready PR waits less. No setting in `huddle.json`; `/huddle-watch 10m` still sets another interval.
 
 ### Fixed
