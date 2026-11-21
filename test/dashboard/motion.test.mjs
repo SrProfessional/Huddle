@@ -18,7 +18,10 @@ function world({ reduce = false, noGsap = false, noScrollTrigger = false } = {})
   const bar = element('bar', { dataset: { w: '42' } });
   const row = element('row');
   const count = element('count', { dataset: { count: '1234.5' }, text: '$1,234.50' });
-  const section = element('section', { children: [row, bar, count] });
+  bar.style['--w'] = '42%';
+  const bar2 = element('bar', { dataset: { w: '80' } });
+  bar2.style['--w'] = '80%';
+  const section = element('section', { children: [row, bar, bar2, count] });
   const hiddenBar = element('bar', { dataset: { w: '10' }, hidden: true });
   const els = {
     head: [element('head')],
@@ -26,7 +29,7 @@ function world({ reduce = false, noGsap = false, noScrollTrigger = false } = {})
     count: [element('count', { dataset: { count: '48' }, text: '48' }), count],
     section: [section],
     row: [row],
-    bar: [bar, hiddenBar],
+    bar: [bar, bar2, hiddenBar],
     glow: [element('glow')],
   };
   const document = {
@@ -41,7 +44,9 @@ function world({ reduce = false, noGsap = false, noScrollTrigger = false } = {})
     return t;
   };
   const gsap = {
-    registerPlugin() {}, fromTo: handle, set: (target, vars) => sets.push({ target, vars }),
+    registerPlugin() {}, fromTo: handle,
+    // Like gsap's clearProps: only the listed properties are removed from the element's inline style.
+    set: (target, vars) => { sets.push({ target, vars }); for (const p of String(vars.clearProps ?? '').split(',').filter(Boolean)) delete target.style?.[p]; },
     ticker: { add() {}, lagSmoothing() {} },
   };
   const ScrollTrigger = { create: (config) => triggers.push(config), update() {} };
@@ -52,7 +57,7 @@ function world({ reduce = false, noGsap = false, noScrollTrigger = false } = {})
   };
   if (!noGsap) context.gsap = gsap;
   if (!noGsap && !noScrollTrigger) context.ScrollTrigger = ScrollTrigger;
-  return { context, tweens, sets, timers, triggers, els, count, hiddenBar, bar };
+  return { context, tweens, sets, timers, triggers, els, count, hiddenBar, bar, bar2 };
 }
 
 const run = (w) => vm.runInNewContext(MOTION_SCRIPT, w.context);
@@ -142,4 +147,40 @@ test('the script text is the contract: reduced motion first, a 3000 ms safety, n
   assert.match(MOTION_SCRIPT, /3000/);
   assert.doesNotMatch(MOTION_SCRIPT, /https?:\/\/|<\/script/i);
   assert.ok(MOTION_SCRIPT.indexOf('prefers-reduced-motion') < MOTION_SCRIPT.indexOf('gsap.fromTo'));
+});
+
+test('a bar keeps its own percentage after its tween completes and after the safety, for two different values', () => {
+  const finish = (w, how) => {
+    run(w);
+    w.triggers[0].onEnter();
+    const bars = [[w.bar, '42%'], [w.bar2, '80%']];
+    for (const [el, end] of bars) {
+      const t = w.tweens.find((x) => x.target === el);
+      assert.equal(t.to.width, end, 'the tween ends at the bar own value');
+      if (how === 'complete') { Object.assign(el.style, { width: end }); t.to.onComplete(); }
+    }
+    if (how === 'safety') for (const t of w.timers.filter((x) => x.ms === 3000)) t.fn();
+    for (const [el, end] of bars) {
+      assert.equal(el.style.width, undefined, 'the tween width is cleared');
+      assert.equal(el.style['--w'], end, how + ': the declared value is still there for the style sheet');
+    }
+  };
+  finish(world(), 'complete');
+  finish(world(), 'safety');
+});
+
+test('a chart column is the same: its tween clears height and keeps --h', () => {
+  const w = world();
+  const column = element('bar', { dataset: { h: '33' } });
+  column.style['--h'] = '33%';
+  w.els.bar.push(column);
+  w.els.section[0].children.push(column);
+  run(w);
+  w.triggers[0].onEnter();
+  const t = w.tweens.find((x) => x.target === column);
+  assert.equal(t.from.height, '0%');
+  assert.equal(t.to.height, '33%');
+  for (const x of w.timers.filter((y) => y.ms === 3000)) x.fn();
+  assert.equal(column.style.height, undefined);
+  assert.equal(column.style['--h'], '33%');
 });
