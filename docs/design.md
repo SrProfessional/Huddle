@@ -1217,6 +1217,12 @@ until the Coach wrote in Spanish: «es» was terse, and the message that wakes t
 person wrote it. Now the session-start line names the language in full (`Intl.DisplayNames`: «Spanish (es; …)») and says that messages from
 Huddle itself and slash commands never change it, and every message Huddle queues into a Codex chat ends with «Answer the person in Spanish.».
 
+**Updating in Codex (Issue #225).** Found before the 0.9.6 release: the version notice, `huddle doctor` and `/huddle-update` gave only Claude
+Code's steps. In a Codex session (`inCodex`: the hook's tool, or `CODEX_THREAD_ID`) they give Codex's: in a terminal in the repo,
+`codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle` (the extension's own `codex` when it is not on the PATH),
+trust the hook again in terminal Codex if it asks, then a new Codex chat. `/huddle-update` and `/huddle-setup` have one Codex note. The
+installed version is read from the running plugin's own `plugin.json`, in Codex as in Claude Code.
+
 **The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
 
 **Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's

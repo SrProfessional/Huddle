@@ -5,9 +5,7 @@ description: Use when a repo that already has Huddle set up must be brought to t
 
 # huddle-update
 
-One command brings Huddle up to date in the project you are in: the plugin, the project's files, and a PR. The person does not switch
-branch, does not open a terminal and does not run a second command. A repo with no `huddle.json` has not been set up: say so and point
-to `/huddle-setup`.
+One command brings Huddle up to date in the project you are in: the plugin, the project's files, and a PR. The person does not switch branch, does not open a terminal and does not run a second command. A repo with no `huddle.json` has not been set up: say so and point to `/huddle-setup`. **In OpenAI Codex** (Issue #225): instead of `claude plugin …`, run `codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle`; instead of `/reload-plugins`, open a new Codex chat; make the worktree with `git worktree add` instead of `EnterWorktree`; run `gh`, `glab` and `git push` with network access (approve it when Codex asks); sections 2, 3 and 6 say what else differs in Codex.
 
 ## 1. The version notice
 
@@ -19,24 +17,24 @@ and never asks anything. When it prints nothing, say nothing about versions (it 
 
 Do this every time, even when the notice said nothing: it can be hours late, and updating the latest only says so.
 
-1. Always run `claude plugin marketplace update huddle` (it has no scope).
+1. Always run `claude plugin marketplace update huddle` (it has no scope; in Codex: `codex plugin marketplace upgrade huddle`).
 2. Find where Huddle is installed: run `claude plugin list --json` and look at the `huddle@huddle` entries. A `project` entry whose
    `projectPath` is this repo's root (compare without case and with either slash) means `--scope project`, run from that folder;
    otherwise a `user` entry means `--scope user`. With neither, say that Huddle is not installed for this project, point to
-   `/huddle-setup`, and stop.
+   `/huddle-setup`, and stop. In Codex skip this and step 3 (Codex has no project scope): run `codex plugin add huddle@huddle` (the VS Code extension's own `codex` when it is not on the PATH: on Windows, the team guide's PowerShell line); its «Installed plugin root: <folder>» is the new version's folder.
 3. Run `claude plugin update huddle@huddle --scope <scope>` (a project install: `claude plugin update huddle@huddle --scope project`).
 
 Read the output: «updated from X to Y», or already the latest; that version is the one step 3 uses. If the `claude` command cannot be run
 from this session (not found, or it fails), do not stop: do steps 3 to 5 with the Huddle that is installed, and tell the person to update
-the plugin with `/plugins` (VS Code) or the terminal commands above, and then run `/huddle-update` again.
+the plugin with `/plugins` (VS Code) or the terminal commands above, and then run `/huddle-update` again (in Codex: the two `codex plugin` commands in a terminal in the repo, then `$huddle-update` in a new Codex chat).
 
 ## 3. The files, in a worktree of its own
 
 This session still has the old skills loaded, so the refresh must use the **new** version's templates. The new version's folder is a
 sibling of `${CLAUDE_PLUGIN_ROOT}`: `<parent of CLAUDE_PLUGIN_ROOT>/<new version>` (`newPluginRoot` in `lib/core/update.mjs` gives it, and
-null when it does not exist; then use `${CLAUDE_PLUGIN_ROOT}`).
+null when it does not exist; then use `${CLAUDE_PLUGIN_ROOT}`). In Codex the new folder is the one `codex plugin add` printed, else the sibling of the running plugin's folder (two folders up from the bin folder of the command the session start named); run that folder's command.
 
-Create the worktree and branch from the up-to-date default branch, enter it with `EnterWorktree`, and run the new folder's command there:
+Create the worktree and branch from the up-to-date default branch, enter it with `EnterWorktree` (in Codex: work in that folder), and run the new folder's command there:
 
 ```text
 git fetch origin
@@ -79,7 +77,8 @@ Say what was done, the PR link, that the files apply to every branch once the PR
 get them when updated from it; the plugin itself is per machine, not per branch), and how to use `<version>` now, in the person's language:
 
 > To use Huddle <version> in this session, type `/reload-plugins`. This works in the terminal and in VS Code. If the new skills do not show up,
-> restart Claude Code: close `claude` and open it again; in VS Code, run «Player: Reload Window» from the Command Palette, or close VS Code and open it again.
+> restart Claude Code: close `claude` and open it again; in VS Code, run «Developer: Reload Window» from the Command Palette, or close VS Code and open it again.
+> In Codex: if Codex asks, trust the hook again in terminal Codex (the team guide's «A mixed team» steps), then open a new Codex chat in this repo.
 
 If nothing changed because the project is up to date, say so and ask for nothing. Do not send the person to a fresh session: `/reload-plugins` comes first.
 

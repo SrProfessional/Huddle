@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- Updating Huddle works in Codex (Issue #225): in a Codex session the version notice, `huddle doctor` and `/huddle-update` give Codex's
+  steps (`codex plugin marketplace upgrade huddle`, `codex plugin add huddle@huddle`, a new chat) instead of Claude Code's.
 - The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach
   and the Players may use either, the Codex install and update, one watch per repo, and what is adapted but not yet tried live in Codex.
 - Take over a stuck watch, when the person asks (Issue #222): if the session that holds the watch took something to review and never came

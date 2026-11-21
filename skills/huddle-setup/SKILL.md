@@ -7,6 +7,8 @@ description: Use when a team wants to put Huddle in a repo for the first time, o
 
 Installs Huddle in the repo you are in. Run it from the repo root, on a branch that is not the default branch.
 
+**In OpenAI Codex** (Issue #225): instead of `claude plugin …`, run `codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle`; instead of `/reload-plugins`, open a new Codex chat; make the worktree with `git worktree add` instead of `EnterWorktree`; run `gh`, `glab` and `git push` with network access (approve it when Codex asks). A first install in Codex: `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`; with the marketplace already added: `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle` (the VS Code extension's own `codex` when it is not on the PATH: the team guide, «A mixed team»); then trust the hook once in terminal Codex (`codex --no-daemon`, `/hooks`) and open a new Codex chat.
+
 ## Look at `huddle.json` first
 
 Before asking anything, look for `huddle.json` in the repo root and read it. A repo that already has a valid one is set up: to bring it to a newer Huddle, use `/huddle-update` (it also asks any question a new release added).
