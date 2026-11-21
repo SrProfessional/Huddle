@@ -12,6 +12,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Changed
 
+- The dashboard shows the API cost only (Issue #264): the «Paid in plans» column, the plan figures and the verdict about plans are gone from the page and its model. `huddle plan` and `huddle prices` work as before.
 - An assigned Issue that waits for a file it shares with an active Issue shows `blocked` on the board (Issue #250), as a dependency wait does, with the Issue and the file in the output of `huddle labels` and `huddle next`; it goes back to `assigned` when the conflict clears. No new label; a wait for capacity alone stays `assigned`.
 - Faster review rounds, never CI (Issue #244): the Coach runs the full suite only when it is about to approve, on the exact head it merges in a
   fresh worktree (never a merge without that run); a docs-only round is approved without a new run; the Player runs the tests of the area it

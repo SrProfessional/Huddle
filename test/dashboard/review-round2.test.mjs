@@ -87,34 +87,11 @@ test('Claude keeps its cache reads and writes as tokens of their own', () => {
 
 const text = (html) => html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
 
-test('priced usage with no plan set: $0 is not shown as paid and no verdict is given', () => {
-  const m = model({ plans: { plans: [], personal: {} } });
-  const s = m.ranges['30'].summary;
-  assert.equal(s.paidPartial, true);
-  assert.equal(s.difference, null);
-  const html = text(renderPage(m));
-  assert.doesNotMatch(html, /the plans cost less than the API|the plans cost more than the API/);
-  assert.match(html, /plan not set/);
-  assert.match(html, /not shown until every plan and every API price is known/);
-});
-
-test('a known subtotal is shown as partial when another person has no plan or a model has no price', () => {
-  const m = model({ usage: { people: { me: [row({})], ana: [row({})] } } });
-  assert.equal(m.ranges['30'].summary.paidPartial, true);
-  assert.equal(m.ranges['30'].summary.difference, null);
-  assert.match(text(renderPage(m)), /\$100\.00 partial/);
+test('a known API subtotal is shown as partial when a model has no price', () => {
   const noPrice = model({ usage: { people: { me: [row({}), row({ model: 'mystery' })] } } });
   assert.equal(noPrice.ranges['30'].summary.apiPartial, true);
-  assert.equal(noPrice.ranges['30'].summary.difference, null);
   assert.match(text(renderPage(noPrice)), /\$0\.0045 partial|\$0\.00 partial/);
-});
-
-test('with every price and every plan known the verdict is given', () => {
-  const s = model().ranges['30'].summary;
-  assert.equal(s.paidPartial, false);
-  assert.equal(s.apiPartial, false);
-  assert.equal(typeof s.difference, 'number');
-  assert.match(text(renderPage(model())), /the plans cost more than the API/);
+  assert.doesNotMatch(text(renderPage(noPrice)), /plan/i);
 });
 
 // 4. Bars keep their value --------------------------------------------------------------------------------------------------------------
