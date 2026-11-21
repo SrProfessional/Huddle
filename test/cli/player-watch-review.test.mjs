@@ -163,6 +163,46 @@ test('a resume waits for a capacity that is full, and for an open dependency', a
   assert.match(why[72], /resume after #99: it depends on it/);
 });
 
+test('starts are weighed against running work and the resumes chosen now: #72 waits on #99, the independent #80 starts', async () => {
+  const h = mk({
+    setup: (w) => {
+      w.issue({ number: 99, title: 'Dependency', body: body(1, ['d.mjs']), assignees: ['luis'], labels: ['in progress'] });
+      w.issue({ number: 72, title: 'Blocked request', body: body(3, ['c.mjs'], [99]), assignees: ['ana'], labels: ['changes requested from Coach'], reviews: [720] });
+      w.review({ number: 720 });
+      w.comment(720, request(7200));
+      w.issue({ number: 80, title: 'Independent', body: body(3, ['e.mjs']), assignees: ['ana'], labels: ['assigned'] });
+    },
+  });
+  assert.equal(await run(['next', '--json'], h.ctx), 0);
+  const r = JSON.parse(h.text());
+  assert.deepEqual(r.resume, []);
+  assert.deepEqual(r.start.map((x) => x.issue), [80]);
+  assert.equal(r.used, 0, 'nothing runs');
+  assert.match(Object.fromEntries(r.wait.map((w) => [w.issue, w.why]))[72], /resume after #99/);
+});
+
+test('a closure check that fails is tried again next round, and the confirmed closure reaches the thread once', async () => {
+  let rounds = 0;
+  let h;
+  let lookups = 0;
+  h = mk({
+    setup: (w) => { w.issue({ number: 60, title: 'In review', body: body(1, ['r.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [600] }); w.review({ number: 600 }); },
+    sleep: async () => { rounds += 1; if (rounds === 1) h.world.issue({ number: 60, title: 'In review', body: body(1, ['r.mjs']), assignees: ['ana'], state: 'merged' }); if (rounds > 4) throw new Error('stop'); },
+  });
+  const make = h.ctx.createPlatform;
+  h.ctx.createPlatform = async (cfg) => {
+    const a = await make(cfg);
+    return { ...a, issueState: async (n) => { lookups += 1; if (lookups === 1) throw new Error('read ECONNRESET'); return a.issueState(n); } };
+  };
+  const sent = [];
+  h.ctx.codexQueue = (t, m) => { sent.push({ t, m }); return { queued: true, resumed: true }; };
+  assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], h.ctx), 0);
+  assert.equal(lookups, 2, 'tried again after the reset');
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].t, 'P1');
+  assert.match(sent[0].m, /#60 is finished/);
+});
+
 test('a claimed request (👀) is no longer offered to resume', async () => {
   const h = mk({ setup: twoOnOneFile(1) });
   assert.equal(await run(['take', '40'], h.ctx), 0);
