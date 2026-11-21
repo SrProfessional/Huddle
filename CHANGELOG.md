@@ -7,6 +7,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The website now uses Huddle's dark dashboard palette, system typography, glowing controls and drifting colour.
 - Updating Huddle works in Codex (Issue #225): in a Codex session the version notice, `huddle doctor` and `/huddle-update` give Codex's
   steps (`codex plugin marketplace upgrade huddle`, `codex plugin add huddle@huddle`, a new chat) instead of Claude Code's.
 - The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach

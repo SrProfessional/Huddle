@@ -192,16 +192,26 @@ test('the home page has what the Issue asks for', () => {
   assert.match(t, /href="how-it-works\/"/);
 });
 
-test('the style sheet has light and dark, visible focus, reduced motion, and no trackers', () => {
+test('the style sheet uses the approved dark tokens, accessible card text, visible focus and reduced motion', () => {
   const cssFiles = existsSync(site) ? readdirSync(site).filter((f) => f.endsWith('.css')) : [];
   assert.ok(cssFiles.length >= 1, 'no style sheet in site/');
   const css = cssFiles.map((f) => readFileSync(path.join(site, f), 'utf8')).join('\n');
-  assert.match(css, /prefers-color-scheme:\s*dark/);
+  for (const [name, color] of Object.entries({
+    bg: '#0F1117', surface: '#1A1D26', surfaceRaised: '#1D2130', ink: '#F2F4F8', muted: '#A3A8B6',
+    accent: '#2F6BFF', accentBright: '#4C8DFF', progress: '#F5A524', changes: '#F0476B', done: '#5FD068',
+  })) assert.match(css, new RegExp(`--${name}:\\s*${color}`, 'i'), `missing ${name} token`);
+  assert.doesNotMatch(css, /prefers-color-scheme/);
+  const luminance = (hex) => hex.slice(1).match(/../g).map((part) => {
+    const c = Number.parseInt(part, 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+  assert.ok(contrast('#F2F4F8', '#1A1D26') >= 4.5, 'card text contrast is below 4.5:1');
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion/);
   for (const p of pages) {
     const t = html(p);
-    assert.match(t, /<meta\s+name="color-scheme"\s+content="light dark"/i, `${p}: color-scheme`);
+    assert.match(t, /<meta\s+name="color-scheme"\s+content="dark"/i, `${p}: color-scheme`);
     assert.doesNotMatch(t, /google-analytics|googletagmanager|plausible|hotjar|segment\.com/i, `${p}: tracker`);
   }
 });
@@ -354,23 +364,15 @@ test('H27: the CSS turns every effect off under prefers-reduced-motion and hides
   for (const p of pages.filter((x) => x !== 'index.html')) assert.doesNotMatch(html(p), /vendor\/|landing\.js/, `${p} should not load the motion scripts`);
 });
 
-test('H27: the fonts are served from the site itself, with their licences, and preloaded (no layout shift from a font swap)', () => {
+test('the site uses the system sans-serif stack without local font preloads', () => {
   for (const p of pages) {
     const t = html(p);
     assert.doesNotMatch(t, /fonts\.googleapis\.com|fonts\.gstatic\.com/, `${p}: loads fonts from another origin`);
-    assert.match(t, /<link rel="preload" href="[^"]*fonts\/bricolage-grotesque-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the display font`);
-    assert.match(t, /<link rel="preload" href="[^"]*fonts\/source-serif-4-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the text font`);
+    assert.doesNotMatch(t, /fonts\//, `${p}: no local font preload`);
   }
   const css = read('site/style.css');
-  assert.match(css, /@font-face\s*\{[^}]*Bricolage Grotesque[^}]*fonts\/bricolage-grotesque-latin\.woff2/);
-  assert.match(css, /@font-face\s*\{[^}]*Source Serif 4[^}]*fonts\/source-serif-4-latin\.woff2/);
-  for (const f of ['bricolage-grotesque-latin.woff2', 'source-serif-4-latin.woff2']) {
-    const b = readFileSync(path.join(site, 'fonts', f));
-    assert.equal(b.subarray(0, 4).toString(), 'wOF2', `${f} is not a woff2 file`);
-  }
-  for (const f of ['OFL-bricolage-grotesque.txt', 'OFL-source-serif-4.txt']) {
-    assert.match(readFileSync(path.join(site, 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i, `${f}: licence text`);
-  }
+  assert.doesNotMatch(css, /@font-face|fonts\//);
+  assert.match(css, /--sans:\s*system-ui/);
 });
 
 // ---- Issue #61, review request: links that leave the site open in a new tab, and say so ----
