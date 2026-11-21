@@ -23,8 +23,8 @@ Coach changes the team. Read `platform`, `host`, `project` and `default_branch` 
    - If it says the login is already there (add) or not there (remove), nothing changed: tell them and stop.
 4. Check `git diff huddle.json`: only the `assignees` array may differ (a multi-line array changes several lines). Then commit it as `Team: add <login>` (or `Team: remove <login>`) and push
    with `git push -u origin <branch>`.
-5. Open the PR (GitHub: `gh pr create --base <default_branch> --title "Team: add <login>" or "Team: remove <login>" --body ...`) or the MR (GitLab:
-   `glab mr create --target-branch <default_branch> --title "Team: add <login>" or "Team: remove <login>" --description ... --yes`), with a one-line reason in the body.
+5. Write the one-line reason to a temporary UTF-8 file. For the title argument, choose `--title "Team: add <login>" or "Team: remove <login>"` as appropriate. Open the PR with
+   `gh pr create --base <default_branch> --title <title> --body-file <file>` or the MR with `glab mr create --target-branch <default_branch> --title <title> --description-file <file> --yes`. Never pass the reason inline.
    **Never merge it.** The Coach merges it after looking, like any change. Give them the link.
 6. On **add**, print the message to send the new person, in the Coach's language, with the commands as they are:
 

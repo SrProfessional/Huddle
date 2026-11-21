@@ -22,3 +22,21 @@ for (const file of files) {
     assert.match(text, /never pass the text inline/i);
   });
 }
+
+const expanded = [
+  ['team', '--description-file'],
+  ['update', '--description-file'],
+  ['release', '--description-file', 'body=@file'],
+  ['watch', 'body=@file'],
+  ['answer-review', 'body=@file'],
+];
+
+for (const [name, ...gitlabForms] of expanded) {
+  test(`huddle-${name}: use file options for its publishing steps`, () => {
+    const text = readFileSync(new URL(`../../skills/huddle-${name}/SKILL.md`, import.meta.url), 'utf8');
+    assert.match(text, /temporary UTF-8 file/);
+    assert.match(text, /--body-file <file>/);
+    for (const form of gitlabForms) assert.ok(text.includes(form), `missing GitLab file form ${form}`);
+    assert.doesNotMatch(text, /(?:--body|--description)(?:\s+|=)\.\.\./);
+  });
+}
