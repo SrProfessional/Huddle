@@ -25,6 +25,17 @@ test('a request mirrored on the PR and on the Issue is one round; distinct round
   assert.equal(roundsOf([pr, issue], 'srprofessional', '2026-11-05T00:00:00Z'), 2, 'logins ignore case');
 });
 
+test('review round keys keep letters: prompts ending in log and logs are two rounds, a whitespace-only difference is one', () => {
+  const mk = (id, text, at) => ({ id, author: 'SrProfessional', body: prompt(text), createdAt: at });
+  const merged = '2026-11-05T00:00:00Z';
+  const a = [mk(1, 'Check the log', '2026-11-01T10:00:00Z')];
+  const b = [mk(2, 'Check the logs', '2026-11-01T11:00:00Z')];
+  assert.equal(roundsOf([a, b], 'SrProfessional', merged), 2, 'log and logs are distinct prompts');
+  const c = [mk(3, 'Fix  the\n  bug', '2026-11-01T10:00:00Z')];
+  const d = [mk(4, 'Fix the bug', '2026-11-01T10:00:01Z')];
+  assert.equal(roundsOf([c, d], 'SrProfessional', merged), 1, 'whitespace-only differences are one round');
+});
+
 for (const gitlab of [false, true]) {
   test(`[${gitlab ? 'gitlab' : 'github'}] rounds read from the platform: the mirrored request is counted once, the distinct ones each count`, async () => {
     const config = { ...(gitlab ? GITLAB_CONFIG : CONFIG), staging_branch: 'staging' };
