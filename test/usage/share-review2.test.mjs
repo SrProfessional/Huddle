@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { pushGoesTo, projectRows } from '../../lib/usage/share.mjs';
 import { run } from '../../lib/cli/run.mjs';
 import { harness } from '../cli/harness.mjs';
@@ -71,4 +71,41 @@ test('remote rows are type-checked one by one: valid ones kept, impossible dates
   // or an impossible date, drops that row only.
   assert.deepEqual(rows.map((r) => r.day), ['2026-11-20', '2026-11-22', '2026-11-24']);
   assert.equal(rows.find((r) => r.day === '2026-11-22').input, 0);
+});
+
+// --- Third review of PR #245 ---------------------------------------------------------------------------------------------------------
+
+test('only unambiguous remotes count: ordinary SSH and HTTPS pass; local paths and ambiguous forms are refused', () => {
+  const gh = { platform: 'github', project: 'acme/app' };
+  for (const ok of ['https://github.com/acme/app.git', 'ssh://git@github.com/acme/app.git', 'git@github.com:acme/app.git', 'github.com:acme/app.git']) {
+    assert.equal(pushGoesTo([ok], gh), true, ok);
+  }
+  for (const bad of [
+    '/tmp/x@github.com:acme/app.git', // a local path that looks like user@host:path
+    'D:/repos/x@github.com:acme/app.git',
+    'D:\\repos\\github.com:acme/app.git',
+    './github.com:acme/app.git',
+    'file:///github.com/acme/app.git',
+    'C:acme/app.git', // a Windows drive, not a host
+    'git@github.com:/acme/app.git', // scp-like with an absolute path
+    'us/er@github.com:acme/app.git',
+  ]) assert.equal(pushGoesTo([bad], gh), false, bad);
+});
+
+test('recovering an expired lock is safe when several sessions do it at once: exactly one reserves (real processes)', async () => {
+  const { writeFileSync, utimesSync } = await import('node:fs');
+  const dir = mkdtempSync(path.join(tmpdir(), 'huddle-reserve-stale-'));
+  const file = path.join(dir, 'huddle-usage-x.pushed');
+  writeFileSync(`${file}.lock`, 'a crashed holder');
+  const old = new Date(Date.now() - 10 * 60 * 1000);
+  utimesSync(`${file}.lock`, old, old);
+  const main = fileURLToPath(new URL('../../lib/cli/main.mjs', import.meta.url));
+  const child = () => new Promise((resolve) => {
+    const p = spawn(process.execPath, ['--input-type=module', '-e', `import { reserveWindow } from ${JSON.stringify(pathToFileURL(main).href)}; process.stdout.write(String(reserveWindow(${JSON.stringify(file)}, Date.now(), 3600000)));`]);
+    let out = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.on('close', () => resolve(out.trim()));
+  });
+  const results = await Promise.all([child(), child(), child(), child(), child(), child()]);
+  assert.equal(results.filter((r) => r === 'true').length, 1, results.join(','));
 });
