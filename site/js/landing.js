@@ -193,8 +193,8 @@ function flowScene(gsap, { phone, addClass }) {
   const card = $('.f-card', svg);
   const stops = $$('.f-stop', svg);
   const rings = $$('.f-ring', svg);
-  const sideA = $('.f-side-a', svg);
-  const sideB = $('.f-side-b', svg);
+  const sideA = $$('.f-side-a .f-branch', svg);
+  const sideB = $$('.f-side-b .f-branch', svg);
   const lit = $('.f-line-lit', svg);
   const bubbleQ = $('.f-q', svg);
   const bubbleA = $('.f-a', svg);
@@ -203,18 +203,17 @@ function flowScene(gsap, { phone, addClass }) {
 
   addClass(phone ? 'fx-flow-phone' : 'fx-flow');
 
-  // Start of the story: the card is at "ready", every other stop and both side roads are dim, no bubble is shown.
+  // Start at "ready". Dim only the branch strokes so every label stays readable.
   const at = ([x, y]) => ({ x, y });
   gsap.set(card, at(P.ready));
-  gsap.set(stops, { opacity: 0.3 });
-  gsap.set([sideA, sideB], { opacity: 0.25 });
+  gsap.set([...sideA, ...sideB], { opacity: 0.25 });
   gsap.set([bubbleQ, bubbleA, bubbleC], { opacity: 0 });
   if (rings.length) gsap.set(rings, { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' });
   if (lit) gsap.set(lit, { scaleX: 0 });
 
   const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
   const light = (index, time) => {
-    tl.to(stops[index], { opacity: 1, duration: 0.4 }, time);
+    tl.fromTo(stops[index], { y: 3 }, { y: 0, duration: 0.4, immediateRender: false }, time);
     if (rings[index]) tl.to(rings[index], { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, time);
   };
   const dim = (index, time) => { if (rings[index]) tl.to(rings[index], { opacity: 0, duration: 0.3 }, time); };

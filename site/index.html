@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="dark">
 <title>Huddle: Decision-led development for teams coding with AI</title>
 <meta name="description" content="Huddle is a plugin for teams in Claude Code and OpenAI Codex. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
 <link rel="canonical" href="https://srprofessional.github.io/Huddle/">
-<meta name="theme-color" content="#4336d8">
+<meta name="theme-color" content="#0F1117">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Huddle">
 <meta property="og:title" content="Huddle: Decision-led development for teams coding with AI">
@@ -22,8 +22,6 @@
 <meta name="twitter:description" content="Huddle is a plugin for teams in Claude Code and OpenAI Codex. One Coach hands out Issues, each Player's session does one, and nothing is dropped.">
 <meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 <script type="application/ld+json">
 {
@@ -72,9 +70,9 @@
       </div>
       <div class="layer layer-mid deco" aria-hidden="true" data-depth="0.18">
         <span class="float-card deco fc1" aria-hidden="true"><b>#12</b> ready</span>
-        <span class="float-card deco fc2" aria-hidden="true"><b>#7</b> in progress</span>
+        <span class="float-card deco fc2 status-in-progress" aria-hidden="true"><b>#7</b> in progress</span>
         <span class="float-card deco fc3" aria-hidden="true"><b>#9</b> in review</span>
-        <span class="float-card deco fc4" aria-hidden="true"><b>#3</b> merged</span>
+        <span class="float-card deco fc4 status-done" aria-hidden="true"><b>#3</b> merged</span>
       </div>
     </div>
     <div class="wrap hero-copy">
@@ -138,22 +136,22 @@
           <g text-anchor="middle">
             <g class="f-stop"><text class="f-label" x="100" y="48">ready</text><text class="f-note" x="100" y="78">Coach writes it</text></g>
             <g class="f-stop"><text class="f-label" x="320" y="48">assigned</text><text class="f-note" x="320" y="78">Given to a Player</text></g>
-            <g class="f-stop"><text class="f-label" x="540" y="48">in progress</text><text class="f-note" x="540" y="78">A session works on it</text></g>
+            <g class="f-stop"><text class="f-label status-in-progress" x="540" y="48">in progress</text><text class="f-note" x="540" y="78">A session works on it</text></g>
             <g class="f-stop"><text class="f-label" x="760" y="48">in review</text><text class="f-note" x="760" y="78">A pull request is open</text></g>
-            <g class="f-stop"><text class="f-label" x="940" y="48">merged</text><text class="f-note" x="940" y="78">Coach merges</text></g>
+            <g class="f-stop"><text class="f-label status-done" x="940" y="48">merged</text><text class="f-note" x="940" y="78">Coach merges</text></g>
           </g>
           <g class="f-side f-side-a">
             <path class="f-branch" d="M528 136C510 190 485 205 472 228" marker-end="url(#arrow-wide)"/>
             <path class="f-branch" d="M400 228C425 200 520 190 534 138" marker-end="url(#arrow-wide)"/>
             <rect class="f-box" x="335" y="230" width="190" height="44" rx="22"/>
-            <text class="f-branch-label" x="430" y="258" text-anchor="middle">needs decision</text>
+            <text class="f-branch-label status-decision" x="430" y="258" text-anchor="middle">needs decision</text>
             <text class="f-note" x="430" y="304" text-anchor="middle">It asks, then goes on</text>
           </g>
           <g class="f-side f-side-b">
             <path class="f-branch" d="M768 136C785 190 800 205 808 228" marker-end="url(#arrow-wide)"/>
             <path class="f-branch" d="M640 252C590 250 560 200 548 138" marker-end="url(#arrow-wide)"/>
             <rect class="f-box" x="640" y="230" width="270" height="44" rx="22"/>
-            <text class="f-branch-label" x="775" y="258" text-anchor="middle">changes requested</text>
+            <text class="f-branch-label status-changes" x="775" y="258" text-anchor="middle">changes requested</text>
             <text class="f-note" x="775" y="304" text-anchor="middle">The Coach asks, the session fixes</text>
           </g>
           <g class="f-bubble f-q deco" aria-hidden="true"><rect x="110" y="232" width="210" height="40" rx="12"/><text x="215" y="258" text-anchor="middle">Postgres or SQLite?</text></g>
@@ -175,11 +173,11 @@
           <circle class="f-node-end" cx="30" cy="538" r="12"/>
           <g class="f-stop"><text class="f-label" x="62" y="42">ready</text><text class="f-note" x="62" y="62">Written by the Coach</text></g>
           <g class="f-stop"><text class="f-label" x="62" y="118">assigned</text><text class="f-note" x="62" y="138">Given to a Player</text></g>
-          <g class="f-stop"><text class="f-label" x="62" y="194">in progress</text><text class="f-note" x="62" y="214">A session works on it</text></g>
+          <g class="f-stop"><text class="f-label status-in-progress" x="62" y="194">in progress</text><text class="f-note" x="62" y="214">A session works on it</text></g>
           <g class="f-side f-side-a">
             <path class="f-branch" d="M30 244H70" marker-end="url(#arrow-tall)"/>
             <rect class="f-box" x="78" y="224" width="190" height="40" rx="20"/>
-            <text class="f-branch-label" x="173" y="250" text-anchor="middle">needs decision</text>
+            <text class="f-branch-label status-decision" x="173" y="250" text-anchor="middle">needs decision</text>
           </g>
           <g class="f-bubble f-q deco" aria-hidden="true"><rect x="78" y="274" width="240" height="34" rx="11"/><text x="198" y="296" text-anchor="middle">Postgres or SQLite?</text></g>
           <g class="f-bubble f-a deco" aria-hidden="true"><rect x="78" y="314" width="240" height="34" rx="11"/><text x="198" y="336" text-anchor="middle">Coach: SQLite</text></g>
@@ -187,10 +185,10 @@
           <g class="f-side f-side-b">
             <path class="f-branch" d="M30 448H70" marker-end="url(#arrow-tall)"/>
             <rect class="f-box" x="78" y="428" width="220" height="40" rx="20"/>
-            <text class="f-branch-label" x="188" y="454" text-anchor="middle">changes requested</text>
+            <text class="f-branch-label status-changes" x="188" y="454" text-anchor="middle">changes requested</text>
           </g>
           <g class="f-bubble f-c deco" aria-hidden="true"><rect x="78" y="478" width="240" height="34" rx="11"/><text x="198" y="500" text-anchor="middle">Add a test for the empty case</text></g>
-          <g class="f-stop"><text class="f-label" x="62" y="544">merged</text><text class="f-note" x="62" y="564">Only the Coach merges</text></g>
+          <g class="f-stop"><text class="f-label status-done" x="62" y="544">merged</text><text class="f-note" x="62" y="564">Only the Coach merges</text></g>
           <g class="f-card deco" aria-hidden="true" transform="translate(30 538)"><rect x="-24" y="-13" width="48" height="26" rx="8"/><text y="4" text-anchor="middle">#42</text></g>
         </svg>
       </div>

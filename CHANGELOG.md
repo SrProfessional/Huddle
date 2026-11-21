@@ -7,6 +7,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The website now uses Huddle's dark dashboard palette, system typography, glowing controls and drifting colour.
 - API and subscription prices (Issue #231): the new prices command reports the daily OpenRouter/LiteLLM API table and dated Claude and
   ChatGPT plans; the plan command stores each person's selections locally, and `huddle.json` can carry negotiated plan overrides.
 - Local token accounting for the dashboard (Issue #229): the new usage command reads Claude Code and Codex transcripts
