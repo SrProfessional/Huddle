@@ -159,3 +159,28 @@ for (const gitlab of [false, true]) {
     assert.match(h.text(), /#239 → assigned − blocked/);
   });
 }
+
+// Review round 2 of PR #260: a scoped run keeps a waiter blocked until its LAST overlap clears, also for a holder that does not touch n and has a merged dependency.
+for (const gitlab of [false, true]) {
+  test(`[${gitlab ? 'gitlab' : 'github'}] closing one blocker keeps the waiter blocked while another holder, with a merged dependency, still shares a file`, async () => {
+    const h = harness({
+      gitlab,
+      wrap: (a) => ({ ...a, me: async () => 'ana' }),
+      setup: (w) => {
+        w.issue({ number: 90, title: 'Merged dependency', state: 'merged' });
+        w.issue({ number: 5, title: 'Holds a', body: body(1, ['a.mjs']), assignees: ['ana'], labels: ['in progress'] });
+        w.issue({ number: 6, title: 'Holds b', body: body(1, ['b.mjs'], '- #90'), assignees: ['ana'], labels: ['in progress'] });
+        w.issue({ number: 239, title: 'Needs both', body: body(1, ['a.mjs', 'b.mjs']), assignees: ['ana'], labels: ['blocked'] });
+      },
+    });
+    h.ctx.updateCachePath = '/data/u.json';
+    h.world.issue({ number: 5, title: 'Holds a', body: body(1, ['a.mjs']), assignees: ['ana'], labels: ['in progress'], state: 'merged' });
+    assert.equal(await run(['labels', '--issue', '5'], h.ctx), 0, h.errText());
+    await run(['next', '--json'], h.ctx);
+    assert.match(JSON.parse(h.out.at(-1)).wait.find((x) => x.issue === 239).why, /shares b\.mjs with #6/);
+    assert.deepEqual(h.world.labelsOf(239), ['blocked'], 'still shares b.mjs with #6');
+    h.world.issue({ number: 6, title: 'Holds b', body: body(1, ['b.mjs'], '- #90'), assignees: ['ana'], labels: ['in progress'], state: 'merged' });
+    assert.equal(await run(['labels', '--issue', '6'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(239), ['assigned'], 'the last overlap cleared');
+  });
+}
