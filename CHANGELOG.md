@@ -53,6 +53,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
   `CLAUDE.md` and `AGENTS.md`, keeping the project's own text outside the markers. A repo set up before gets `AGENTS.md` on its next
   `/huddle-update`.
 
+### Fixed
+
+- Huddle skills send Issue, PR/MR and comment text from temporary files in Claude Code and Codex (Issue #241), preserving line breaks and backslashes on Windows.
+
 ## [0.9.5] - 2026-11-17
 
 ### Changed

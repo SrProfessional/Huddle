@@ -41,7 +41,7 @@ First run /huddle-play <n>: it marks this request as taken (👀), so the Issue 
 ```
 ````
 
-Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Right after posting, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
+In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline. Post a reopening reason as a separate comment after reopening. Right after posting a changes request, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
 (`n` the Issue): it puts `changes requested from Coach` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
 
 ## Reviewing for the watch
