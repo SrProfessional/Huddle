@@ -48,15 +48,29 @@ test('a Codex clone is told to pull and open a new Codex chat, not to restart Cl
   assert.match(updateSteps(false, 'project', true), /team guide's «A mixed team» steps/);
 });
 
-test('huddle-update has a concrete Codex path through the plugin, the files and the last line (review of PR #226)', () => {
-  const t = read('skills/huddle-update/codex.md');
-  assert.match(t, /skip `claude plugin list --json`/);
-  assert.match(t, /the VS Code extension's own `codex`/);
-  assert.match(t, /the new version's folder is a sibling of the running plugin's folder/);
-  assert.match(t, /the command the session start named/);
-  assert.match(t, /trust the hook again in terminal Codex/);
-  assert.match(t, /open a new Codex chat/);
-  assert.match(read('skills/huddle-update/SKILL.md'), /read and follow `\$\{CLAUDE_PLUGIN_ROOT\}\/skills\/huddle-update\/codex\.md`/);
+test('huddle-update keeps one shared flow with the Codex differences inside sections 2, 3 and 6 (second review of PR #226)', () => {
+  const t = read('skills/huddle-update/SKILL.md');
+  // §2: the Codex commands, no scope lookup, the extension's codex on Windows, the new folder from the add.
+  assert.match(t, /in Codex: `codex plugin marketplace upgrade huddle`/);
+  assert.match(t, /In Codex skip this and step 3 \(Codex has no project scope\): run `codex plugin add huddle@huddle`/);
+  assert.match(t, /on Windows, the team guide's PowerShell line/);
+  assert.match(t, /«Installed plugin root: <folder>» is the new version's folder/);
+  // §3: the same up-to-date default branch, worktree name and reuse, with Codex's folder and no EnterWorktree.
+  assert.match(t, /In Codex the new folder is the one `codex plugin add` printed/);
+  assert.match(t, /enter it with `EnterWorktree` \(in Codex: work in that folder\)/);
+  assert.match(t, /git worktree add \.claude\/worktrees\/huddle-update-<version> -b huddle-update-<version> origin\/<default>/);
+  // The shared status handling stays: up to date exits with no PR, a failure stops, questions come before the PR.
+  assert.match(t, /\*\*`status` is `up-to-date`\*\*: nothing changed\. Say so, ask for nothing, make no branch or PR/);
+  assert.match(t, /If it fails, show its message .* and stop\./);
+  assert.match(t, /\*\*`status` is `questions`\*\* \(exit code 3\): it changed \*\*nothing\*\*\. Go to step 4\./);
+  // §6: hook trust in terminal Codex and a new chat.
+  assert.match(t, /In Codex: if Codex asks, trust the hook again in terminal Codex .* then open a new Codex chat in this repo\./);
+  assert.doesNotMatch(t, /codex\.md/);
+});
+
+test('the companion file is gone, and no page claims a non-Windows lookup of the extension\'s codex (second review of PR #226)', () => {
+  assert.throws(() => read('skills/huddle-update/codex.md'));
+  assert.doesNotMatch(read('skills/huddle-setup/SKILL.md'), /other systems/);
 });
 
 test('huddle-setup tells a first Codex install from an upgrade, with the trust step (review of PR #226)', () => {

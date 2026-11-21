@@ -41,7 +41,7 @@ test('step 5 opens the PR; a Player\'s session never merges, the Coach\'s merges
 test('step 6 ends with /reload-plugins, the restart fallback and both ways to restart', () => {
   assert.match(skill, /\/reload-plugins/);
   assert.match(skill, /restart Claude Code/i);
-  assert.match(skill, /Player: Reload Window/);
+  assert.match(skill, /Developer: Reload Window/);
   assert.match(skill, /close `claude` and open it again/);
   assert.doesNotMatch(skill, /applies (right away|by itself)/i);
 });
