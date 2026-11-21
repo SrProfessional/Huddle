@@ -32,7 +32,7 @@ uses `--needs-decision`). If it fails, the session says one line and goes on; th
 | `assigned` | A Player has it. Not started. |
 | `in progress` | A session is working on it. |
 | `in review` | A PR/MR is open and waits for the Coach. |
-| `blocked` | It depends on an Issue that is not merged yet. |
+| `blocked` | It waits for a dependency (an Issue that is not merged yet) or for a shared file (an active Issue of the same Player has one of its allowed files). The reason is in the output of `huddle next` and `huddle labels`. |
 | `needs decision` | The session asked the Coach and waits. |
 | `changes requested from Coach` | The Coach asked for changes and nobody has taken the request yet. |
 
