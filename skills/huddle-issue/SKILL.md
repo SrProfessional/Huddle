@@ -8,6 +8,8 @@ description: Use when the Coach wants to write a new Issue for a Player from the
 For the Coach (the `coach` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that login; if
 not, stop and say so.
 
+Use `huddle-brainstorm` first when a new task needs its goal, scope, or approach clarified.
+
 **In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
 
 ## Do

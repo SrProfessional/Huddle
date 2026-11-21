@@ -292,6 +292,10 @@ session cannot touch what customers use.
 
 The method works with plain Issues and a good `CLAUDE.md`. The plugin takes the manual steps away:
 
+It also includes five focused base skills, adapted from MIT-licensed Superpowers: `/huddle-tdd`, `/huddle-debug`,
+`/huddle-verify`, `/huddle-answer-review`, and the Coach-only `/huddle-brainstorm`. They preserve Huddle's Issue,
+worktree, evidence, and review rules; see [the attribution](skills/THIRD-PARTY.md).
+
 - Status labels that move on their own: ready, assigned, in progress, in review, blocked, needs decision, and changes
   requested from Coach.
 - A dependency check before a session starts: if an Issue it depends on is not merged yet, the session does not begin.
