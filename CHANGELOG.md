@@ -7,6 +7,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
+  and keeps one Player watch (`huddle next --wait`, `--codex` in Codex) that wakes the session when there is something to do, with no tokens.
+
 - The Coach merges when the PR/MR is correct and safe (Issue #252): a review asks for changes only for what blocks; a rarer edge case or
   extra hardening is merged and written right away as a new Issue, instead of another round.
 - Each person's token summary is shared on the `huddle-usage` branch (Issue #230), numbers only, at most once an hour from the session

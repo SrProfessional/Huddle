@@ -27,10 +27,10 @@ test('parallel.md: huddle next --json first, then one background subagent per Is
   assert.match(par, /Do not start the wait/);
 });
 
-test('parallel.md: the waits stay in the main session; a request continues the same subagent with SendMessage, or a new one', () => {
-  assert.ok(par.includes(`${HUDDLE} wait <n>`));
+test('parallel.md: the waiting stays in the main session (one Player watch, Issue #248); a request continues the same subagent with SendMessage, or a new one', () => {
+  assert.ok(par.includes(`${HUDDLE} next --wait --seen <keys>`));
   assert.match(par, /continue \*\*that Issue's\*\* subagent with SendMessage/);
-  assert.match(par, /If SendMessage is not available here, or the subagent's ID is lost, launch a new background subagent/);
+  assert.match(par, /If SendMessage is not available here, or the subagent's ID is lost \(a new session, an old wait that died\), launch a new background/);
   assert.match(par, /«Continue an Issue»/);
 });
 
