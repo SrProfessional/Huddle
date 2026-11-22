@@ -159,7 +159,7 @@ test('a resume waits for a capacity that is full, and for an open dependency', a
   const r = JSON.parse(h.text());
   assert.deepEqual(r.resume, []);
   const why = Object.fromEntries(r.wait.map((w) => [w.issue, w.why]));
-  assert.match(why[71], /resume later: no room: 3 of 5 points in use, it needs 3/);
+  assert.match(why[71], /resume later: no room: 6 of 5 points in use, it needs 3/);
   assert.match(why[72], /resume after #99: it depends on it/);
 });
 

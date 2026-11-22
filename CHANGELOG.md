@@ -5,6 +5,21 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-22
+
+### Changed
+
+- A red base branch no longer stalls reviews (Issue #290): when a PR's suite fails, the review compares the failing tests with the base branch; a PR with no new failure is merged, the base's failures become one follow-up Issue, a baseline that cannot be compared goes to the Coach as a decision, and the watch names the PR and the reason once when a review stops.
+
+### Added
+
+- The Coach can pause an Issue (Issue #291): `huddle pause <n> [--reason <text>]` leaves a «Paused by the Coach» comment and `huddle pause <n> --off` resumes it (Coach only, no new label; the newest comment wins). A paused Issue, and an Issue that is parked (`needs decision`, or a draft PR waiting for an open dependency), stops using the Player's capacity: `huddle next` lists it apart, never starts or resumes it, and its allowed files hold other Issues only when it has a branch with commits.
+
+### Fixed
+
+- The board's `blocked` label follows the pause and parking rules of `huddle next` (Issue #294): the file wait of `fileWaits` and `plan` ignores a paused or parked Issue that has no commits and no pushed branch, and a paused dependency keeps `blocked` with a reason that says it is paused.
+- `huddle next` counts points in one way (Issue #291): the «no room: X of Y points in use» message of a resume gave the points of the work already running (4 of 5) while `used` and the over-capacity line gave the total (8 of 5). Both read the same total now.
+
 ## [1.0.1] - 2026-11-22
 
 ### Added
