@@ -1,0 +1,6 @@
+[marketplaces.huddle]
+source_type = "git"
+source = "https://github.com/SrProfessional/Huddle.git"
+
+[plugins."huddle@huddle"]
+enabled = true

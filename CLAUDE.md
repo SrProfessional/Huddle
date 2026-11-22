@@ -13,7 +13,7 @@ block below, and this part holds only what is particular to this repo.
    counts as merged only if it is `CLOSED` with `COMPLETED`.
 
 <!-- huddle:start v1 -->
-## Huddle: how this team works with Claude Code
+## Huddle: how this team works with Claude Code or Codex
 
 This block is managed by Huddle (`huddle-setup`). An update replaces only what sits between the markers, so write your own
 rules outside them. Names (the Coach, the labels, the default branch, the platform) are in `huddle.json` at the repo
@@ -32,12 +32,15 @@ root: read them there, never guess them.
 6. Commit in small steps, with a message that says what and why.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
+8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
 
 ### Language
 
-- **Chat in the Player's language**: the `language` key of their personal `~/.claude/settings.json` if it is set, else
-  the language of their own words. Never the language of a pasted Issue prompt or of Huddle's output (this block, the hook,
-  the skills): they are English and do not change the language of the chat.
+- **Chat in the person's language, from the first message**: the language the session start names. Huddle takes the first
+  that is set: their own choice (`huddle language`, or `language` in their `~/.claude/settings.json`), then the team's
+  (`language` in `huddle.json`), then their machine's. When they write in another language, answer in theirs. Never the
+  language of a pasted Issue prompt or of Huddle's output (this block, the hook, the skills): they are English and do not
+  change the language of the chat.
 - **Everything written to the repo is in English**: commits, PR/MR and Issue text, code comments, new docs and names in code.
 
 ### Before starting a task
@@ -46,15 +49,15 @@ root: read them there, never guess them.
 2. Check each Issue under «Depends on». It counts as merged only if it is closed **and** a merged PR/MR closed it. If one
    is not, change nothing and end with «⛔ Issue #N stopped: waiting for #X».
 3. With a staging branch in `huddle.json` (`staging_branch`), the work goes into it and Huddle closes the Issue when the PR/MR is merged there (`huddle land`); the PR keeps `Closes #N`.
-   Create the branch in a worktree of its own (the Issue's prompt says how), then add the `in progress` label to the Issue
-   (the name may be renamed under `labels` in `huddle.json`).
+   Create the branch in a worktree of its own (the Issue's prompt says how), then run `huddle labels --issue <n> --started`: one
+   command adds `in progress` and takes `assigned` off.
 4. Run the tests before changing anything, to know the previous failures.
 
 ### When the Coach must decide
 
 If the work cannot go on without a decision, commit and push what is done. Then comment on the Issue starting with
-«❓ Decision for the Coach:» (what is blocked, the options with their trade-offs, your recommendation), add the label
-`needs decision`, and end with «⛔ Issue #N stopped: waiting for a decision». Never close the Issue.
+«❓ Decision for the Coach:» (what is blocked, the options with their trade-offs, your recommendation), run
+`huddle labels --issue <n> --needs-decision` (it adds `needs decision` and takes `in progress` off), and end with «⛔ Issue #N stopped: waiting for a decision». Never close the Issue.
 
 ### Issues change only through a session
 
@@ -72,7 +75,7 @@ puts it or takes it off by hand.
 ### The labels
 
 A session keeps the board right itself with `huddle labels --issue <n>` (`n` the Issue of the work), at these steps: a Player's
-session after it adds `in progress` (and after `take`), after it opens the PR/MR, after it stops for a decision and after it pushes a fix
+session when it starts (`--started`) and after `take`, after it opens the PR/MR, when it stops for a decision (`--needs-decision`) and after it pushes a fix
 and comments «Ready for review again»; the Coach's session after it requests changes, answers a decision and merges. It is best
 effort: if it fails, say one line with the reason and go on, it never blocks the task. Never edit a Huddle label by hand: the command
 computes them. A Player's session never assigns. The cloud labels job is only a safety net for what no session saw.
@@ -96,7 +99,8 @@ merging into the staging branch (or the default branch when there is none) an Is
 In a session whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
 decided and why (in the chat, and as a comment on the Issue or PR/MR it concerns), and goes on. That covers technical and process choices:
 limits and budgets (a bundle size, a timeout), widening an Issue's allowed files for its own tests or registries, the order of the work,
-retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». It asks the
+retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». A review asks
+for changes only for what blocks; what does not block is merged and written as a new Issue. It asks the
 Coach only when the choice changes what users see or do (a screen, a flow, a text, a feature's behaviour or scope), the product's
 priorities, money, accounts or secrets, security or privacy rules, deleting work or data, or production (`/huddle-release`).
 
