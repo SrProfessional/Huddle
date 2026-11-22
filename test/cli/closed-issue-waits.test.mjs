@@ -145,3 +145,54 @@ test('scoped labels keeps a recent legacy heartbeat and clears its closure note 
   h.ctx.now = fakeNow(NOW + 3600_000);
   assert.match(await h.command('status'), /waiting: #6: .*run \/huddle-play 6/);
 });
+
+// Issue #281: a poll that read «open» before the Issue was closed must not undo the closure when it resumes.
+for (const [name, seeded] of [['an existing live marker', true], ['the first poll', false]]) {
+  test('an older open poll does not undo land: ' + name, async () => {
+    const gate = { armed: false, release: null, reached: null };
+    const h = harness({
+      config: { ...CONFIG, staging_branch: 'staging' },
+      wrap: (adapter) => ({
+        ...adapter,
+        listLabels: async () => Object.values(LABELS).map((label) => label.name),
+        comments: async (...args) => {
+          if (gate.armed) {
+            gate.armed = false;
+            gate.reached();
+            await new Promise((resolve) => { gate.release = resolve; });
+          }
+          return adapter.comments(...args);
+        },
+      }),
+      setup(w) {
+        w.branch('staging');
+        w.issue({ number: 6, body: managed });
+        w.review({ number: 30, base: 'staging', merged: true, body: 'Closes #6' });
+      },
+    });
+    Object.assign(h.ctx, { now: fakeNow(NOW), pid: 111, isAlive: (pid) => pid === 111 });
+    h.ctx.writeFile(worktree + '/huddle.json', h.huddleJson());
+    const file = labelsFiles(h.ctx).waitBeats;
+    const saved = () => JSON.parse(h.ctx.readFile(file) || '{}');
+    if (seeded) h.ctx.writeFile(file, JSON.stringify({ 6: { at: NOW, every: 120, pid: 111 } }));
+    const player = { ...h.ctx, git: localGit, root: worktree, sleep: async () => { throw new Error('interrupted'); } };
+
+    const reached = new Promise((resolve) => { gate.reached = resolve; });
+    gate.armed = true;
+    const poll = run(['wait', '6'], player); // reads «open», then pauses while it reads the comments
+    await reached;
+    h.out.length = 0;
+    assert.equal(await run(['land', '30'], h.ctx), 0, h.errText());
+    gate.release();
+    await poll; // the older poll resumes, then its sleep stops the wait
+
+    h.ctx.isAlive = () => false;
+    h.ctx.now = fakeNow(NOW + 3600_000);
+    h.out.length = 0;
+    assert.equal(await run(['doctor'], h.ctx), 0, h.errText());
+    const doctor = h.text();
+    assert.doesNotMatch(doctor, /huddle-play 6/);
+    if (seeded) assert.match(doctor, /#6: .*Issue is closed.*huddle wait 6/);
+    else assert.deepEqual(saved(), {});
+  });
+}
