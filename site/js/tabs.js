@@ -19,7 +19,8 @@ function storage(win) {
 
 export function enhance(doc, win) {
   const infos = [...doc.querySelectorAll('[data-tabs]')].map((group, g) => {
-    const panes = group.children.filter((c) => c.hasAttribute('data-tab-label'));
+    // Element.children is an HTMLCollection in a browser: it has no filter, so make an array first.
+    const panes = Array.from(group.children).filter((c) => c.hasAttribute('data-tab-label'));
     const list = doc.createElement('div');
     list.className = 'tablist';
     list.setAttribute('role', 'tablist');

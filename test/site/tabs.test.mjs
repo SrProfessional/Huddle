@@ -17,13 +17,20 @@ class El {
   constructor(tag) {
     this.tagName = tag.toUpperCase();
     this.attrs = new Map();
-    this.children = [];
+    this.kids = [];
     this.parentNode = null;
     this.listeners = {};
     this.hidden = false;
     this.className = '';
     this.textContent = '';
     this.focused = false;
+  }
+  // In a browser, children is an HTMLCollection: indexed, with length and item(), but no filter, map or indexOf.
+  get children() {
+    if (!El.browserLike) return this.kids;
+    const c = { length: this.kids.length, item: (i) => this.kids[i] || null, [Symbol.iterator]: () => this.kids[Symbol.iterator]() };
+    this.kids.forEach((k, i) => { c[i] = k; });
+    return c;
   }
   get id() { return this.attrs.get('id') || ''; }
   set id(v) { this.attrs.set('id', v); }
@@ -38,11 +45,11 @@ class El {
       contains(c) { return self.className.split(' ').includes(c); },
     };
   }
-  appendChild(c) { c.parentNode = this; this.children.push(c); return c; }
+  appendChild(c) { c.parentNode = this; this.kids.push(c); return c; }
   insertBefore(c, ref) {
     c.parentNode = this;
-    const i = this.children.indexOf(ref);
-    this.children.splice(i < 0 ? this.children.length : i, 0, c);
+    const i = this.kids.indexOf(ref);
+    this.kids.splice(i < 0 ? this.kids.length : i, 0, c);
     return c;
   }
   addEventListener(t, fn) { (this.listeners[t] ||= []).push(fn); }
@@ -53,7 +60,7 @@ class El {
   }
   focus() { this.focused = true; }
   scrollIntoView() { this.scrolled = true; }
-  walk(out = []) { out.push(this); for (const c of this.children) c.walk(out); return out; }
+  walk(out = []) { out.push(this); for (const c of this.kids) c.walk(out); return out; }
 }
 const el = (tag, attrs = {}, kids = []) => {
   const e = new El(tag);
@@ -253,4 +260,25 @@ test('a hashchange (the Mac link inside the page) opens the right tabs', () => {
   win.location.hash = '#unrelated';
   win.fire('hashchange');
   assert.deepEqual(openIds(doc), ['codex-tab', 'mac-codex'], 'a hash that is not a tab changes nothing');
+});
+
+test('with a browser-like children collection (no filter), both tab lists build and macOS opens its panel', () => {
+  El.browserLike = true;
+  try {
+    const { doc, win, main, sub } = makeDoc();
+    assert.equal(typeof main.children.filter, 'undefined', 'the stand-in really has no filter');
+    enhance(doc, win);
+    const tabs = (g) => Array.from(g.children.item(0).children);
+    assert.deepEqual(tabs(main).map((t) => t.textContent), ['Claude Code', 'OpenAI Codex']);
+    assert.deepEqual(tabs(sub).map((t) => t.textContent), ['Install', 'macOS']);
+    assert.equal(tabs(main)[0].getAttribute('aria-selected'), 'true');
+    tabs(main)[1].fire('click');
+    tabs(sub)[1].fire('click');
+    assert.equal(paneOf(doc, 'mac-codex').hidden, false);
+    assert.equal(paneOf(doc, 'codex-install').hidden, true);
+    assert.equal(paneOf(doc, 'claude-code').hidden, true);
+    assert.equal(win.location.hash, '#mac-codex');
+  } finally {
+    El.browserLike = false;
+  }
 });
