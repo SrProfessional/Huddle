@@ -1100,6 +1100,14 @@ most every 15 minutes inside the loop. The heartbeat of the watch and of a Playe
 Issue) without an error; a failing round keeps the last good time and records `lastError`, which `huddle status` shows («last round
 failed … ; last good check …»). And when anyone asks what waits, the Coach's session reads `huddle queue` first, never its memory.
 
+**Wait markers for closed Issues (Issue #281).** New waits record their process ID in the main checkout's heartbeat file. Older
+markers without a process ID count as active while their last check is fresh. `huddle land` and `huddle labels --issue <n>` use the
+Issue state they already have to clear abandoned markers, including markers in other worktrees and the legacy tool directory.
+`huddle clean` also checks the Issue state of abandoned markers before cleaning worktrees, except with `--no-fetch` or
+`--dry-run`. A running wait keeps its marker and clears it when it sees the Issue is closed. If cleanup leaves a marker,
+the local closure note lets the heartbeat display omit it while the wait is active and point to `huddle wait <n>` if it
+becomes abandoned. Heartbeat display does no platform lookup.
+
 **Reviews cost less (Issue #195).** Seen on 2026-11-17: with 19 PRs in review, the Coach's account hit its usage limit twice, because
 PRs fell behind the base branch and were reviewed again after each update. Four savings, none of them a change of what is checked:
 
