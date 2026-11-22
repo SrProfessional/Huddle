@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- A stop for a dependency writes it down (Issue #298): a Player session that stops «waiting for #X» adds `- #X` to the Issue's «Depends on» (removing `- None`), comments why, turns an open PR/MR into a draft and runs `labels --issue`, so the parked rule of Issue #291 can give its points back; a parallel subagent does the same and the main session checks it.
+
 ## [1.0.2] - 2026-11-22
 
 ### Changed

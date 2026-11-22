@@ -26,7 +26,8 @@ You work on Issue #<n> of this repo with Huddle, as a Player session. Read ${CLA
 «Start an Issue» for Issue <n> exactly: its own worktree from the up-to-date staging branch (or the default branch when there is none),
 labels --issue <n> --started, TDD, the allowed files only, the PR/MR, labels --issue <n>. Do not start the wait. If you cannot go on,
 follow «When you cannot go on» but do not start the wait either. End with a short summary: the PR/MR link, the test counts in one line,
-what was not done, or why you stopped (a decision, a permission, a dependency).
+what was not done, or why you stopped (a decision, a permission, a dependency). If you stop for a dependency, follow «A stop for a
+dependency» of SKILL.md: write `- #X` in the Issue's «Depends on» and turn an open PR/MR into a draft.
 ```
 
 A Design Issue never goes to a subagent (`huddle next` never lists one to start): it needs the designer in the chat.
@@ -36,7 +37,9 @@ A Design Issue never goes to a subagent (`huddle next` never lists one to start)
 Read only its summary; never read the diff or its files here. Then:
 
 - **It opened its PR/MR, or it stopped for a decision:** nothing more for that Issue here: the Player's watch (step 5) sees the Coach's answer.
-- **It stopped for anything else** (a permission, a missing credential, a dependency): tell the Player in one line, and do not retry it.
+- **It stopped for a dependency** («waiting for #X»): check that the stopped Issue now names it in «Depends on» (`gh issue view <n> --json body`); if it does not,
+  write `- #X` there yourself as in «A stop for a dependency» of SKILL.md (and turn an open PR/MR into a draft), then run `labels --issue <n>`. Tell the Player in one line, and do not retry it.
+- **It stopped for anything else** (a permission, a missing credential): tell the Player in one line, and do not retry it.
 
 Then run `huddle next --json` again: an Issue in review uses no room, so the next one that fits can start (step 2).
 When `used` is above `capacity` (a request came back), nothing new starts: wait for the work to end, then run `huddle next --json` again.
