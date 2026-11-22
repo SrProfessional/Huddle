@@ -1337,6 +1337,8 @@ output. The page shows the API cost only («Would cost by API», per person, too
 verdict about plans, because the Coach already knows the plan they pay. `huddle plan` and the plan table stay as commands, outside the page. When prices are
 missing, the API subtotal is marked partial and names the missing tools and models. The token table columns wrap within their cards.
 
+**How a token kind is priced.** Prices are USD per token, as the source lists them. For a Claude Code row: input tokens at the input price, output tokens at the output price, cache reads at the cache-read price and cache writes at the cache-write price; reasoning tokens are not charged again. For a Codex row: the cached tokens are inside `input`, so `input - cached` is charged at the input price and the cached tokens once at the cache-read price; output (reasoning included) at the output price. A price the source does not list for a cache kind charges nothing. The cost of a range is the sum of the cost of its rows, so it equals the sum of its models, tools, people and Issues (`test/dashboard/cost-audit.test.mjs`).
+
 **Cost per Issue** groups the rows by Issue (tokens without an Issue are one line apart), sorted by API cost, and divides by the Issue's effort points (its
 «Effort» section, read with the adapter's `issueBody` for a closed Issue). **Pace** reads the last 60 merged PRs/MRs into the staging branch (the default
 branch with none) that close Issues: Issues closed per day (per week for all time), the median hours from the PR/MR's first commit to its merge, and the
