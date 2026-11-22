@@ -1045,6 +1045,8 @@ docs do not promise it in the VS Code extension), and runs `huddle next` again w
 in the main session; closing the main session stops them. Each subagent makes its own worktree from the staging branch with git (the
 Agent tool's worktree isolation starts from the default branch).
 
+**Machines of one login (Issue #283).** The capacity is per machine. `huddle machine` prints this machine's id and name (`huddle machine <name>` sets the name; it defaults to the host name). The id is random, made once and kept in `~/.huddle/machine.json`, never in the repo. When a session starts an Issue (`labels --issue <n> --started`) or takes a request (`take`), it leaves one comment on the Issue, «🖥️ Working on this from <name>» with the hidden marker `<!-- huddle-machine: <id> -->`, unless the newest claim is already this machine's; the newest claim is the owner, so `/huddle-play <n>` by hand on another machine moves the work there. `huddle next` reads the newest claim of each active Issue (once per run, for active Issues only): one claimed by this machine, or by none (started before claims existed), counts as before; one claimed by another machine does not count in `used` or in the over-capacity check, is never in `start` or `resume`, and is listed apart (`elsewhere` in `--json`, «running on other machines: #n (<name>)» in words, and in `huddle status` from what the last `next` saw), but its allowed files still hold: a candidate that shares one waits with «shares <file> with #n, which runs on <name>». `schedule` takes this as `elsewhere: <name>` on an active Issue. The board and its labels do not change.
+
 **Never above the capacity (Issue #240).** A request that came back (changes requested) is active work again even while it waits for room or a shared file, so
 its points count in `used` and a new start is weighed against them (only a request that waits for an open dependency holds nothing). When `used` is
 already above the capacity, `schedule` starts nothing and says why on each Issue: «6 of 5 points in use: finish one first» (before any shared-file reason), and `next` also gives the overall reason in words («Over capacity: …») and in `--json` (`over`).
@@ -1099,6 +1101,14 @@ minutes. Now a round starts every interval from the start of the previous one (i
 most every 15 minutes inside the loop. The heartbeat of the watch and of a Player's wait is written after a round read the queue (or the
 Issue) without an error; a failing round keeps the last good time and records `lastError`, which `huddle status` shows («last round
 failed … ; last good check …»). And when anyone asks what waits, the Coach's session reads `huddle queue` first, never its memory.
+
+**Wait markers for closed Issues (Issue #281).** New waits record their process ID in the main checkout's heartbeat file. Older
+markers without a process ID count as active while their last check is fresh. `huddle land` and `huddle labels --issue <n>` use the
+Issue state they already have to clear abandoned markers, including markers in other worktrees and the legacy tool directory.
+`huddle clean` also checks the Issue state of abandoned markers before cleaning worktrees, except with `--no-fetch` or
+`--dry-run`. A running wait keeps its marker and clears it when it sees the Issue is closed. If cleanup leaves a marker,
+the local closure note lets the heartbeat display omit it while the wait is active and point to `huddle wait <n>` if it
+becomes abandoned. Heartbeat display does no platform lookup.
 
 **Reviews cost less (Issue #195).** Seen on 2026-11-17: with 19 PRs in review, the Coach's account hit its usage limit twice, because
 PRs fell behind the base branch and were reviewed again after each update. Four savings, none of them a change of what is checked:
