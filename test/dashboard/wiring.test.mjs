@@ -92,6 +92,7 @@ test('the docs say it: design §26, the team guide, the README and the changelog
   assert.match(repo('docs/team-guide.md'), /huddle-dashboard/);
   assert.match(repo('README.md'), /huddle-dashboard/);
   const changelog = repo('CHANGELOG.md');
-  const unreleased = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('## [', changelog.indexOf('## [Unreleased]') + 5));
+  // «Unreleased» plus the section of the release that carries it (1.0.0): everything above 0.9.5.
+  const unreleased = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('## [0.9.5]'));
   assert.match(unreleased, /dashboard/i);
 });

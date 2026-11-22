@@ -461,6 +461,20 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.0
+
+Run of: 2026-11-21, Huddle `staging` with 39 Issues merged since 0.9.5, by the Coach's Claude Code session, Issue by Issue with the Coach (the guided test of #269, done by hand before the skill shipped). Only what is new was checked; the 0.9.5 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| The dashboard: API cost only, Claude and Codex prices, tokens per Issue, zero-token rows, the cost audit (#232, #259, #262, #264, #265, #266, #272, #276) | ✔ | covered by tests | Opened from `staging` in a browser by the Coach. All history: Claude Code $315.03 equals Opus $206.28 + Sonnet $95.16 + Fable $13.59, and with Codex $75.74 the person total is $390.77. The cost per Issue has data. One early run showed $24.04 for Claude Code; it could not be reproduced and the later figures match the hand sums of #276. |
+| The website: dark style, tabs in «Get started», Codex and Mac guides (#234, #273, #227, #246) | ✔ | n/a | Served from a local web server: opened as a plain file, the module script does not load and the folder links list their files. The tabs follow the Coach's reference. |
+| Parallel play and the board: no taken request offered, the capacity limit, `blocked` for shared files, the watch every 2 minutes (#239, #240, #250, #243) | covered by tests and seen live | covered by tests | Seen in this session: the board showed `blocked` only with the `staging` code; the 0.9.5 plugin does not have the rule. |
+| Comments from a file (#241) | ✔ | covered by tests | A test comment with line breaks and backslashes kept both on GitHub. |
+| Reviews: the full suite once, merge for what does not block (#244, #252) | text only | text only | Checked as rules in the skills; not run live. |
+| Codex: language, update steps, the Player's watch, taking over a watch, the base skills (#221, #225, #248, #222, #235) | covered by tests | n/a | Not run live in Codex on `staging`: the Codex on this machine has 0.9.5. To check after the release. |
+| The guided test (#269) | ✔ | covered by tests | Followed by hand, as written in the skill. |
+
 ### Results 0.9.5
 
 Run of: 2026-11-17, Huddle `staging` with Issue #195 merged, by the Coach's Claude Code session. Only the new parts were checked; the 0.9.4 and older tables below still hold for the rest.
