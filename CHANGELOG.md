@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- Huddle tells the machines of one login apart (Issue #283): the `machine` command shows this machine's id and name (`machine <name>` sets it), a session that starts or takes an Issue leaves a «Working on this from <name>» claim on it, and `huddle next` counts only this machine's work against the capacity. Work claimed by another machine is listed apart in `next` and `status`, is never offered here, and its allowed files still keep a clashing Issue waiting. No new label.
+
 ### Fixed
 
 - Closed Issues no longer leave abandoned wait warnings after `huddle land`, `huddle labels --issue`, or `huddle clean` (Issue #281). Running waits keep their heartbeats, and a closed Issue whose marker remains points to `huddle wait <n>` for cleanup.
