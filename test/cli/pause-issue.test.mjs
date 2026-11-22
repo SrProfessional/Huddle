@@ -46,23 +46,28 @@ for (const gitlab of [false, true]) {
     assert.equal(newest.used, 1, 'the newest of the two wins');
   });
 
-  test(`${on}: a paused Issue holds its files only when it already has a branch with commits`, async () => {
+  test(`${on}: a parked Issue (not paused) holds its files only when it already has a branch with commits; a paused one never does (Issue #300)`, async () => {
     const withBranch = await next(asAna((w) => {
+      w.issue({ number: 5, title: 'Asked', body: body(2, ['api/a.mjs']), assignees: ['ana'], labels: ['needs decision'], reviews: [50] });
+      w.review({ number: 50, draft: true, commits: ['2026-11-21T10:00:00Z'] });
+      w.issue({ number: 12, title: 'Shares with #5', body: body(1, ['api/a.mjs']), assignees: ['ana'], labels: ['assigned'] });
+    }, gitlab));
+    assert.equal(withBranch.used, 0);
+    assert.deepEqual(withBranch.start, []);
+    assert.match(withBranch.wait.find((x) => x.issue === 12).why, /shares api\/a\.mjs with #5, which is parked/);
+    const pushed = await next(asAna((w) => {
+      w.issue({ number: 5, title: 'Asked', body: body(2, ['api/a.mjs'], { branch: 'h5-x' }), assignees: ['ana'], labels: ['needs decision'] });
+      w.branch('h5-x');
+      w.issue({ number: 12, title: 'Shares with #5', body: body(1, ['api/a.mjs']), assignees: ['ana'], labels: ['assigned'] });
+    }, gitlab));
+    assert.deepEqual(pushed.start, [], 'a pushed branch holds too');
+    const paused = await next(asAna((w) => {
       w.issue({ number: 5, title: 'Paused one', body: body(2, ['api/a.mjs']), assignees: ['ana'], labels: ['in progress'], reviews: [50] });
       w.review({ number: 50, draft: true, commits: ['2026-11-21T10:00:00Z'] });
       w.issue({ number: 12, title: 'Shares with #5', body: body(1, ['api/a.mjs']), assignees: ['ana'], labels: ['assigned'] });
       pause(5, '2026-11-22T10:00:00Z', 501)(w);
     }, gitlab));
-    assert.equal(withBranch.used, 0);
-    assert.deepEqual(withBranch.start, []);
-    assert.match(withBranch.wait.find((x) => x.issue === 12).why, /shares api\/a\.mjs with #5, which is paused/);
-    const pushed = await next(asAna((w) => {
-      w.issue({ number: 5, title: 'Paused one', body: body(2, ['api/a.mjs'], { branch: 'h5-x' }), assignees: ['ana'], labels: ['in progress'] });
-      w.branch('h5-x');
-      w.issue({ number: 12, title: 'Shares with #5', body: body(1, ['api/a.mjs']), assignees: ['ana'], labels: ['assigned'] });
-      pause(5, '2026-11-22T10:00:00Z', 501)(w);
-    }, gitlab));
-    assert.deepEqual(pushed.start, [], 'a pushed branch holds too');
+    assert.deepEqual(paused.start.map((s) => s.issue), [12], 'a pause frees the files even with commits');
   });
 
   test(`${on}: a paused Issue whose request came back is not resumed`, async () => {
