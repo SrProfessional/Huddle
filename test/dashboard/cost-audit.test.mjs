@@ -7,10 +7,12 @@ import { buildModel, costOf, rowCost } from '../../lib/dashboard/model.mjs';
 const models = {
   'anthropic/claude-opus-5.5': { input: 0.000001, output: 0.000005, cacheRead: 0.0000001, cacheWrite: 0.00000125 },
   'openai/gpt-x': { input: 0.000002, output: 0.000008, cacheRead: 0.0000005, cacheWrite: null },
+  'openai/gpt-w': { input: 0.000002, output: 0.000008, cacheRead: 0.0000005, cacheWrite: 0.0000025 },
 };
 const M = 1_000_000;
 const claude = (extra) => ({ day: '2026-11-20', tool: 'Claude Code', model: 'claude-opus-5-5', issue: 1, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, reasoning: 0, ...extra });
 const codex = (extra) => ({ day: '2026-11-20', tool: 'Codex', model: 'gpt-x', issue: 1, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, reasoning: 0, ...extra });
+const codexW = (extra) => codex({ model: 'gpt-w', ...extra });
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} is not ${expected}`);
 
 test('Claude: every kind of token is charged at its own price (1M tokens each)', () => {
@@ -36,6 +38,11 @@ test('Codex: cached tokens inside input are charged once, at the cache price', (
   close(rowCost(codex({ output: M, reasoning: 300_000 }), models), 8);
   // no cache-write price in the source: charges nothing
   close(rowCost(codex({ cacheWrite: M }), models), 0);
+});
+
+test('Codex: a cache-write-only row is charged at a positive cache-write price (1M at 2.5 per million = 2.5)', () => {
+  close(rowCost(codexW({ cacheWrite: M }), models), 2.5);
+  close(rowCost(codexW({ input: M, cacheRead: 400_000, cacheWrite: M }), models), 1.4 + 2.5);
 });
 
 test('Claude and Codex rows add up in costOf', () => {
