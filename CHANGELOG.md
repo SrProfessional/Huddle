@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-21
+
 ### Added
 
 - A guided test of staging (Issue #269): the `/huddle-test` skill (`$huddle-test` in Codex) walks the Coach through the Issues in staging that are not tested, one at a time and in an order it explains, with plain steps for each, and marks an Issue «tested in staging» only after the Coach says it passed. The Task templates have an optional «How to test in staging» section, `/huddle-issue` asks for it, and `/huddle-release` points to `/huddle-test`.

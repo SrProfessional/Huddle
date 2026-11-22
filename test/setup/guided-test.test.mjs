@@ -127,6 +127,7 @@ test('the docs say it: design §21, README, the team guide, in both forms, and t
   assert.match(read('docs/team-guide.md'), /the `\/huddle-test` skill/);
   assert.match(read('docs/team-guide.md'), /\$huddle-test/);
   const changelog = readFileSync(fileURLToPath(new URL('../../CHANGELOG.md', import.meta.url)), 'utf8');
-  const unreleased = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('## [', changelog.indexOf('## [Unreleased]') + 5));
+  // «Unreleased» plus the section of the release that carries it (1.0.0): everything above 0.9.5.
+  const unreleased = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('## [0.9.5]'));
   assert.match(unreleased, /huddle-test/);
 });

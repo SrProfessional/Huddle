@@ -65,7 +65,8 @@ test('the team guide\'s mixed team covers take over, the Coach in Codex and a ne
 });
 
 test('the CHANGELOG has the Codex docs and website under «Unreleased»', () => {
-  const unreleased = raw('CHANGELOG.md').split(/^## \[\d/m)[0];
+  // «Unreleased» plus the section of the release that carries it (1.0.0): everything above 0.9.5.
+  const unreleased = raw('CHANGELOG.md').split(/^## \[0\.9\.5\]/m)[0];
   assert.match(unreleased, /#227/);
 });
 
