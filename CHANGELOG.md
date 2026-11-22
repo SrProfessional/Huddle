@@ -11,6 +11,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Fixed
 
+- The dashboard ignores zero-token rows (Issue #272): a row with no tokens at all, such as Claude Code's `<synthetic>` messages, is never named under «No price for» and never makes a cost «partial». A model with tokens and no price still does. `huddle usage` is unchanged.
 - Tokens are attributed to their Issue (Issue #266): `huddle usage` showed `no Issue` for every row because the Issue was looked up only through an open PR/MR, and the transcripts of finished (removed) worktrees were not read at all. It now also finds the Issue through the merged PR/MR of the branch (by its own source branch, asking for the branch by name when it is older than the newest 200), and reads the Claude Code and Codex transcripts of removed worktrees, using the recorded branch or the folder name, and only those inside this checkout. The default branch stays `no Issue`.
 - Claude Code model names find their API price (Issue #265): `claude-opus-5-5` (with an optional date suffix) matches `anthropic/claude-opus-5.5` by a general rule, so the dashboard stops saying «no price» for them. The old aliases still work, and an unknown family or version still has no price.
 
