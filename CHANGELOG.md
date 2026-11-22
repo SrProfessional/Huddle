@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- An explicit pause frees the files of the paused Issue (Issue #300): a paused Issue holds none of its allowed files, with or without commits, in `huddle next` and in the `blocked` label, so a pause can no longer close a circle of waits; `huddle next` says once, on its «paused» line, that the files are free and the branch must be updated from the base when it comes back. Parked work (`needs decision`, a draft waiting for a dependency) keeps the rule of Issue #291.
+
 ### Fixed
 
 - A stop for a dependency writes it down (Issue #298): a Player session that stops «waiting for #X» adds `- #X` to the Issue's «Depends on» (removing `- None`), comments why, turns an open PR/MR into a draft and runs `labels --issue`, so the parked rule of Issue #291 can give its points back; a parallel subagent does the same and the main session checks it.

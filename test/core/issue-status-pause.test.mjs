@@ -76,10 +76,9 @@ for (const gitlab of [false, true]) {
     assert.equal(await run(['labels'], h.ctx), 0, h.errText());
     assert.deepEqual(h.world.labelsOf(6), ['assigned']);
   });
-  test(`[${kind}] huddle labels: a paused Issue with a pushed branch still holds its file`, async () => {
+  test(`[${kind}] huddle labels: a paused Issue with a pushed branch holds no file either (Issue #300)`, async () => {
     const h = harness({ gitlab, setup: world(true) });
     assert.equal(await run(['labels'], h.ctx), 0, h.errText());
-    assert.deepEqual(h.world.labelsOf(6), ['blocked']);
-    assert.match(h.text(), /shares a\.mjs with #5, which is paused/);
+    assert.deepEqual(h.world.labelsOf(6), ['assigned']);
   });
 }
