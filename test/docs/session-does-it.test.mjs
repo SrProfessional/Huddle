@@ -10,7 +10,9 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const read = (rel) => readFileSync(path.join(root, rel), 'utf8');
 const design = read('docs/design.md');
 const smoke = read('docs/smoke-test.md');
-const skills = readdirSync(path.join(root, 'skills')).map((d) => [d, read(`skills/${d}/SKILL.md`)]);
+const skills = readdirSync(path.join(root, 'skills'), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map(({ name }) => [name, read(`skills/${name}/SKILL.md`)]);
 
 const ONLY = '🙋 Only you';
 

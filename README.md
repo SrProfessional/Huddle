@@ -2,14 +2,15 @@
 
 [![Website](https://img.shields.io/badge/website-srprofessional.github.io%2FHuddle-4336d8)](https://srprofessional.github.io/Huddle/)
 
-Huddle is a Claude Code plugin and a decision-led team workflow for AI coding. One person, the Coach, hands out
-tasks as Issues. Each Player pastes the Issue's «Prompt for Claude Code» into a session. The session works on its own
-branch, stops to ask when a decision is not its to make, opens a pull request (a merge request on GitLab) and waits for
-the review on its own.
+Huddle is a plugin for Claude Code and OpenAI Codex and a decision-led team workflow for AI coding. One person, the
+Coach, hands out tasks as Issues. Each Player runs the Issue (`/huddle-play <n>` in Claude Code, `$huddle-play <n>` in
+Codex) in a session. The session works on its own branch, stops to ask when a decision is not its to make, opens a pull
+request (a merge request on GitLab) and waits for the review on its own.
 
-It works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
+The Coach and each Player may use either tool, at the same time: the sessions talk only through GitHub or GitLab. It
+works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** the latest release is [0.9.5](https://github.com/SrProfessional/Huddle/releases/tag/v0.9.5); what came after
+> **Status:** the latest release is [1.0.0](https://github.com/SrProfessional/Huddle/releases/tag/v1.0.0); what came after
 > it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
@@ -64,6 +65,37 @@ In the Claude Code CLI you can run the same as `/plugin` commands, then type `/r
 If you use only the VS Code extension, it puts no `claude` command in the terminal: type `/plugins` instead, add the
 marketplace `SrProfessional/Huddle` in the **Marketplaces** tab, and install `huddle` from the **Plugins** tab with
 **Install for this project** (not «Install for you»). Each person does this once per clone. The same dialog updates it.
+
+### In OpenAI Codex (Players and the Coach)
+
+Anyone may work in [OpenAI Codex](https://developers.openai.com/codex) instead of Claude Code. The Coach can work in Codex too: the watch, the
+reviews and the releases; only design work needs Claude Code. In Codex: same Issues, same rules (Huddle writes them
+into `AGENTS.md` too), same `huddle` command. A set-up repo has `.codex/config.toml`, which declares Huddle for Codex in that repo: on a new
+machine, trust the project when Codex asks and run `codex plugin marketplace upgrade huddle` once in the repo. Without that file, install once, from a terminal (the VS Code extension of Codex
+brings its own `codex`; if `codex` is not found, see [the team guide](docs/team-guide.md#a-mixed-team-claude-code-and-codex)):
+
+```text
+codex plugin marketplace add SrProfessional/Huddle
+codex plugin add huddle@huddle
+```
+
+[Follow the Mac setup steps](docs/team-guide.md#set-up-huddle-on-a-mac-with-codex) to install the tools and trust the Huddle hook on macOS.
+
+The Codex chat in VS Code has no `/hooks`. Open a terminal in the repo and trust the Huddle hook once in terminal Codex instead: it
+uses the same configuration. The [team guide has the steps](docs/team-guide.md#a-mixed-team-claude-code-and-codex). Then work on an
+Issue with `$huddle-play <n>`. Codex has no `/reload-plugins`: after installing or updating, open a new chat. Codex's sandbox has no
+network, so approve network access when Codex asks to run `git push`, `gh`, `glab` or `huddle`. `huddle doctor` shows a «codex» line.
+
+Adapted but not yet tried live in Codex: `/huddle-bug`, `/huddle-areas`, `/huddle-team`, playing several Issues in parallel, GitLab, and
+Codex on macOS. Design Issues and the review of a design PR stay in Claude Code (they need Claude Design).
+
+In Codex the Coach's skills start with `$` too: `$huddle-setup`, `$huddle-issue`, `$huddle-review`, `$huddle-update`, `$huddle-watch`.
+**One watch per repo per machine.** Huddle keeps its watch marks in `~/.huddle` on that machine. If you use two
+computers as Coach, keep the watch on one at a time. Run `$huddle-watch off` in Codex (or `/huddle-watch off` in Claude
+Code) on the first computer before starting the watch on the other. Players may work on both computers.
+On the same machine, the first session that turns the watch on reviews and merges. A second session reports where the watch is
+running. If the owner goes quiet while it reviews, running
+`$huddle-watch` in Codex (or `/huddle-watch` in Claude Code) in another session asks «Take over?».
 
 ### The settings snippet is a helper
 
@@ -219,7 +251,7 @@ session cannot touch what customers use.
 - **No production and no secrets.** If a permission or a key is missing, stop and tell. Do not look for another way.
 - **Nothing is dropped silently.** Everything the Issue asks for ends up done, or noted under «What was NOT done» with the
   reason.
-- **Chat in your language; the repository is in English.** You talk to Claude Code in the language you prefer. Commit
+- **Chat in your language; the repository is in English.** You talk to Claude Code or Codex in the language you prefer. Commit
   messages, pull requests, Issues, code comments and documents are in English.
 
 ## Commands
@@ -236,6 +268,8 @@ session cannot touch what customers use.
 | `/huddle-decide` | Coach | Answers a «needs decision» question. |
 | `/huddle-release` | Coach | With a staging branch: releases staging to production. Lists what is in staging, asks about each Issue without the «tested in staging» mark, runs the project's own clean check, opens the PR/MR from staging into the default branch and merges it (a merge commit) only on the Coach's word in the same chat. |
 | `/huddle-watch [interval\|always\|status\|off]` | Coach | Checks every few minutes (default 5) what waits for the Coach and runs `/huddle-review` on each PR/MR that waits. Turning it on is the order to review and merge. It never answers decisions or triages bugs. It stops with `off` or when Claude Code closes. It is turned on by hand in each session, because turning it on is the order to merge. It waits in the background like a Player's session (`huddle queue --wait`), so it uses no Claude tokens while nothing waits, and wakes the session only when something waits. Without it, the Coach's session start says what waits. `/huddle-watch always` keeps it on: it starts again in each of the Coach's sessions of that repo on that machine, until `off`. Several PRs/MRs are reviewed at once, each in a background subagent, within `review_capacity` effort points (default 5); merges stay one at a time, each checked again against the updated base. |
+| `/huddle-test` (`$huddle-test` in Codex) | Coach | With a staging branch: the `/huddle-test` skill guides the Coach through testing what is in staging, one Issue at a time, in an order it explains (what others depend on first, what a person sees or touches before internal changes, other tools last). It gives plain steps with «You should see:» and «If you see something else:», runs what it can itself, and marks an Issue «tested in staging» only when the Coach says it passed. |
+| `/huddle-dashboard` (`$huddle-dashboard` in Codex), which runs the `dashboard [--no-open]` command of the CLI | Anyone | Writes a private dashboard of this repo to `.huddle/dashboard/index.html` and opens it in the browser: Issues closed, tokens and what they would cost by API against the plans, cost per Issue and per effort point, pace (Issues closed per day, time from start to merge, review rounds), progress by area, who does what now and the releases, with a 7 days / 30 days / all filter. It stays on your machine; `.huddle/` is ignored by git. |
 | `/huddle-team` | Coach | Adds or removes a Player through a PR/MR and prints the message for the new person. |
 | `/huddle-areas` | Coach | Helps define the project's areas (milestones): proposes them, puts Issues in them, estimates what is missing and checks them later. |
 | `huddle labels [--dry-run]` | Coach, CI | Assigns ready Issues and keeps the status labels up to date. |
@@ -264,6 +298,10 @@ session cannot touch what customers use.
 ## What the plugin adds
 
 The method works with plain Issues and a good `CLAUDE.md`. The plugin takes the manual steps away:
+
+It also includes five focused base skills, adapted from MIT-licensed Superpowers: `/huddle-tdd`, `/huddle-debug`,
+`/huddle-verify`, `/huddle-answer-review`, and the Coach-only `/huddle-brainstorm`. They preserve Huddle's Issue,
+worktree, evidence, and review rules; see [the attribution](skills/THIRD-PARTY.md).
 
 - Status labels that move on their own: ready, assigned, in progress, in review, blocked, needs decision, and changes
   requested from Coach.

@@ -192,17 +192,60 @@ test('the home page has what the Issue asks for', () => {
   assert.match(t, /href="how-it-works\/"/);
 });
 
-test('the style sheet has light and dark, visible focus, reduced motion, and no trackers', () => {
+test('the style sheet uses the approved dark tokens, accessible card text, visible focus and reduced motion', () => {
   const cssFiles = existsSync(site) ? readdirSync(site).filter((f) => f.endsWith('.css')) : [];
   assert.ok(cssFiles.length >= 1, 'no style sheet in site/');
   const css = cssFiles.map((f) => readFileSync(path.join(site, f), 'utf8')).join('\n');
-  assert.match(css, /prefers-color-scheme:\s*dark/);
+  for (const [name, color] of Object.entries({
+    bg: '#0F1117', surface: '#1A1D26', surfaceRaised: '#1D2130', ink: '#F2F4F8', muted: '#A3A8B6',
+    accent: '#2F6BFF', accentBright: '#4C8DFF', progress: '#F5A524', changes: '#F0476B', done: '#5FD068',
+  })) assert.match(css, new RegExp(`--${name}:\\s*${color}`, 'i'), `missing ${name} token`);
+  assert.doesNotMatch(css, /prefers-color-scheme/);
+  const luminance = (hex) => hex.slice(1).match(/../g).map((part) => {
+    const c = Number.parseInt(part, 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+  assert.ok(contrast('#F2F4F8', '#1A1D26') >= 4.5, 'card text contrast is below 4.5:1');
+  const token = (name) => {
+    const value = css.match(new RegExp('--' + name + ':\\s*([^;]+);'))?.[1];
+    assert.ok(value, `missing --${name}`);
+    return value.startsWith('var(--') ? token(value.slice(6, -1)) : value;
+  };
+  const assertPair = (fg, bg) => {
+    const ratio = contrast(token(fg), token(bg));
+    assert.ok(ratio >= 4.5, `--${fg} on --${bg}: ${ratio.toFixed(2)}:1`);
+  };
+  for (const surface of ['bg', 'surface', 'surfaceRaised']) {
+    for (const fg of ['ink', 'muted', 'link']) assertPair(fg, surface);
+  }
+  for (const surface of ['accent', 'accentBright', 'board-ink']) assertPair('on-accent', surface);
+  assertPair('board-ink', 'board-line'); // Copy on hover and active.
+  for (const fg of ['progress', 'done']) assertPair(fg, 'board');
+  for (const fg of ['progress', 'changes', 'done']) assertPair(fg, 'surface');
+  assert.match(css, /\.btn\.ghost\s*\{[^}]*color:\s*var\(--link\)/);
+  assert.match(css, /\.f-box\s*\{[^}]*fill:\s*var\(--surface\)/);
+  assert.match(css, /\.f-bubble text\s*\{[^}]*fill:\s*var\(--on-accent\)/);
+  const landing = read('site/js/landing.js');
+  assert.doesNotMatch(landing, /(?:set|to)\(stops\b[^\n]*opacity/);
+  assert.match(landing, /\.f-side-a \.f-branch/);
+  assert.match(landing, /\.f-side-b \.f-branch/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion/);
   for (const p of pages) {
     const t = html(p);
-    assert.match(t, /<meta\s+name="color-scheme"\s+content="light dark"/i, `${p}: color-scheme`);
+    assert.match(t, /<meta\s+name="color-scheme"\s+content="dark"/i, `${p}: color-scheme`);
     assert.doesNotMatch(t, /google-analytics|googletagmanager|plausible|hotjar|segment\.com/i, `${p}: tracker`);
+  }
+});
+
+test('status colors appear on both flow layouts and in the label reference', () => {
+  const home = html('index.html');
+  for (const [status, label] of [['in-progress', 'in progress'], ['done', 'merged'],
+    ['decision', 'needs decision'], ['changes', 'changes requested']]) {
+    const tags = home.match(new RegExp('<text class="[^"]*status-' + status + '[^"]*"[^>]*>' + label + '</text>', 'g'));
+    assert.equal(tags?.length, 2, `${label}: expected a colored label in both layouts`);
+    assert.match(html('how-it-works/index.html'), new RegExp('<code class="status-pill status-' + status + '">'));
   }
 });
 
@@ -235,7 +278,7 @@ test('the Pages workflow deploys site/ from main with pinned actions', () => {
 test('the README opens with the words people search for, links the site and has a Website badge', () => {
   const t = read('README.md');
   const top = t.split('\n').slice(0, 14).join('\n');
-  assert.match(top, /Claude Code plugin/i);
+  assert.match(top, /plugin for Claude Code and OpenAI Codex/i);
   assert.match(top, /AI coding/i);
   assert.match(top, /decision-led/i);
   assert.match(top, /https:\/\/srprofessional\.github\.io\/Huddle\//);
@@ -302,7 +345,7 @@ test('H27: the home page has the eight scenes, in order, and every scene has its
     assert.match(p, /<h[12][\s>]/, `scene ${order[i]} has no heading`);
     assert.ok(strip(p.split(/<footer/)[0]).length >= 150, `scene ${order[i]} has too little text in the HTML`);
   });
-  for (const s of ['Five Players, five Claude Code sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The Coach', "The Player's session"]) {
+  for (const s of ['Five Players, five Claude Code or Codex sessions', 'How it works in four steps', 'GitHub and GitLab', 'Install it in two commands', 'Questions people ask', 'The same commands everywhere', 'The Coach', "The Player's session"]) {
     assert.ok(t.includes(s), `missing text «${s}»`);
   }
   // the label-flow scene has a text equivalent that names every stop and both side roads
@@ -354,23 +397,15 @@ test('H27: the CSS turns every effect off under prefers-reduced-motion and hides
   for (const p of pages.filter((x) => x !== 'index.html')) assert.doesNotMatch(html(p), /vendor\/|landing\.js/, `${p} should not load the motion scripts`);
 });
 
-test('H27: the fonts are served from the site itself, with their licences, and preloaded (no layout shift from a font swap)', () => {
+test('the site uses the system sans-serif stack without local font preloads', () => {
   for (const p of pages) {
     const t = html(p);
     assert.doesNotMatch(t, /fonts\.googleapis\.com|fonts\.gstatic\.com/, `${p}: loads fonts from another origin`);
-    assert.match(t, /<link rel="preload" href="[^"]*fonts\/bricolage-grotesque-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the display font`);
-    assert.match(t, /<link rel="preload" href="[^"]*fonts\/source-serif-4-latin\.woff2" as="font" type="font\/woff2" crossorigin>/, `${p}: preload of the text font`);
+    assert.doesNotMatch(t, /fonts\//, `${p}: no local font preload`);
   }
   const css = read('site/style.css');
-  assert.match(css, /@font-face\s*\{[^}]*Bricolage Grotesque[^}]*fonts\/bricolage-grotesque-latin\.woff2/);
-  assert.match(css, /@font-face\s*\{[^}]*Source Serif 4[^}]*fonts\/source-serif-4-latin\.woff2/);
-  for (const f of ['bricolage-grotesque-latin.woff2', 'source-serif-4-latin.woff2']) {
-    const b = readFileSync(path.join(site, 'fonts', f));
-    assert.equal(b.subarray(0, 4).toString(), 'wOF2', `${f} is not a woff2 file`);
-  }
-  for (const f of ['OFL-bricolage-grotesque.txt', 'OFL-source-serif-4.txt']) {
-    assert.match(readFileSync(path.join(site, 'fonts', f), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i, `${f}: licence text`);
-  }
+  assert.doesNotMatch(css, /@font-face|fonts\//);
+  assert.match(css, /--sans:\s*system-ui/);
 });
 
 // ---- Issue #61, review request: links that leave the site open in a new tab, and say so ----

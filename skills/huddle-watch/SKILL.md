@@ -8,6 +8,10 @@ description: Use when the Coach wants its session to check by itself what waits 
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`,
 stop with one clear line («/huddle-watch is for the Coach») and change nothing. The rules are in docs/design.md §19.
 
+**In OpenAI Codex** (Issue #212): run the background wait as `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait <seconds> [--seen <keys>] --codex` (the `huddle` command the session start named; approve network access). It returns at once and the watch waits with no tokens; when this chat gets «Huddle's watch: … Run $huddle-watch», read `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` and go on as below, then start the wait again the same way. If it says the watch already runs in another session, say so in one line and stop: that session reviews.
+
+**Another session holds the watch** (Issue #222, in Claude Code and in Codex): «already runs» means its loop is alive: say so in one line and stop. «took … to review … and has not checked since» means that session may be stuck (closed, or out of quota): when the person ran `/huddle-watch` themselves, ask the person «Another session took <what> <when> and has not come back. Take over?» and pass `--take-over` only on yes (with `--codex` too in Codex); on no, stop. The «always» start at a session start never passes `--take-over`: it only names the other session.
+
 The watch waits in the background with a small Node process (`queue --wait`), as a Player's session waits for its review: it uses
 **no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself, unless
 the Coach chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
@@ -20,7 +24,7 @@ session start says «the watch starts now, as you asked», do the same «On» st
 
 ## On (`/huddle-watch` or `/huddle-watch <interval>`)
 
-An interval is like `5m`: default 5 minutes, allowed 2 to 60 (the wait takes it in seconds: `5m` is `300`).
+An interval is like `5m`: default 2 minutes (always, no setting in `huddle.json`), allowed 2 to 60 (the wait takes it in seconds: `5m` is `300`, the default is `120`).
 
 1. If this session already runs the watch's background wait, the watch is already on: do **not** start a second one; say it is on and its
    interval, and stop.
@@ -51,8 +55,8 @@ anything. Docs/design.md §19 and §22.
   Agent tool, **in the background**, with a clean context, told: «Review <pr> with /huddle-review, following its «Reviewing for the
   watch» section». A subagent never merges. When it ends with «needs changes», it already posted the comment and the item leaves the queue by itself.
 - **Merges, one at a time, in this session.** For each «ready to merge», in order: check it again against the updated base (it still
-  merges cleanly, and its tests pass on the branch updated with the base, in a fresh worktree). If not, post the usual «🔁 Changes
-  requested» comment asking to update the branch from the base, and nothing is merged. If it does, approve and merge it, and land it, as
+  merges cleanly, and the full suite passes on the exact head it merges, updated with the base, in a fresh worktree; a docs-only delta since your last full run needs no new run, as `/huddle-review` says). If not, post the usual «🔁 Changes
+  requested» comment asking to update the branch from the base, and nothing is merged. Write the comment to a temporary UTF-8 file and use `gh pr comment <pr> --body-file <file>` and `gh issue comment <n> --body-file <file>`, or `glab api … -F 'body=@file'` on both notes endpoints. Never pass it inline. If the recheck passes, approve and merge it, and land it, as
   «All good» of `/huddle-review` says. Then start the next review that fits.
 - **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,
   with the reason, and do **not** try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes

@@ -1,6 +1,7 @@
 # Team guide
 
-How a team works with Claude Code under Huddle. The rules live in the Huddle block of your `CLAUDE.md`; this guide
+How a team works under Huddle, in Claude Code and in OpenAI Codex. The rules live in the Huddle block of your `CLAUDE.md`
+(and `AGENTS.md`, which Codex reads); this guide
 explains them. New here? Read [the first day](first-day.md) first, and [the roles](roles.md) for who does what.
 
 ## The idea
@@ -8,7 +9,7 @@ explains them. New here? Read [the first day](first-day.md) first, and [the role
 > Our job is no longer typing code. It is making good decisions. The AI writes, tests and asks; the person decides.
 
 One task is one Issue, one branch and one pull request (merge request on GitLab). Each Issue carries the exact prompt to
-paste into Claude Code, so every session starts with the same goal, limits and tests.
+paste into the session (Claude Code or Codex), so every session starts with the same goal, limits and tests.
 
 ## The seven labels
 
@@ -31,7 +32,7 @@ uses `--needs-decision`). If it fails, the session says one line and goes on; th
 | `assigned` | A Player has it. Not started. |
 | `in progress` | A session is working on it. |
 | `in review` | A PR/MR is open and waits for the Coach. |
-| `blocked` | It depends on an Issue that is not merged yet. |
+| `blocked` | It waits for a dependency (an Issue that is not merged yet) or for a shared file (an active Issue of the same Player has one of its allowed files). The reason is in the output of `huddle next` and `huddle labels`. |
 | `needs decision` | The session asked the Coach and waits. |
 | `changes requested from Coach` | The Coach asked for changes and nobody has taken the request yet. |
 
@@ -59,6 +60,13 @@ it found, a Player's technical question), says in one line what it decided and w
 (what users see or do, a feature's scope, priorities), money, accounts or secrets, security or privacy, deleting work or data, and
 production.
 
+## Prices
+
+Run `plan claude=max5 codex=plus` once to save the subscriptions you personally use, then `prices --json` for the API-price
+source and date plus every plan. API prices refresh daily from OpenRouter, fall back to LiteLLM, and keep the last good copy for offline
+work. Unknown models say `no price`; Huddle never invents one. The Coach can put a negotiated per-seat price or seat count under `plans`
+in `huddle.json`.
+
 The `CLAUDE.md` block has «Standing orders of the Coach»: in the Coach's own sessions, merging a reviewed Issue PR/MR into staging,
 `huddle land`, the labels, and the PRs/MRs of `/huddle-update` and `/huddle-team` need no confirmation. Only `/huddle-release` (staging to
 production) asks. A Coach who also works on an Issue (a team of one) goes on from the PR/MR to the review and the merge by itself.
@@ -72,14 +80,19 @@ in the labels run, not a failure; that Issue stays `blocked`.
 
 ## How a task goes
 
+Huddle includes `/huddle-tdd`, `/huddle-debug`, `/huddle-verify`, and `/huddle-answer-review` to guide a Player through
+implementation and Coach feedback. The Coach uses `/huddle-brainstorm` to turn an uncertain request into an Issue; a
+Player does not brainstorm a replacement scope. All five work in Claude Code and Codex and never replace the Coach's
+review and merge role.
+
 1. The Coach writes the Issue (`/huddle-issue`).
 2. `huddle labels`, run by the Coach's session, assigns it when it is ready.
 3. The Player runs `/huddle-play <n>`. The session works test first, touching only the allowed files.
 4. It opens the PR/MR with `Closes #N`, the real test counts and «What was NOT done», and ends with «✅ Issue #N finished».
-5. CI runs the tests. The Coach reviews (`/huddle-review`): either requests changes or merges.
+5. The Coach reviews (`/huddle-review`): it reads the change and either requests changes or, about to approve, runs the full suite on the exact head and merges. A docs-only round is approved without a new run (Issue #244).
 6. A request comes as a comment with a `## Prompt for Claude Code` heading. The session picks it up (`huddle take <n>`),
-   pushes the fix and comments «Ready for review again» with the counts. Before the PR/MR and before «Ready for review again», the
-   session merges the base branch in and runs the tests again, so the Coach reviews a branch that is up to date (Issue #195).
+   pushes the fix and comments «Ready for review again» with the counts. While it works it runs the tests of the area it touched; before the PR/MR and before «Ready for review again», the
+   session merges the base branch in and runs the full suite once, so the Coach reviews a branch that is up to date (Issue #195).
 
 ## Who does each step
 
@@ -308,7 +321,8 @@ Every Player installs Huddle once on their own machine, then types `/reload-plug
 `claude plugin marketplace add SrProfessional/Huddle` and `claude plugin install huddle@huddle` (in the CLI, `/plugin marketplace add ...`
 and `/plugin install ...` work too). With only the VS Code extension, which puts no `claude` command in the terminal, type `/plugins`,
 add the marketplace `SrProfessional/Huddle` in the **Marketplaces** tab and install `huddle` from the **Plugins** tab with **Install for
-this project** (not «Install for you»), once per clone. The Coach sends both routes to each Player after `/huddle-setup`.
+this project** (not «Install for you»), once per clone. The Coach sends both routes to each Player after `/huddle-setup`. A Player
+(or the Coach) who works in OpenAI Codex installs it the Codex way instead: see [A mixed team](#a-mixed-team-claude-code-and-codex).
 
 The `.claude/settings.json` snippet that setup writes is only a helper. It enables the plugin for the project and, in the
 CLI, registers the marketplace silently, only after the trust dialog of that folder itself. When a parent folder is already
@@ -317,6 +331,233 @@ a «plugin» line so a Player can check their own machine. Its «login» line te
 installed or not on the PATH of this terminal» (with the install command for the system, and on Windows «open a new
 terminal, or reload the PATH») and «is not logged in» (with `gh auth login` or `glab auth login`, plus `--hostname <host>`
 when `huddle.json` has a host). The SessionStart hook stays silent in both cases.
+
+## The Player keeps working by itself
+
+`/huddle-play` (`$huddle-play` in Codex) with no number works like the Coach's watch: it first resumes what the Coach answered, then
+starts what fits in the capacity, and then **keeps watching** with no tokens; when an Issue can start or the Coach answers one, the session
+wakes and goes on. Leave the session open and the computer on; `huddle next --wait-off` stops it, and `huddle status` shows it as
+«player watch». One per person and repo on a machine.
+
+## The dashboard
+
+`/huddle-dashboard` (`$huddle-dashboard` in Codex; in a terminal, the `dashboard` command of the CLI) writes one private page, `.huddle/dashboard/index.html`, and opens it in
+your browser. Add `--no-open` to only write it. It is dark, it works with no internet (its three scripts are copied next to it), and it
+stays on your machine: `.huddle/` is ignored by git, which setup and `/huddle-update` add to the `.gitignore`. It shows:
+
+- **Summary**: Issues closed, the team's tokens, what those tokens would cost by API, what the plans cost for the same days, and the difference.
+- **Progress by area**, the same numbers as the «Huddle progress» Issue.
+- **Who does what now**: what is in progress, waiting for review or for a decision, and whether the watch and the waits are alive.
+- **Tokens and cost**: each person, each tool, each model. A model with no price says so.
+- **Cost per Issue**: tokens and API cost of each Issue, per effort point, the most expensive first.
+- **Pace**: Issues closed per day (per week for all time), the median time from the first commit to the merge, and the review rounds (requests for changes) per PR/MR.
+- **Releases**: what is in staging, how much of it was tested, and the last release.
+
+The 7 days, 30 days and all-time buttons change every number that has days. With the operating system set to reduce motion, the page does not move.
+
+## What the dashboard shares
+
+The Huddle dashboard shows the team's tokens and each person's. For that, each session leaves a summary of its tokens on the branch
+`huddle-usage`, at most once an hour: per day, tool, model and Issue, **numbers only** (never the text of a conversation). That branch
+never mixes with the code, and it has the repo's own visibility: in a private repo only the team sees it. **In a public repo nothing is
+shared** unless the team sets `"share_usage": true` in `huddle.json` (then anyone can see those numbers); `false` turns it off anywhere.
+
+To compare the cost with your plan, say your plan once on your machine: `huddle plan claude=max5 codex=plus`. `huddle prices` shows the API
+prices in use (and where they came from) and the plan table; `huddle usage` shows your own numbers, `huddle usage --team` the team's.
+
+**When the Coach asks for changes.** Only for what blocks: a requirement not done, a failing test, a bug a user would hit, a security or
+privacy hole, data loss, a broken rule. Anything else (a rarer edge case, extra hardening, a nicer structure) does not hold the merge: the
+Coach merges and writes it as a new Issue on the spot.
+
+## A mixed team: Claude Code and Codex
+
+The Coach and the Players may each work in **Claude Code** or in **OpenAI Codex**, at the same time. One person can be both, on two
+plans: for example the Players' work (and its tokens) in Codex and the reviews in Claude Code, or the other way round. The two tools never
+talk to each other directly: they talk through GitHub or GitLab, as every Huddle session does. A Player opens the PR; the Coach's watch
+reviews it; the Coach's request wakes the Player's session, which goes on.
+
+**The Coach in Codex.** `$huddle-watch` waits in a process of its own with no tokens (`huddle queue --wait --codex`) and wakes the open
+Codex chat when something waits; the chat then reviews, requests changes, merges and lands, as in Claude Code. This was tried live on
+2026-11-20, end to end (PR #220 and others). `$huddle-issue`, `$huddle-decide` and `$huddle-release` work in Codex too.
+
+There is **one watch per repo per machine**. Huddle keeps its watch marks in `~/.huddle` on that machine. If you use two
+computers as Coach, keep the watch on one at a time. Run `$huddle-watch off` in Codex (or `/huddle-watch off` in Claude
+Code) on the first computer before starting the watch on the other. Players may work on both computers.
+With both tools open on the same machine, the first Coach session to turn the watch on reviews and merges. The other session says where
+it runs («The watch already runs in Codex…»). `huddle status` names the tool. If the owner goes quiet while it reviews (its chat was closed, or it ran out of quota), `/huddle-watch`
+in another session says so and asks «Take over?»; on a yes it starts with `--take-over`. The automatic start of `/huddle-watch always`
+never takes over.
+
+| Who | Where | Runs |
+|---|---|---|
+| The Coach | Claude Code or Codex | `/huddle-watch always`, `/huddle-review`, `/huddle-issue`, `/huddle-release` and the other Coach skills (`$huddle-watch` and so on in Codex) |
+| A Player | Codex or Claude Code | `$huddle-play <n>` in Codex, `/huddle-play <n>` in Claude Code |
+
+**The language.** Every session, in Claude Code and in Codex, chats with each person in their language from the first message. Huddle
+takes the first that is set: the person's own (`huddle language es`, once on their machine; `huddle language` shows it, `--clear`
+removes it), then the team's (asked by `/huddle-setup`, and once by `/huddle-update` in a repo set up before, kept as `language` in
+`huddle.json`), then the machine's. The repo itself
+stays in English.
+
+**What stays in Claude Code:** Design Issues and the review of a design PR (they need Claude Design). In Codex they stop with one line.
+
+**Adapted but not yet tried live in Codex:** `/huddle-bug`, `/huddle-areas`, `/huddle-team`, playing several Issues in parallel
+(`$huddle-play` alone), and GitLab. They are written for Codex and should work; tell the Coach if one does not.
+
+**In Codex the skills start with `$`:** `$huddle-play <n>`, `$huddle-watch`, `$huddle-review` and so on, where Claude Code has
+`/huddle-…`. Codex has no `/reload-plugins`: after installing or updating Huddle, open a new chat.
+
+**A repo set up with Huddle comes nearly ready in Codex.** `/huddle-setup` and `/huddle-update` write `.codex/config.toml`, which declares
+Huddle for Codex in that repo only. On a machine where Codex is new, open the repo in Codex, trust the project when it asks, and run
+`codex plugin marketplace upgrade huddle` once in a terminal in the repo; then trust the hook once (step 4 below). A Claude Code session
+says once when this machine has Codex but no Huddle in it, and `huddle doctor` shows a «codex» line.
+
+On macOS, follow the [Mac setup steps](#set-up-huddle-on-a-mac-with-codex).
+
+**Setting up a Player's Codex, once** (written for someone with no technical background):
+
+1. 🙋 Install Codex: in VS Code, open **Extensions**, search «Codex», install the one by OpenAI and sign in.
+2. 🙋 Open a terminal (**Terminal → New Terminal**) and paste:
+   ```text
+   codex plugin marketplace add SrProfessional/Huddle
+   codex plugin add huddle@huddle
+   ```
+   You should see: «Added plugin `huddle`». If you see «codex is not recognized»: the extension brings its own `codex`, not on the PATH.
+   On Windows, in PowerShell, paste this instead (it finds that `codex` and runs the same two commands):
+   ```text
+   $codex = (Get-ChildItem "$HOME\.vscode\extensions\openai.chatgpt-*\bin\*\codex.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
+   & $codex plugin marketplace add SrProfessional/Huddle; & $codex plugin add huddle@huddle
+   ```
+3. 🙋 Open the repo folder in VS Code, then choose **Terminal → New Terminal**. The Codex chat in VS Code has no `/hooks`; use this
+   terminal Codex once to trust the hook. Paste:
+   ```text
+   codex --no-daemon
+   ```
+   On Windows, if `codex` is not recognized, paste the line that finds the extension's Codex, then start it:
+   ```text
+   $codex = (Get-ChildItem "$HOME\.vscode\extensions\openai.chatgpt-*\bin\*\codex.exe" | Sort-Object FullName | Select-Object -Last 1).FullName
+   & $codex --no-daemon
+   ```
+   Do not leave off `--no-daemon`: without it, Codex stops with «this CLI has no complete local package».
+4. 🙋 When terminal Codex shows «Hooks need review», choose **Review hooks**. Go to the **SessionStart** row: the list does not name the
+   plugin, so Huddle is the row with **Review 1**. Press Enter. Check that its command is
+   `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" hook` and its plugin is `huddle`, then trust it.
+5. 🙋 You should see: **SessionStart** has **Active 1** and **Review 0**. Press Esc, type `/exit`, then open a new Codex chat in the
+   repo. The hook runs when that session starts. If you see something else, leave with `/exit` and repeat steps 3 and 4, checking that
+   you opened the terminal in the repo folder.
+6. 🙋 Let Codex reach GitHub or GitLab: when Codex asks to run `git push`, `gh`, `glab` or `huddle` with network access, approve it.
+   Codex's sandbox has no network, so without that the PR cannot be opened and the wait cannot see the Coach's answer.
+7. Work as usual: `$huddle-play <n>`. When the PR is open, the session waits in the background with no tokens
+   (`huddle wait <n> --codex`); when the Coach answers, the open Codex chat gets a message and goes on by itself.
+
+**Updating Huddle in Codex:** `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle`, then open a new chat. A
+changed hook needs trust again, so repeat steps 3–5 in terminal Codex (not the VS Code chat, which has no `/hooks`). The Coach then runs
+`$huddle-update` in each repo (`/huddle-update` in Claude Code), as after any update.
+
+### Set up Huddle on a Mac with Codex
+
+Codex on macOS is adapted for Huddle but not yet tried live.
+
+1. 🙋 **Install Homebrew.** If you need it, follow the installation and **Next steps** at [Homebrew](https://brew.sh/). Homebrew installs tools on your Mac.
+   You should see: The installer finishes and tells you how to make `brew` available in Terminal (the app where you paste commands).
+   If you see something else: Follow the installer's instructions before continuing.
+
+2. 🙋 **Install the tools.** Open **Terminal** from **Applications → Utilities**, then paste this command.
+   ```text
+   brew install node gh git
+   ```
+   You should see: Homebrew installs Node (which runs Huddle), GitHub CLI (which signs you in to GitHub from Terminal) and Git
+   (which copies and tracks your project files), or reports that they are already installed.
+   If you see something else: If `brew` is missing, complete Homebrew's **Next steps** and open Terminal again.
+
+3. 🙋 **Sign in to GitHub.** In Terminal, paste the following. Choose **GitHub.com**, **HTTPS**, and **Login with a web browser** when prompted.
+   ```text
+   gh auth login
+   ```
+   You should see: GitHub CLI confirms that you are logged in.
+   If you see something else: Complete the browser prompt and return to Terminal.
+
+4. 🙋 **Install the Codex command.** In Terminal, paste this command. The global install adds `codex` to your PATH (where new terminals look for commands).
+   ```text
+   npm install -g @openai/codex
+   ```
+   You should see: npm reports that it added or updated Codex.
+   If you see something else: If a new Terminal window cannot find `codex`, check that Homebrew's **Next steps** were applied.
+
+5. 🙋 **Sign in to the Codex extension.** In VS Code, open **Extensions**, search for **Codex**, install the extension published by OpenAI and sign in.
+   You should see: The Codex sidebar opens with your account signed in.
+   If you see something else: Choose **Sign in** in the sidebar and finish in your browser.
+
+6. 🙋 **Clone your repo.** In Terminal, copy the repo (your team's project) to this Mac. The example copies Huddle to the **Huddle** folder in your home folder. For your own repo, replace `SrProfessional/Huddle` with the name from GitHub and `Huddle` in the destination with your project folder name.
+   ```text
+   gh repo clone SrProfessional/Huddle "$HOME/Huddle"
+   ```
+   You should see: Git reports that it is cloning into your project folder.
+   If you see something else: For an access error, check the repo name and the account you signed in with.
+
+7. 🙋 **Open a terminal in the repo.** In VS Code, choose **File → Open Folder**, select the folder you just cloned, then choose **Terminal → New Terminal**.
+   You should see: The new terminal opens in the repo folder.
+   If you see something else: Check that you opened the folder created by the clone command.
+
+8. 🙋 **Trust the project folder.** Start terminal Codex and approve the project trust prompt for your repo if it appears. Sign in if prompted. Close the chat with `/exit` before running the next terminal command.
+   ```text
+   codex --no-daemon
+   ```
+   You should see: Codex opens the repo without a warning that its project settings are ignored.
+   If you see something else: Reopen terminal Codex from the repo folder and review the trust prompt.
+
+9. 🙋 **Add the Huddle marketplace if needed.** If the repo has no `.codex/config.toml` and you haven't already added the marketplace, paste this in the repo terminal. The marketplace tells Codex where to find Huddle.
+   ```text
+   codex plugin marketplace add SrProfessional/Huddle
+   ```
+   You should see: Codex reports that it added the marketplace.
+   If you see something else: If it is already configured, continue to the next step.
+
+10. 🙋 **Refresh the marketplace.** In the repo terminal, paste this command.
+    ```text
+    codex plugin marketplace upgrade huddle
+    ```
+    You should see: Codex refreshes the Huddle marketplace.
+    If you see something else: If Codex cannot find it, check folder trust and whether the repo has `.codex/config.toml`, or complete the previous step.
+
+11. 🙋 **Install Huddle.** In the repo terminal, paste this command.
+    ```text
+    codex plugin add huddle@huddle
+    ```
+    You should see: Codex reports that it added Huddle.
+    If you see something else: If it cannot find Huddle, repeat the marketplace refresh.
+
+12. 🙋 **Open terminal Codex.** In the repo terminal, paste this command before reviewing the hook (a command that runs when a chat starts).
+    ```text
+    codex --no-daemon
+    ```
+    You should see: Codex opens in the repo and may say **Hooks need review**.
+    If you see something else: If it cannot find the command, reopen the terminal after installing the Codex command.
+
+13. 🙋 **Trust Huddle's startup hook.** In terminal Codex, type this command. Select **SessionStart**, open Huddle's row, confirm that it runs `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" hook` for the `huddle` plugin, and choose **Trust**.
+    ```text
+    /hooks
+    ```
+    You should see: **SessionStart** shows the Huddle hook as active.
+    If you see something else: If the Huddle row is missing, check that you started Codex in the repo after installing Huddle.
+
+14. 🙋 **Leave terminal Codex.** Press Esc to return to the chat, then type this command.
+    ```text
+    /exit
+    ```
+    You should see: You are back at the terminal prompt.
+    If you see something else: If the hook list is still open, press Esc again first.
+
+15. 🙋 **Set your personal language if the team has none.** Run the following in the terminal for Spanish. Change `es` to your own language code if needed.
+    ```text
+    node ~/.codex/plugins/cache/huddle/huddle/*/bin/huddle language es
+    ```
+    You should see: Huddle confirms your language.
+    If you see something else: If several versions are installed, replace `*` with the installed version you want to use.
+
+16. 🙋 **Start a new Codex chat.** In the repo, open a new Codex chat in VS Code or terminal Codex.
+    You should see: Huddle introduces itself when the chat starts.
+    If you see something else: If it does not, review the Huddle hook again in terminal Codex.
 
 ## Add or remove someone
 
@@ -382,6 +623,7 @@ Nothing goes from staging to production until the Coach has seen that **every Is
   own clean check (a fresh copy of staging, a clean install, the tests; it asks if the project has not written down how), shows the list and waits for the Coach's OK. Then it
   opens the PR/MR from staging into the default branch, and merges it with a **merge commit** only when the Coach says so in the same chat. `huddle release` shows the list
   without changing anything.
+- **Testing in staging.** The Coach runs the `/huddle-test` skill (`$huddle-test` in Codex) before `/huddle-release`. It lists the Issues in staging that are not tested, in an order it explains, and takes them one at a time: it says in plain words what the Issue changes, gives numbered steps with what you should see, runs the ones it can itself and hands you only what needs your eyes or another device. When you say «passed» it marks the Issue «tested in staging»; «failed» offers a bug Issue or a reopen; «skip» and «stop» leave it unmarked. An Issue can carry its own optional «How to test in staging» section so the steps come from its writer.
 - **Two warnings.** If staging received commits that belong to no listed Issue (a hotfix, a back-merge), the Coach must confirm them. If the default branch is **ahead** of staging
   (a hotfix went straight to production), a back-merge PR/MR from the default branch into staging comes first, and the release does not open until it is merged.
 - **An Issue that was not tested** can go out only if the Coach gives the reason (`--untested <n> --reason "<why>"`); the reason is written in the PR/MR.

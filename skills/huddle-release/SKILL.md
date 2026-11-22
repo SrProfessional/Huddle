@@ -9,14 +9,16 @@ For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you
 stop with one clear line («/huddle-release is for the Coach») and change nothing; you never merge when you are not that session.
 A repo with no `staging_branch` has nothing to release this way: say so and stop. The rules are in docs/design.md §21.
 
+**In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
+
 Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"` followed by the words shown.
 
 1. **What is in staging.** Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" release --json` and show the staged Issues with and without the
    marker, and the two warnings. Nothing in staging: say so and stop.
    - If the default branch is ahead of staging (a hotfix went straight to production), say that the back-merge comes first: a PR/MR from the
-     default branch into staging, merged before this release. Offer to open that PR/MR, and stop until it is merged.
+     default branch into staging, merged before this release. Offer to open that PR/MR with its body in a temporary UTF-8 file (`gh pr create --body-file <file>` or `glab mr create --description-file <file>`, never inline), and stop until it is merged.
    - If staging received commits that belong to no listed Issue after the newest test, show them and ask the Coach to confirm them.
-2. **Each untested Issue.** Say it plainly («#N has no «tested in staging» mark») and ask: has it been tested in staging? Run
+2. **Each untested Issue.** When any staged Issue is untested, even exactly one, point the Coach to `/huddle-test` (a guided test, one Issue at a time, which marks each one) instead of asking Issue by Issue, and go on when it is done. Only if the Coach declines the guided test, say it plainly («#N has no «tested in staging» mark») and ask: has it been tested in staging? Run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` only on a yes from the Coach. On a no, stop for that Issue. You may release it
    anyway with `--untested <n> --reason "<why>"` in step 4, only if the Coach gives the reason: never make up a reason yourself.
 3. **The project's clean check on staging.** Run the check the project documents in its `CLAUDE.md`: a fresh worktree of `origin/<staging>`,
@@ -31,7 +33,7 @@ Do these in this order. Every command is `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle
 ## Reopening an Issue
 
 Only the Coach's session reopens an Issue (for example one that failed its test in staging); nobody reopens one by hand on the website.
-Run `gh issue reopen <n>` (or `glab issue reopen <n>`) with a comment that says why. Then run
+Run `gh issue reopen <n>` (or `glab issue reopen <n>`). Write the reason to a temporary UTF-8 file and post it with `gh issue comment <n> --body-file <file>` or `glab api … -F 'body=@file'` on the Issue notes endpoint. Never pass it inline. Then run
 `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` and, once, the full `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels`, so the «tested in
 staging» label goes and the Issues that depend on it are blocked again. Both are best effort, as above. The fix is a new PR/MR on the same Issue,
 landed as usual.

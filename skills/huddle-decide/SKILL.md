@@ -8,6 +8,8 @@ description: Use when an Issue has the needs decision label and the Coach must a
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; a Player
 session never answers its own decision.
 
+**In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
+
 ## Do
 
 1. List the Issues with the `needs decision` label (name in `huddle.json` under `labels.decision` if renamed). Open the
@@ -28,7 +30,7 @@ Decision: <the chosen option and why, in one or two lines>.
 ```
 ````
 
-   Use `gh issue comment` / `gh pr comment` (or `glab issue note` / `glab mr note`).
+   In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
 4. Right after posting the answer, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` (`n` the Issue): it takes `needs decision` off now that the
    answer is there. Do not close anything and do not edit labels by hand. The command is best effort: if it fails (no permission to edit labels, the
    platform is unreachable), say one line with the reason and go on; it never stops or blocks the task and never asks anything, since the cloud job,

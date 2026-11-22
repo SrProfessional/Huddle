@@ -96,6 +96,12 @@ Node ≥ 22 and no runtime dependencies. The only tools it calls are `git` plus 
 `<!-- huddle:start v1 -->` and `<!-- huddle:end -->`. An update replaces only that block, so the project's own text is never
 touched. The block refers to `huddle.json` for names (the Coach, labels), never to SocialCortex.
 
+**The same block in `AGENTS.md` (Issue #200).** OpenAI Codex reads `AGENTS.md`, not `CLAUDE.md`, so `huddle-setup` and `huddle-update`
+write the same block, with the same markers, into both files at the repo root (the result says `claudeMd` and `agentsMd`: created, inserted
+or updated). A repo set up before gets `AGENTS.md` on its next `/huddle-update`. Both files are built before anything is written, so a file
+with half a marker stops setup with nothing changed and names that file. Codex reads at most 32 KiB of `AGENTS.md` text in all; the block is
+about 7 KB, and a test keeps it under 16 KiB. Its heading says «Claude Code or Codex».
+
 ## 6. Configuration: `huddle.json` at the repo root
 
 Replaces `docs/equipo/team.json`. No secrets ever go in it.
@@ -122,6 +128,11 @@ Replaces `docs/equipo/team.json`. No secrets ever go in it.
   set they must name the same login. Setup writes `coach` on a new repo and leaves an existing `ai_manager` as it is. The code reads it
   in one place (`coachOf` in `lib/cli/config.mjs`), so a list of Coaches (one per area) can come later.
 - `default_branch`: the branch Issues are merged into (default `main`).
+- `language`: optional (Issue #209); the language the sessions chat in with the team, for example `es`. Absent or `""` means each
+  person's machine language. A person's own choice wins: `huddle language <lang>` (a file of their own, `~/.huddle/language.json`, read by
+  Claude Code and Codex alike) or Claude Code's `language` in `~/.claude/settings.json`. The order, first that is set: the person's, the
+  team's, the machine's locale (`Intl`). The session-start hook names it in one line of context, in both tools; when the person writes in
+  another language, the session answers in theirs. `huddle language` prints it and where it came from; `--clear` removes the person's own.
 - `staging_branch`: optional; the branch where changes are tested before they go to the default branch. Absent or `""` means none
   (today's behaviour). Stored and validated only for now; see §21.
 - `labels_job`: optional; how the cloud labels job runs: `sessions` (the default when absent), `hourly` or `events`. Never asked:
@@ -458,13 +469,13 @@ asked once. Setup writes it too, except when a question is still pending: then i
 **pending** when `since` is newer than the repo's `setup_version` **and** `needed(config)` is true (the key is not set yet). A
 question never repeats: once its key is in `huddle.json` it is not asked again, whatever the version. The registry is **empty
 in 0.4.x** (no release asks anything yet): the mechanism ships first, and the tests use a fake registry. The first release that
-needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21). 0.8.0 also asked `labels-job` (§23); Issue #130
+needs a new answer adds its entry: `staging-branch` (`since: 0.8.0`, §21), `language` (`since: 0.9.6`, §6, Issue #209). 0.8.0 also asked `labels-job` (§23); Issue #130
 removed it, so it is never pending again.
 
 **The command.** `huddle update [--check] [--dry-run] [--json] [--answer key=value ...]`. It needs no platform and no login:
 only files, never the network.
 
-- No flags: refreshes the block of `CLAUDE.md`, the templates and the labels job exactly as setup does (a template the
+- No flags: refreshes the block of `CLAUDE.md` and of `AGENTS.md` (§5), the templates and the labels job exactly as setup does (a template the
   project edited is kept and reported), writes `setup_version`, and prints what changed. Exit 0.
 - Pending questions without answers: it changes **nothing**, prints each question (`--json`: `pendingQuestions: [{ id, key,
   ask, options, default }]`) and exits **3**, so the skill knows to ask.
@@ -604,7 +615,7 @@ gets the same «not configured» error as the other commands.
 **The skill `/huddle-watch [interval|off|status]`.** For the Coach only: it runs `huddle doctor` first and stops with a clear line
 if the login is not `coach`.
 
-1. **On** (no argument, or an interval such as `5m`; default 5 minutes, allowed 2 to 60). If this session already runs the watch's
+1. **On** (no argument, or an interval such as `5m`; default 2 minutes, allowed 2 to 60). If this session already runs the watch's
    background wait, it is already on and no second one starts. **Check now (Issue #107):** the session runs the full `huddle labels` and
    then `huddle queue --json` once and handles what it lists (step 3 and 4); when nothing waits it says «Nothing is waiting for the Coach.», so the person sees that it ran. **Then it waits in the background (Issue #157).** Until 0.8.5 the watch was a recurring job
    (`CronCreate`): each tick woke the session for a Claude turn that re-read its context only to run `labels` and `queue`, and most ticks
@@ -615,7 +626,7 @@ if the login is not `coach`.
    failure does not stop it). Found in staging on a real project: the labels pass took 4m46s and the queue 15 s, so running the labels
    first made every wake about five minutes late. The session handles
    them and starts the wait again. Keys: `<pr>@<head>` for a review that stopped (a new commit makes it new again) and `#<issue>` for a
-   decision or a triage already said. Interval: default 300 seconds, 120 to 3600. It refuses a login that is not `coach`. The API
+   decision or a triage already said. Interval: default 120 seconds (Issue #243: each review round lost up to 5 minutes to the old default; the wait spends no Claude tokens, and the full labels pass still runs at most every 15 minutes), 120 to 3600. It refuses a login that is not `coach`. The API
    use per hour is the same as the old job at the same interval; the Claude tokens while nothing waits go to zero.
 2. The first message says that **turning the watch on is the Coach's order to review and merge, as if they asked for each review**,
    that it uses no Claude tokens while nothing waits, and what stops it (`/huddle-watch off`, or closing Claude Code, because the wait
@@ -652,6 +663,15 @@ login, no login or a failed read: the hook adds nothing. The login is read once 
 two minutes with their own login: no Claude tokens and no CI minutes while it waits. Since Issue #157 `/huddle-watch` waits the same way
 (`huddle queue --wait`): no Claude tokens while nothing waits; the session's model works only on what waits. The guides and the website
 say both.
+
+**Faster review rounds (Issue #244, decided 2026-11-21).** Each round used to run the whole suite twice (the Player before pushing, the Coach
+again in a clean copy), about 8 minutes of tests for even a one-line change. Now, and never CI (its minutes end up paid, so no workflow is added
+or widened, for this repo or a project's): the Coach reads the change first and runs the full suite **only when it is about to approve**; when it
+already has something to ask for, it asks without running the tests, since another round follows anyway. Before any approval and merge the
+full suite runs in a fresh worktree on the exact head it merges (the watch's recheck too): never a merge without that run. A docs-only round
+(the delta since `Reviewed head:` touches no code and no test) is approved without a new run, saying so in the review: the head's last full run
+by the Coach, in an earlier round of the same PR, stands. The Player runs the tests of the area it touches while it fixes and the full suite once,
+right before pushing, after merging the base; the counts it reports are that last full run's.
 
 **Not here:** answering decisions or triaging bugs on its own, desktop or phone notifications, a cloud routine that runs with the
 computer off, starting the watch when a session opens, a cheaper model for the reviews (the review and the merge are the steps that need
@@ -812,6 +832,7 @@ Issue in staging was tested there**. Unset, the commands say «no staging branch
   Issue, ask whether it was tested and run `huddle tested <n>` only on a yes; the project's **clean check** on staging (the one the project documents in its `CLAUDE.md`: a fresh
   worktree of `origin/<staging>`, a clean install, its test command; when none is documented it asks and never invents one; a failing suite stops the release); show the list and
   wait for the OK; `huddle release open`; merge with a merge commit only when the Coach says so in the same chat.
+- **`/huddle-test`** (`$huddle-test` in Codex; Coach only; `huddle doctor` first). A guided test of staging: it takes the staged Issues with `tested: false` from `huddle release --json`, orders them (what other Issues depend on first, then what a person sees or touches, then what needs another tool or device, docs- and tests-only last) with a reason each, and walks the Coach through them one at a time with numbered steps in the §13 form, built from the Issue's optional «How to test in staging» section, else its Goal, «Tests that must pass» and the merged PR (it never invents a behaviour). The session runs the steps it can; only a person's eyes, a second account or another device go to the Coach as «🙋 Only you». It runs `huddle tested <n>` only on a «passed» from the Coach in the same chat; «failed» offers `/huddle-bug` or a reopen and does not mark; «skip» and «stop» are allowed. `/huddle-release` points to it.
 - **Branch protection.** A staging branch should have branch protection on the platform: nothing technical in Huddle stops a Player from merging into it. The label is cosmetic by
   design; the gate trusts only the comments by authorised authors.
 
@@ -925,6 +946,8 @@ adds `needs decision` (each under its `labels` name), then the same run recomput
 nothing changed). `/huddle-play` and the `CLAUDE.md` block use these flags and never say to add the label by hand. Each output line says
 what goes on and what comes off (`#5 → in progress − assigned`, `#6 − in progress`); «(keeps its label)» hid a removal and is gone.
 
+**`blocked` also means «waits for a shared file» (Issue #250).** `blocked` means «waits for a dependency or for a shared file». An assigned Issue whose start the scheduler (§24, the same `schedule` that `huddle next` uses) holds because it shares an allowed file with an active Issue of the same person (in progress, or with changes requested) gets `blocked` instead of `assigned`, keeps its assignee, and the run prints the reason: `#239 → blocked − assigned (waits for #5: shares lib/cli/run.mjs with #5)`; `huddle next` prints the same Issue and path. There is no new label. The labels run puts `blocked` on when the conflict starts and takes it off (back to `assigned`) when it clears, also when the blocking Issue goes to review or closes, since each run recomputes from the state. Active work is classified once, by `holdsFiles` (`lib/core/issue-status.mjs`), for the board and for `huddle next`: in progress (also a taken request), or a request that came back (pending) with no open dependency, even when its PR is open; an Issue only awaiting review, stopped for a decision or waiting for a dependency holds nothing. A scoped run on the blocker (`labels --issue n`, `--started`, or after it closes) also reconciles the assigned Issues that may wait for its files, so the start and the close move them with no other run. A wait for capacity alone, or for another candidate that has not started, is not a block: it stays `assigned`, because it is the Player's own load; and when the person is over capacity the scheduler gives capacity first, as `huddle next` does. The capacity used is what the Coach allows, never a Player's local lowering. This came from the board showing only `assigned` while `huddle next` held #239 (`lib/cli/run.mjs`) and #244 (`docs/design.md`) (#230).
+
 **The old name of «changes requested from Coach» (Issue #166).** Until 0.8 the label was «changes requested from AI Manager». Both names are
 read as the same label (`OLD_LABELS` in `lib/cli/run.mjs`), and the full `huddle labels` renames the old one on the platform once
 (`renameLabel`, GitHub `gh label edit --name`, GitLab `PUT labels/:id` with `new_name`), before it creates the missing labels, so the
@@ -1014,13 +1037,17 @@ value is refused, and `huddle capacity reset` restores it. `schedule({ active, c
 active work (in progress, or with changes requested) uses room and an Issue in review uses none; the candidates (assigned, ready, no stop
 label, not a Design Issue) go in by order, blocking bugs first then the oldest, while the sum stays within the capacity; two Issues that
 share an allowed file never run at once; an Issue bigger than the whole capacity runs alone when nothing else is active. `huddle next
-[--json]` prints it, with the reason of each wait. `/huddle-play` with no number follows `skills/huddle-play/parallel.md`: it hands each
+[--json]` prints it, with the reason of each wait. An assigned Issue held by a shared file with active work shows `blocked` on the board (§22, Issue #250). `/huddle-play` with no number follows `skills/huddle-play/parallel.md`: it hands each
 Issue that starts to a background subagent with a clean context (so no Issue pays for another's context), keeps the review waits in the
 main session, continues the same subagent with SendMessage when a request comes (or a new one when SendMessage is not available, as the
 docs do not promise it in the VS Code extension), and runs `huddle next` again when room frees. Checked against the Claude Code docs on
 2026-11-15: background subagents can run Bash, git and gh and push, up to 20 at once by default; a permission prompt of a subagent appears
 in the main session; closing the main session stops them. Each subagent makes its own worktree from the staging branch with git (the
 Agent tool's worktree isolation starts from the default branch).
+
+**Never above the capacity (Issue #240).** A request that came back (changes requested) is active work again even while it waits for room or a shared file, so
+its points count in `used` and a new start is weighed against them (only a request that waits for an open dependency holds nothing). When `used` is
+already above the capacity, `schedule` starts nothing and says why on each Issue: «6 of 5 points in use: finish one first» (before any shared-file reason), and `next` also gives the overall reason in words («Over capacity: …») and in `--json` (`over`).
 
 **Parallel reviews (Issue #165).** When several PRs/MRs wait, the Coach's watch reviews them at once, each in a background subagent with
 a clean context, while the sum of their efforts stays within `review_capacity` in `huddle.json` (default **5** points; a PR/MR bigger than
@@ -1088,3 +1115,240 @@ PRs fell behind the base branch and were reviewed again after each update. Four 
 - **A later round reads only what changed.** `/huddle-review` ends each review comment with `Reviewed head: <sha>`; on the next round it
   reads the Player's answer to each item and `git diff <old>..<new>`, not the whole PR again. The tests still run in a fresh worktree.
 - **Test output is summarized.** The review keeps only the summary lines of the test output (the counts and the failures).
+
+### The Player's watch (Issue #248)
+
+Seen on 2026-11-21: a Player chat in Codex, run with no number, said «no Issue can start» and stopped, while #230 held 2 points with a
+Coach request nobody had taken (its per-Issue wait had died with a closed session) and four Issues waited on its files. Now `huddle next`
+also lists `resume`: each active Issue with a pending Coach request, keyed `resume:#n:<comment id>`. `huddle next --wait [s] [--seen keys]`
+is the Player's watch, like the Coach's: no tokens; every 120 s by default it re-reads the plan and wakes the session (prints
+`{ actionable }`) when something not seen can start or must be resumed; `--codex` runs it as a process of its own that queues «Huddle
+(Player): … Run $huddle-play and do it» into the Codex chat, and a failed delivery is recorded in its heartbeat and retried next round,
+never marked seen. One per Player and repo on a machine: under `~/.huddle`, an owner record `{ run, pid, tool, session, stopped }`
+changed only under an exclusive lock file, and a heartbeat. Each launch makes a run id and claims before its child starts; the child
+gets `--run <id>`. A live, not stopped run refuses a second launch; a dead one frees it. `next --wait-off` marks the run stopped (it
+keeps its ownership until it exits). At every round and right before telling anything, a run that is stopped, or that another launch
+took over, ends without waking anyone. `huddle status` shows «player watch», with a note when Codex only queued the message (it could
+not resume the session). A resume is scheduled like a start: against the work already running (an active Issue whose request was
+taken), the capacity and the open dependencies, never a Design Issue. An Issue the watch followed is told finished (`actionable.finished`,
+key `done:#n`) only when it really closed, and stays pending until a delivery succeeds. Parallel play resumes first, then starts, and
+never ends on an empty queue: it keeps that one watch, which replaces the per-Issue waits of parallel play. This holds in Claude Code
+as in Codex, by the Coach's decision on #248 (numbered play keeps its per-Issue wait).
+
+## 25. OpenAI Codex
+
+Decided by the Coach on 2026-11-20: Huddle also runs in OpenAI Codex. The first delivery is for **Players**; the Coach stays in Claude Code
+(the watch, parallel reviews, releases), and Design Issues stay in Claude Code (they need Claude Design). One repo serves both tools: the
+same skills, the same `huddle` command and the same marketplace file. Sessions of the two tools never talk to each other directly: they talk
+through GitHub or GitLab (Issues, PRs/MRs, comments, labels), so one person can run the Coach in Claude Code and Players in Codex at the
+same time, on two plans.
+
+**What was proven on a real Codex (Issue #199).** `codex-cli 0.171.0-alpha.13`, bundled with the VS Code extension (not on the PATH:
+`<extension>/bin/windows-x86_64/codex.exe`), on Windows, 2026-11-20:
+
+- **No Codex manifest is needed.** `codex plugin marketplace add <path or owner/repo>` reads `.claude-plugin/marketplace.json` as it is,
+  and `codex plugin add huddle@huddle` installs the plugin («installed, enabled 0.9.5»). From GitHub:
+  `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`. Updating: `codex plugin marketplace upgrade
+  huddle`, then `codex plugin add huddle@huddle` again. There must be no `plugin.json` at the repo root (openai/codex#39895: Codex then
+  drops every hook of the plugin silently); a test keeps it so.
+- **The skills load** as `huddle:huddle-play` and so on (`codex debug prompt-input` lists all eleven). Codex gives the model the folder of
+  the plugin's `skills/`, but it does not replace `${CLAUDE_PLUGIN_ROOT}` inside a `SKILL.md`.
+- **The session-start hook runs** (`hooks/hooks.json`, the same file Claude Code reads). Codex runs it through `cmd.exe` on Windows, replaces
+  `${CLAUDE_PLUGIN_ROOT}` in the command itself, and sets both `PLUGIN_ROOT` and `CLAUDE_PLUGIN_ROOT` to the installed plugin folder. Its
+  input is `{ session_id, transcript_path: null, cwd, hook_event_name: "SessionStart", model, permission_mode, source }`. The
+  `hookSpecificOutput.additionalContext` it prints reaches the model (asked, the model quoted it back).
+- **The hook must be trusted once in terminal Codex.** The VS Code chat has no `/hooks`, but terminal Codex shares its configuration:
+  start it with `codex --no-daemon` (or the extension's executable on Windows), choose «Review hooks» at «Hooks need review», then
+  review and trust Huddle's `SessionStart` command. Codex skips an untrusted hook, and a changed hook needs trust again. Trust was given
+  this way on 2026-11-20 and checked with a `codex exec` run with no bypass: the model quoted the hook's line.
+- **The model.** A ChatGPT account may refuse the model set in the Player's `config.toml` («The 'gpt-5.5' model is not supported when using
+  Codex with a ChatGPT account»); `codex debug models` lists the ones offered.
+- **Waking a Codex session (Issue #201).** `codex queue --thread <id> --message <text>` queues a message into a session; with the session
+  open in the VS Code extension, the chat took the message and answered it by itself (2026-11-20, twice: once from `codex queue`, once from
+  Huddle's own `codexQueue`). `--resume` warns «could not resume thread … start a local daemon» and the message is still delivered. The
+  commands the Codex agent runs get the session id as `CODEX_THREAD_ID` (and `CODEX_HOME`, `CODEX_VERSION`), not `PLUGIN_ROOT`.
+
+**The hook in Codex.** `huddle` tells Codex apart by `PLUGIN_ROOT`, which only Codex sets (`toolOf` in `lib/cli/main.mjs`). In Codex the
+hook always adds one line of context, even when nothing waits: «Huddle (OpenAI Codex): the huddle command is node "<plugin>/bin/huddle".
+Where a Huddle skill writes node "${CLAUDE_PLUGIN_ROOT}/bin/huddle", run that instead.» In Claude Code the hook's output does not change. The Coach's `/huddle-watch always` mark never asks a Codex session to start the watch
+(the same login may play there): the watch runs in Claude Code.
+
+**The wait in Codex (Issue #201).** `huddle wait <n> --codex`, run by the Codex agent, starts the same wait as a process of its own,
+tagged with `--codex-thread <CODEX_THREAD_ID>`, and returns at once (a Codex command must not block the session). That process polls as
+`huddle wait` always does, with no tokens; when the Coach leaves a request it queues «Huddle: the Coach left a request on Issue #n (<url>). Run
+$huddle-play n and follow it.» into the session, and when the Issue is finished it queues one line saying so. `--codex` outside a Codex
+session (no `CODEX_THREAD_ID`) says so and exits 1. `findCodex` finds the command: the `codex` on the PATH (not an npm `.cmd` shim, which
+would need a shell), else the newest one bundled with the OpenAI extension under `~/.vscode`, `~/.vscode-insiders` or `~/.cursor`. If the
+session is closed, the message waits in its queue, and the next session start says a request waits, as in Claude Code.
+
+**The skills in Codex (Issue #201).** `/huddle-play` has one paragraph for Codex: the `huddle` command the session start named, a plain
+`git worktree add` instead of `EnterWorktree`, `huddle wait <n> --codex` for every background wait, a Design Issue that stops («this Issue
+is done in Claude Code (it needs Claude Design)»), and **no review or merge in Codex**, even on the Coach's login (a team of one keeps the
+Coach in Claude Code, whose watch reviews). The Coach's skills (decide, review, watch, release, issue, bug, areas, team) stop in Codex with one
+line: «/huddle-<name> runs in Claude Code, where the Coach works.»
+
+**The Codex sandbox (Issue #202).** Proven on 2026-11-20 with `codex exec --sandbox workspace-write`: `CODEX_SANDBOX_NETWORK_DISABLED=1`
+is set and `gh` cannot even start (`spawnSync gh EPERM`), so every command that reaches the platform needs network access, which the
+Player approves when Codex asks; a detached child started by the agent's command did outlive it (it wrote its file 20 s later). So
+`huddle wait <n> --codex` refuses with one clear line when `CODEX_SANDBOX_NETWORK_DISABLED` is `1` («run it again with network access:
+approve it when Codex asks»), and `/huddle-play` says the same for `git fetch`, `git push`, `gh`, `glab` and `huddle`. The team guide's
+«A mixed team» section gives the Player's setup.
+
+**The GitLab template test in Codex (Issue #207).** Inside the Codex sandbox, the four runtime checks in `test/templates/gitlab-job.test.mjs`
+failed with `spawnSync sh ENOENT`; outside the sandbox, after network access was approved and Git's `sh` was on `PATH`, all seven passed.
+
+**The language (Issue #209).** Seen on 2026-11-20: a Codex session opened with only `$huddle-play 207` answered a Spanish-speaking
+Player in English: there were no words to go by, Windows said `en-US` and no `language` was set. Now the session start names the language
+(§6), so the first answer is in it.
+
+**One watch per repo, whatever the tool (Issue #211).** Decided by the Coach on 2026-11-20: with Claude Code and Codex open at once on the
+Coach's login, the first session that turns the watch on reviews and merges; the other says so and does not start. The per-repo files
+(«always», the stop mark, the heartbeats, the capacity, and now the owner) live in one tool-neutral folder, `~/.huddle`; the old folder
+next to a tool's update cache is still read, as the old ids are (#185), so an «always» set before is kept. `queue --wait` writes the owner
+(`{ tool, session }`: `CODEX_THREAD_ID` in Codex, else `CLAUDE_CODE_SESSION_ID`). Another session's `queue --wait` stops with «The watch
+already runs in <tool> (another session), last check <ago>: this session does not start a second one.» while the owner's heartbeat is
+fresh, or while the owner reviews: when the watch returns items it keeps the watch for 45 minutes, since the loop ends while its session
+reviews. The same session restarts its own watch freely; `queue --wait-off` from any session frees it; `huddle status` names the tool.
+
+**The watch in Codex (Issue #212).** `queue --wait <s> [--seen <keys>] --codex`, run by the Codex agent, starts the watch as a process of its
+own with `--codex-thread <CODEX_THREAD_ID>` and returns at once (as `wait --codex`, #201); it refuses outside Codex, with no network, and
+when another session holds the watch (#211). The process runs the usual loop with no tokens; when items wait it prints them as always and
+queues «Huddle's watch: N item(s) wait for the Coach (seen keys: …). Run $huddle-watch and review them.» into the Codex chat. The
+session-start hook no longer skips the Coach's «always» in Codex (#199 did): it asks the Codex session to start the watch the Codex way, or,
+when another session holds it, names that session in the visible line and asks for nothing. `/huddle-watch` has its Codex steps.
+
+**The Coach's skills in Codex (Issue #213).** The stop lines of #201 go: decide, review, release, issue, bug, areas and team work in Codex,
+each with one note: the `huddle` command the session start named, `git worktree add` for worktrees, and network access for `gh`, `glab`,
+`git push` and `huddle`. `parallel.md` says a subagent is a Codex subagent there. What still needs Claude Code: a Design Issue (`/huddle-play`
+stops) and a design PR in review (`/huddle-review` stops: it needs Claude Design to look at). `/huddle-play` on the Coach's login reviews and
+merges in Codex as in Claude Code, unless another session holds the watch (#211), which reviews instead.
+
+**A set-up repo comes nearly ready in Codex (Issue #215).** Proven on 2026-11-20 (codex-cli 0.171, an isolated `CODEX_HOME`): in a trusted
+project, a repo file `.codex/config.toml` with `[marketplaces.huddle]` (git, `https://github.com/SrProfessional/Huddle.git`) and
+`[plugins."huddle@huddle"] enabled = true` makes Codex see the marketplace in that repo only; after one `codex plugin marketplace upgrade
+huddle` it lists `huddle@huddle  installed, enabled`, and outside the repo it is not listed. Setup and update write that file (the project's
+own tables kept, the Huddle ones added once; a hand-written `huddle` marketplace with another source is kept and reported). What stays per
+machine: trusting the project, that one command, and trusting the hook (#207). `huddle doctor` shows a «codex» line when `findCodex` finds a
+Codex: ✔ when its `CODEX_HOME/plugins/cache/huddle` exists, ⚠ with the command otherwise, and a Claude Code session start says the ⚠ once per
+repo. Not checked: whether the VS Code extension runs the upgrade by itself when it opens the repo.
+
+**The Coach in Codex, end to end (Issue #214).** On 2026-11-20, on the Coach's machine, a Claude Code session played #214 as the Player and
+opened PR #220 while the Coach's watch ran in Codex. From Claude Code, `huddle status` said «watch: on, in Codex» and `queue --wait` refused:
+Claude Code did not start a second watch. The Codex watch woke its chat with «Huddle's watch: 1 item waits for the Coach…» and the review
+began; it stopped once on the Coach's OpenAI usage limit and went on in the same chat when the quota came back. A second Codex chat opened
+meanwhile refused to start the watch, since the first one held it (the stuck-owner case Issue H90 handles). Then the Codex review asked for a
+change (this note and the README heading); the Player's `huddle wait` in Claude Code woke on it, and the change was pushed for review again.
+The Coach's Codex session then reviews this round and merges and lands it.
+
+**Taking over a stuck watch (Issue #222).** Seen in the live run of 2026-11-20: the Codex session that held the watch took PR #220 and hit
+the OpenAI usage limit, and a new chat could not start the watch for 45 minutes. Decided by the Coach: two refusals. While the owner's loop
+runs (no `reviewingUntil`, fresh heartbeat), «The watch already runs in <tool>…», and nobody takes it. While the owner only holds it to
+review, the owner record keeps what it took and since when, and the refusal says «Another session (<tool>) took PR #220 to review 30 minutes
+ago and has not checked since. If it is stuck, take over with --take-over (ask the person first).» `queue --wait … --take-over` (with
+`--codex` too) then takes it and says so. `/huddle-watch` asks the person before passing it; the «always» start never passes it.
+
+**The language holds (Issue #221).** Seen in the live run of 2026-11-20: with `huddle language es` set, a Codex chat still answered in English
+until the Coach wrote in Spanish: «es» was terse, and the message that wakes the chat («Huddle's watch: …», in English) arrives as if the
+person wrote it. Now the session-start line names the language in full (`Intl.DisplayNames`: «Spanish (es; …)») and says that messages from
+Huddle itself and slash commands never change it, and every message Huddle queues into a Codex chat ends with «Answer the person in Spanish.».
+
+**Updating in Codex (Issue #225).** Found before the 0.9.6 release: the version notice, `huddle doctor` and `/huddle-update` gave only Claude
+Code's steps. In a Codex session (`inCodex`: the hook's tool, or `CODEX_THREAD_ID`) they give Codex's: in a terminal in the repo,
+`codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle` (the extension's own `codex` when it is not on the PATH),
+trust the hook again in terminal Codex if it asks, then a new Codex chat. `/huddle-update` and `/huddle-setup` have one Codex note. The
+installed version is read from the running plugin's own `plugin.json`, in Codex as in Claude Code.
+
+**The rules** reach Codex through `AGENTS.md` (§5, Issue #200).
+
+**Files on the machine.** Codex sets `CLAUDE_PLUGIN_DATA` to its own data folder, so the update cache and the heartbeat files of a Player's
+Codex session live there, apart from Claude Code's: `huddle status` run from one tool does not see the other tool's waits.
+
+**A request another session already took (Issue #239).** The session start line may be minutes old: with two sessions on one login (a Claude Code session and a Codex chat) the other one may have taken the request meanwhile. Before it asks «Do you want me to continue?», the session runs `huddle pending <n>` again; with nothing pending it says in one line that another session took it and goes on with the person's own request. `huddle take <n>` on a request already marked 👀 prints one line saying so and exits 1, instead of printing the prompt again.
+
+## 26. The dashboard
+
+The first dashboard data is local-only token accounting. `huddle usage [--json] [--since <YYYY-MM-DD>]` reads the Claude Code project
+transcripts below `<CLAUDE_CONFIG_DIR or ~/.claude>/projects/` and Codex sessions below `<CODEX_HOME or ~/.codex>/sessions/`. It never
+sends a transcript, prompt, answer, path outside this checkout, or token total to the platform.
+
+The command includes this checkout and every one of its Git worktrees. Claude Code assistant entries are keyed by `requestId` (or message
+id) so streaming repeats count once. Cache creation uses the reported total or the sum of the 5-minute and 1-hour counts when only
+the breakdown is present. Codex sessions count only when their saved `cwd` is one of those folders. Repeated token snapshots count once,
+and the checkout's Git branch supplies attribution when the event has no branch. The platform adapter resolves each distinct recorded
+branch through its PR or MR: the open one first, and when there is none, the merged ones into the staging and default branches, matched by their own
+source branch (`mergedReviews` returns `head`: GitHub's `headRefName`, GitLab's `source_branch`; no merge commit has to be local) and read through the
+same closing keywords as §21. The newest 200 are read once; a branch not among them is asked for by name (`mergedReviews(base, { head })`) (Issue #266). A finished worktree is removed (§16) but its
+transcripts stay: the Claude Code folders and the Codex sessions of `<checkout>/.claude/worktrees/<name>` still count, and the branch the transcript or
+Codex's `session_meta` records (or, failing that, the folder name) is the branch. A folder name is ambiguous (`repo--claude-worktrees-x` is also a sibling
+of `repo`), so a line whose `cwd` is not inside this checkout's `.claude/worktrees/` is not counted, and a path differing only in case counts only where the
+filesystem says it is the same folder. An unresolved branch, such as the default branch, is `no Issue`. A broken or half-written JSONL line
+is skipped and named once on stderr, without stopping the report.
+
+`--json` writes exactly `{ person, rows }`: `person` is the platform login read once, and a row is
+`{ day, tool, model, issue, input, output, cacheRead, cacheWrite, reasoning }`. The rows group totals by day, tool, model and Issue;
+every usage value is a number and no message text appears in the output. The plain report shows those same columns. `--since` keeps days on
+or after the inclusive date.
+
+### The team's numbers: the huddle-usage branch (Issue #230)
+
+So the dashboard can show the whole team and each person, every session leaves its summary on the orphan branch `huddle-usage`:
+`usage/<login>/<YYYY-MM-DD>.json` = `{ person, day, rows }`, the rows of `huddle usage` for that day. Numbers only: no message text, no
+path. `huddle usage --push` writes it with git plumbing and a private index file (`read-tree` of the branch's tip, `hash-object`,
+`update-index`, `write-tree`, `commit-tree`, `push <commit>:refs/heads/huddle-usage`), so the working tree, the real index and the current
+branch are never touched; a day already there is replaced, other days and other people are kept; a push rejected because someone pushed
+meanwhile fetches and retries once on top. The session-start hook starts `huddle usage --push` as a process of its own at most once an
+hour per repo (a mark under `~/.huddle`). `huddle usage --team [--json]` reads every file of the branch after a fetch: `{ team, people }`,
+the team's rows summed and each login's rows apart; with no branch yet, an empty team. The branch has the repo's own visibility, so the
+Coach decided (2026-11-21): `--push` shares by itself only in a private or internal repo (the adapters' `repoVisibility()`); in a public one,
+or when the visibility cannot be read, it shares nothing and says so, unless `share_usage` in `huddle.json` is `true`; `false` never shares.
+
+### API and plan prices
+
+The dashboard shows API token cost only; it does not compare it with subscriptions. `prices --json` returns the API table, its source and date, and the dated plan
+table. Huddle keeps OpenRouter prices for one day under `~/.huddle` and tries LiteLLM if OpenRouter is unavailable. If both fail, it uses
+the last kept copy. An unknown model or ambiguous bare name without an exact match or explicit alias is reported as `no price`.
+
+The 2026-11-20 snapshot in `lib/usage/plans.json` uses US list prices in USD. `monthly_usd` is the monthly-billed rate, per seat where
+marked. `annual_monthly_equivalent_usd` is the public monthly equivalent for annual billing where available.
+
+- Claude Pro is $20 monthly or $200 per year (about $16.67 per month). The `max5` key maps to Max at $100, and `max20` maps to Ultra
+  (formerly Max 20x) at $200, both billed monthly. [Claude pricing](https://claude.com/pricing), [Ultra plan](https://support.claude.com/en/articles/17728952-what-is-the-ultra-plan).
+- Claude Team Standard and Premium are $25 and $125 per seat with monthly billing, and $20 and $100 per seat per month with annual
+  billing. [Claude Team plan](https://support.claude.com/en/articles/9266767-what-is-the-team-plan).
+- ChatGPT Plus is $20 monthly. The `pro` key represents Pro 200 at $200 monthly. The `business` key represents a Standard seat at $25
+  with monthly billing or $20 per month with annual billing. [Plus](https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus),
+  [Pro tiers](https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers), [Business pricing](https://openai.com/business/pricing/).
+
+`huddle.json` may override the rate used for monthly cost calculations or the seat count under `plans`. The annual equivalents remain
+public reference figures. Each person stores their selection with `plan claude=max5 codex=plus`.
+
+### The dashboard page (Issue #232)
+
+The `dashboard [--no-open]` command of the CLI (`/huddle-dashboard` in Claude Code, `$huddle-dashboard` in Codex) writes `.huddle/dashboard/index.html` and copies
+`gsap.min.js`, `ScrollTrigger.min.js` and `lenis.min.js` from `site/vendor/` next to it, then opens the page with the system's program (`start`, `open`
+or `xdg-open`); `--no-open` only writes it. `.huddle/` is ignored by git: setup and update add it to the repo's `.gitignore` (any of `.huddle`,
+`.huddle/`, `/.huddle`, `/.huddle/` already there counts, and the line takes the file's own line ending). The page loads nothing from the network; the only
+network read of the command is the API price list (§26 prices), through the same daily cache.
+
+**Data.** The token rows are every person's from the huddle-usage branch, with my own days replaced by the ones read from this machine's transcripts.
+The API cost of a row is its tokens times the price of its model; a model with no price counts nothing and is named, a cache price the source does
+not list charges nothing, and a Codex row's cached tokens (already inside its input) are charged once, at the cache rate; reasoning tokens are part of the
+output. The page shows the API cost only («Would cost by API», per person, tool, model and Issue): it has no plan column, no plan figure and no
+verdict about plans, because the Coach already knows the plan they pay. `huddle plan` and the plan table stay as commands, outside the page. When prices are
+missing, the API subtotal is marked partial and names the missing tools and models. The token table columns wrap within their cards.
+
+**How a token kind is priced.** Prices are USD per token, as the source lists them. For a Claude Code row: input tokens at the input price, output tokens at the output price, cache reads at the cache-read price and cache writes at the cache-write price; reasoning tokens are not charged again. For a Codex row: the cached tokens are inside `input`, so `input - cached` is charged at the input price and the cached tokens once at the cache-read price; output (reasoning included) at the output price. A price the source does not list for a cache kind charges nothing. The cost of a range is the sum of the cost of its rows, so it equals the sum of its models, tools, people and Issues (`test/dashboard/cost-audit.test.mjs`).
+
+**Cost per Issue** groups the rows by Issue (tokens without an Issue are one line apart), sorted by API cost, and divides by the Issue's effort points (its
+«Effort» section, read with the adapter's `issueBody` for a closed Issue). **Pace** reads the last 60 merged PRs/MRs into the staging branch (the default
+branch with none) that close Issues: Issues closed per day (per week for all time), the median hours from the PR/MR's first commit to its merge, and the
+review rounds, which are the Coach's «Prompt for Claude Code» requests on the PR/MR or its Issues before the merge. The first commit stands for «in progress»
+because the platform gives no timestamp for a label through the adapters; a read that fails leaves only that number out. The daily chart
+labels its UTC dates and months in the browser's language, with English as the fallback. Each day shows its date and count on hover, focus
+or tap, including days with zero Issues, and exposes that information to screen readers.
+
+**Style and motion.** Dark only: background #0F1117 with drifting light, cards #1A1D26 and #1D2130 with 24 px radius, text #F2F4F8 and #A3A8B6, blue
+#2F6BFF to #4C8DFF, orange #F5A524 (in progress), pink #F0476B (changes or decision; its text is #F25A7A, for 4.5:1 on both cards) and green #5FD068 (done).
+Motion: header and summary cards enter in a stagger with numbers counting up, sections reveal on scroll, rows slide in, bars grow; the light, the pulse of the
+watch dot, the breathing savings card and the hover lift are CSS. Each element has one tween with explicit end values and its styles cleared at the end, and a
+3 s safety ends any unfinished tween. With `prefers-reduced-motion: reduce` no script moves anything and the page is complete.

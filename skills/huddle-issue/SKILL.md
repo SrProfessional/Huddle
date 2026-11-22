@@ -8,6 +8,11 @@ description: Use when the Coach wants to write a new Issue for a Player from the
 For the Coach (the `coach` login in `huddle.json`). Check with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor` that you are that login; if
 not, stop and say so.
 
+Use `huddle-brainstorm` first when a new task needs its goal, scope, or approach clarified.
+
+**In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
+In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
+
 ## Do
 
 1. Ask what the task is (goal, the document that rules over it). Read that document and the code it touches.
@@ -25,7 +30,8 @@ not, stop and say so.
      (a second person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid
      action, a permission that was denied). Mark each of those with «🙋 Only you» and write it as numbered steps for someone
      with no technical background (docs/design.md §13); every other step stays the session's.
-   - **Allowed files**, **Contract or spec**, **Tests that must pass:** concrete, checkable.
+   - **How to test in staging:** optional. Ask for one or two steps a person with no technical background can do in staging, each with what they should see. `/huddle-test` reads this section to guide the Coach, so write it whenever the Issue changes something a person can see or touch.
+  - **Allowed files**, **Contract or spec**, **Tests that must pass:** concrete, checkable.
    - **Milestone (area):** ask which milestone the Issue goes in. Areas are milestones, and each Issue belongs to one: list the
      open ones with `gh api repos/<project>/milestones --jq '.[].title'` (or `glab api projects/<encoded project>/milestones?state=active`)
      and offer them. If the right one does not exist yet, offer to create it. The Coach keeps its

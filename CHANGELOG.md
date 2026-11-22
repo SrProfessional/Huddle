@@ -5,6 +5,106 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-22
+
+### Added
+
+- A guided test of staging (Issue #269): the `/huddle-test` skill (`$huddle-test` in Codex) walks the Coach through the Issues in staging that are not tested, one at a time and in an order it explains, with plain steps for each, and marks an Issue «tested in staging» only after the Coach says it passed. The Task templates have an optional «How to test in staging» section, `/huddle-issue` asks for it, and `/huddle-release` points to `/huddle-test`.
+
+### Fixed
+
+- The dashboard's API cost is audited (Issue #276): hand-worked tests pin that input, output, cache-read and cache-write tokens are each priced at their own list price, for Claude Code and for Codex, and that a range's total equals the sum of its models, tools, people and Issues. No price arithmetic was wrong; the figures of 2026-11-21 differed because Claude 5.x models had no price before #265. §26 states how each kind is priced.
+- The dashboard ignores zero-token rows (Issue #272): a row with no tokens at all, such as Claude Code's `<synthetic>` messages, is never named under «No price for» and never makes a cost «partial». A model with tokens and no price still does. `huddle usage` is unchanged.
+- Tokens are attributed to their Issue (Issue #266): `huddle usage` showed `no Issue` for every row because the Issue was looked up only through an open PR/MR, and the transcripts of finished (removed) worktrees were not read at all. It now also finds the Issue through the merged PR/MR of the branch (by its own source branch, asking for the branch by name when it is older than the newest 200), and reads the Claude Code and Codex transcripts of removed worktrees, using the recorded branch or the folder name, and only those inside this checkout. The default branch stays `no Issue`.
+- Claude Code model names find their API price (Issue #265): `claude-opus-5-5` (with an optional date suffix) matches `anthropic/claude-opus-5.5` by a general rule, so the dashboard stops saying «no price» for them. The old aliases still work, and an unknown family or version still has no price.
+
+### Changed
+
+- The Get started page shows step 1 in tabs (Issue #273): «Claude Code» and «OpenAI Codex», and inside Codex «Install» and «macOS», so a person sees only the path they chose. Built by `site/js/tabs.js` as accessible tabs (arrow keys, Home and End, visible focus, no animation under reduced motion); the page still shows all its text without JavaScript. `#codex` and `#mac-codex` open the right tab, a change of tab updates the hash without scrolling, and the last tab is remembered in the browser (the hash wins).
+- The dashboard shows the API cost only (Issue #264): the «Paid in plans» column, the plan figures and the verdict about plans are gone from the page and its model. `huddle plan` and `huddle prices` work as before.
+- An assigned Issue that waits for a file it shares with an active Issue shows `blocked` on the board (Issue #250), as a dependency wait does, with the Issue and the file in the output of `huddle labels` and `huddle next`; it goes back to `assigned` when the conflict clears. No new label; a wait for capacity alone stays `assigned`.
+- Faster review rounds, never CI (Issue #244): the Coach runs the full suite only when it is about to approve, on the exact head it merges in a
+  fresh worktree (never a merge without that run); a docs-only round is approved without a new run; the Player runs the tests of the area it
+  touched while it fixes and the full suite once, right before pushing. No workflow is added.
+- The Coach's watch checks every 2 minutes by default instead of 5 (Issue #243), so a ready PR waits less. No setting in `huddle.json`; `/huddle-watch 10m` still sets another interval.
+
+### Fixed
+
+- Dashboard readability (Issue #262): token tables fit within their cards, partial API costs are separated from plan costs, and the daily
+  chart shows localized dates and accessible counts.
+- Parallel play never goes over the Player's capacity (Issue #240): a request that came back with changes requested and waits for room still
+  holds its points, so `huddle next` no longer starts an Issue that would put the used points above the capacity; over capacity it starts nothing
+  and says «6 of 5 points in use: finish one first».
+
+### Added
+
+- The dashboard (Issue #232): `/huddle-dashboard` (`$huddle-dashboard` in Codex; the `dashboard [--no-open]` command of the CLI) writes a private dark page to
+  `.huddle/dashboard/index.html` and opens it: summary (Issues closed, team tokens, would cost by API, paid in plans, the difference), progress by area,
+  who does what now, tokens and cost per person, tool and model, cost per Issue and per effort point, pace (Issues closed per day, median time from start
+  to merge, review rounds) and releases, with a 7 days / 30 days / all filter. Nothing is loaded from the network, and `prefers-reduced-motion` gets a
+  still, complete page. Setup and update add `.huddle/` to `.gitignore`, and the progress Issue says how to open it. The adapters gain `issueBody`.
+- The session start never offers a request another session already took (Issue #239): before asking «Do you want me to continue?» the session runs
+  `huddle pending` again, and `huddle take` on a request already marked 👀 says so in one line and exits 1.
+- The Player keeps working by itself (Issue #248): `/huddle-play` with no number resumes the Coach's requests nobody took, starts what fits,
+  and keeps one Player watch (`huddle next --wait`, `--codex` in Codex) that wakes the session when there is something to do, with no tokens.
+
+- The Coach merges when the PR/MR is correct and safe (Issue #252): a review asks for changes only for what blocks; a rarer edge case or
+  extra hardening is merged and written right away as a new Issue, instead of another round.
+- Each person's token summary is shared on the `huddle-usage` branch (Issue #230), numbers only, at most once an hour from the session
+  start, written without touching the working tree or the current branch; `huddle usage --team` sums the team and keeps each person apart.
+  Only in a private repo by default: a public one shares nothing unless `share_usage` is `true` in `huddle.json`.
+- Five base skills adapted from MIT-licensed Superpowers (Issue #235): `huddle-tdd`, `huddle-debug`, `huddle-verify`,
+  `huddle-answer-review`, and Coach-only `huddle-brainstorm`. They are concise, work in Claude Code and Codex, retain
+  Huddle's Issue/worktree/review rules, and carry their upstream attribution in `skills/THIRD-PARTY.md`.
+- The website now uses Huddle's dark dashboard palette, system typography, glowing controls and drifting colour.
+- API and subscription prices (Issue #231): the new prices command reports the daily OpenRouter/LiteLLM API table and dated Claude and
+  ChatGPT plans; the plan command stores each person's selections locally, and `huddle.json` can carry negotiated plan overrides.
+- Local token accounting for the dashboard (Issue #229): the new usage command reads Claude Code and Codex transcripts
+  from this machine, across the checkout and its worktrees, grouping numeric totals by day, tool, model and Issue. It never sends the
+  transcript data to the platform; broken or half-written lines are skipped with a stderr warning.
+- Updating Huddle works in Codex (Issue #225): in a Codex session the version notice, `huddle doctor` and `/huddle-update` give Codex's
+  steps (`codex plugin marketplace upgrade huddle`, `codex plugin add huddle@huddle`, a new chat) instead of Claude Code's.
+- The README, the team guide and the website cover OpenAI Codex (Issue #227): Huddle works in Claude Code and OpenAI Codex, the Coach
+  and the Players may use either, the Codex install and update, one watch per repo, and what is adapted but not yet tried live in Codex.
+- The README, team guide and get-started page give Mac setup steps for Huddle in Codex and explain how a Coach switches the watch
+  between two computers (Issue #246).
+- Take over a stuck watch, when the person asks (Issue #222): if the session that holds the watch took something to review and never came
+  back (closed, or out of quota), `/huddle-watch` in another session says what it took and when, and asks «Take over?».
+- The language holds in Codex (Issue #221): the session start names it in full («Spanish»), Huddle's own messages never change it, and the
+  messages Huddle sends into a Codex chat end with «Answer the person in Spanish.».
+- The docs say the Coach can work in Codex too (Issue #214), with one watch per repo whatever the tool; only design work needs Claude Code.
+- A set-up repo comes nearly ready in Codex (Issue #215): setup and update write `.codex/config.toml`, which declares Huddle for Codex in
+  that repo; a new machine needs one `codex plugin marketplace upgrade huddle` and the hook trust. `huddle doctor` and the session start say
+  when this machine has Codex without Huddle.
+- The Coach's skills work in Codex (Issue #213): review, issue, bug, decide, areas, team and release. Design Issues and design reviews
+  still need Claude Code.
+- The Coach's watch in Codex (Issue #212): `/huddle-watch` waits with no tokens in a process of its own and wakes the Codex chat when
+  something waits; `/huddle-watch always` starts it in each Codex session too, unless another session already holds the watch.
+- One watch per repo, whatever the tool (Issue #211): with Claude Code and Codex open at once on the Coach's login, the first session
+  that turns the watch on keeps it (also while it reviews), and the other says where it runs and does not start a second one. The watch's
+  marks now live in `~/.huddle`, read by both tools; the ones set before are kept. `huddle status` names the tool of the running watch.
+- Each person's language, in Claude Code and Codex (Issue #209). The session start names it, so even a session opened with only a
+  command answers in it: the person's own (`huddle language <lang>`), else the team's (`language` in `huddle.json`, asked by
+  `/huddle-setup` and once by `/huddle-update`), else the machine's. The repo stays in English.
+- Codex hook trust (Issue #207): the VS Code chat has no `/hooks`, so Players trust Huddle's SessionStart hook once in terminal Codex,
+  which shares its configuration; the team guide gives the Windows `--no-daemon` steps and the same check after an update.
+- A mixed team (Issue #202): the README and the team guide say how a Player works in OpenAI Codex while the Coach stays in Claude Code,
+  one person on two plans if they like, with the Player's setup in plain steps. `huddle wait --codex` refuses with one clear line inside a
+  Codex sandbox with no network, and `/huddle-play` runs the commands that reach the platform with network access.
+- `/huddle-play` works in OpenAI Codex (Issue #201). `huddle wait <n> --codex` waits in a process of its own with no tokens and, when the
+  Coach answers, sends the Codex session a message to go on (`codex queue`; an open Codex chat in VS Code answers it by itself). In Codex
+  the Player never reviews or merges, even on the Coach's login; Design Issues and the Coach's skills stop there with one line.
+- Huddle installs in OpenAI Codex (Issue #199): `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`.
+  The skills and the session-start hook run there; in Codex the hook always tells the session where the `huddle` command is. Proven on a
+  real Codex (docs/design.md §25). For Players; the Coach stays in Claude Code.
+- The Huddle rules in `AGENTS.md` too (Issue #200), the first step for OpenAI Codex: setup and update write the same managed block into
+  `CLAUDE.md` and `AGENTS.md`, keeping the project's own text outside the markers. A repo set up before gets `AGENTS.md` on its next
+  `/huddle-update`.
+
+### Fixed
+
+- Huddle skills send Issue, PR/MR and comment text from temporary files in Claude Code and Codex (Issue #241), preserving line breaks and backslashes on Windows.
+
 ## [0.9.5] - 2026-11-17
 
 ### Changed

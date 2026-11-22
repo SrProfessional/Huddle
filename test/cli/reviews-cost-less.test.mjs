@@ -77,7 +77,7 @@ test('the play skill brings the base in before the PR and before «Ready for rev
   const t = read('skills/huddle-play/SKILL.md');
   assert.match(t, /git merge origin\/<base>/);
   assert.match(t, /before opening the PR\/MR and before commenting «Ready for review again»/);
-  assert.match(t, /counts after the merge/);
+  assert.match(t, /counts you report are that last full run/);
 });
 
 test('the review skill writes the reviewed head, reads only the delta on a later round, and keeps only the test summary', () => {

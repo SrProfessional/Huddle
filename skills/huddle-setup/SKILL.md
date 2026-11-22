@@ -7,6 +7,8 @@ description: Use when a team wants to put Huddle in a repo for the first time, o
 
 Installs Huddle in the repo you are in. Run it from the repo root, on a branch that is not the default branch.
 
+**In OpenAI Codex** (Issue #225): instead of `claude plugin …`, run `codex plugin marketplace upgrade huddle` and `codex plugin add huddle@huddle`; instead of `/reload-plugins`, open a new Codex chat; make the worktree with `git worktree add` instead of `EnterWorktree`; run `gh`, `glab` and `git push` with network access (approve it when Codex asks). A first install in Codex: `codex plugin marketplace add SrProfessional/Huddle`, then `codex plugin add huddle@huddle`; with the marketplace already added: `codex plugin marketplace upgrade huddle`, then `codex plugin add huddle@huddle` (the VS Code extension's own `codex` when it is not on the PATH: the team guide, «A mixed team»); then trust the hook once in terminal Codex (`codex --no-daemon`, `/hooks`) and open a new Codex chat.
+
 ## Look at `huddle.json` first
 
 Before asking anything, look for `huddle.json` in the repo root and read it. A repo that already has a valid one is set up: to bring it to a newer Huddle, use `/huddle-update` (it also asks any question a new release added).
@@ -14,7 +16,7 @@ Before asking anything, look for `huddle.json` in the repo root and read it. A r
 - **It exists and is valid, and you are not its Coach:** run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`. If the login is not `coach`,
   stop and change nothing, with one plain message: «This project already uses Huddle; its Coach is <login>. You do not need
   /huddle-setup: type /reload-plugins and work with /huddle-play <n>.»
-- **It exists and is valid** (a refresh by the Coach, for example after updating the plugin): **ask nothing**. Everything the questions would ask is already in the file. Go straight to «Do» and run `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs"` with no flags: it reuses the file's answers, replaces the block of `CLAUDE.md` and refreshes the templates. In your report say what changed: the block (updated or not), the templates written, and the templates **kept** because the project edited them (the report's `skipped`), with the one-line way to get the current one.
+- **It exists and is valid** (a refresh by the Coach, for example after updating the plugin): **ask nothing**. Everything the questions would ask is already in the file. Go straight to «Do» and run `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs"` with no flags: it reuses the file's answers, replaces the block of `CLAUDE.md` and of `AGENTS.md` (the same block, for OpenAI Codex) and refreshes the templates. In your report say what changed: the block (updated or not), the templates written, and the templates **kept** because the project edited them (the report's `skipped`), with the one-line way to get the current one.
 - **It does not exist, or it is invalid or incomplete**: ask **only** for what is missing. Run the CLI once with no flags: for a missing file it fails naming each missing field (`"platform" is required`), and for an invalid one it names the field. Ask only the questions below that match those fields, and keep what the file already says.
 - **No file here:** first run `git fetch origin` and look for it on the remote's default branch: `git show origin/HEAD:huddle.json`
   (else `origin/main`, else `origin/master`). If it is there, stop and change nothing: «This project is already set up on <platform>; its
@@ -29,6 +31,7 @@ Before asking anything, look for `huddle.json` in the repo root and read it. A r
 4. **Coach:** the login of the one person who hands out Issues, answers decisions, reviews and merges, for example `SrProfessional`. Offer the login of the Player running the setup: `gh api user --jq .login` on GitHub, `glab api user` (the `username` field) on GitLab. If that command fails, ask without an offer.
 5. **Team:** the logins of the Players who get Issues, separated by commas, for example `SrProfessional, Santiago123`. Optional: max open Issues per person (empty = no limit), default branch.
 6. **Staging branch:** «Does the project have a staging (or QA) branch where changes are tested before they go to <default branch>? Give its name, or none.» Pass the answer as `--staging-branch <name>` (`none` is stored as `""`). If `huddle.json` already has the key, keep it and do not ask again. With it set, Issue branches start from staging, their PRs/MRs target it, and `/huddle-release` takes staging to the default branch (docs/design.md §21).
+7. **Language:** «In which language should the sessions chat with the team (for example es or en)? Each person can still choose their own with `huddle language`.» Offer the language the person is writing in. Pass it as `--language <code>` (empty: each person's machine language). If `huddle.json` already has the key, keep it and do not ask again. The repo itself stays in English.
 
 Do not ask how the labels are kept: the sessions keep them right and the board repairs itself when a session opens, so setup writes no
 cloud labels job and uses no CI minutes. A `labels_job` already in `huddle.json` is kept as it is.
@@ -40,7 +43,7 @@ Never ask for a token. If `gh`/`glab` is not logged in to that host, tell the Pl
 1. Run, in the repo root (leave out the flags for answers that were left empty; with a valid `huddle.json` give no flags at all):
    `node "${CLAUDE_PLUGIN_ROOT}/lib/setup/cli.mjs" --platform <p> --host <h> --project <x> --coach <login> --assignees a,b --staging-branch <name|none>`
 2. It writes `huddle.json` and the Issue and PR/MR templates of that platform, and inserts the Huddle block
-   in `CLAUDE.md`. It also writes `.claude/settings.json` with the marketplace and the enabled plugin (`extraKnownMarketplaces.huddle` and
+   in `CLAUDE.md` and in `AGENTS.md` (OpenAI Codex reads that one). It also writes `.codex/config.toml`, which declares Huddle for OpenAI Codex in this repo (Issue #215), and `.claude/settings.json` with the marketplace and the enabled plugin (`extraKnownMarketplaces.huddle` and
    `enabledPlugins["huddle@huddle"]`): it creates the file, or merges those two keys and keeps every other key. Run again later and it replaces only that block; the project's own text and edited templates stay.
    If the project already runs the labels job under another file name (any workflow, or `.gitlab-ci.yml` and the files it includes, that runs the labels command), setup keeps it and adds no second one; its notes name that file and say when it pins an older Huddle (`HUDDLE_REF`). Updating that pin is a PR the Coach's session opens.
    That file is only a helper: it enables the plugin for the project and, in the CLI, registers the marketplace silently after the folder's own trust dialog. It does not install Huddle for anyone.

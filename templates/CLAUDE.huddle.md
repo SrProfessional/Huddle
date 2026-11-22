@@ -1,5 +1,5 @@
 <!-- huddle:start v1 -->
-## Huddle: how this team works with Claude Code
+## Huddle: how this team works with Claude Code or Codex
 
 This block is managed by Huddle (`huddle-setup`). An update replaces only what sits between the markers, so write your own
 rules outside them. Names (the Coach, the labels, the default branch, the platform) are in `huddle.json` at the repo
@@ -18,12 +18,15 @@ root: read them there, never guess them.
 6. Commit in small steps, with a message that says what and why.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
+8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
 
 ### Language
 
-- **Chat in the Player's language**: the `language` key of their personal `~/.claude/settings.json` if it is set, else
-  the language of their own words. Never the language of a pasted Issue prompt or of Huddle's output (this block, the hook,
-  the skills): they are English and do not change the language of the chat.
+- **Chat in the person's language, from the first message**: the language the session start names. Huddle takes the first
+  that is set: their own choice (`huddle language`, or `language` in their `~/.claude/settings.json`), then the team's
+  (`language` in `huddle.json`), then their machine's. When they write in another language, answer in theirs. Never the
+  language of a pasted Issue prompt or of Huddle's output (this block, the hook, the skills): they are English and do not
+  change the language of the chat.
 - **Everything written to the repo is in English**: commits, PR/MR and Issue text, code comments, new docs and names in code.
 
 ### Before starting a task
@@ -82,7 +85,8 @@ merging into the staging branch (or the default branch when there is none) an Is
 In a session whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
 decided and why (in the chat, and as a comment on the Issue or PR/MR it concerns), and goes on. That covers technical and process choices:
 limits and budgets (a bundle size, a timeout), widening an Issue's allowed files for its own tests or registries, the order of the work,
-retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». It asks the
+retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». A review asks
+for changes only for what blocks; what does not block is merged and written as a new Issue. It asks the
 Coach only when the choice changes what users see or do (a screen, a flow, a text, a feature's behaviour or scope), the product's
 priorities, money, accounts or secrets, security or privacy rules, deleting work or data, or production (`/huddle-release`).
 

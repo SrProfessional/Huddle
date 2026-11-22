@@ -3,28 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>Get started with Huddle: install the Claude Code plugin</title>
-<meta name="description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta name="color-scheme" content="dark">
+<title>Get started with Huddle in Claude Code or Codex</title>
+<meta name="description" content="Install Huddle in Claude Code or OpenAI Codex, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
 <link rel="canonical" href="https://srprofessional.github.io/Huddle/get-started/">
-<meta name="theme-color" content="#4336d8">
+<meta name="theme-color" content="#0F1117">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Huddle">
-<meta property="og:title" content="Get started with Huddle: install the Claude Code plugin">
-<meta property="og:description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta property="og:title" content="Get started with Huddle in Claude Code or Codex">
+<meta property="og:description" content="Install Huddle in Claude Code or OpenAI Codex, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
 <meta property="og:url" content="https://srprofessional.github.io/Huddle/get-started/">
 <meta property="og:image" content="https://srprofessional.github.io/Huddle/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Huddle: Decision-led development for teams coding with AI, with the label flow ready, assigned, in progress, in review">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Get started with Huddle: install the Claude Code plugin">
-<meta name="twitter:description" content="Install the Huddle Claude Code plugin, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
+<meta name="twitter:title" content="Get started with Huddle in Claude Code or Codex">
+<meta name="twitter:description" content="Install Huddle in Claude Code or OpenAI Codex, run /huddle-setup, write the first Issue and take the first task. About five minutes on GitHub or GitLab.">
 <meta name="twitter:image" content="https://srprofessional.github.io/Huddle/og.png">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-<link rel="preload" href="../fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../style.css">
+<script type="module" defer src="../js/tabs.js"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -60,10 +59,13 @@
         <h2>1. Install the plugin</h2>
         <p class="prose">Every Player installs Huddle once, on their own machine. A settings file committed to the repo does not do it for them. You need:</p>
         <ul class="prose">
-          <li><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>.</li>
+          <li><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> or <a href="https://developers.openai.com/codex" target="_blank" rel="noopener">OpenAI Codex<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> (its command line or its VS Code extension). Each person picks their own, and the Coach and the Players may mix them.</li>
           <li>Node 22 or newer, and <code>git</code>.</li>
           <li>On GitHub, the <a href="https://cli.github.com" target="_blank" rel="noopener">gh<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> command line, logged in with <code>gh auth login</code>. On GitLab, the <a href="https://gitlab.com/gitlab-org/cli" target="_blank" rel="noopener">glab<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> command line, logged in with <code>glab auth login</code> (add <code>--hostname gitlab.example.com</code> for a self-managed server).</li>
         </ul>
+        <div class="tabs" data-tabs="install" data-tabs-label="Choose your tool">
+        <div class="tab-pane" id="claude-code" data-tab-label="Claude Code">
+        <h3 class="tab-title">In Claude Code</h3>
         <p class="prose">Run this once in any terminal, then open a new Claude Code session:</p>
         <pre tabindex="0"><code>claude plugin marketplace add SrProfessional/Huddle
 claude plugin install huddle@huddle</code></pre>
@@ -71,16 +73,120 @@ claude plugin install huddle@huddle</code></pre>
         <p class="prose"><strong>To update later.</strong> Install and update are per project, so repeat this in each project that uses Huddle. From the project, type one command:</p>
         <pre tabindex="0"><code>/huddle-update</code></pre>
         <p class="prose">It updates the plugin (<code>claude plugin marketplace update huddle</code> and <code>claude plugin update huddle@huddle --scope project</code>), refreshes the templates and the <code>CLAUDE.md</code> block in a branch of its own, asks only the questions a new release added, and opens the PR. It ends by telling you to type <code>/reload-plugins</code>; if the new skills do not show up, restart Claude Code. A project can be on an older version than another. <code>/huddle-play</code> and <code>/huddle-update</code> tell you in the chat when a newer release exists, at most once a day.</p>
+        </div>
+        <div class="tab-pane" id="codex-tab" data-tab-hash="codex" data-tab-label="OpenAI Codex">
+        <h3 id="codex">In OpenAI Codex</h3>
+        <div class="tabs tabs-sub" data-tabs="codex" data-tabs-label="Codex steps">
+        <div class="tab-pane" id="codex-install" data-tab-label="Install">
+        <p class="prose">On macOS, follow the <a href="#mac-codex">Mac setup steps</a>.</p>
+        <p class="prose">The same marketplace, the same skills and the same <code>huddle</code> command. Run this once in a terminal (the VS Code extension of Codex brings its own <code>codex</code>; the team guide says how to find it if <code>codex</code> is not recognized):</p>
+        <pre tabindex="0"><code>codex plugin marketplace add SrProfessional/Huddle
+codex plugin add huddle@huddle</code></pre>
+        <p class="prose">In a repo already set up with Huddle, the file <code>.codex/config.toml</code> declares Huddle for Codex: trust the project when Codex asks, and run <code>codex plugin marketplace upgrade huddle</code> once in a terminal in the repo instead. Then, once per machine:</p>
+        <ol class="prose">
+          <li><strong>Trust the hook in terminal Codex.</strong> The Codex chat in VS Code has no <code>/hooks</code>, so open a terminal in the repo, start <code>codex --no-daemon</code>, choose <strong>Review hooks</strong> (or type <code>/hooks</code>), and trust Huddle's row under <strong>SessionStart</strong>. Then type <code>/exit</code>.</li>
+          <li><strong>Allow network access.</strong> Codex's sandbox has no network: approve it when Codex asks to run <code>git push</code>, <code>gh</code>, <code>glab</code> or <code>huddle</code>.</li>
+          <li><strong>Open a new chat.</strong> Codex has no <code>/reload-plugins</code>. In Codex the skills start with <code>$</code>: <code>$huddle-play &lt;n&gt;</code>, <code>$huddle-watch</code> and so on. <code>huddle doctor</code> shows a «codex» line.</li>
+        </ol>
+        <p class="prose">To update in Codex: <code>codex plugin marketplace upgrade huddle</code>, then <code>codex plugin add huddle@huddle</code>, then a new chat (and trust the hook again if it changed). Only design work still needs Claude Code. The <a href="https://github.com/SrProfessional/Huddle/blob/main/docs/team-guide.md#a-mixed-team-claude-code-and-codex" target="_blank" rel="noopener">team guide<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a> has every step, with the hook trust walkthrough. Adapted but not yet tried live in Codex: <code>$huddle-bug</code>, <code>$huddle-areas</code>, <code>$huddle-team</code>, playing several Issues in parallel, and GitLab.</p>
+        </div>
+        <div class="tab-pane" id="mac-codex" data-tab-label="macOS">
+        <h4 class="tab-title">Set up Huddle on a Mac with Codex</h4>
+        <p class="prose">Codex on macOS is adapted for Huddle but not yet tried live.</p>
+        <ol class="prose">
+          <li>🙋 <strong>Install Homebrew.</strong> If you need it, follow the installation and <strong>Next steps</strong> at <a href="https://brew.sh/" target="_blank" rel="noopener">Homebrew<span class="ext" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>. Homebrew installs tools on your Mac.
+            <p>You should see: The installer finishes and tells you how to make <code>brew</code> available in Terminal (the app where you paste commands).<br>
+              If you see something else: Follow the installer's instructions before continuing.</p>
+          </li>
+          <li>🙋 <strong>Install the tools.</strong> Open <strong>Terminal</strong> from <strong>Applications → Utilities</strong>, then paste this command.
+            <pre tabindex="0"><code>brew install node gh git</code></pre>
+            <p>You should see: Homebrew installs Node (which runs Huddle), GitHub CLI (which signs you in to GitHub from Terminal) and Git
+              (which copies and tracks your project files), or reports that they are already installed.<br>
+              If you see something else: If <code>brew</code> is missing, complete Homebrew's <strong>Next steps</strong> and open Terminal again.</p>
+          </li>
+          <li>🙋 <strong>Sign in to GitHub.</strong> In Terminal, paste the following. Choose <strong>GitHub.com</strong>, <strong>HTTPS</strong>, and <strong>Login with a web browser</strong> when prompted.
+            <pre tabindex="0"><code>gh auth login</code></pre>
+            <p>You should see: GitHub CLI confirms that you are logged in.<br>
+              If you see something else: Complete the browser prompt and return to Terminal.</p>
+          </li>
+          <li>🙋 <strong>Install the Codex command.</strong> In Terminal, paste this command. The global install adds <code>codex</code> to your PATH (where new terminals look for commands).
+            <pre tabindex="0"><code>npm install -g @openai/codex</code></pre>
+            <p>You should see: npm reports that it added or updated Codex.<br>
+              If you see something else: If a new Terminal window cannot find <code>codex</code>, check that Homebrew's <strong>Next steps</strong> were applied.</p>
+          </li>
+          <li>🙋 <strong>Sign in to the Codex extension.</strong> In VS Code, open <strong>Extensions</strong>, search for <strong>Codex</strong>, install the extension published by OpenAI and sign in.
+            <p>You should see: The Codex sidebar opens with your account signed in.<br>
+              If you see something else: Choose <strong>Sign in</strong> in the sidebar and finish in your browser.</p>
+          </li>
+          <li>🙋 <strong>Clone your repo.</strong> In Terminal, copy the repo (your team's project) to this Mac. The example copies Huddle to the <strong>Huddle</strong> folder in your home folder. For your own repo, replace <code>SrProfessional/Huddle</code> with the name from GitHub and <code>Huddle</code> in the destination with your project folder name.
+            <pre tabindex="0"><code>gh repo clone SrProfessional/Huddle "$HOME/Huddle"</code></pre>
+            <p>You should see: Git reports that it is cloning into your project folder.<br>
+              If you see something else: For an access error, check the repo name and the account you signed in with.</p>
+          </li>
+          <li>🙋 <strong>Open a terminal in the repo.</strong> In VS Code, choose <strong>File → Open Folder</strong>, select the folder you just cloned, then choose <strong>Terminal → New Terminal</strong>.
+            <p>You should see: The new terminal opens in the repo folder.<br>
+              If you see something else: Check that you opened the folder created by the clone command.</p>
+          </li>
+          <li>🙋 <strong>Trust the project folder.</strong> Start terminal Codex and approve the project trust prompt for your repo if it appears. Sign in if prompted. Close the chat with <code>/exit</code> before running the next terminal command.
+            <pre tabindex="0"><code>codex --no-daemon</code></pre>
+            <p>You should see: Codex opens the repo without a warning that its project settings are ignored.<br>
+              If you see something else: Reopen terminal Codex from the repo folder and review the trust prompt.</p>
+          </li>
+          <li>🙋 <strong>Add the Huddle marketplace if needed.</strong> If the repo has no <code>.codex/config.toml</code> and you haven't already added the marketplace, paste this in the repo terminal. The marketplace tells Codex where to find Huddle.
+            <pre tabindex="0"><code>codex plugin marketplace add SrProfessional/Huddle</code></pre>
+            <p>You should see: Codex reports that it added the marketplace.<br>
+              If you see something else: If it is already configured, continue to the next step.</p>
+          </li>
+          <li>🙋 <strong>Refresh the marketplace.</strong> In the repo terminal, paste this command.
+            <pre tabindex="0"><code>codex plugin marketplace upgrade huddle</code></pre>
+            <p>You should see: Codex refreshes the Huddle marketplace.<br>
+              If you see something else: If Codex cannot find it, check folder trust and whether the repo has <code>.codex/config.toml</code>, or complete the previous step.</p>
+          </li>
+          <li>🙋 <strong>Install Huddle.</strong> In the repo terminal, paste this command.
+            <pre tabindex="0"><code>codex plugin add huddle@huddle</code></pre>
+            <p>You should see: Codex reports that it added Huddle.<br>
+              If you see something else: If it cannot find Huddle, repeat the marketplace refresh.</p>
+          </li>
+          <li>🙋 <strong>Open terminal Codex.</strong> In the repo terminal, paste this command before reviewing the hook (a command that runs when a chat starts).
+            <pre tabindex="0"><code>codex --no-daemon</code></pre>
+            <p>You should see: Codex opens in the repo and may say <strong>Hooks need review</strong>.<br>
+              If you see something else: If it cannot find the command, reopen the terminal after installing the Codex command.</p>
+          </li>
+          <li>🙋 <strong>Trust Huddle's startup hook.</strong> In terminal Codex, type this command. Select <strong>SessionStart</strong>, open Huddle's row, confirm that it runs <code>node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" hook</code> for the <code>huddle</code> plugin, and choose <strong>Trust</strong>.
+            <pre tabindex="0"><code>/hooks</code></pre>
+            <p>You should see: <strong>SessionStart</strong> shows the Huddle hook as active.<br>
+              If you see something else: If the Huddle row is missing, check that you started Codex in the repo after installing Huddle.</p>
+          </li>
+          <li>🙋 <strong>Leave terminal Codex.</strong> Press Esc to return to the chat, then type this command.
+            <pre tabindex="0"><code>/exit</code></pre>
+            <p>You should see: You are back at the terminal prompt.<br>
+              If you see something else: If the hook list is still open, press Esc again first.</p>
+          </li>
+          <li>🙋 <strong>Set your personal language if the team has none.</strong> Run the following in the terminal for Spanish. Change <code>es</code> to your own language code if needed.
+            <pre tabindex="0"><code>node ~/.codex/plugins/cache/huddle/huddle/*/bin/huddle language es</code></pre>
+            <p>You should see: Huddle confirms your language.<br>
+              If you see something else: If several versions are installed, replace <code>*</code> with the installed version you want to use.</p>
+          </li>
+          <li>🙋 <strong>Start a new Codex chat.</strong> In the repo, open a new Codex chat in VS Code or terminal Codex.
+            <p>You should see: Huddle introduces itself when the chat starts.<br>
+              If you see something else: If it does not, review the Huddle hook again in terminal Codex.</p>
+          </li>
+        </ol>
+        </div>
+        </div>
+        </div>
+        </div>
+        <p class="prose">There is <strong>one watch per repo per machine</strong>. Huddle keeps its watch marks in <code>~/.huddle</code> on that machine. If you use two computers as Coach, keep the watch on one at a time. Run <code>$huddle-watch off</code> in Codex (or <code>/huddle-watch off</code> in Claude Code) on the first computer before starting the watch on the other. Players may work on both computers.</p>
       </section>
 
       <section id="setup">
         <h2>2. Set up your repo</h2>
-        <p class="prose">This is the Coach's step, once per repo. Open Claude Code in the repo and create a branch for the setup:</p>
+        <p class="prose">This is the Coach's step, once per repo. Open Claude Code or Codex in the repo and create a branch for the setup:</p>
         <pre tabindex="0"><code>git switch -c huddle-setup</code></pre>
         <ol class="prose">
-          <li>Run <code>/huddle-setup</code>. It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the Coach and the logins of the Players.</li>
+          <li>Run <code>/huddle-setup</code> (<code>$huddle-setup</code> in Codex). It asks for the platform (GitHub or GitLab), the host (empty for github.com or gitlab.com), the project, the login of the Coach and the logins of the Players.</li>
           <li>It also asks whether the project has a staging branch where changes are tested first (<code>staging_branch</code>); answer none if not.</li>
-          <li>It writes <code>huddle.json</code>, the Issue and pull request templates and the Huddle block of <code>CLAUDE.md</code>. There is no cloud job: the sessions keep the labels right. Nothing outside that block is touched.</li>
+          <li>It writes <code>huddle.json</code>, the Issue and pull request templates, the Huddle block of <code>CLAUDE.md</code> and <code>AGENTS.md</code> (which Codex reads), and <code>.codex/config.toml</code>. There is no cloud job: the sessions keep the labels right. Nothing outside the Huddle blocks and tables is touched.</li>
           <li>Run <code>huddle doctor</code>. You want a check mark on the file, the login, the Coach and the labels. If a label is missing, run <code>huddle labels</code> once.</li>
           <li>Commit, push and open a pull request with the setup files. Merge it. The Coach is the only one who merges.</li>
         </ol>
@@ -91,7 +197,7 @@ claude plugin install huddle@huddle</code></pre>
 
       <section id="first-issue">
         <h2>3. Write the first Issue</h2>
-        <p class="prose">Run <code>/huddle-issue</code>. It writes the Issue from the template, so every task arrives complete:</p>
+        <p class="prose">Run <code>/huddle-issue</code> (<code>$huddle-issue</code> in Codex). It writes the Issue from the template, so every task arrives complete:</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Part</th><th scope="col">What it says</th></tr></thead>
@@ -110,13 +216,13 @@ claude plugin install huddle@huddle</code></pre>
       <section id="first-day">
         <h2>4. A Player's first day</h2>
         <ol class="prose">
-          <li><strong>Set up your machine.</strong> Install Claude Code, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the two commands above. Never paste a token into a chat, a file or an Issue.</li>
-          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the Coach: only they run <code>huddle labels</code>.</li>
-          <li><strong>Take an Issue.</strong> The Coach's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
-          <li><strong>Answer its questions.</strong> This is the job. If you do not know, say so and let the session ask the Coach.</li>
+          <li><strong>Set up your machine.</strong> Install Claude Code or Codex, Node, <code>git</code> and <code>gh</code> or <code>glab</code>, log in yourself, and install Huddle with the commands above for your tool. Never paste a token into a chat, a file or an Issue.</li>
+          <li><strong>Check it works.</strong> Clone the team's repo, open Claude Code or Codex in it and run <code>huddle doctor</code>. If <code>labels</code> fails, tell the Coach: only they run <code>huddle labels</code>.</li>
+          <li><strong>Take an Issue.</strong> The Coach's session assigns one when it is ready. Run <code>/huddle-play &lt;n&gt;</code> (<code>$huddle-play &lt;n&gt;</code> in Codex) with its number, or paste the Issue's prompt. The session checks what the Issue depends on, creates its own branch and adds the <code>in progress</code> label. If a dependency is not merged yet, it stops, and that is right.</li>
+          <li><strong>Answer its questions.</strong> The session chats with you in your language from the first message (set your own once with <code>huddle language es</code>); the repo stays in English. This is the job. If you do not know, say so and let the session ask the Coach.</li>
           <li><strong>Review what it did</strong> before you accept the pull request. You are responsible for it.</li>
         </ol>
-        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the Coach's requested changes on its own. The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. On the other side, the Coach can run <code>/huddle-watch</code> to let their session review what waits every few minutes. With <code>/huddle-play</code> alone, the session works on several of the Player's assigned Issues at once, as many as their capacity allows.</p>
+        <p class="prose">A session ends with a message that starts with «Issue #N finished» or «Issue #N stopped», with the pull request link, the test counts, what was not done and your next step. After the pull request opens, the session waits in the background and picks up the Coach's requested changes on its own. The waiting is a small Node process on the Player's computer that asks GitHub or GitLab every two minutes: it uses no Claude tokens and no GitHub Actions or CI minutes. In Codex the same wait (<code>huddle wait &lt;n&gt; --codex</code>) wakes the open chat when the Coach answers. On the other side, the Coach can run <code>/huddle-watch</code> (<code>$huddle-watch</code> in Codex) to let their session review what waits. There is one watch per repo on a machine, whatever the tool: a second session says where the watch already runs and does not start another. With <code>/huddle-play</code> alone, the session works on several of the Player's assigned Issues at once, as many as their capacity allows.</p>
         <p class="prose">Next: <a href="../how-it-works/">how it works</a>, with the roles, the labels and the reviews.</p>
       </section>
     </article>

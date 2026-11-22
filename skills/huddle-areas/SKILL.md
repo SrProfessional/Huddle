@@ -8,6 +8,8 @@ description: Use when the Coach wants to define the project's areas, put Issues 
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, stop; only the
 Coach defines the areas. It works the same on GitHub and GitLab.
 
+**In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
+
 **Areas are milestones.** Each Issue goes in one milestone, and the milestone description holds a one-line purpose and a line of its own,
 `Huddle remaining: N`, the estimate of the Issues not written yet (docs/design.md §12). **The number of areas depends on the project and is never fixed:**
 one project has 3, another more or fewer. Never start from a number; start from the project.

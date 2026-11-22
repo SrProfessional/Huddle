@@ -5,13 +5,13 @@ description: Use when the Coach reviews a Player's PR/MR and must either request
 
 # huddle-review
 
-For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop.
+For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`, you do not merge, deploy or change settings; give the review as text and stop. **In OpenAI Codex** (Issue #213): run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks). In Codex, a design PR stops there: «A design PR is reviewed in Claude Code (it needs Claude Design to look at).»
 
 ## Review
 
 1. Read the PR/MR, the Issue it closes (goal, allowed files, tests that must pass) and the diff. On a later round, when your last review ended with `Reviewed head: <sha>`, read the Player's answer to each requested item and only `git diff <old>..<new>` (Issue #195): not the whole PR again. End every review comment with `Reviewed head: <sha>` (the head you reviewed).
-2. Check out the branch in a worktree and run the tests yourself, keeping only the summary lines of their output (the counts and the failures). Compare the counts with the PR/MR text.
-3. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence; no secret, no runtime dependency the rules forbid.
+2. Check: only the allowed files changed; every requirement is done or listed under «What was NOT done»; TDD evidence; no secret, no runtime dependency the rules forbid. Ask for changes only for what blocks: a contract item not done, a failing test, a bug a user would hit, a security or privacy hole, data loss, a broken rule of the repo. Anything else (a rarer edge case, extra hardening, a nicer structure, more tests of the same thing) never holds the merge: approve and merge, and write each one now as a new Issue with `/huddle-issue`, named in the approval comment (Issue #252).
+3. Do not run the tests while you read (Issue #244): when you already have something to ask for, then asking for changes, do not run them, since another round follows anyway. Run the full suite only when you are about to approve: **before any approval and merge**, check out the exact head you merge in a fresh worktree and run the full suite there, keeping only the summary lines of its output (the counts and the failures); compare the counts with the PR/MR text. Never merge without that run. **A docs-only round** (the delta since `Reviewed head:` touches no code and no test) needs no new run: the last full run of this PR, by you, in an earlier round with only docs changed since, stands; say so in the review.
 
 ## A design PR (its Issue has the `design` label, and the PR only touches `design/<n>-<slug>/`)
 
@@ -41,7 +41,7 @@ First run /huddle-play <n>: it marks this request as taken (👀), so the Issue 
 ```
 ````
 
-Use `gh pr comment` / `gh issue comment` (or `glab mr note` / `glab issue note`). Right after posting, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
+In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline. Post a reopening reason as a separate comment after reopening. Right after posting a changes request, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
 (`n` the Issue): it puts `changes requested from Coach` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
 
 ## Reviewing for the watch

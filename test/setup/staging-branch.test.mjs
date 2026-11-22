@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const CLI = fileURLToPath(new URL('../../lib/setup/cli.mjs', import.meta.url));
 
-const ANSWERS = { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana'], labels_job: 'hourly' };
+const ANSWERS = { platform: 'github', project: 'acme/app', ai_manager: 'boss', assignees: ['ana'], language: '', labels_job: 'hourly' };
 const INSTALLED = JSON.parse(readFileSync(new URL('../../.claude-plugin/plugin.json', import.meta.url), 'utf8')).version;
 const inTemp = (fn) => {
   const dir = mkdtempSync(path.join(tmpdir(), 'huddle-staging-'));

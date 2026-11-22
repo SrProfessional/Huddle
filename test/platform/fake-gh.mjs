@@ -19,6 +19,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
   const collaborators = new Set(['SrProfessional', 'ana', 'luis']); // logins with access to the repo
   const calls = [];
   const failures = []; // { match(args), message, times }: what GitHub answers when it rate limits or breaks (world.failWhen)
+  let visibility = 'private'; // Issue #230: what `gh api repos/<project>` says
   let searchLag = false; // while true, an Issue created through the API is missing from `gh issue list` (it uses search, which indexes late)
   const merged = [];
   let nextId = 9000;
@@ -131,10 +132,11 @@ export function fakeGithub({ project = PROJECT } = {}) {
         return JSON.stringify({ labels: found.labels.map((name) => ({ name })) });
       }
       const it = issueOf(args[2], args);
+      if (fields === 'body') return JSON.stringify({ body: it.body });
       if (fields === 'closedByPullRequestsReferences') return JSON.stringify({ closedByPullRequestsReferences: it.reviews.map((number) => ({ number })) });
       need(false, args);
     }
-    if (a === 'pr' && b === 'list' && args.includes('--head')) {
+    if (a === 'pr' && b === 'list' && args.includes('--head') && values(args, '--state')[0] !== 'merged') {
       // Without a staging branch the fields are exactly today's; with one, the base and the body come too (the link is read from the body).
       const fields = values(args, '--json')[0];
       need(values(args, '--state')[0] === 'open' && (fields === 'number,closingIssuesReferences' || fields === 'number,closingIssuesReferences,baseRefName,body'), args);
@@ -165,11 +167,12 @@ export function fakeGithub({ project = PROJECT } = {}) {
     }
     if (a === 'pr' && b === 'list' && values(args, '--state')[0] === 'merged') {
       // The merged PRs into one base, in the order GitHub lists them (by creation, newest first): the adapter sorts by mergedAt itself.
-      need(values(args, '--json')[0] === 'number,baseRefName,body,mergedAt,mergeCommit' && values(args, '--base').length === 1, args);
+      need(values(args, '--json')[0] === 'number,baseRefName,headRefName,body,mergedAt,mergeCommit' && values(args, '--base').length === 1, args);
       const base = values(args, '--base')[0];
+      const head = values(args, '--head')[0];
       const limit = Number(values(args, '--limit')[0]);
-      return JSON.stringify([...reviews.values()].filter((r) => r.merged && r.base === base).sort((x, y) => y.number - x.number).slice(0, limit)
-        .map((r) => ({ number: r.number, baseRefName: r.base, body: r.body, mergedAt: r.mergedAt, mergeCommit: { oid: `merge${r.number}` } })));
+      return JSON.stringify([...reviews.values()].filter((r) => r.merged && r.base === base && (head === undefined || r.branch === head)).sort((x, y) => y.number - x.number).slice(0, limit)
+        .map((r) => ({ number: r.number, baseRefName: r.base, headRefName: r.branch ?? '', body: r.body, mergedAt: r.mergedAt, mergeCommit: { oid: `merge${r.number}` } })));
     }
     if (a === 'pr' && b === 'merge') {
       need(args.includes('--merge') && !args.includes('--delete-branch'), args);
@@ -213,6 +216,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
     if (a === 'api') {
       const path = args.find((x) => x.startsWith('repos/') || x.startsWith('users/') || x === 'user');
       if (path === 'user') return JSON.stringify({ login: 'SrProfessional', id: 1 });
+      if (path === `repos/${project}`) return JSON.stringify({ full_name: project, visibility });
       let u;
       if ((u = /^users\/([^/]+)$/.exec(path))) {
         const login = decodeURIComponent(u[1]);
@@ -335,6 +339,7 @@ export function fakeGithub({ project = PROJECT } = {}) {
 
   // The neutral side the contract suite uses. Another platform's fake offers the same methods over its own wire format.
   const world = {
+    visibility(v) { visibility = v; },
     // `closes` overrides the close history (oldest first, each { pr: number|null, merged }), for what the neutral states cannot say.
     issue({ number, title = '', body = '', assignees = [], labels = [], state = 'open', reviews: closing = [], closes, milestone = null }) {
       const defaults = { open: ['OPEN', []], merged: ['CLOSED', [{ pr: 70, merged: true }]], 'closed-by-hand': ['CLOSED', [{ pr: null }]] }[state];
