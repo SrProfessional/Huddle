@@ -58,7 +58,7 @@ anything. Docs/design.md §19 and §22.
   merges cleanly, and the full suite passes on the exact head it merges, updated with the base, in a fresh worktree; a docs-only delta since your last full run needs no new run, as `/huddle-review` says). If not, post the usual «🔁 Changes
   requested» comment asking to update the branch from the base, and nothing is merged. Write the comment to a temporary UTF-8 file and use `gh pr comment <pr> --body-file <file>` and `gh issue comment <n> --body-file <file>`, or `glab api … -F 'body=@file'` on both notes endpoints. Never pass it inline. If the recheck passes, approve and merge it, and land it, as
   «All good» of `/huddle-review` says. Then start the next review that fits.
-- **A review that stops** (a test fails, a requirement is missing, the platform refuses the merge, a permission is missing): say it once,
+- **A review that stops** (a new test failure, a requirement is missing, the platform refuses the merge, a permission is missing, a base that cannot be compared and was sent to the Coach as «❓ Decision for the Coach:»; failures the base already has do not stop it, see `/huddle-review`): the message names the PR and the reason once (Issue #290), so the Coach never finds a PR waiting with no word. Say it once,
   with the reason, and do **not** try that same PR/MR with that same `head` again: add `<pr>@<head>` to the keys. A new commit changes
   `head` and makes it a new item (a `head` of `null` means it could not be read: use the PR/MR number alone).
 - **`decision`:** when the question is technical, answer it as `/huddle-decide` does (the Coach's session decides, and keeps going). A

@@ -634,7 +634,8 @@ if the login is not `coach`.
 3. **`review`:** `/huddle-review` on that PR with its usual rules: all good, approve and merge; changes needed, the «🔁 Changes
    requested» comment. Either way the item leaves the queue by itself. If the review **stops** (a failing test, a missing requirement, a
    merge the platform refuses, a missing permission) the watch says it once, with the reason, and does not try that PR with that `head`
-   again; a new commit changes `head` and makes it a new item.
+   again; a new commit changes `head` and makes it a new item. The message names the PR and the reason once.
+   **A red base does not stall reviews (Issue #290, asked on 2026-11-22 after four PRs sat «in review» for 27 failures that master already had).** When the full suite of a PR fails, the review runs the same suite (or the failing tests only) on the base branch in a fresh worktree and compares the failing test names with the base. A PR whose failures all also fail on the base adds no new failure: no new failure counts as passing, it is merged as usual, and the failures the base already has are written once as one follow-up Issue (an open one is reused). A baseline that cannot be compared (the base run cannot start, the failures differ between runs, or a test is flaky) is never a silent stop: the review comments «❓ Decision for the Coach:» on the Issue and runs `huddle labels --issue <n> --needs-decision`, and the watch reports it once.
 4. **`decision` and `triage` are never answered by the watch:** they are the person's decisions. One line per new item, once per Issue.
 5. **Off:** `huddle queue --wait-off` leaves a stop mark for this repo (next to the update cache, never in the repo); the waiting loop finds
    it at its next round, clears it, prints `{ "stopped": true }` and ends, so off works even when the session lost the background command's
