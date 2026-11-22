@@ -461,6 +461,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.2
+
+Run of: 2026-11-22, Huddle `staging` with Issues #290, #291 and #294 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.1 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| A red base branch does not stall reviews (#290) | covered by tests | covered by tests | 6 tests read the review and watch skills and design §19; the review skill was read on `staging`. Passed by evidence: a real review meeting a red base is to be seen in the project where it happened. |
+| Pause an Issue, and parked work uses no capacity (#291) | covered by tests | covered by tests | 43 tests of the three areas, both fakes; `huddle pause` is registered. **Not run on a real paused Issue:** passed by evidence. |
+| The `blocked` label follows the pause rules (#294) | covered by tests | covered by tests | 14 tests, `huddle labels` end to end on both fakes. Passed by evidence, together with #291. |
+
 ### Results 1.0.1
 
 Run of: 2026-11-22, Huddle `staging` with Issues #281, #283 and #285 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.0 and older tables below still hold for the rest.
