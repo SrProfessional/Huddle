@@ -461,6 +461,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.1
+
+Run of: 2026-11-22, Huddle `staging` with Issues #281, #283 and #285 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.0 and older tables below still hold for the rest.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Closed Issues leave no wait warnings (#281) | ✔ | covered by tests | Checked live in this repo: `huddle doctor` and `huddle status` no longer warn about waits of closed Issues. |
+| The `huddle machine` command in the docs (#285) | ✔ | n/a | Checked by reading the docs; the command is registered and documented. |
+| Machines of one login apart (#283) | covered by tests | covered by tests | 18 tests on both fakes; `huddle machine` run live on one machine. **Not run on two real machines:** passed by evidence, to be seen when the Coach uses two machines. |
+
 ### Results 1.0.0
 
 Run of: 2026-11-21, Huddle `staging` with 39 Issues merged since 0.9.5, by the Coach's Claude Code session, Issue by Issue with the Coach (the guided test of #269, done by hand before the skill shipped). Only what is new was checked; the 0.9.5 and older tables below still hold for the rest.
