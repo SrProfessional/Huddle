@@ -388,7 +388,7 @@ it runs («The watch already runs in Codex…»). `huddle status` names the tool
 in another session says so and asks «Take over?»; on a yes it starts with `--take-over`. The automatic start of `/huddle-watch always`
 never takes over.
 
-**One login on two machines.** A Player may work from two computers on the same account (a Windows PC and a Mac, say). Huddle tells them apart: the `machine` command shows each one's id and name, and an Issue started or taken on a machine is claimed there with a comment on the Issue. The capacity counts only the work of this machine, `huddle next` lists the Issues that run on the other one apart and never offers them again, and the files they hold still keep a clashing Issue waiting. To move an Issue to this machine, run `/huddle-play <n>` here.
+**One login on two machines.** A Player may work from two computers on the same account (a Windows PC and a Mac, say). Huddle tells them apart: `huddle machine` shows each one's id and name, and an Issue started or taken on a machine is claimed there with a comment on the Issue. The capacity counts only the work of this machine, `huddle next` lists the Issues that run on the other one apart and never offers them again, and the files they hold still keep a clashing Issue waiting. To move an Issue to this machine, run `/huddle-play <n>` here.
 
 | Who | Where | Runs |
 |---|---|---|
