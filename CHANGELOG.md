@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- Closed Issues no longer leave abandoned wait warnings after `huddle land`, `huddle labels --issue`, or `huddle clean` (Issue #281). Running waits keep their heartbeats, and a closed Issue whose marker remains points to `huddle wait <n>` for cleanup.
+
 ## [1.0.0] - 2026-11-22
 
 ### Added
