@@ -56,25 +56,26 @@ export function enhance(doc, win) {
     if (focus) info.tabs[index].focus();
   }
 
-  // Open the pane with this id and every pane around it. Returns false when the id is not a pane.
+  // Open the panes around the element with this id (a pane, or a heading inside one). Returns the innermost pane
+  // opened, or null when the id is not inside any pane.
   function open(id) {
-    let pane = id ? doc.getElementById(id) : null;
-    if (!pane || !paneInfo(pane)) return false;
+    let node = id ? doc.getElementById(id) : null;
     const chain = [];
-    for (; pane; pane = pane.parentNode) if (paneInfo(pane)) chain.unshift(pane);
+    for (; node; node = node.parentNode) if (paneInfo(node)) chain.unshift(node);
     for (const p of chain) {
       const info = paneInfo(p);
       show(info, info.panes.indexOf(p), false);
     }
-    return true;
+    return chain.length ? chain[chain.length - 1] : null;
   }
 
   function choose(info, index, focus) {
     show(info, index, focus);
-    const id = info.panes[index].id;
-    try { win.history.replaceState(null, '', `#${id}`); } catch { /* the hash is a convenience */ }
+    const pane = info.panes[index];
+    const hash = pane.getAttribute('data-tab-hash') || pane.id;
+    try { win.history.replaceState(null, '', `#${hash}`); } catch { /* the hash is a convenience */ }
     const s = storage(win);
-    try { if (s) s.setItem(STORE + info.name, id); } catch { /* blocked: the tabs still work */ }
+    try { if (s) s.setItem(STORE + info.name, pane.id); } catch { /* blocked: the tabs still work */ }
   }
 
   const idFromHash = () => decodeURIComponent((win.location.hash || '').replace(/^#/, ''));
@@ -101,7 +102,8 @@ export function enhance(doc, win) {
 
   // The URL hash wins over what was remembered.
   const first = idFromHash();
-  if (open(first)) doc.getElementById(first).scrollIntoView();
+  const target = open(first);
+  if (target) target.scrollIntoView();
   win.addEventListener('hashchange', () => { open(idFromHash()); });
   return { open };
 }

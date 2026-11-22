@@ -523,7 +523,7 @@ html.lenis, html.lenis body { height: auto; }
    script nothing here applies and every pane stays on screen. */
 .tab-pane[hidden] { display: none; }
 .tabs.is-enhanced { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 0 0 1.4em; }
-.tabs.is-enhanced .tab-title { display: none; }
+.tabs.is-enhanced .tab-title, .tabs.is-enhanced > .tab-pane > h3:first-child { display: none; }
 .tabs.is-enhanced > .tab-pane { padding: 1.2rem 1.3rem 0.2rem; }
 .tabs.is-enhanced pre { background: var(--bg); }
 .tablist { display: flex; flex-wrap: wrap; gap: 0 0.4rem; padding: 0 0.8rem; border-bottom: 1px solid var(--line); }

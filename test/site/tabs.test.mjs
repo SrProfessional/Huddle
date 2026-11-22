@@ -64,14 +64,15 @@ const el = (tag, attrs = {}, kids = []) => {
 
 // The same shape as step 1 of the page: install{ claude-code, codex{ codex-install, mac-codex } }.
 function makeDoc({ hash = '', store = {} } = {}) {
-  const pane = (id, label, kids = []) => el('div', { id, 'data-tab-label': label, class: 'tab-pane' }, kids);
+  const pane = (id, label, kids = []) =>
+    el('div', { id, 'data-tab-label': label, class: 'tab-pane', ...(id === 'codex-tab' ? { 'data-tab-hash': 'codex' } : {}) }, kids);
   const sub = el('div', { 'data-tabs': 'codex', 'data-tabs-label': 'Codex steps' }, [
     pane('codex-install', 'Install'),
     pane('mac-codex', 'macOS'),
   ]);
   const main = el('div', { 'data-tabs': 'install', 'data-tabs-label': 'Choose your tool' }, [
     pane('claude-code', 'Claude Code'),
-    pane('codex', 'OpenAI Codex', [el('h3'), sub]),
+    pane('codex-tab', 'OpenAI Codex', [el('h3', { id: 'codex' }), sub]),
   ]);
   const body = el('body', {}, [main]);
   const all = () => body.walk();
@@ -103,8 +104,8 @@ const openIds = (doc) =>
 test('step 1 marks two tabs and, inside Codex, two sub-tabs, with the ids the links need', () => {
   assert.match(page, /<div class="tabs" data-tabs="install"/);
   assert.match(page, /<div class="tabs tabs-sub" data-tabs="codex"/);
-  for (const [id, label] of [['claude-code', 'Claude Code'], ['codex', 'OpenAI Codex'], ['codex-install', 'Install'], ['mac-codex', 'macOS']]) {
-    assert.match(page, new RegExp(`class="tab-pane" id="${id}" data-tab-label="${label}"`), `pane ${id}`);
+  for (const [id, label] of [['claude-code', 'Claude Code'], ['codex-tab', 'OpenAI Codex'], ['codex-install', 'Install'], ['mac-codex', 'macOS']]) {
+    assert.match(page, new RegExp(`class="tab-pane" id="${id}"(?: data-tab-hash="codex")? data-tab-label="${label}"`), `pane ${id}`);
   }
   assert.equal((page.match(/\sid="codex"/g) || []).length, 1);
   assert.equal((page.match(/\sid="mac-codex"/g) || []).length, 1);
@@ -168,10 +169,10 @@ test('enhance builds ARIA tablists, Claude Code open by default', () => {
 test('#codex opens the Codex tab and #mac-codex opens Codex then macOS', () => {
   let { doc, win } = makeDoc({ hash: '#codex' });
   enhance(doc, win);
-  assert.deepEqual(openIds(doc), ['codex', 'codex-install']);
+  assert.deepEqual(openIds(doc), ['codex-tab', 'codex-install']);
   ({ doc, win } = makeDoc({ hash: '#mac-codex' }));
   enhance(doc, win);
-  assert.deepEqual(openIds(doc), ['codex', 'mac-codex']);
+  assert.deepEqual(openIds(doc), ['codex-tab', 'mac-codex']);
   assert.ok(paneOf(doc, 'mac-codex').scrolled, 'the target is brought into view');
 });
 
@@ -182,7 +183,7 @@ test('a click changes the tab and updates the hash without a page jump', () => {
   assert.equal(win.location.hash, '#codex');
   tabsOf(sub)[1].fire('click');
   assert.equal(win.location.hash, '#mac-codex');
-  assert.deepEqual(openIds(doc), ['codex', 'mac-codex']);
+  assert.deepEqual(openIds(doc), ['codex-tab', 'mac-codex']);
   assert.equal(paneOf(doc, 'mac-codex').scrolled, undefined);
   assert.equal(tabsOf(sub)[1].getAttribute('aria-selected'), 'true');
   assert.equal(tabsOf(sub)[0].getAttribute('aria-selected'), 'false');
@@ -219,10 +220,10 @@ test('the last tab is remembered, and the URL hash wins over it', () => {
   let { doc, win, main } = makeDoc({ store });
   enhance(doc, win);
   tabsOf(main)[1].fire('click');
-  assert.ok(Object.values(store).includes('codex'));
+  assert.ok(Object.values(store).includes('codex-tab'));
   ({ doc, win } = makeDoc({ store }));
   enhance(doc, win);
-  assert.deepEqual(openIds(doc), ['codex', 'codex-install']);
+  assert.deepEqual(openIds(doc), ['codex-tab', 'codex-install']);
   ({ doc, win } = makeDoc({ store, hash: '#claude-code' }));
   enhance(doc, win);
   assert.deepEqual(openIds(doc), ['claude-code', 'codex-install']);
@@ -233,7 +234,7 @@ test('a missing or throwing localStorage does not break the tabs; a stale stored
   win.localStorage = { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); } };
   enhance(doc, win);
   tabsOf(main)[1].fire('click');
-  assert.deepEqual(openIds(doc), ['codex', 'codex-install']);
+  assert.deepEqual(openIds(doc), ['codex-tab', 'codex-install']);
   ({ doc, win } = makeDoc());
   delete win.localStorage;
   enhance(doc, win);
@@ -248,8 +249,8 @@ test('a hashchange (the Mac link inside the page) opens the right tabs', () => {
   enhance(doc, win);
   win.location.hash = '#mac-codex';
   win.fire('hashchange');
-  assert.deepEqual(openIds(doc), ['codex', 'mac-codex']);
+  assert.deepEqual(openIds(doc), ['codex-tab', 'mac-codex']);
   win.location.hash = '#unrelated';
   win.fire('hashchange');
-  assert.deepEqual(openIds(doc), ['codex', 'mac-codex'], 'a hash that is not a tab changes nothing');
+  assert.deepEqual(openIds(doc), ['codex-tab', 'mac-codex'], 'a hash that is not a tab changes nothing');
 });
