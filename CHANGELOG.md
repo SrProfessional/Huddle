@@ -15,6 +15,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Fixed
 
+- The board's `blocked` label follows the pause and parking rules of `huddle next` (Issue #294): the file wait of `fileWaits` and `plan` ignores a paused or parked Issue that has no commits and no pushed branch, and a paused dependency keeps `blocked` with a reason that says it is paused.
 - `huddle next` counts points in one way (Issue #291): the «no room: X of Y points in use» message of a resume gave the points of the work already running (4 of 5) while `used` and the over-capacity line gave the total (8 of 5). Both read the same total now.
 
 ## [1.0.1] - 2026-11-22
