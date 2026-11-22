@@ -7,7 +7,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
-- Huddle tells the machines of one login apart (Issue #283): the `machine` command shows this machine's id and name (`machine <name>` sets it), a session that starts or takes an Issue leaves a «Working on this from <name>» claim on it, and `huddle next` counts only this machine's work against the capacity. Work claimed by another machine is listed apart in `next` and `status`, is never offered here, and its allowed files still keep a clashing Issue waiting. No new label.
+- Huddle tells the machines of one login apart (Issue #283): `huddle machine` shows this machine's id and name (`huddle machine <name>` sets it), a session that starts or takes an Issue leaves a «Working on this from <name>» claim on it, and `huddle next` counts only this machine's work against the capacity. Work claimed by another machine is listed apart in `next` and `status`, is never offered here, and its allowed files still keep a clashing Issue waiting. No new label.
 
 ### Fixed
 
