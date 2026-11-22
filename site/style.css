@@ -518,3 +518,37 @@ html.lenis, html.lenis body { height: auto; }
 .status-changes, .status-decision { color: var(--changes); }
 .status-done { color: var(--done); }
 .flow text[class*="status-"] { fill: currentColor; }
+
+/* Tabs (Issue #273). The page ships all its text; site/js/tabs.js adds .is-enhanced and the tab row. Without the
+   script nothing here applies and every pane stays on screen. */
+.tab-pane[hidden] { display: none; }
+.tabs.is-enhanced { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 0 0 1.4em; }
+.tabs.is-enhanced .tab-title { display: none; }
+.tabs.is-enhanced > .tab-pane { padding: 1.2rem 1.3rem 0.2rem; }
+.tabs.is-enhanced pre { background: var(--bg); }
+.tablist { display: flex; flex-wrap: wrap; gap: 0 0.4rem; padding: 0 0.8rem; border-bottom: 1px solid var(--line); }
+.tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin: 0 0 -1px;
+  padding: 0.8rem 0.7rem;
+  font: inherit;
+  font-family: var(--display);
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accentBright); }
+.tab:focus-visible { outline: 3px solid var(--link); outline-offset: -3px; border-radius: 4px; }
+.tabs-sub { margin-top: 0.4rem; }
+.tabs-sub .tab { font-size: 0.9rem; padding: 0.55rem 0.6rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .tab { transition: color 150ms ease, border-color 150ms ease; }
+}
+@media (max-width: 44rem) {
+  .tabs.is-enhanced > .tab-pane { padding-inline: 1rem; }
+  .tablist { padding-inline: 0.4rem; }
+}
