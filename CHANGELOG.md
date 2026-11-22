@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-22
+
 ### Changed
 
 - A red base branch no longer stalls reviews (Issue #290): when a PR's suite fails, the review compares the failing tests with the base branch; a PR with no new failure is merged, the base's failures become one follow-up Issue, a baseline that cannot be compared goes to the Coach as a decision, and the watch names the PR and the reason once when a review stops.
