@@ -3,6 +3,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fileWaits, plan, LABELS } from '../../lib/core/issue-status.mjs';
+import { run } from '../../lib/cli/run.mjs';
+import { pauseBody } from '../../lib/core/pause.mjs';
+import { harness } from '../cli/harness.mjs';
 
 const body = (files, deps = 'None', effort = 1) => `## Depends on\n\n${deps}\n\n## Effort\n\n${effort}\n\n## Allowed files\n\n${files.map((f) => `- \`${f}\``).join('\n')}\n`;
 const issue = (number, files, extra = {}) => ({ number, assignees: ['ana'], labels: [], reviews: [], body: body(files, extra.deps), ...extra });
@@ -55,5 +58,28 @@ for (const platform of ['github', 'gitlab']) {
     assert.match(change.why, /waits for #1, which is paused/);
     const plain = plan({ open: [dep, next], issues }).find((c) => c.number === 2);
     assert.equal(plain.why, undefined, 'without a pause the reason is the usual one');
+  });
+}
+
+// The `huddle labels` command feeds the same rule as `huddle next` (canned adapters; GitHub and GitLab).
+const cliBody = (files, branch = null) => ['## Depends on', '', '- None', '', '## Effort', '', '1', '', ...(branch ? ['## Branch', '', '`' + branch + '`, from staging.', ''] : []), '## Allowed files', '', ...files.map((f) => '- `' + f + '`'), ''].join('\n');
+for (const gitlab of [false, true]) {
+  const kind = gitlab ? 'gitlab' : 'github';
+  const world = (pushed) => (w) => {
+    w.issue({ number: 5, title: 'Paused', body: cliBody(['a.mjs'], 'h5'), assignees: ['ana'], labels: ['in progress'] });
+    w.issue({ number: 6, title: 'Shares a.mjs', body: cliBody(['a.mjs']), assignees: ['ana'], labels: ['assigned'] });
+    w.comment(5, { id: 501, author: 'SrProfessional', body: pauseBody('on hold'), createdAt: '2026-11-22T10:00:00Z' });
+    if (pushed) w.branch('h5');
+  };
+  test(`[${kind}] huddle labels: a paused Issue with no commits does not make the Issue sharing its file blocked`, async () => {
+    const h = harness({ gitlab, setup: world(false) });
+    assert.equal(await run(['labels'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(6), ['assigned']);
+  });
+  test(`[${kind}] huddle labels: a paused Issue with a pushed branch still holds its file`, async () => {
+    const h = harness({ gitlab, setup: world(true) });
+    assert.equal(await run(['labels'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(6), ['blocked']);
+    assert.match(h.text(), /shares a\.mjs with #5, which is paused/);
   });
 }
