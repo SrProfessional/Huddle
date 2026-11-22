@@ -30,3 +30,15 @@ test('a model with tokens and no price is still partial and named', () => {
   assert.equal(s.apiPartial, true);
   assert.deepEqual(s.unpriced, ['mystery']);
 });
+
+test('rendered page: the missing-price note names mystery alone and the zero-token model row costs $0.00', async () => {
+  const { renderPage } = await import('../../lib/dashboard/page.mjs');
+  const html = renderPage(build([row('claude-x', 1000), row('<synthetic>', 0), row('mystery', 500)]));
+  const t = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
+  const note = t.match(/No price for ([^<]*?)\./)[1];
+  assert.equal(note, 'Claude Code: mystery');
+  const synthetic = t.match(/<div class="trow"[^>]*><span class="name">&lt;synthetic&gt; [\s\S]*?<\/div>/);
+  assert.ok(synthetic, 'the <synthetic> model row is rendered');
+  assert.match(synthetic[0], /\$0\.00/);
+  assert.doesNotMatch(synthetic[0], /no price/);
+});
