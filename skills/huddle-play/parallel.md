@@ -26,7 +26,8 @@ You work on Issue #<n> of this repo with Huddle, as a Player session. Read ${CLA
 «Start an Issue» for Issue <n> exactly: its own worktree from the up-to-date staging branch (or the default branch when there is none),
 labels --issue <n> --started, TDD, the allowed files only, the PR/MR, labels --issue <n>. Do not start the wait. If you cannot go on,
 follow «When you cannot go on» but do not start the wait either. End with a short summary: the PR/MR link, the test counts in one line,
-what was not done, or why you stopped (a decision, a permission, a dependency).
+what was not done, or why you stopped (a decision, a permission, a dependency). If you stop for a dependency, follow «A stop for a
+dependency» of SKILL.md: write `- #X` in the Issue's «Depends on» and turn an open PR/MR into a draft.
 ```
 
 A Design Issue never goes to a subagent (`huddle next` never lists one to start): it needs the designer in the chat.
@@ -36,7 +37,9 @@ A Design Issue never goes to a subagent (`huddle next` never lists one to start)
 Read only its summary; never read the diff or its files here. Then:
 
 - **It opened its PR/MR, or it stopped for a decision:** nothing more for that Issue here: the Player's watch (step 5) sees the Coach's answer.
-- **It stopped for anything else** (a permission, a missing credential, a dependency): tell the Player in one line, and do not retry it.
+- **It stopped for a dependency** («waiting for #X»): check that the stopped Issue now names it in «Depends on» (`gh issue view <n> --json body`); if it does not,
+  write `- #X` there yourself as in «A stop for a dependency» of SKILL.md (and turn an open PR/MR into a draft), then run `labels --issue <n>`. Tell the Player in one line, and do not retry it.
+- **It stopped for anything else** (a permission, a missing credential): tell the Player in one line, and do not retry it.
 
 Then run `huddle next --json` again: an Issue in review uses no room, so the next one that fits can start (step 2).
 When `used` is above `capacity` (a request came back), nothing new starts: wait for the work to end, then run `huddle next --json` again.
@@ -47,6 +50,7 @@ When `used` is above `capacity` (a request came back), nothing new starts: wait 
   SendMessage: «The Coach left a request on #<n>: follow «Continue an Issue» of SKILL.md for #<n>, then end with the same short summary.»
   If SendMessage is not available here, or the subagent's ID is lost (a new session, an old wait that died), launch a new background
   subagent with that same message instead: it works in the Issue's existing worktree. When it ends, go back to step 3.
+- **An interrupted Issue** (`kind: "interrupted"`, no Coach request): continue it the same way, with the message «#<n> was interrupted: run `huddle take <n>`, then follow «Continue an Issue» of SKILL.md for #<n>: in its worktree run the tests, finish what the Issue asks and open the PR/MR». `take` marks this session as its worker, so no other session offers it.
 - **The Issue is finished** (its PR/MR was merged, or the Issue was closed): say so in one line and run `huddle next --json` again.
 
 ## 5. Keep watching: the Player's watch (Issue #248)
@@ -58,6 +62,8 @@ Issue can start or the Coach answers one: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddl
 leave `--seen` out the first time. When it wakes: run `next --json` again (the queue is re-read live: never start from the old answer) and
 go on from step 1. It checks every 2 minutes. One per Player and repo: if it says it already runs in another session, say so in one line and
 stop. `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next --wait-off` stops it. It needs this session open and the computer on.
+
+**After you closed the chat or turned off the computer** (Issue #304): a new session simply runs `/huddle-play` again, with no question. A watch whose owner is gone (its process, its heartbeat, or a restart of the computer) is taken over by the new one without `--take-over`; only a live owner keeps it. The session start clears the stale wait markers of sessions that are gone, so no warning says «run /huddle-play n» for an Issue with nothing to resume (a Coach request that waits is still offered by `resume`). An Issue of this login that was in progress on this machine, with commits, and whose worker is gone shows in `resume` with `kind: "interrupted"` (and a `branch`); it is never offered when another machine claimed it, or it is paused, parked, in review or waiting for the Coach.
 
 ## 6. While it runs
 

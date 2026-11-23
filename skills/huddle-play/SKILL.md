@@ -28,7 +28,7 @@ With no number (`/huddle-play`): read and follow `${CLAUDE_PLUGIN_ROOT}/skills/h
 
 1. Read the whole Issue and the documents it names. Follow its «Prompt for Claude Code» block.
 2. Check each Issue under «Depends on»: it counts only if it is closed **and** a merged PR/MR closed it. If one is not, change
-   nothing and end with «⛔ Issue #N stopped: waiting for #X».
+   nothing and end with «⛔ Issue #N stopped: waiting for #X», after the steps of «A stop for a dependency» below.
 3. Create the branch in a worktree of its own, as the Issue says, then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n> --started`: one command adds `in progress` and takes `assigned` off (never add it by hand). With `staging_branch` set in `huddle.json`, the branch starts from the up-to-date staging branch (`origin/<staging_branch>`), not from the default branch; without it, from the up-to-date default branch.
 4. Run the tests before changing anything. Then work with TDD, touching only the allowed files; while you work, run the tests of the area you touched, not the whole suite (Issue #244).
 5. Bring in the base branch first (Issue #195): before opening the PR/MR and before commenting «Ready for review again», run `git fetch origin` and `git merge origin/<base>` (the staging branch, or the default branch when there is none), resolve the conflicts, then run the full suite once, right before pushing: the counts you report are that last full run's, after the merge. Open the PR/MR with `Closes #N`, using the template (with `staging_branch` set, open it **against** the staging branch; Huddle closes the Issue when it is merged there): what changed, the real test counts, **What was NOT done**. Right after it is opened, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`.
@@ -69,7 +69,7 @@ branch in its own worktree, `labels --issue <n> --started`). Then:
 
 1. Enter the Issue's worktree, `.claude/worktrees/<branch>`, with your `EnterWorktree` tool. If the folder is gone but the branch
    exists, create it again with `git worktree add .claude/worktrees/<branch> <branch>` (without `-b`) and enter it.
-2. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" pending <n>` again, even if the session start already said a request waits (that line may be minutes old). If nothing is pending, say in one line that another session took it, go on with the person's own request, change nothing, and offer to wait with
+2. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" pending <n>` again, even if the session start already said a request waits (that line may be minutes old). If nothing is pending, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`: when it says the Issue was interrupted (its session is gone), continue it in this worktree (run the tests, finish what the Issue asks, open the PR/MR). Otherwise say in one line that another session took it, go on with the person's own request, change nothing, and offer to wait with
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`.
 3. If a request is pending, tell the Player which one it is (one line), then run
    `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`. It marks the request 👀 and prints the Coach's prompt. Follow that
@@ -82,18 +82,15 @@ branch in its own worktree, `labels --issue <n> --started`). Then:
 6. Start the wait again in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`. When it ends, a new request is pending:
    the Player runs `/huddle-play <n>` again.
 
+## A stop for a dependency (Issue #298)
+
+A stop «⛔ Issue #N stopped: waiting for #X» (at the start or while working) must leave the dependency written, so Huddle can park the Issue (docs/design.md §24). In this order: (1) read the Issue body and add `- #X` to its «Depends on» section if it is not there: change only that section, remove `- None` when a real dependency is added, write the body to a temporary UTF-8 file and use `--body-file`; (2) comment why it stopped, also with `--body-file`; (3) if the PR/MR is already open, turn it into a draft (`gh pr ready --undo`; on GitLab, the draft title) and say so in your last message; (4) run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`. When the dependency is merged, nothing is edited: the labels pass and `huddle next` read it as done.
+
 ## When you cannot go on
 
-Commit and push what is done. Comment on the Issue starting with «❓ Decision for the Coach:» (what is blocked, the
-options with trade-offs, your recommendation), then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n> --needs-decision` (one command adds `needs decision` and takes `in progress` off), and end with «⛔ Issue #N stopped: waiting for a
+Commit and push what is done. Comment on the Issue starting with «❓ Decision for the Coach:» (what is blocked, the options with trade-offs, your recommendation), then run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n> --needs-decision` (one command adds `needs decision` and takes `in progress` off), and end with «⛔ Issue #N stopped: waiting for a
 decision». Never close the Issue. Then start the wait in the background: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>` (tell the Player to leave the session open; it uses no Claude tokens). When it ends, the Coach answered: continue as in «Continue an Issue» (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" take <n>`, then follow the prompt).
 
 ## Who does each step
 
-Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`,
-and the repo's own tools). If you can, do it and report what you did. Only a step that needs something you cannot have goes to them: a second
-person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must
-approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical
-background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see
-something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those
-🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.
+Before you hand a step to the person, check whether you can do it yourself with the tools and logins you have (`gh`, `glab`, and the repo's own tools). If you can, do it and report what you did. Only a step that needs something you cannot have goes to them: a second person's account, a payment, a secret, a phone or another device, a legal or business decision, a paid action they must approve, or a permission that was denied. Write that step as numbered «🙋 Only you» steps for someone with no technical background (docs/design.md §13): one action per step, a copy block for what is pasted, «You should see:» and «If you see something else:». Your closing message says what you did yourself, and its next step is either a step you will take or those 🙋 steps. If a permission is denied or a credential is missing, stop and ask; never look for another way.

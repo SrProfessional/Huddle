@@ -5,6 +5,21 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-23
+
+### Changed
+
+- A new session after a closed chat or a restart resumes with no block (Issue #304): a Coach or Player watch whose owner is dead (its process gone, a pid reused after a restart, a stale heartbeat, or a session that was reviewing before the computer started) is taken over with no question and no `--take-over`; the session start clears the wait markers of sessions that are gone, so no warning says «run /huddle-play n» for nothing; an Issue in progress on this machine with commits whose worker is gone is offered by `huddle next --json` under `resume` with `kind: "interrupted"`, and `huddle take <n>` claims it (`labels --started` and `take` now leave a per-Issue worker mark in the shared folder); the first round of a new Coach watch rebuilds the lost `--seen` keys for reviews from the `Reviewed head:` line of the Coach's comments. The request items of `resume` now carry `kind: "request"`.
+
+- An Issue that waits only for a file uses none of the Player's points (Issue #303): an active Issue held back only by a file of another Issue is not counted in `huddle next`'s «in use», is listed apart as «waits for files» (`waitsForFiles` in `--json`), keeps its place and its files, and counts again when the holder is done; a circle of file waits is resolved by the older Issue first and said in the output. Dependency and capacity waits and the board's labels are unchanged.
+- The flow says why nothing moves (Issue #302): when nothing can start or resume, `huddle next` (text and `--json` key `stalled`) lists each open Issue with who must act (the Coach's decision or review, a step only the person can do, another Issue or file, a pause), and names a circle of waits with the link to break; `huddle status` repeats it in one line from the shared folder, and the Player's watch tells it once each time the set of reasons changes.
+- An explicit pause frees the files of the paused Issue (Issue #300): a paused Issue holds none of its allowed files, with or without commits, in `huddle next` and in the `blocked` label, so a pause can no longer close a circle of waits; `huddle next` says once, on its «paused» line, that the files are free and the branch must be updated from the base when it comes back. Parked work (`needs decision`, a draft waiting for a dependency) keeps the rule of Issue #291.
+
+### Fixed
+
+- Interrupted Issues read the signs better (Issue #308): uncommitted edits in the Issue's worktree (the newest changed file, by its modification time) count as activity, so an Issue whose chat is still editing is no longer offered as `interrupted`; the key of an interrupted entry now carries the last commit and the worker mark (`resume:#n:interrupted:<hash>`), so a second interruption of the same Issue wakes a long-running Player watch again.
+- A stop for a dependency writes it down (Issue #298): a Player session that stops «waiting for #X» adds `- #X` to the Issue's «Depends on» (removing `- None`), comments why, turns an open PR/MR into a draft and runs `labels --issue`, so the parked rule of Issue #291 can give its points back; a parallel subagent does the same and the main session checks it.
+
 ## [1.0.2] - 2026-11-22
 
 ### Changed

@@ -49,11 +49,11 @@ shows it. It decides how many Issues a Player works on at once.
 **Several Issues at once.** Each Player has a **capacity** of 5 points by default (`capacity`, or `capacity_per_person`, in
 `huddle.json`, set by the Coach). `/huddle-play` with no number works on as many of your assigned Issues as fit, each in a background
 subagent with a clean context, so no Issue pays for another one's context. Work in review uses no room, two Issues that share a file
-never run at once, and the next one starts when room frees. `huddle next` shows what starts and what waits, and why. You can only
+never run at once, and the next one starts when room frees. An Issue that waits only for a file held by another one uses no points either: `huddle next` lists it apart as «waits for files», and it counts again when the other one is done. `huddle next` shows what starts and what waits, and why. You can only
 **lower** your capacity, on your machine: `huddle capacity 3` (and `huddle capacity reset`). Keep that session open: closing it stops the
 subagents. Design Issues stay in a session of their own.
 
-**Pausing an Issue.** The Coach can pause one with `huddle pause <n> --reason "staging on hold"` and put it back with `huddle pause <n> --off`; only the Coach's login can. A pause is a comment on the Issue, not a label, so the board does not change. While it lasts the Issue gives its points back, `huddle next` lists it apart as «paused» and never offers it to start or resume, and its allowed files keep another Issue waiting only if it already has a branch with commits. Pausing does not close, unassign or stop the work: the branch and the PR stay as they are. Work that waits is parked the same way with no command: an Issue with `needs decision`, or whose PR is a draft that waits for an open dependency. An Issue with changes requested from the Coach is never parked, because the Player has to act on it.
+**Pausing an Issue.** The Coach can pause one with `huddle pause <n> --reason "staging on hold"` and put it back with `huddle pause <n> --off`; only the Coach's login can. A pause is a comment on the Issue, not a label, so the board does not change. While it lasts the Issue gives its points back, `huddle next` lists it apart as «paused» and never offers it to start or resume, and its allowed files never keep another Issue waiting: a pause frees them, even when the Issue has commits (`huddle next` then tells you to update its branch from the base when it comes back, since a merge conflict may wait for you). The allowed files of work parked with no command (below) keep another Issue waiting only if it already has a branch with commits. Pausing does not close, unassign or stop the work: the branch and the PR stay as they are. Work that waits is parked the same way with no command: an Issue with `needs decision`, or whose PR is a draft that waits for an open dependency. An Issue with changes requested from the Coach is never parked, because the Player has to act on it.
 
 ## The Coach does not stop to ask
 
@@ -289,6 +289,8 @@ watch itself, with no Claude tokens, asks the Player to bring in the base branch
 Player's wait as any request). To check from any terminal that the watch and the waits are alive, run `huddle status` (or
 `huddle doctor`): each one says its last check, and a stale one says which command starts it again.
 
+**After closing the chat or turning the computer off.** Open a new chat and run the same two commands: `/huddle-watch` (the Coach) and `/huddle-play` (a Player). Nothing is asked and nothing blocks: a watch whose session is gone is taken over by the new one, the waits of closed sessions are cleared when the session starts, and an Issue that was in progress here, with commits, and that nobody works on any more is offered to continue (`huddle next` lists it as «interrupted») and continued in its worktree. The Coach's new watch does not review again a PR/MR it already reviewed at the same head. If you keep a chat idle for more than 15 minutes while it still edits an Issue without committing, another chat of your own may offer that Issue to continue: say no there and keep going in the first one.
+
 ## Old worktrees clean themselves
 
 Every Issue's session works in a folder of its own, a git worktree in `.claude/worktrees/`. In a project with dependencies each
@@ -391,6 +393,8 @@ in another session says so and asks «Take over?»; on a yes it starts with `--t
 never takes over.
 
 **One login on two machines.** A Player may work from two computers on the same account (a Windows PC and a Mac, say). Huddle tells them apart: `huddle machine` shows each one's id and name, and an Issue started or taken on a machine is claimed there with a comment on the Issue. The capacity counts only the work of this machine, `huddle next` lists the Issues that run on the other one apart and never offers them again, and the files they hold still keep a clashing Issue waiting. To move an Issue to this machine, run `/huddle-play <n>` here.
+
+**When nothing seems to move.** If the Player's chat says no Issue can start, ask it to run `huddle next`: when nothing can start or resume it ends with a «Stalled» block that says, for each Issue, who must act (the Coach's decision or review, a step only you can do, another Issue or a shared file, a pause) and names a circle of waits («circular wait: #a → #b → #a») with the link to break. `huddle status` repeats it in one line, and the Player's watch tells it once each time the reasons change (its first round is the baseline).
 
 | Who | Where | Runs |
 |---|---|---|
