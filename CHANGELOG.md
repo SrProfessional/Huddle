@@ -15,6 +15,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Fixed
 
+- Interrupted Issues read the signs better (Issue #308): uncommitted edits in the Issue's worktree (the newest changed file, by its modification time) count as activity, so an Issue whose chat is still editing is no longer offered as `interrupted`; the key of an interrupted entry now carries the last commit and the worker mark (`resume:#n:interrupted:<hash>`), so a second interruption of the same Issue wakes a long-running Player watch again.
 - A stop for a dependency writes it down (Issue #298): a Player session that stops «waiting for #X» adds `- #X` to the Issue's «Depends on» (removing `- None`), comments why, turns an open PR/MR into a draft and runs `labels --issue`, so the parked rule of Issue #291 can give its points back; a parallel subagent does the same and the main session checks it.
 
 ## [1.0.2] - 2026-11-22
