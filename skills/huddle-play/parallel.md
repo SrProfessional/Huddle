@@ -50,6 +50,7 @@ When `used` is above `capacity` (a request came back), nothing new starts: wait 
   SendMessage: «The Coach left a request on #<n>: follow «Continue an Issue» of SKILL.md for #<n>, then end with the same short summary.»
   If SendMessage is not available here, or the subagent's ID is lost (a new session, an old wait that died), launch a new background
   subagent with that same message instead: it works in the Issue's existing worktree. When it ends, go back to step 3.
+- **An interrupted Issue** (`kind: "interrupted"`, no Coach request): continue it the same way, with the message «#<n> was interrupted: run `huddle take <n>`, then follow «Continue an Issue» of SKILL.md for #<n>: in its worktree run the tests, finish what the Issue asks and open the PR/MR». `take` marks this session as its worker, so no other session offers it.
 - **The Issue is finished** (its PR/MR was merged, or the Issue was closed): say so in one line and run `huddle next --json` again.
 
 ## 5. Keep watching: the Player's watch (Issue #248)
@@ -61,6 +62,8 @@ Issue can start or the Coach answers one: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddl
 leave `--seen` out the first time. When it wakes: run `next --json` again (the queue is re-read live: never start from the old answer) and
 go on from step 1. It checks every 2 minutes. One per Player and repo: if it says it already runs in another session, say so in one line and
 stop. `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next --wait-off` stops it. It needs this session open and the computer on.
+
+**After you closed the chat or turned off the computer** (Issue #304): a new session simply runs `/huddle-play` again, with no question. A watch whose owner is gone (its process, its heartbeat, or a restart of the computer) is taken over by the new one without `--take-over`; only a live owner keeps it. The session start clears the stale wait markers of sessions that are gone, so no warning says «run /huddle-play n» for an Issue with nothing to resume (a Coach request that waits is still offered by `resume`). An Issue of this login that was in progress on this machine, with commits, and whose worker is gone shows in `resume` with `kind: "interrupted"` (and a `branch`); it is never offered when another machine claimed it, or it is paused, parked, in review or waiting for the Coach.
 
 ## 6. While it runs
 

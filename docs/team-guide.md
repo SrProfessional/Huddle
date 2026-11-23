@@ -289,6 +289,8 @@ watch itself, with no Claude tokens, asks the Player to bring in the base branch
 Player's wait as any request). To check from any terminal that the watch and the waits are alive, run `huddle status` (or
 `huddle doctor`): each one says its last check, and a stale one says which command starts it again.
 
+**After closing the chat or turning the computer off.** Open a new chat and run the same two commands: `/huddle-watch` (the Coach) and `/huddle-play` (a Player). Nothing is asked and nothing blocks: a watch whose session is gone is taken over by the new one, the waits of closed sessions are cleared when the session starts, and an Issue that was in progress here, with commits, and that nobody works on any more is offered to continue (`huddle next` lists it as «interrupted») and continued in its worktree. The Coach's new watch does not review again a PR/MR it already reviewed at the same head. If you keep a chat idle for more than 15 minutes while it still edits an Issue without committing, another chat of your own may offer that Issue to continue: say no there and keep going in the first one.
+
 ## Old worktrees clean themselves
 
 Every Issue's session works in a folder of its own, a git worktree in `.claude/worktrees/`. In a project with dependencies each
