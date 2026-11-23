@@ -392,7 +392,7 @@ never takes over.
 
 **One login on two machines.** A Player may work from two computers on the same account (a Windows PC and a Mac, say). Huddle tells them apart: `huddle machine` shows each one's id and name, and an Issue started or taken on a machine is claimed there with a comment on the Issue. The capacity counts only the work of this machine, `huddle next` lists the Issues that run on the other one apart and never offers them again, and the files they hold still keep a clashing Issue waiting. To move an Issue to this machine, run `/huddle-play <n>` here.
 
-**When nothing seems to move.** If the Player's chat says no Issue can start, ask it to run `huddle next`: when nothing can start or resume it ends with a «Stalled» block that says, for each Issue, who must act (the Coach's decision or review, a step only you can do, another Issue or a shared file, a pause) and names a circle of waits («circular wait: #a → #b → #a») with the link to break. `huddle status` repeats it in one line, and the Player's watch tells it once each time the reasons change.
+**When nothing seems to move.** If the Player's chat says no Issue can start, ask it to run `huddle next`: when nothing can start or resume it ends with a «Stalled» block that says, for each Issue, who must act (the Coach's decision or review, a step only you can do, another Issue or a shared file, a pause) and names a circle of waits («circular wait: #a → #b → #a») with the link to break. `huddle status` repeats it in one line, and the Player's watch tells it once each time the reasons change (its first round is the baseline).
 
 | Who | Where | Runs |
 |---|---|---|

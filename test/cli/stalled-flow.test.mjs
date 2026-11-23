@@ -104,19 +104,24 @@ for (const gitlab of [false, true]) {
     assert.doesNotMatch(h.text(), /the flow waits for/);
   });
 
-  test(`${on}: the Player's watch tells a stalled flow once, and again only when the set of reasons changes`, async () => {
-    const h = mk(stuck, { gitlab });
+  test(`${on}: the Player's watch takes a stalled flow as its baseline, tells it when the set of reasons changes, and not twice`, async () => {
+    // Round 1 sees the stalled flow (no wake: the session that started the watch has just seen it); round 2 sees a new reason.
+    let h;
+    h = mk(stuck, { gitlab, sleep: async () => { h.world.issue({ number: 30, title: 'Asked too', body: body(1, ['f.mjs']), assignees: ['ana'], labels: ['needs decision'] }); } });
     assert.equal(await run(['next', '--wait'], h.ctx), 0);
     const woke = JSON.parse(h.text());
     assert.deepEqual(woke.actionable.start, []);
-    assert.equal(woke.actionable.stalled.reasons.length, 5);
+    assert.equal(woke.actionable.stalled.reasons.length, 6);
     assert.deepEqual(woke.actionable.keys, [woke.actionable.stalled.key]);
-    const same = mk(stuck, { gitlab, sleep: async () => { throw new Error('stop'); } });
-    await run(['next', '--wait', '--seen', woke.actionable.stalled.key], same.ctx).catch(() => {});
+    // The same set for many rounds wakes nobody.
+    let rounds = 0;
+    const same = mk(stuck, { gitlab, sleep: async () => { rounds += 1; if (rounds > 3) throw new Error('stop'); } });
+    await run(['next', '--wait'], same.ctx).catch(() => {});
     assert.doesNotMatch(same.text(), /actionable/);
-    const changed = mk((w) => { stuck(w); w.issue({ number: 8, title: 'Blocked', body: body(1, ['d.mjs'], '- #98'), assignees: ['ana'], labels: ['blocked'] }); w.issue({ number: 98, title: 'Other dep', body: body(1, ['q2.mjs']), assignees: ['luis'], labels: ['assigned'] }); }, { gitlab });
-    await run(['next', '--wait', '--seen', woke.actionable.stalled.key], changed.ctx);
-    const again = JSON.parse(changed.text());
-    assert.notEqual(again.actionable.stalled.key, woke.actionable.stalled.key);
+    // A restarted watch that was told that key does not tell it again.
+    let again = 0;
+    const seen = mk((w) => { stuck(w); w.issue({ number: 30, title: 'Asked too', body: body(1, ['f.mjs']), assignees: ['ana'], labels: ['needs decision'] }); }, { gitlab, sleep: async () => { again += 1; if (again > 2) throw new Error('stop'); } });
+    await run(['next', '--wait', '--seen', woke.actionable.stalled.key], seen.ctx).catch(() => {});
+    assert.doesNotMatch(seen.text(), /actionable/);
   });
 }
