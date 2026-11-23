@@ -7,6 +7,7 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Changed
 
+- An Issue that waits only for a file uses none of the Player's points (Issue #303): an active Issue held back only by a file of another Issue is not counted in `huddle next`'s «in use», is listed apart as «waits for files» (`waitsForFiles` in `--json`), keeps its place and its files, and counts again when the holder is done; a circle of file waits is resolved by the older Issue first and said in the output. Dependency and capacity waits and the board's labels are unchanged.
 - The flow says why nothing moves (Issue #302): when nothing can start or resume, `huddle next` (text and `--json` key `stalled`) lists each open Issue with who must act (the Coach's decision or review, a step only the person can do, another Issue or file, a pause), and names a circle of waits with the link to break; `huddle status` repeats it in one line from the shared folder, and the Player's watch tells it once each time the set of reasons changes.
 - An explicit pause frees the files of the paused Issue (Issue #300): a paused Issue holds none of its allowed files, with or without commits, in `huddle next` and in the `blocked` label, so a pause can no longer close a circle of waits; `huddle next` says once, on its «paused» line, that the files are free and the branch must be updated from the base when it comes back. Parked work (`needs decision`, a draft waiting for a dependency) keeps the rule of Issue #291.
 
