@@ -461,6 +461,19 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.3
+
+Run of: 2026-11-23, Huddle `staging` with Issues #298, #300, #302, #303, #304 and #308 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.2 and older tables below still hold for the rest. Context: the 1.0.2 fixes were seen working on a real project (SocialCortex: `used` fell from 8 to 0, three PRs merged with failures that master already had); the Issues below came from what that project still showed.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| A stop for a dependency writes it in «Depends on» (#298) | covered by tests | covered by tests | 6 tests read the play skill, the parallel guide, design §18 and §24. Passed by evidence: to be seen the next time a real Player stops for a dependency. |
+| An explicit pause frees the files (#300) | covered by tests | covered by tests | Both fakes; a parked Issue with commits still holds. Passed by evidence. |
+| The flow says why nothing moves, and names circles (#302) | covered by tests | covered by tests | 18 new tests; no network call in `status`. Passed by evidence. |
+| An Issue that waits only for a file uses no capacity (#303) | covered by tests | covered by tests | The review looked for a double booking and found none. Passed by evidence. |
+| After closing the chat or the computer, a new watch and play resume (#304) | covered by tests | covered by tests | 31 new tests with a fake clock and process table. **Not run with a real restart:** passed by evidence, to be seen on the Mac. |
+| Uncommitted edits count as activity, a new interruption wakes the watch (#308) | covered by tests | covered by tests | 8 new tests. Passed by evidence. |
+
 ### Results 1.0.2
 
 Run of: 2026-11-22, Huddle `staging` with Issues #290, #291 and #294 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.1 and older tables below still hold for the rest.

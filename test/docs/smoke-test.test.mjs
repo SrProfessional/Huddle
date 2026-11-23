@@ -112,13 +112,14 @@ test('a «Results 0.3.0» table with GitHub and GitLab columns covers the new pa
   assert.ok(!smoke.includes('11. Clean up'), '«Clean up» moved to 12');
 });
 
-test('the versions are 1.0.2 and the CHANGELOG has an «Unreleased» section above «1.0.2»', () => {
-  for (const f of ['package.json', '.claude-plugin/plugin.json']) assert.equal(JSON.parse(readFileSync(path.join(root, f), 'utf8')).version, '1.0.2', f);
+test('the versions are 1.0.3 and the CHANGELOG has an «Unreleased» section above «1.0.3»', () => {
+  for (const f of ['package.json', '.claude-plugin/plugin.json']) assert.equal(JSON.parse(readFileSync(path.join(root, f), 'utf8')).version, '1.0.3', f);
   const m = JSON.parse(readFileSync(path.join(root, '.claude-plugin/marketplace.json'), 'utf8'));
-  assert.ok(m.plugins.every((p) => p.version === '1.0.2'));
+  assert.ok(m.plugins.every((p) => p.version === '1.0.3'));
   const c = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
   // Work merged after the release (for example the website, Issue #56) lives under «Unreleased» until the next one.
   assert.match(c, /## \[Unreleased\]\r?\n[\s\S]*?## \[1\.0\.0\] - \d{4}-\d{2}-\d{2}/);
+  assert.ok(c.indexOf('## [1.0.3]') < c.indexOf('## [1.0.2]'));
   assert.ok(c.indexOf('## [1.0.2]') < c.indexOf('## [1.0.1]'));
   assert.ok(c.indexOf('## [1.0.1]') < c.indexOf('## [1.0.0]'));
   assert.ok(c.indexOf('## [1.0.0]') < c.indexOf('## [0.9.5]'));

@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-23
+
 ### Changed
 
 - A new session after a closed chat or a restart resumes with no block (Issue #304): a Coach or Player watch whose owner is dead (its process gone, a pid reused after a restart, a stale heartbeat, or a session that was reviewing before the computer started) is taken over with no question and no `--take-over`; the session start clears the wait markers of sessions that are gone, so no warning says «run /huddle-play n» for nothing; an Issue in progress on this machine with commits whose worker is gone is offered by `huddle next --json` under `resume` with `kind: "interrupted"`, and `huddle take <n>` claims it (`labels --started` and `take` now leave a per-Issue worker mark in the shared folder); the first round of a new Coach watch rebuilds the lost `--seen` keys for reviews from the `Reviewed head:` line of the Coach's comments. The request items of `resume` now carry `kind: "request"`.
