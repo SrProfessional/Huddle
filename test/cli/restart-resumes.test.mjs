@@ -141,8 +141,9 @@ for (const gitlab of [false, true]) {
 
   test(`${on}: an active Issue with commits, no worker for a while and no request is offered under resume as interrupted`, async () => {
     const r = await nextOf(play());
-    assert.deepEqual(r.resume.map((x) => [x.issue, x.kind, x.key]), [[21, 'interrupted', 'resume:#21:interrupted']]);
+    assert.deepEqual(r.resume.map((x) => [x.issue, x.kind]), [[21, 'interrupted']]);
     assert.equal(r.resume[0].branch, 'h21-work');
+    assert.match(r.resume[0].key, /^resume:#21:interrupted:[0-9a-f]{8}$/, 'the key carries what changes between interruptions (Issue #308)');
   });
 
   test(`${on}: it is not offered while it shows recent activity, in the marked session, or with no commits at all`, async () => {
@@ -201,6 +202,60 @@ for (const gitlab of [false, true]) {
     const again = play();
     await run(['next', '--wait', '--seen', woke.actionable.keys[0]], again.ctx).catch(() => {});
     assert.doesNotMatch(again.text(), /actionable/);
+  });
+}
+
+// Issue #308: uncommitted edits count as activity, and a later interruption of the same Issue is a new key.
+/** Local git with a worktree for the branch and its `git status` paths; the file times are fake and come through ctx.mtimeOf. */
+const gitWithTree = ({ status = [], head = 'aaaa1111', ...o } = {}) => (args, opts) => {
+  const line = args.join(' ');
+  if (/^worktree list/.test(line)) return `worktree /wt/h21-work\nHEAD ${head}\nbranch refs/heads/h21-work\n\n`;
+  if (/^status --porcelain/.test(line)) { assert.equal(opts.cwd, '/wt/h21-work'); return status.join('\n') + (status.length ? '\n' : ''); }
+  if (/^rev-parse /.test(line)) return `${head}\n`;
+  return gitOf(o)(args);
+};
+
+for (const gitlab of [false, true]) {
+  const on = gitlab ? 'GitLab' : 'GitHub';
+  const withTimes = (times, g) => { const h = mk({ me: 'ana', gitlab, setup: active(), git: g }); h.ctx.mtimeOf = (p) => times[p] ?? null; return h; };
+  const old = T0 - 3 * 60 * MIN;
+
+  test(`${on}: changed files newer than the idle window keep the Issue from being offered as interrupted, though the last commit is old`, async () => {
+    const times = { '/wt/h21-work/a.mjs': T0 - 3 * MIN, '/wt/h21-work/new.txt': old };
+    const h = withTimes(times, gitWithTree({ status: [' M a.mjs', '?? new.txt'], lastCommit: old }));
+    assert.deepEqual((await nextOf(h)).resume, []);
+  });
+
+  test(`${on}: only old commits and old changes (or no changes, or node_modules paths) still read as interrupted`, async () => {
+    const times = { '/wt/h21-work/a.mjs': old, '/wt/h21-work/node_modules/x/i.js': T0 - MIN };
+    const h = withTimes(times, gitWithTree({ status: [' M a.mjs', '?? node_modules/x/i.js'], lastCommit: old }));
+    assert.deepEqual((await nextOf(h)).resume.map((x) => x.kind), ['interrupted']);
+    const clean = withTimes({}, gitWithTree({ lastCommit: old }));
+    assert.deepEqual((await nextOf(clean)).resume.map((x) => x.kind), ['interrupted']);
+  });
+
+  test(`${on}: a renamed file counts by its new path, and a path that cannot be read is skipped`, async () => {
+    const times = { '/wt/h21-work/b.mjs': T0 - MIN };
+    const h = withTimes(times, gitWithTree({ status: ['R  a.mjs -> b.mjs', ' D gone.mjs'], lastCommit: old }));
+    assert.deepEqual((await nextOf(h)).resume, []);
+  });
+
+  test(`${on}: a later interruption of the same Issue has a new key; the same one keeps its key and is told once`, async () => {
+    const keyOf = async (head, mark) => {
+      const h = withTimes({}, gitWithTree({ lastCommit: old, head }));
+      if (mark) h.ctx.writeFile(labelsFiles(h.ctx).workers, JSON.stringify({ 21: mark }));
+      return (await nextOf(h)).resume[0].key;
+    };
+    const first = await keyOf('aaaa1111');
+    assert.equal(await keyOf('aaaa1111'), first, 'nothing changed: the same interruption');
+    assert.notEqual(await keyOf('bbbb2222'), first, 'a new commit, a new interruption');
+    assert.notEqual(await keyOf('aaaa1111', { session: 'S1', tool: 'claude', at: T0 - 60 * MIN }), first, 'another worker mark is another interruption');
+    const seen = withTimes({}, gitWithTree({ lastCommit: old }));
+    await run(['next', '--wait', '--seen', first], seen.ctx).catch(() => {});
+    assert.doesNotMatch(seen.text(), /actionable/, 'a key already told is not repeated');
+    const woken = withTimes({}, gitWithTree({ lastCommit: old, head: 'bbbb2222' }));
+    assert.equal(await run(['next', '--wait', '--seen', first], woken.ctx), 0);
+    assert.match(woken.text(), /actionable/, 'the later interruption wakes the same long watch');
   });
 }
 
