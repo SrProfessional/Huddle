@@ -461,6 +461,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.5
+
+Run of: 2026-11-24, Huddle `staging` with Issues #325, #326 and #329 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.4 and older tables below still hold for the rest. Context: on a real project a Player session still ran the 0.9.5 plugin after the repo's `huddle.json` was updated to 1.0.3, and every command of that session failed with `huddle.json: "language" is not allowed`.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| A `huddle.json` written by a newer Huddle warns an older one instead of breaking it (#325) | covered by tests | covered by tests | 24 new tests, both fakes. Strictness for typos kept (equal, older, missing or odd `setup_version` still fail with the old text); newer is a real version comparison (1.0.10 over 1.0.9). The warning goes to stderr, never into `--json` or the hook. `huddle doctor` names both versions and what to refresh. Passed by evidence. Sessions already running 0.9.5 are not fixed: it helps from this version on. |
+| An unclosed fence hides only up to the next `## ` heading, a four-backtick fence closes on four (#326) | covered by tests | covered by tests | 10 new tests. The old and the new reader gave identical results on 100 real Issue bodies in LF and CRLF (200 variants). Known limit: an unclosed fence before «Depends on» pairs with a later fence (the Prompt block) when there is one. Passed by evidence. |
+| The cross-login wait text says «circle» only for a real two-way case (#329) | covered by tests | covered by tests | Words only, shown on 7 scenarios and 300 random inputs: the decisions, the order, the points and the `--json` shape are identical, only 14 phrases changed. With the labels `huddle next` reads today, the circle wording cannot appear (kept for a later detection). Passed by evidence. |
+
 ### Results 1.0.4
 
 Run of: 2026-11-24, Huddle `staging` with Issues #312, #313, #315, #318 and #321 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.3 and older tables below still hold for the rest. Context: a Unity project with several Players showed Issues that shared files and none of them `blocked`, because the board only blocked for a file held by ACTIVE work of the SAME login.

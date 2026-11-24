@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-11-24
+
 ### Changed
 
 - The cross-login text of `huddle next` says «circle» only for a real two-way case (Issue #329): a foreign Issue that is simply active reads «#n waits for #m, which runs for <login>». Words only: every scheduler decision and the `--json` keys are unchanged.
