@@ -72,6 +72,8 @@ test('--json prints the items; pr and head only for review', async () => {
       { issue: 47, title: 'Which payment provider?', waits: 'decision' },
       { issue: 53, title: 'Login page crashes on Safari', waits: 'triage' },
     ],
+    unlinked: [],
+    mergedWithoutClosing: [],
   });
 });
 
@@ -104,7 +106,7 @@ test('the head of each review item is read once, and decision and triage items n
 test('--json with nothing waiting is an empty list', async () => {
   const h = mk(() => {});
   assert.equal(await run(['queue', '--json'], h.ctx), 0);
-  assert.deepEqual(JSON.parse(h.text()), { waiting: [] });
+  assert.deepEqual(JSON.parse(h.text()), { waiting: [], unlinked: [], mergedWithoutClosing: [] });
 });
 
 test('the renamed labels of huddle.json are understood', async () => {

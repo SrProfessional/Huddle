@@ -43,7 +43,7 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
   const user = (login) => ({ id: users.get(login), username: login, name: login });
   const noteJson = (n) => ({ id: n.id, body: n.body, created_at: n.created_at, author: user(n.author), system: n.system, noteable_iid: n.issue, noteable_type: n.mr ? 'MergeRequest' : 'Issue' });
   const mrJson = (r) => ({
-    iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: `MR ${r.iid}`, source_branch: r.branch ?? '',
+    iid: r.iid, state: r.state, draft: r.draft, work_in_progress: r.draft, title: r.title ?? `MR ${r.iid}`, source_branch: r.branch ?? '',
     target_branch: r.base ?? 'main', description: r.body ?? '', merge_commit_sha: r.state === 'merged' ? `merge${r.iid}` : null, merged_at: r.state === 'merged' ? (r.mergedAt ?? '2026-11-10T00:00:00Z') : null,
   });
   const issueJson = (i) => ({
@@ -294,8 +294,8 @@ export function fakeGitlab({ project = PROJECT, host = '' } = {}) {
       addSystemNote(number, `changed title to «${title}»`);
     },
     // base: the branch the MR targets; body: its description; merged: it was merged (so it is not open).
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt, mergeable = 'MERGEABLE' }) {
-      reviews.set(number, { iid: number, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head, mergedAt, mergeable });
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt, mergeable = 'MERGEABLE', title }) {
+      reviews.set(number, { iid: number, title, draft, state: merged ? 'merged' : open ? 'opened' : 'closed', branch, base, body, commits: [...commits], head, mergedAt, mergeable });
     },
     /** A branch that exists on the remote (`main` always does). */
     branch(name) { branches.add(name); },

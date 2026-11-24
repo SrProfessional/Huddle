@@ -37,7 +37,7 @@ Decision: <the chosen option and why, in one or two lines>.
    answer is there. Do not close anything and do not edit labels by hand. The command is best effort: if it fails (no permission to edit labels, the
    platform is unreachable), say one line with the reason and go on; it never stops or blocks the task and never asks anything, since the cloud job,
    or the next session, catches up. The Player's wait (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" wait <n>`) picks the comment up.
-5. If the decision changes the Issue's scope, edit the Issue text too, so it stays true.
+5. If the decision changes the Issue's scope, edit the Issue text too, so it stays true. A PR/MR is linked to its Issue only by «Closes #N»: one that fixes only part of an Issue is linked with «Closes» to a smaller Issue (reduce the Issue's text first) and the rest is written as a new Issue; never tell a Player to write «Refs #N» to keep an Issue open, since a PR/MR that closes no Issue is invisible to the board (the queue and the doctor name it).
 
 ## Who does each step
 

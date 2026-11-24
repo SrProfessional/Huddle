@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Added
+
+- An open PR/MR linked to no Issue is never invisible (Issue #334). `huddle queue` lists every open PR/MR into the staging or default branch that closes no Issue (number, title, head branch, and the Issue its «Refs #N» or its branch points to), drafts apart, with the advice «Put «Closes #N» in its description, or open a separate Issue»; `--json` has a new key `unlinked`. `huddle doctor` adds one warning line when any exists. A merged PR that only said «Refs #N» (or «Part of #N») and closed nothing is named by `huddle land` and `huddle queue` while #N is still open (`--json`: `mergedWithoutClosing`). `/huddle-decide` and `/huddle-review` now say a PR that fixes only part of an Issue is linked with «Closes» to a smaller Issue and the rest is a new Issue, never «Refs #N». How PRs are matched to Issues for the labels and the review items is unchanged, and the lists cost one call for the open PRs/MRs and one per base for the merged ones, never one per PR.
+
 ### Fixed
 
 - A path with spaces under «Allowed files» is read whole, not cut at its first space (Issue #333): `Assets/1 Scenes/Mentor Dashboard/Mentor Dashboard.unity (new)` is one file, so `huddle next`, the board and `huddle conflicts` no longer report a shared phantom file such as `Assets/1` between Issues that touch different files. The path ends at a `code` span, or at a trailing «(…)» group or a spaced hyphen, en dash or em dash separator; an item whose first word was already a complete path (`lib/a.mjs the reader`) reads as before.
