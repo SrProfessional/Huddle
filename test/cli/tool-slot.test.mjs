@@ -136,15 +136,34 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(r.wait, []);
   });
 
-  test(`${on}: the person's answer to the checkout question travels as the note of «huddle steps <n> --done --note»`, async () => {
+  test(`${on}: the Coach sees a Player's dirty checkout choice, with Wait pending and Commit gated by the checkout status`, async () => {
     const h = build({ gitlab, extra: (w) => {
       w.issue({ number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in progress'] });
     } });
     h.ctx.writeFile('/tmp/steps.txt', 'Reason: the main checkout has changes that are not committed\nStep: Choose what happens to the changes in your main checkout: commit them, save them aside with a stash so I can give them back, or ask me to wait.\nSee: Your answer is saved on the Issue.\nOtherwise: Tell me what you saw.\n');
-    assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt', '--preflight'], h.ctx), 0);
+    assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt', '--preflight', '--checkout-changes'], h.ctx), 0);
+    const { state, reads } = checkout(h);
+    state.status = ' M person.txt\n';
     h.as('SrProfessional');
-    assert.equal(await run(['steps', '7', '--done', '--note', 'stash'], h.ctx), 0);
-    assert.equal(readSteps(h.world.commentsOf(7)).steps[0].note, 'stash');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    assert.deepEqual(JSON.parse(h.text()).steps.map((s) => [s.issue, s.checkoutChoice]), [[7, true]]);
+    assert.equal(await run(['steps', '7', '--done'], h.ctx), 1);
+    assert.equal(await run(['steps', '7', '--skip', '--note', 'wait'], h.ctx), 1);
+    assert.equal(await run(['steps', '7', '--done', '--note', 'wait'], h.ctx), 1);
+    assert.equal(await run(['asked', '7'], h.ctx), 0);
+    h.ctx.updateCachePath = '/another-machine/u.json';
+    assert.equal(await run(['steps', '7', '--done', '--note', 'stash'], h.ctx), 1);
+    h.ctx.updateCachePath = '/data/u.json';
+    assert.equal(readSteps(h.world.commentsOf(7)).current, 1);
+    assert.deepEqual(reads, [], 'waiting and inappropriate answers leave the checkout untouched');
+    assert.equal(await run(['steps', '7', '--done', '--note', 'commit'], h.ctx), 1);
+    assert.equal(readSteps(h.world.commentsOf(7)).current, 1);
+    state.status = '';
+    assert.equal(await run(['steps', '7', '--done', '--note', 'commit'], h.ctx), 0);
+    assert.equal(readSteps(h.world.commentsOf(7)).steps[0].note, 'commit');
+    assert.equal(await run(['steps', '7', '--stash'], h.ctx), 1);
+    assert.ok(reads.every((c) => c === 'status --porcelain --untracked-files=all'));
     assert.doesNotMatch(h.text(), /steps 7 --return/);
     assert.equal(await run(['steps', '7', '--done', '--bogus'], h.ctx), 2);
   });
@@ -401,15 +420,26 @@ for (const gitlab of [false, true]) {
     assert.equal(await run(['steps', '7', '--stash'], h.ctx), 1);
     assert.equal(reads.length, 0, 'without approval, Git is not asked to save changes');
     h.ctx.writeFile('/tmp/preflight.txt', LIST);
-    assert.equal(await run(['steps', '7', '--post', '/tmp/preflight.txt', '--preflight'], h.ctx), 0);
+    assert.equal(await run(['steps', '7', '--post', '/tmp/preflight.txt', '--preflight', '--checkout-changes'], h.ctx), 0);
     h.as('SrProfessional');
     assert.equal(await run(['steps', '7', '--done', '--note', 'stash'], h.ctx), 0);
+    assert.ok(!reads.some((r) => r.startsWith('stash push')), 'the consent note is recorded before the checkout changes');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    assert.deepEqual(JSON.parse(h.text()).stashApprovals.map(({ issue }) => issue), [7]);
     h.as('ana');
+    assert.deepEqual((await plan(h)).start, [], 'the Issue remains parked and holds the slot before saving');
     assert.equal(await run(['steps', '7', '--stash'], h.ctx), 1, 'the first attempt ends after git created the stash');
     assert.equal(await run(['steps', '7', '--stash'], h.ctx), 0, 'a later process recovers the already saved stash by its tag');
     assert.equal(slots()[7].stash.oid, oid);
     assert.equal(reads.filter((r) => r.startsWith('stash push')).length, 1);
     assert.equal((await plan(h)).returns, undefined, 'preflight has no pending return');
+    h.as('SrProfessional');
+    assert.equal(await run(['steps', '7', '--stash'], h.ctx), 0, 'the Coach resumes after verifying the saved changes');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    assert.equal(JSON.parse(h.text()).stashApprovals, undefined);
+    h.as('ana');
     h.ctx.writeFile('/tmp/test.txt', LIST);
     assert.equal(await run(['steps', '7', '--post', '/tmp/test.txt'], h.ctx), 0);
     h.world.issue({ number: 7, title: 'Tool issue', body: body(['e.mjs'], NEEDS), assignees: ['ana'], state: 'merged' });
