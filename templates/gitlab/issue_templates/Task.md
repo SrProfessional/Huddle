@@ -28,6 +28,10 @@
 
 <!-- Optional. Write one or two steps a person with no technical background can do in staging, and what they should see after each. -->
 
+## Needs
+
+<!-- Optional. Write «- Editor: <tool>» on a line of its own (the tool that must be open on the main checkout, for example: Unity Editor, Xcode) when this task must run in a tool the person has open there; plain «- Editor» also works. Huddle then runs it alone (the tool slot), switches the main checkout to its branch and returns it when the test steps are closed. Leave the section empty or delete it otherwise. -->
+
 ## Allowed files
 
 <!-- The only files this task may touch. -->

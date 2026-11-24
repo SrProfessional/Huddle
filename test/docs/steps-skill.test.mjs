@@ -72,6 +72,40 @@ test('it goes to the next step of the same Issue, then the next Issue, and ends 
   assert.match(t, /what is closed, what failed, what was skipped, and the Issues that went back into play/);
 });
 
+test('a fresh guided session handles returns even when there is no human step left', () => {
+  const entry = section(skill(), '1. **What waits.**', '2. **One step');
+  assert.match(entry, /steps --json/);
+  assert.match(entry, /handle `returns` before asking any `steps`, even when `steps` is empty/);
+  assert.match(entry, /Only if both `steps` and `returns` are empty and there are no approved stashes waiting, say «No steps wait for you» and stop/);
+});
+
+test('after final closure it re-reads pending returns and handles them before the next Issue', () => {
+  const after = section(skill(), '4. **Then the next step of the same Issue**', '5. **The end.**');
+  assert.match(after, /After recording a step closure, re-read `steps --json`/);
+  assert.match(after, /If this was the final step, handle the Issue's pending return immediately before moving on to the next Issue/);
+  assert.match(after, /After a successful return, re-read `steps --json` and continue the guided steps/);
+});
+
+test('a blocked return or a quit leaves the reservation and a later guided session can retry', () => {
+  const handoff = section(skill(), '### Return the main checkout', '## Who does each step');
+  assert.match(handoff, /skills\/huddle-play\/parallel\.md.*section 7, step 7/);
+  assert.match(handoff, /steps <n> --return/);
+  assert.match(handoff, /blocked or interrupted.*keep the slot reserved/);
+  assert.match(handoff, /If the person chooses to wait or quits, report the return as pending/);
+  assert.match(handoff, /next `\/huddle-steps` invocation.*re-read `steps --json` and retry/);
+  assert.match(handoff, /force nothing/);
+});
+
+test('the dirty-checkout preflight uses explicit choices and leaves Wait pending', () => {
+  const all = skill();
+  assert.match(section(all, '2. **One step', '3. **Record'), /checkoutChoice.*ordinary test steps/);
+  const preflight = section(all, '### Choose what to do with local changes', '### Return the main checkout');
+  assert.match(preflight, /\*\*Commit my changes\*\*.*After the person has committed.*steps <n> --done --note commit/);
+  assert.match(preflight, /\*\*Save changes in a stash\*\*.*steps <n> --done --note stash.*only if the person explicitly chooses.*Once that command records consent.*steps <n> --stash/);
+  assert.match(preflight, /\*\*Wait\*\*.*leave the step pending.*change nothing in the checkout/);
+  assert.match(section(all, '1. **What waits.**', '2. **One step'), /stashApprovals.*before asking/);
+});
+
 test('a pending step stays in front of the person and holds only the dependent work, with the record of Issue #335', () => {
   const t = skill();
   assert.match(t, /bin\/huddle" asked <n>/);
