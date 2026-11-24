@@ -27,8 +27,7 @@ for (const name of NAMES) {
 
   test(`${name}: a pending decision stays visible, is asked again once per session, and an unanswered message ends with its list`, () => {
     const t = skill(name);
-    assert.match(t, /`huddle queue`/);
-    assert.match(t, /«Stalled» block of `huddle next`/);
+    assert.ok(t.includes('stays visible in `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue` and in the «Stalled» block of `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next` until answered'));
     assert.match(t, /asks them again, once per session, before anything else/);
     assert.match(t, /Pending decisions: #n, #m/);
   });
