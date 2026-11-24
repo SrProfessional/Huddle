@@ -29,8 +29,7 @@ There is no code, so this review never checks tests: do not run them and do not 
 
 ## Changes needed
 
-Post **the same comment** on the PR/MR and on its Issue (the labels job and the Player's wait read both), starting with the
-heading and a text block:
+Post **the same comment** on the PR/MR and on its Issue (the labels job and the Player's wait read both), starting with the heading and a text block:
 
 ````text
 ## Prompt for Claude Code
@@ -41,8 +40,7 @@ First run /huddle-play <n>: it marks this request as taken (👀), so the Issue 
 ```
 ````
 
-In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline. Post a reopening reason as a separate comment after reopening. Right after posting a changes request, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>`
-(`n` the Issue): it puts `changes requested from Coach` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
+In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline. Post a reopening reason as a separate comment after reopening. Right after posting a changes request, run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" labels --issue <n>` (`n` the Issue): it puts `changes requested from Coach` on from the comment, and the take step in the prompt takes it off. Do not edit labels by hand.
 
 ## Reviewing for the watch
 
@@ -66,9 +64,11 @@ When the prompt says you review for `/huddle-watch` (a subagent, Issue #165): do
 
 ## Keeping the labels right
 
-`labels --issue <n>` (docs/design.md §22) is best effort: if it fails (no permission to edit labels, the platform is unreachable), say one line
-with the reason and go on; it never stops or blocks the review or the merge and never asks the person anything. The cloud job, or the next
-session, catches up.
+`labels --issue <n>` (docs/design.md §22) is best effort: if it fails (no permission to edit labels, the platform is unreachable), say one line with the reason and go on; it never stops or blocks the review or the merge and never asks the person anything. The cloud job, or the next session, catches up.
+
+## Asking the Coach
+
+**Asking the person (Issue #321).** A decision for the person is asked with the `AskUserQuestion` tool, never as prose: up to 4 related questions in one call, each with 2 to 4 concrete options (a label plus its trade-off in one line), the recommended one first and marked «(Recommended)», never a yes/no wrapped in prose; the automatic «Other» stays. When it must ask the Coach (a product choice, a choice that changes what users see or do, an order or a priority, money, accounts or secrets, deleting work or data), use this form. In OpenAI Codex use Codex's own structured-question tool (`request_user_input`, with options and an «Other» answer) when the session has it (check the tool list at run time, it may exist only in Plan mode); with no such tool, write the same question as a numbered list, the recommended option first, then a last line «Other: tell me what you prefer», and wait. A pending decision stays visible in `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue` and in the «Stalled» block of `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next` until answered: a Coach session that starts or wakes with decisions waiting asks them again, once per session, before anything else, and a message that asked and got no answer ends with one line «Pending decisions: #n, #m» (in a numbered list, the list ends with the Issue numbers so the person can answer by number). A technical or process choice with a clear best answer is still taken and said in one line.
 
 ## Reopening an Issue
 
