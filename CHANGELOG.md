@@ -7,6 +7,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ### Added
 
+- An active Issue now holds its allowed files against every Player, not only the same login (Issue #313): `huddle next` never offers a candidate that shares a file with another person's active Issue («shares <file> with #n, which runs for <login>»), and `huddle labels` shows it `blocked` with that reason until the holder stops being active. The holder never uses the other person's points (`used` and `capacity` are unchanged); another login's explicitly paused Issue holds nothing on the board; in `huddle next` other logins are read from the Issue's «in progress» label alone, with no new call. Same-login behaviour is unchanged.
+
 - The Coach can see planned file conflicts between open Issues and settle the order (Issue #312): `huddle conflicts` lists every pair of open Issues that share an allowed file (a path ending in `/` covers what is under it; `CHANGELOG.md` and a doc shared by two docs-only Issues are ignored) as «first / then / file», with a suggested order (an Issue the other depends on, then a blocking bug, then the lower number) and the Issues with no conflict, with `--json`; `huddle conflicts --apply` (the Coach's login only; `--dry-run` shows it first) adds `- #first` to the «Depends on» of each later Issue, never twice and never a circle (it stops and names the link to break), then runs `huddle labels` once, so the board shows `blocked` with the usual reason. `/huddle-issue` warns when a new Issue's allowed files overlap an open Issue and offers to add the dependency.
 
 ## [1.0.3] - 2026-11-23
