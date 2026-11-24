@@ -49,7 +49,7 @@ shows it. It decides how many Issues a Player works on at once.
 **Several Issues at once.** Each Player has a **capacity** of 5 points by default (`capacity`, or `capacity_per_person`, in
 `huddle.json`, set by the Coach). `/huddle-play` with no number works on as many of your assigned Issues as fit, each in a background
 subagent with a clean context, so no Issue pays for another one's context. Work in review uses no room, two Issues that share a file
-never run at once, and the next one starts when room frees. An Issue that waits only for a file held by another one uses no points either: `huddle next` lists it apart as «waits for files», and it counts again when the other one is done. `huddle next` shows what starts and what waits, and why. You can only
+never run at once, and the next one starts when room frees. An Issue that waits only for a file held by another one uses no points either: `huddle next` lists it apart as «waits for files», and it counts again when the other one is done. The files of an active Issue hold against every Player, not only you: an Issue of yours that shares a file with someone else's running Issue waits («shares <file> with #n, which runs for <login>»), shows `blocked` on the board, and never uses their points or yours. `huddle next` shows what starts and what waits, and why. You can only
 **lower** your capacity, on your machine: `huddle capacity 3` (and `huddle capacity reset`). Keep that session open: closing it stops the
 subagents. Design Issues stay in a session of their own.
 
@@ -79,6 +79,10 @@ An Issue lists what it needs under «Depends on», one `- #N` per line. A depend
 closed **and** a merged PR/MR closed it. An Issue closed by hand unblocks nothing. Put a note after the number
 (`- #209 (see PR #407)`): only the `#N` at the start of the line count, and a number that is not an Issue is a warning
 in the labels run, not a failure; that Issue stays `blocked`.
+
+### Planned file conflicts
+
+Two open Issues that list the same allowed file will collide at merge even if neither has started, and the `blocked` label only waits for a file that an active Issue holds. The Coach runs `huddle conflicts` to see every pair (first, then, the files they share, a suggested order) and the Issues with no conflict, and `huddle conflicts --apply` to settle the order once: it adds `- #first` to the «Depends on» of each later Issue (never a circle; it names the link to break) and runs the labels, so the later Issues show `blocked` until the first is merged. `huddle conflicts --apply --dry-run` shows the change first. When you want a different order than the suggested one (the lowest number first is only a default), say it: `huddle conflicts --apply --order 91,84,85` makes each Issue wait for the ones named before it that share a file with it, and leaves the other pairs as they were. `/huddle-issue` also warns when a new Issue overlaps an open one.
 
 ## How a task goes
 

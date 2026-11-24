@@ -86,12 +86,12 @@ test('a review item runs /huddle-review with its usual rules: merge when good, t
   assert.match(t, /oldest first/i);
 });
 
-test('a triage item is only reported; a decision is answered when technical (Issue #189), only reported when it is a product question', () => {
+test('a triage item is only reported; a decision is answered when technical (Issue #189), asked at once as a multiple choice when it is a product question (Issue #321)', () => {
   const t = flat(WATCH);
   assert.match(t, /`decision`/);
   assert.match(t, /`triage`/);
   assert.match(t, /never answered/i);
-  assert.match(t, /waits for your decision/);
+  assert.match(t, /asks it at once/);
   assert.match(t, /once per Issue/i);
   assert.match(t, /technical, answer it as `\/huddle-decide` does/);
 });

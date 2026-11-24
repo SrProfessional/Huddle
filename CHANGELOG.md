@@ -5,6 +5,22 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-11-24
+
+### Changed
+
+- Every decision for the person is asked as a multiple choice with «Other» (Issue #321): `/huddle-decide`, `/huddle-watch`, `/huddle-review`, `/huddle-release` and `/huddle-test` ask it with `AskUserQuestion` (up to 4 questions per call, 2 to 4 options with their trade-off, the recommended one first, the automatic «Other»), in OpenAI Codex with `request_user_input` when the session has it and otherwise as a numbered list ending with «Other: tell me what you prefer». The watch asks a waiting product decision at once, batched up to 4 per call, and answers it as `/huddle-decide` does; `triage` is still only reported, now offered as «triage now with /huddle-bug» or «later». A pending decision stays in `huddle queue` and the «Stalled» block of `huddle next`, is asked again once per session start, and a message with no answer ends with «Pending decisions: #n, #m». A technical question with a clear best answer is still decided without asking.
+
+### Added
+
+- The readers of an Issue's sections are consistent (Issue #318): a `None` or `(none)` allowed-files line lists no file in the shared reader (a file named `none.mjs` still counts) and `huddle conflicts` uses it; `section()` and `dependsOn` skip headings inside fenced code blocks; an interrupted Issue and another login's interrupted Issue with overlapping files no longer wait for each other (the lower number resumes, `huddle next` says so); and `huddle next` ignores another login's `in progress` Issue that has `needs decision`.
+
+- `huddle conflicts --apply --order <n>,<n>,...` takes the Coach's order (Issue #315): each named Issue depends on the named ones before it that it shares a file with, the other pairs keep the suggestion, a circle still writes nothing, only the Coach's login may apply it, `--dry-run` works, and an Issue that is not open or named twice is refused with no change. Three small reading fixes in `huddle conflicts`: `None` / `(none)` in «Allowed files» is no file, `CHANGELOG.md` does not stop an Issue from being docs-only, and a fenced `## Depends on` is not edited.
+
+- An active Issue now holds its allowed files against every Player, not only the same login (Issue #313): `huddle next` never offers a candidate that shares a file with another person's active Issue («shares <file> with #n, which runs for <login>»), and `huddle labels` shows it `blocked` with that reason until the holder stops being active. The holder never uses the other person's points (`used` and `capacity` are unchanged); another login's explicitly paused Issue holds nothing on the board; in `huddle next` other logins are read from the Issue's «in progress» label alone, with no new call. Same-login behaviour is unchanged.
+
+- The Coach can see planned file conflicts between open Issues and settle the order (Issue #312): `huddle conflicts` lists every pair of open Issues that share an allowed file (a path ending in `/` covers what is under it; `CHANGELOG.md` and a doc shared by two docs-only Issues are ignored) as «first / then / file», with a suggested order (an Issue the other depends on, then a blocking bug, then the lower number) and the Issues with no conflict, with `--json`; `huddle conflicts --apply` (the Coach's login only; `--dry-run` shows it first) adds `- #first` to the «Depends on» of each later Issue, never twice and never a circle (it stops and names the link to break), then runs `huddle labels` once, so the board shows `blocked` with the usual reason. `/huddle-issue` warns when a new Issue's allowed files overlap an open Issue and offers to add the dependency.
+
 ## [1.0.3] - 2026-11-23
 
 ### Changed
