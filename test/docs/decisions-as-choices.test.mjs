@@ -73,7 +73,7 @@ test('release, review and test name their own asks in the same form', () => {
   assert.match(skill('huddle-test'), /as one question/);
 });
 
-test('design §19 says it, and the CHANGELOG lists it in 1.0.4 with Unreleased left empty', () => {
+test('design §19 says it, and the CHANGELOG lists it in 1.0.4 only', () => {
   const d = read('docs/design.md');
   const s19 = d.slice(d.indexOf('## 19. Watching what waits'), d.indexOf('## 20. The version notice'));
   assert.match(s19, /Issue #321/);
@@ -85,7 +85,7 @@ test('design §19 says it, and the CHANGELOG lists it in 1.0.4 with Unreleased l
   assert.match(s19, /«Stalled» block of `huddle next`/);
   const c = raw('CHANGELOG.md');
   const unreleased = c.slice(c.indexOf('## [Unreleased]'), c.indexOf('## [1.0.4]'));
-  assert.equal(unreleased.trim(), '## [Unreleased]');
+  assert.doesNotMatch(unreleased, /Issue #321/); // Issue #325: Unreleased now holds later entries; #321 must stay in 1.0.4 only
   const v104 = c.slice(c.indexOf('## [1.0.4]'), c.indexOf('## [1.0.3]'));
   assert.match(v104, /Issue #321/);
 });

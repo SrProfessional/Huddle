@@ -5,6 +5,17 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-11-24
+
+### Changed
+
+- The cross-login text of `huddle next` says «circle» only for a real two-way case (Issue #329): a foreign Issue that is simply active reads «#n waits for #m, which runs for <login>». Words only: every scheduler decision and the `--json` keys are unchanged.
+
+### Fixed
+
+- An unclosed code fence in an Issue body hides only up to the next `## ` heading (Issue #326), so `dependsOn`, the effort and the allowed files are still read from the sections after it, in the board, `huddle next` and `huddle conflicts`. A fence of four backticks closes only on a line of four or more. Design §19 says a pending decision is «asked again», and the «Asking the Coach» section of the review skill says what the watch's review subagent does when it cannot ask.
+- A `huddle.json` written by a newer Huddle no longer breaks an older session (Issue #325): when its `setup_version` is newer than the running Huddle, unknown keys are ignored and every command says one line on stderr («huddle.json was written by Huddle X and this session runs Y: it ignores …. Reload the plugin»), never inside `--json` output. A typo (an unknown key with a `setup_version` that is not newer) and every other validation error fail exactly as before. `huddle doctor` names both versions and the action (reload the plugin), and its `setup` warning with equal versions now says which files differ instead of repeating the versions.
+
 ## [1.0.4] - 2026-11-24
 
 ### Changed
