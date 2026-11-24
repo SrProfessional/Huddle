@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { run } from '../../lib/cli/run.mjs';
 import { readSteps } from '../../lib/core/steps.mjs';
-import { harness } from './harness.mjs';
+import { harness, CONFIG, GITLAB_CONFIG } from './harness.mjs';
 
 const body = (files, needs = '') => `## Depends on\n\n- None\n\n## Effort\n\n1\n\n${needs}## Allowed files\n\n${files.map((f) => `- \`${f}\``).join('\n')}\n`;
 const NEEDS = ['## Needs', '', '- Editor: Xcode', '', ''].join('\n');
@@ -150,5 +150,104 @@ for (const gitlab of [false, true]) {
     h.as('SrProfessional');
     assert.equal(await run(['steps', '8', '--done'], h.ctx), 1);
     assert.match(h.text(), /not an open Issue/);
+  });
+
+  // Review round 2: a record that cannot be read never breaks a command; the record belongs to one login; the skip path releases the slot.
+  const closedHolder = ({ fail = {} } = {}) => {
+    const issue7 = { number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] };
+    let broken = null;
+    let who = 'ana';
+    const h = harness({ gitlab, config: { ...(gitlab ? GITLAB_CONFIG : CONFIG), staging_branch: 'staging' }, setup: (w) => {
+      w.issue(issue7);
+      w.review({ number: 70 });
+      w.issue({ number: 11, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: ['assigned'] });
+      w.issue({ number: 21, title: 'Luis plain', body: body(['q.mjs']), assignees: ['luis'], labels: ['assigned'] });
+    }, wrap: (a) => ({ ...a, me: async () => who, comments: async (n) => { if (broken && n === 7) throw broken; return a.comments(n); } }) });
+    h.ctx.updateCachePath = '/data/u.json';
+    const paths = [];
+    const write = h.ctx.writeFile;
+    h.ctx.writeFile = (p, t) => { paths.push(p); write(p, t); };
+    h.as = (name) => { who = name; };
+    h.breakWith = (e) => { broken = e; };
+    h.ready = async () => {
+      h.ctx.writeFile('/tmp/steps.txt', LIST);
+      assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt'], h.ctx), 0);
+      h.world.issue({ ...issue7, state: 'merged', labels: [] });
+      h.slotPath = paths.filter((x) => /toolslot/.test(x)).at(-1);
+    };
+    return h;
+  };
+
+  test(`${on}: a recorded Issue that cannot be found is dropped with ONE line, and never breaks next, steps or the start`, async () => {
+    const h = closedHolder();
+    await h.ready();
+    h.breakWith(Object.assign(new Error('gh: Could not resolve to an Issue with the number of 7.'), { notFound: true }));
+    h.err.length = 0;
+    const r = await plan(h);
+    assert.deepEqual(r.start.map((s) => s.issue), [11], 'the dropped record holds nothing');
+    assert.equal(h.err.length, 1);
+    assert.match(h.errText(), /#7/);
+    assert.match(h.errText(), /not found|Could not resolve/i);
+    assert.deepEqual(JSON.parse(h.ctx.readFile(h.slotPath)), {}, 'the record is removed from the file');
+    h.err.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    assert.equal(h.err.length, 0, 'said once');
+  });
+
+  test(`${on}: any other error (a network failure) skips that record for this round, keeps it, and never breaks the command`, async () => {
+    const h = closedHolder();
+    await h.ready();
+    h.breakWith(new Error('network down'));
+    h.err.length = 0;
+    const r = await plan(h);
+    assert.equal(h.err.length, 1);
+    assert.match(h.errText(), /#7.*network down/);
+    assert.deepEqual(r.start.map((s) => s.issue), [11]);
+    assert.ok(JSON.parse(h.ctx.readFile(h.slotPath))[7], 'the record stays');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0, 'steps does not crash either');
+    h.breakWith(null);
+    assert.equal(whyOf(await plan(h))[11], 'waits for the tool: #7 (closed, its test steps are still open) uses it', 'the next round holds again');
+  });
+
+  test(`${on}: a corrupt or empty record file is ignored with one line, and never breaks a command`, async () => {
+    const h = closedHolder();
+    await h.ready();
+    h.ctx.writeFile(h.slotPath, '{not json');
+    h.err.length = 0;
+    assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
+    assert.equal(h.err.length, 1);
+    assert.match(h.errText(), /record/i);
+    h.ctx.writeFile(h.slotPath, '');
+    h.err.length = 0;
+    assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
+    assert.equal(h.err.length, 0, 'an empty file is just no record');
+  });
+
+  test(`${on}: the record belongs to the login that wrote it; another login on the machine is not held; an old record without a login counts for everyone`, async () => {
+    const h = closedHolder();
+    await h.ready();
+    assert.equal(JSON.parse(h.ctx.readFile(h.slotPath))[7].login, 'ana');
+    assert.equal(whyOf(await plan(h))[11], 'waits for the tool: #7 (closed, its test steps are still open) uses it');
+    h.as('luis');
+    const r = await plan(h);
+    assert.deepEqual(r.start.map((s) => s.issue), [21], 'luis is not held by the record of ana');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    assert.deepEqual(JSON.parse(h.text()).steps, [], 'and does not see her step');
+    h.ctx.writeFile(h.slotPath, JSON.stringify({ 7: { title: 'Tool work' } }));
+    assert.equal(whyOf(await plan(h))[21], 'waits for the tool: #7 (closed, its test steps are still open) uses it', 'an old record, written before logins were stored, holds for every login');
+  });
+
+  test(`${on}: skipping the last step of a closed Issue releases the slot, clears the record and prints the return line`, async () => {
+    const h = closedHolder();
+    await h.ready();
+    h.as('SrProfessional');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '7', '--skip', '--note', 'I will never test this'], h.ctx), 0);
+    assert.match(h.text(), /#7 held the main checkout: return it to staging now/);
+    assert.deepEqual(JSON.parse(h.ctx.readFile(h.slotPath)), {});
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
   });
 }
