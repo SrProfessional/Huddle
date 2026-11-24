@@ -49,7 +49,7 @@ shows it. It decides how many Issues a Player works on at once.
 **Several Issues at once.** Each Player has a **capacity** of 5 points by default (`capacity`, or `capacity_per_person`, in
 `huddle.json`, set by the Coach). `/huddle-play` with no number works on as many of your assigned Issues as fit, each in a background
 subagent with a clean context, so no Issue pays for another one's context. Work in review uses no room, two Issues that share a file
-never run at once, and the next one starts when room frees. An Issue that waits only for a file held by another one uses no points either: `huddle next` lists it apart as «waits for files», and it counts again when the other one is done. `huddle next` shows what starts and what waits, and why. You can only
+never run at once, and the next one starts when room frees. An Issue that waits only for a file held by another one uses no points either: `huddle next` lists it apart as «waits for files», and it counts again when the other one is done. The files of an active Issue hold against every Player, not only you: an Issue of yours that shares a file with someone else's running Issue waits («shares <file> with #n, which runs for <login>»), shows `blocked` on the board, and never uses their points or yours. `huddle next` shows what starts and what waits, and why. You can only
 **lower** your capacity, on your machine: `huddle capacity 3` (and `huddle capacity reset`). Keep that session open: closing it stops the
 subagents. Design Issues stay in a session of their own.
 
