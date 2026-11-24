@@ -592,6 +592,18 @@ Rules that follow from `plan` and `statusOf` (they decide what the labels say, s
   **no «Depends on» section is not managed** and is never listed for `review`.
 - A closed Issue is never listed. The queue does not look at «Depends on» being merged: a PR for a blocked Issue is still a PR to review.
 
+**A question that waits is asked again, and blocks only what depends on it (Issue #335).** Seen on 2026-11-24: a Coach session answered
+«is there anything to decide?» in chat prose and the person missed it. The rule now sits in the managed block (§17), so it holds in every
+Coach session: a real question goes through `AskUserQuestion` (Codex: `request_user_input`; else a numbered list ending «Other: tell me
+what you prefer»), never a paragraph. `huddle asked <n>` records that a waiting decision was asked (`huddle-asked-<repo id>.json` in the
+shared folder, `{ "<n>": { count, at } }`; it refuses an Issue that does not wait, and drops the records of the ones answered). `queue`
+and `queue --json` add `asked: { count, at }` to a decision that was asked («asked <n> times, last at <time>»), and the session asks it
+again once at the start of each Coach turn and each watch wake, with «asked at <time>, still waiting», until it is answered. A decision
+holds only what depends on it: `holds` (its `--json` key, a list of Issue numbers) is every open Issue that depends on it through
+«Depends on», directly or down the chain, or shares an allowed file with it (`CHANGELOG.md` alone is no share: every Issue touches it); a review among them carries `heldBy`, and the
+Coach's session neither merges nor answers it while the decision waits. Reviews and merges of independent work go on. `queue` itself
+still writes nothing; only `asked` writes this one file.
+
 **`huddle queue [--json]`.** Read-only: it never writes a label, a comment or a file. The pure function
 `waitingFor({ open, openPrs, requests })` in `lib/core/queue.mjs` (`requests`: Issue number to `requestState`, as `plan` takes it) returns
 the items sorted by Issue number. Text output:

@@ -152,6 +152,8 @@ Issue #N stopped: waiting for a decision». The Coach answers with `/huddle-deci
 and the session continues on the same branch: it keeps waiting in the background and picks the answer up by itself (leave it open; if
 Claude Code was closed, run `/huddle-play <n>`). The session never closes the Issue.
 
+**A question that waits is asked again (Issue #335).** The Coach's session asks every real question as a multiple choice (with «Other»), never as a paragraph, also when you ask «is there anything to decide?». If you do not answer, it asks again at the start of each turn and each watch wake, saying «asked at <time>, still waiting»; it records each ask with `huddle asked <n>`, and `huddle queue` shows «asked <n> times, last at <time>». While a decision waits, only the Issue that waits for it, what depends on it («Depends on») and what shares an allowed file with it stay put; reviews and merges of other work go on.
+
 ## Issues change only through a session
 
 Every change to an Issue goes through a Huddle session: creating it (`/huddle-issue`, `/huddle-bug`), editing it, closing it, reopening it, and merging its PR/MR. Nobody merges, closes, reopens or edits an Issue by hand on the website or from a phone. The session runs `huddle labels` after the change, so the board stays right with no cloud job.
