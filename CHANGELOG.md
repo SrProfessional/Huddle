@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Changed
+
+- The cross-login text of `huddle next` says «circle» only for a real two-way case (Issue #329): a foreign Issue that is simply active reads «#n waits for #m, which runs for <login>». Words only: every scheduler decision and the `--json` keys are unchanged.
+
 ### Fixed
 
 - An unclosed code fence in an Issue body hides only up to the next `## ` heading (Issue #326), so `dependsOn`, the effort and the allowed files are still read from the sections after it, in the board, `huddle next` and `huddle conflicts`. A fence of four backticks closes only on a line of four or more. Design §19 says a pending decision is «asked again», and the «Asking the Coach» section of the review skill says what the watch's review subagent does when it cannot ask.

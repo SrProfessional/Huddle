@@ -32,16 +32,17 @@ for (const gitlab of [false, true]) {
   test(`${on}: two interrupted Issues of two logins with the same file: the lower number resumes, the other waits, and the output says so`, async () => {
     const ana = await nextOf(as('ana', circle, gitlab));
     assert.deepEqual(ana.resume.map((r) => r.issue), [21], 'the lower number holds and resumes');
-    assert.ok(ana.crossLoginCircles?.some((t) => /#21/.test(t) && /#22/.test(t) && /luis/.test(t) && /lower number/.test(t)), JSON.stringify(ana.crossLoginCircles));
+    assert.ok(ana.crossLoginCircles?.some((t) => /#22 waits for #21, which runs for ana/.test(t) && /lower number/.test(t)), JSON.stringify(ana.crossLoginCircles));
     const luis = await nextOf(as('luis', circle, gitlab));
     assert.deepEqual(luis.resume, [], 'the higher number waits for the other login\'s Issue');
     assert.match(luis.wait.find((w) => w.issue === 22).why, /#21/);
   });
 
-  test(`${on}: the text of next names the circle`, async () => {
+  test(`${on}: the text of next says a plainly active foreign Issue waits, with no circle`, async () => {
     const h = as('ana', circle, gitlab);
     assert.equal(await run(['next'], h.ctx), 0, h.errText());
-    assert.match(h.text(), /interrupted in a circle across logins: #21 \(ana\) and #22 \(luis\)/);
+    assert.match(h.text(), /#22 waits for #21, which runs for ana/);
+    assert.doesNotMatch(h.text(), /circle/);
   });
 
   test(`${on}: with no file in common nothing changes, and a foreign Issue with a lower number still holds the higher one`, async () => {
@@ -75,6 +76,11 @@ test('yields: only an interrupted Issue gives way, and only to another login\'s 
   assert.equal(yields({ number: 1 }, { number: 2, forLogin: 'luis' }), false, 'not interrupted');
   assert.equal(yields({ number: 1, interrupted: true }, { number: 2 }), false, 'same login');
   const f = (n) => body(`h${n}`, ['x.mjs']);
+  const [plain] = crossLoginCircles({ mine: [{ number: 1, interrupted: true, body: f(1) }], foreign: [{ number: 2, forLogin: 'luis', body: f(2) }], login: 'ana' });
+  assert.match(plain, /^#2 waits for #1, which runs for ana/);
+  assert.doesNotMatch(plain, /circle/);
+  const [two] = crossLoginCircles({ mine: [{ number: 1, interrupted: true, body: f(1) }], foreign: [{ number: 2, forLogin: 'luis', interrupted: true, body: f(2) }], login: 'ana' });
+  assert.equal(two, 'interrupted in a circle across logins: #1 (ana) and #2 (luis) share x.mjs; #1 goes first (the lower number), #2 waits for it');
   assert.deepEqual(crossLoginCircles({ mine: [{ number: 1, interrupted: true, body: f(1) }], foreign: [{ number: 2, forLogin: 'luis', body: body('h2', ['y.mjs']) }], login: 'ana' }), [], 'no shared file');
   assert.equal(crossLoginCircles({ mine: [{ number: 1, interrupted: true, body: f(1) }], foreign: [{ number: 2, forLogin: 'luis', body: f(2) }], login: 'ana' }).length, 1);
 });
