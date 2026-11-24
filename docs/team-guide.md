@@ -123,6 +123,8 @@ have to paste, **You should see:** what it looks like when it worked, and **If y
 A word like terminal or token gets a one-line meaning the first time it appears. Issues use the same mark, so a step
 without it belongs to the session. The rule and the format are in [the design](design.md#13-the-session-does-every-step-it-can).
 
+**The steps are a list, asked one by one (Issue #340).** When only you can go on, the session writes the steps as one list on the Issue, never as a paragraph and never with a command for you to type. In the Coach's session, `/huddle-steps` (`$huddle-steps` in Codex) shows the first step of one Issue as a question with **Done**, **I could not do it**, **It failed** and **Skip it** (the Issue goes on without that step), records your answer itself, and then shows the next step. A step you have not closed stays in `huddle queue`, in `huddle next` and in `huddle status` («waits for you: step 1 of 3 of #117: …»), and the Coach's session asks it again at the start of each turn, saying «still waiting». Only the work that depends on that step waits; everything else goes on.
+
 If a permission is denied or a credential is missing, the session stops and asks, as always: it never looks for another
 way.
 
