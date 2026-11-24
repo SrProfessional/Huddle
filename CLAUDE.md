@@ -33,6 +33,7 @@ root: read them there, never guess them.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
 8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
+9. When only the person can go on, post the steps with `huddle steps <n> --post <file>`. Write one action per step and never a command for the person to type. The Coach's session asks them with `/huddle-steps`.
 
 ### Language
 
