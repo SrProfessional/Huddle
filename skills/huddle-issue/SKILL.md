@@ -32,6 +32,7 @@ In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary
      with no technical background (docs/design.md §13); every other step stays the session's.
    - **How to test in staging:** optional. Ask for one or two steps a person with no technical background can do in staging, each with what they should see. `/huddle-test` reads this section to guide the Coach, so write it whenever the Issue changes something a person can see or touch.
   - **Allowed files**, **Contract or spec**, **Tests that must pass:** concrete, checkable.
+   - **Overlap warning:** compare the new Issue's allowed files with those of the open Issues (`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" conflicts` lists the planned conflicts that already exist); when a file is shared, say which Issues and offer to add `- #N` to this Issue's «Depends on» before creating it (the Coach's session decides when the order is obvious: the older Issue goes first), so the board shows `blocked` and two Players never collide at merge. `huddle conflicts --apply` settles the order of the whole repo at once.
    - **Milestone (area):** ask which milestone the Issue goes in. Areas are milestones, and each Issue belongs to one: list the
      open ones with `gh api repos/<project>/milestones --jq '.[].title'` (or `glab api projects/<encoded project>/milestones?state=active`)
      and offer them. If the right one does not exist yet, offer to create it. The Coach keeps its
