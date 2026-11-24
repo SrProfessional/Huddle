@@ -96,6 +96,53 @@ const DIRTY = ` M Assets/Main.unity${NL}?? notes.txt${NL}`;
 const BASE = { branch: 'staging', base: 'staging', issueBranch: 'h140-x' };
 const FAKE_ENGINE = { tool: 'Unity', answers: { connected: true } };
 
+test('the literal editor placeholder reserves the slot and asks for an unnamed tool', () => {
+  const placeholder = needs('- Editor: <tool>');
+  const required = needsTool(body(placeholder));
+  assert.deepEqual(required, { tool: null });
+  const plan = checkoutPlan({ ...BASE, ...required, status: CLEAN });
+  assert.equal(plan.kind, 'tool');
+  assert.equal(plan.list.steps[0].do, 'Open the tool on the main checkout.');
+  assert.deepEqual(plan.commands, []);
+  const scheduled = schedule({ active: [], candidates: [issue(5, placeholder), issue(6)], capacity: 5 });
+  assert.deepEqual(nums(scheduled.start), [5]);
+  assert.deepEqual(scheduled.wait, [{ issue: 6, why: 'waits for the tool: #5 uses it' }]);
+});
+
+test('a detached HEAD asks a branch question without planning a switch or return', () => {
+  for (const branch of ['', 'HEAD']) {
+    const checkout = { ...BASE, ...FAKE_ENGINE, branch, status: CLEAN, stepsOpen: false };
+    for (const plan of [checkoutPlan(checkout), returnPlan(checkout)]) {
+      assert.equal(plan.action, 'ask');
+      assert.equal(plan.kind, 'branch');
+      assert.deepEqual(plan.commands, []);
+      assert.match(plan.list.reason, /detached HEAD/);
+      assert.doesNotThrow(() => stepsBody(plan.list));
+    }
+  }
+});
+
+test('a detached HEAD keeps the return unverified even when clean and up to date', () => {
+  for (const branch of ['', 'HEAD']) {
+    const result = verifyReturn({ ...BASE, status: CLEAN, branch, behind: 0 });
+    assert.equal(result.ok, false);
+    assert.match(result.list.reason, /detached HEAD/);
+  }
+});
+
+test('a dirty detached checkout still asks about the changes first', () => {
+  const checkout = { ...BASE, ...FAKE_ENGINE, branch: '', status: DIRTY, stepsOpen: false };
+  for (const plan of [checkoutPlan(checkout), returnPlan(checkout)]) {
+    assert.equal(plan.kind, 'changes');
+    assert.deepEqual(plan.commands, []);
+    assert.match(plan.list.reason, /detached HEAD/);
+  }
+  const result = verifyReturn({ ...checkout, behind: 0 });
+  assert.equal(result.ok, false);
+  assert.match(result.list.reason, /changes that are not committed/);
+  assert.match(result.list.reason, /detached HEAD/);
+});
+
 test('the detector is one entry keyed by the tool name: connected, not connected or unknown', () => {
   assert.deepEqual(Object.keys(DETECTORS), ['unity']);
   assert.equal(toolState('Unity', { connected: true }), 'connected');
