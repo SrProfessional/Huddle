@@ -195,12 +195,14 @@ test('the return stops with one question, never forcing, when there are new chan
   assert.equal(moved.action, 'ask');
   assert.equal(moved.kind, 'branch');
   assert.deepEqual(moved.commands, []);
-  assert.equal(returnPlan({ ...r, status: CLEAN, branch: 'staging' }).action, 'done', 'already back: only the slot is released');
+  const onBase = returnPlan({ ...r, status: CLEAN, branch: 'staging' });
+  assert.equal(onBase.action, 'return', 'already on the base still needs a fresh check');
+  assert.deepEqual(onBase.commands, ['git fetch origin', 'git merge --ff-only origin/staging']);
 });
 
 test('after the return: on the base, clean and not behind means released; anything else is one question', () => {
   assert.deepEqual(verifyReturn({ status: CLEAN, branch: 'staging', base: 'staging', behind: 0 }), { ok: true });
-  for (const bad of [{ status: ` M a${NL}` }, { branch: 'h140-x' }, { behind: 2 }]) {
+  for (const bad of [{ status: ` M a${NL}` }, { branch: 'h140-x' }, { behind: 2 }, { behind: '' }, { behind: null }]) {
     const r = verifyReturn({ status: CLEAN, branch: 'staging', base: 'staging', behind: 0, ...bad });
     assert.equal(r.ok, false);
     assert.equal(r.list.steps.length, 1);

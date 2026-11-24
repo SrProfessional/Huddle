@@ -1,18 +1,40 @@
 // Issue #339: `huddle next` and the tool slot (docs/design.md §24). An Issue that lists `- Editor: <tool>` under `## Needs` waits while another Issue of the login runs;
-// while its test steps are open it holds the slot; closing them frees it. GitHub and GitLab, canned adapters; no git is run.
+// It holds the slot through testing and until the main checkout is verified back on the base. GitHub, GitLab and checkout data are faked.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { run } from '../../lib/cli/run.mjs';
-import { readSteps } from '../../lib/core/steps.mjs';
+import { readSteps, stepCloseBody } from '../../lib/core/steps.mjs';
 import { harness, CONFIG, GITLAB_CONFIG } from './harness.mjs';
 
 const body = (files, needs = '') => `## Depends on\n\n- None\n\n## Effort\n\n1\n\n${needs}## Allowed files\n\n${files.map((f) => `- \`${f}\``).join('\n')}\n`;
 const NEEDS = ['## Needs', '', '- Editor: Xcode', '', ''].join('\n');
 const LIST = 'Reason: test it in the tool\nStep: Press Play on the scene.\nSee: The Denied counter shows 0.\nOtherwise: Send a screenshot to the Coach.\n';
 
+function checkout(h) {
+  const state = { status: '', branch: 'staging', behind: '0\n', fetchError: null };
+  const reads = [];
+  h.ctx.git = (args, { cwd }) => {
+    const command = args.join(' ');
+    if (command === 'worktree list --porcelain') {
+      return 'worktree /repo\nHEAD abc123\nbranch refs/heads/staging\n\nworktree /repo/.claude/worktrees/linked\nHEAD def456\nbranch refs/heads/linked\n';
+    }
+    assert.equal(cwd, '/repo');
+    reads.push(command);
+    switch (command) {
+      case 'fetch origin --quiet': if (state.fetchError) throw state.fetchError; return '';
+      case 'status --porcelain --untracked-files=all': return state.status;
+      case 'branch --show-current': return state.branch;
+      case 'rev-list --count HEAD..refs/remotes/origin/staging': return state.behind;
+      default: assert.fail(command);
+    }
+  };
+  return { state, reads };
+}
+
 const build = ({ gitlab, extra }) => {
   let who = 'ana';
-  const h = harness({ gitlab, setup: extra, wrap: (a) => ({ ...a, me: async () => who }) });
+  const config = { ...(gitlab ? GITLAB_CONFIG : CONFIG), staging_branch: 'staging' };
+  const h = harness({ gitlab, config, setup: extra, wrap: (a) => ({ ...a, me: async () => who }) });
   h.ctx.updateCachePath = '/data/u.json';
   h.as = (name) => { who = name; };
   return h;
@@ -47,10 +69,10 @@ for (const gitlab of [false, true]) {
     assert.equal(whyOf(r)[11], 'waits for the tool: #10 uses it');
   });
 
-  test(`${on}: it holds the slot from its start until its test steps are closed, then it is released`, async () => {
+  test(`${on}: closing the last test step keeps an open Issue's slot until the return is verified`, async () => {
     const h = build({ gitlab, extra: (w) => {
       w.issue({ number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] });
-      w.review({ number: 70 });
+      w.review({ number: 70, base: 'staging', body: 'Closes #7' });
       w.issue({ number: 11, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: ['assigned'] });
       w.issue({ number: 12, title: 'Needs the tool too', body: body(['f.mjs'], NEEDS), assignees: ['ana'], labels: ['assigned'] });
     } });
@@ -66,16 +88,22 @@ for (const gitlab of [false, true]) {
     h.as('SrProfessional');
     h.out.length = 0;
     assert.equal(await run(['steps', '7', '--done'], h.ctx), 0);
+    assert.match(h.text(), /steps 7 --return/);
     h.as('ana');
     r = await plan(h);
-    assert.deepEqual(r.start.map((s) => s.issue), [11], 'the steps are closed: the slot is free');
+    assert.deepEqual(r.start, []);
+    assert.equal(whyOf(r)[11], 'waits for the tool: #7 (return of the main checkout pending) uses it');
+    assert.deepEqual(r.returns.map((entry) => entry.issue), [7]);
+    checkout(h);
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 0);
+    assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
   });
 
-  test(`${on}: a failed or skipped last step also releases the slot`, async () => {
+  test(`${on}: a failed or skipped last step also leaves the return pending`, async () => {
     for (const close of [['--failed', '--note', 'it crashed'], ['--skip', '--note', 'no time']]) {
       const h = build({ gitlab, extra: (w) => {
         w.issue({ number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] });
-        w.review({ number: 70 });
+        w.review({ number: 70, base: 'staging', body: 'Closes #7' });
         w.issue({ number: 11, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: ['assigned'] });
       } });
       h.ctx.writeFile('/tmp/steps.txt', LIST);
@@ -83,6 +111,9 @@ for (const gitlab of [false, true]) {
       h.as('SrProfessional');
       assert.equal(await run(['steps', '7', ...close], h.ctx), 0);
       h.as('ana');
+      assert.deepEqual((await plan(h)).start, []);
+      checkout(h);
+      assert.equal(await run(['steps', '7', '--return'], h.ctx), 0);
       assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
     }
   });
@@ -110,14 +141,15 @@ for (const gitlab of [false, true]) {
       w.issue({ number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in progress'] });
     } });
     h.ctx.writeFile('/tmp/steps.txt', 'Reason: the main checkout has changes that are not committed\nStep: Choose what happens to the changes in your main checkout: commit them, save them aside with a stash so I can give them back, or ask me to wait.\nSee: Your answer is saved on the Issue.\nOtherwise: Tell me what you saw.\n');
-    assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt'], h.ctx), 0);
+    assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt', '--preflight'], h.ctx), 0);
     h.as('SrProfessional');
     assert.equal(await run(['steps', '7', '--done', '--note', 'stash'], h.ctx), 0);
     assert.equal(readSteps(h.world.commentsOf(7)).steps[0].note, 'stash');
+    assert.doesNotMatch(h.text(), /steps 7 --return/);
     assert.equal(await run(['steps', '7', '--done', '--bogus'], h.ctx), 2);
   });
 
-  test(`${on}: an Issue that closed (its PR landed) while its test steps are open still holds the slot, its steps stay closable, and closing the last one releases it`, async () => {
+  test(`${on}: a closed Issue still reserves the checkout while testing and while the return is pending or blocked`, async () => {
     const issue7 = { number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] };
     const h = build({ gitlab, extra: (w) => {
       w.issue(issue7);
@@ -139,10 +171,50 @@ for (const gitlab of [false, true]) {
     h.as('SrProfessional');
     h.out.length = 0;
     assert.equal(await run(['steps', '7', '--done'], h.ctx), 0);
-    assert.match(h.text(), /main checkout/, 'it tells the session to return the checkout to the base branch');
+    assert.match(h.text(), /main checkout.*steps 7 --return/);
     h.as('ana');
     r = await plan(h);
-    assert.deepEqual(r.start.map((s) => s.issue), [11], 'the last step is closed: the slot is free');
+    assert.deepEqual(r.start, []);
+    assert.equal(whyOf(r)[12], 'waits for the tool: #7 (return of the main checkout pending) uses it');
+    assert.deepEqual(r.returns.map((entry) => entry.issue), [7]);
+
+    h.as('SrProfessional');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0, 'a new Coach command can find the pending return');
+    assert.deepEqual(JSON.parse(h.text()).returns.map((entry) => entry.issue), [7]);
+    const { state, reads } = checkout(h);
+    h.ctx.writeFile('/repo/.claude/worktrees/linked/huddle.json', h.ctx.readFile('/repo/huddle.json'));
+    h.ctx.root = '/repo/.claude/worktrees/linked';
+    h.ctx.cwd = '/repo/.claude/worktrees/linked';
+    h.as('luis');
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    assert.deepEqual(reads, [], 'another login cannot perform verification or release on this record');
+    h.as('SrProfessional');
+    state.status = ' M person.txt\n';
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    assert.match(h.text(), /changes that are not committed/);
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start, []);
+    h.as('SrProfessional');
+    state.status = '';
+    state.branch = 'h140-editor-slot';
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    state.branch = 'staging';
+    state.behind = '1\n';
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    state.behind = '\n';
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    state.behind = '0\n';
+    state.fetchError = new Error('offline');
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start, []);
+    h.as('SrProfessional');
+    state.fetchError = null;
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 0);
+    assert.deepEqual(reads.slice(-4), ['fetch origin --quiet', 'branch --show-current', 'status --porcelain --untracked-files=all', 'rev-list --count HEAD..refs/remotes/origin/staging']);
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
   });
 
   test(`${on}: an Issue that is closed and was never a tool Issue is still refused by huddle steps`, async () => {
@@ -240,16 +312,40 @@ for (const gitlab of [false, true]) {
     assert.equal(whyOf(await plan(h))[21], 'waits for the tool: #7 (closed, its test steps are still open) uses it', 'an old record, written before logins were stored, holds for every login');
   });
 
-  test(`${on}: skipping the last step of a closed Issue releases the slot, clears the record and prints the return line`, async () => {
+  test(`${on}: skipping the last step of a closed Issue records a pending return and prints its pointer`, async () => {
     const h = closedHolder();
     await h.ready();
     h.as('SrProfessional');
     h.out.length = 0;
     assert.equal(await run(['steps', '7', '--skip', '--note', 'I will never test this'], h.ctx), 0);
-    assert.match(h.text(), /#7 held the main checkout: return it to staging now/);
+    assert.match(h.text(), /#7 still holds the main checkout.*staging.*steps 7 --return/);
+    assert.equal(JSON.parse(h.ctx.readFile(h.slotPath))[7].returnPending, true);
+    checkout(h);
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 0);
     assert.deepEqual(JSON.parse(h.ctx.readFile(h.slotPath)), {});
     h.as('ana');
     assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
+  });
+
+  test(`${on}: a new session recovers a return when the closer stopped after posting the last closure`, async () => {
+    const h = closedHolder();
+    await h.ready();
+    const records = JSON.parse(h.ctx.readFile(h.slotPath));
+    h.ctx.writeFile(h.slotPath, JSON.stringify({ ...records, 7: { ...records[7], closing: true } }));
+    h.world.comment(7, { id: 800, author: 'SrProfessional', createdAt: '9999', body: stepCloseBody('done', { n: 1, total: 1, do: 'Press Play on the scene.' }) });
+    assert.equal(JSON.parse(h.ctx.readFile(h.slotPath))[7].returnPending, undefined);
+    h.breakWith(new Error('network down'));
+    assert.deepEqual((await plan(h)).start, [], 'a read error cannot clear an interrupted return');
+    h.breakWith(null);
+    assert.deepEqual((await plan(h)).start, []);
+    h.as('SrProfessional');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    assert.deepEqual(JSON.parse(h.text()).returns.map(({ issue }) => issue), [7]);
+    checkout(h);
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 0);
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start.map(({ issue }) => issue), [11]);
   });
 
   // Review round 3: only a real «not found» drops a record. The adapters build «<command and arguments> failed: <stderr>»: the arguments hold the Issue number, so a
