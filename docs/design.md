@@ -613,6 +613,29 @@ and `detailed_merge_status` of the MR); a failed read is `unknown`, never an err
 Exit 0 when it ran, with or without items; 1 on a platform error, with one clear line; 2 on a bad flag. A repo without `huddle.json`
 gets the same «not configured» error as the other commands.
 
+**A PR/MR that closes no Issue is never invisible (Issue #334).** Huddle links a PR/MR to its Issue only through the closing keyword
+(`closingIssuesReferences` on GitHub, «Closes #N» in the body of a PR/MR into the staging branch, the description on GitLab). Seen on 2026-11-24
+in a real project: a PR whose description was changed from «Closes #92» to «Refs #92» stopped belonging to #92, so #92 showed `in progress` with
+nobody working, the queue listed nothing to review and the Player's `huddle next` offered nothing to resume, for hours. The rule did not change
+(the matching of PRs/MRs to Issues for the labels and for the review items above is exactly what it was); the unlinked ones are now seen:
+
+- `huddle queue` lists every open PR/MR into the staging or the default branch that closes no Issue, with its number, title, head branch and the
+  Issue it seems to belong to: «PR #94 closes no Issue (it says «Refs #92»): Huddle does not see it in review. Put «Closes #92» in its
+  description, or open a separate Issue.» The hint is «it says «Refs #N»» (also «Part of #N»), or «its branch matches the Branch of #N» when the head
+  branch is the one an open Issue names under «Branch», or none. Drafts are listed apart, under «Drafts that close no Issue». `--json` adds the key
+  `unlinked`: `[{ number, title, head, base, draft, issue, hint }]` (`hint`: `refs`, `branch` or `null`).
+- `huddle doctor` adds one `⚠ reviews` line when any open PR/MR closes no Issue («1 open PR closes no Issue: huddle queue says which»), and nothing
+  when none does.
+- A merged PR/MR into the staging or the default branch whose text says «Refs #N» (or «Part of #N»), that closed nothing while #N is still open,
+  gets one line from `huddle land` and from `huddle queue` (the newest 20 merged per base): «PR #p merged and closed no Issue; #N is still open: if
+  its work is done, close it (the Coach's session closes it with a comment); if not, say what is left». `--json` has them as
+  `mergedWithoutClosing: [{ number, issues }]`. An Issue that has a PR/MR open for it, or is closed, is not reported.
+- A PR that fixes only part of an Issue is linked with «Closes» to a smaller Issue, and the rest is written as a new Issue (the Coach's session reduces
+  the Issue's text first); `/huddle-decide` and `/huddle-review` never advise «Refs #N» to keep an Issue open.
+- No extra cost per PR/MR: the adapter operation `openReviewList()` reads the open PRs/MRs in one call (GitHub: `gh pr list --state open --json
+  number,isDraft,title,body,headRefName,baseRefName,closingIssuesReferences`; GitLab: the list of open MRs the adapter already reads), and the
+  merged ones are one list per base. An adapter without it, or a failed read, shows nothing (one line on stderr for `queue`).
+
 **The skill `/huddle-watch [interval|off|status]`.** For the Coach only: it runs `huddle doctor` first and stops with a clear line
 if the login is not `coach`.
 

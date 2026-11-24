@@ -4,6 +4,8 @@
 
 const PROJECT = 'acme/app';
 
+const OPEN_DETAILS = 'number,isDraft,title,body,headRefName,baseRefName,closingIssuesReferences';
+
 export function fakeGithub({ project = PROJECT } = {}) {
   const issues = new Map(); // number -> { number, title, body, assignees[], labels[], state, closes[], reviews[], milestone }
   const milestones = new Map(); // title -> { number, title, description, state: 'OPEN' | 'CLOSED', closedAt, updatedAt }
@@ -151,6 +153,14 @@ export function fakeGithub({ project = PROJECT } = {}) {
       need(values(args, '--state')[0] === 'open' && values(args, '--limit')[0] === '1000' && values(args, '--json')[0] === 'number,isDraft,body,headRefName', args);
       const base = values(args, '--base')[0];
       return JSON.stringify([...reviews.values()].filter((r) => r.open && r.base === base).map((r) => ({ number: r.number, isDraft: r.draft, body: r.body, headRefName: r.branch })));
+    }
+    if (a === 'pr' && b === 'list' && values(args, '--state')[0] === 'open' && values(args, '--json')[0] === OPEN_DETAILS) {
+      // Issue #334: every open PR with what `huddle queue` and `huddle doctor` need to tell the unlinked ones, in one call (never one per PR).
+      need(values(args, '--limit')[0] === '1000', args);
+      return JSON.stringify([...reviews.values()].filter((r) => r.open).map((r) => ({
+        number: r.number, isDraft: r.draft, title: r.title, body: r.body, headRefName: r.branch, baseRefName: r.base,
+        closingIssuesReferences: [...issues.values()].filter((i) => i.reviews.includes(r.number)).map((i) => ({ number: i.number })),
+      })));
     }
     if (a === 'pr' && b === 'list' && values(args, '--state')[0] !== 'merged') {
       need(args.includes('--json') && values(args, '--state')[0] === 'open', args);
@@ -346,8 +356,8 @@ export function fakeGithub({ project = PROJECT } = {}) {
       issues.set(number, { number, title, body, assignees: [...assignees], labels: [...labels], state: defaults[0], closes: closes ?? defaults[1], reviews: [...closing], milestone });
     },
     // base: the branch the PR targets; body: its text; merged: it was merged (so it is not open).
-    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt = '2026-11-10T00:00:00Z', mergeable = 'MERGEABLE' }) {
-      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, commits: [...commits], head, mergedAt, mergeable });
+    review({ number, draft = false, open = true, branch = '', commits = [], head = `head${number}`, base = 'main', body = '', merged = false, mergedAt = '2026-11-10T00:00:00Z', mergeable = 'MERGEABLE', title = `PR ${number}` }) {
+      reviews.set(number, { number, draft, open: open && !merged, merged, branch, base, body, title, commits: [...commits], head, mergedAt, mergeable });
     },
     /** A branch that exists on the remote (`main` always does). */
     branch(name) { branches.add(name); },

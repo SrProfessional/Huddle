@@ -276,9 +276,11 @@ about it.
 | See what `huddle labels` would change | `huddle labels --dry-run` |
 | Update the labels of one Issue only | `huddle labels --issue <n>` |
 | Continue after a request | `/huddle-play <n>`, or answer yes to the hook |
-| See what waits for the Coach | `huddle queue` |
+| See what waits for the Coach, and the open PRs/MRs that close no Issue | `huddle queue` |
 | See if a newer Huddle exists (the skills say it too) | `huddle notice` |
 | Have the Coach's session review by itself (Coach) | `/huddle-watch`, and `/huddle-watch off` to stop |
+
+**A PR/MR must close its Issue.** Huddle links a PR/MR to its Issue only through «Closes #N» in its description. One that says «Refs #N» (or «Part of #N») belongs to no Issue: the board does not see it in review. `huddle queue` lists every open PR/MR that closes no Issue (drafts apart) with the Issue it points to, `huddle doctor` warns once, and a merged PR/MR that only said «Refs #N» is named by `huddle land` and `huddle queue` while #N is still open. A PR that fixes only part of an Issue is linked with «Closes» to a smaller Issue, and the rest is written as a new Issue: the Coach's session reduces the Issue's text first. Never use «Refs #N» to keep an Issue open.
 
 **What waiting costs.** After a PR/MR opens, the Player's session waits with a small Node process on the Player's own computer
 (`huddle wait`) that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub
