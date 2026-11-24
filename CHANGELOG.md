@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- A path with spaces under «Allowed files» is read whole, not cut at its first space (Issue #333): `Assets/1 Scenes/Mentor Dashboard/Mentor Dashboard.unity (new)` is one file, so `huddle next`, the board and `huddle conflicts` no longer report a shared phantom file such as `Assets/1` between Issues that touch different files. The path ends at a `code` span, or at a trailing «(…)» group or a spaced hyphen, en dash or em dash separator; an item whose first word was already a complete path (`lib/a.mjs the reader`) reads as before.
+
 ## [1.0.5] - 2026-11-24
 
 ### Changed
