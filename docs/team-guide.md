@@ -84,6 +84,12 @@ in the labels run, not a failure; that Issue stays `blocked`.
 
 Two open Issues that list the same allowed file will collide at merge even if neither has started, and the `blocked` label only waits for a file that an active Issue holds. The Coach runs `huddle conflicts` to see every pair (first, then, the files they share, a suggested order) and the Issues with no conflict, and `huddle conflicts --apply` to settle the order once: it adds `- #first` to the «Depends on» of each later Issue (never a circle; it names the link to break) and runs the labels, so the later Issues show `blocked` until the first is merged. `huddle conflicts --apply --dry-run` shows the change first. When you want a different order than the suggested one (the lowest number first is only a default), say it: `huddle conflicts --apply --order 91,84,85` makes each Issue wait for the ones named before it that share a file with it, and leaves the other pairs as they were. `/huddle-issue` also warns when a new Issue overlaps an open one.
 
+### Tasks that need a tool open on your checkout
+
+If a task has to run in a tool you already have open on your main checkout (for example a game engine's editor, Xcode or Android Studio), write `- Editor: <tool>` under `## Needs` in the Issue (the Task template has the section; for example `- Editor: Unity`). You only keep the tool open: Huddle starts that task only when nothing else of yours is running, lets nothing else of yours start while it works, switches the main checkout to the task's branch, does the work through the open tool, and leaves it there with a list of test steps for you. When you close the steps (`/huddle-steps`), it returns the checkout to the staging branch, up to date and clean, and the next task can start. `huddle next` shows «waits for the tool: #n is running» while it waits.
+
+Huddle never touches changes you have not committed. If the main checkout has some, it stops and asks you one question: commit them, save them aside with a stash and it gives them back later, or wait. Huddle can see by itself whether some tools are open (the first one is a game engine's editor); for any other tool the step is «Open <tool> on the main checkout», and it goes on when you close it. The same questions come back if the return finds new changes or a branch you moved: it never forces anything.
+
 ## How a task goes
 
 Huddle includes `/huddle-tdd`, `/huddle-debug`, `/huddle-verify`, and `/huddle-answer-review` to guide a Player through
