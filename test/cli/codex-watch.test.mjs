@@ -17,6 +17,7 @@ const review = (w) => { w.issue({ number: 42, title: 'Add login form', body: MAN
 test('queue --wait --codex starts the watch as a process of its own with the session, and returns at once', async () => {
   const started = [];
   const h = mk();
+  assert.equal(await run(['role', 'coach'], h.ctx), 0);
   h.ctx.startDetached = (args) => started.push(args);
   assert.equal(await run(['queue', '--wait', '300', '--seen', '51@x', '--codex'], h.ctx), 0);
   assert.deepEqual(started, [['queue', '--wait', '300', '--seen', '51@x', '--codex-thread', 'T9']]);
@@ -25,10 +26,12 @@ test('queue --wait --codex starts the watch as a process of its own with the ses
 
 test('queue --wait --codex refuses outside Codex, and with no network', async () => {
   const h = mk({ session: { tool: 'claude', id: 'S1' } });
+  assert.equal(await run(['role', 'coach'], h.ctx), 0);
   h.ctx.startDetached = () => assert.fail('nothing starts');
   assert.equal(await run(['queue', '--wait', '300', '--codex'], h.ctx), 1);
   assert.match(h.errText(), /CODEX_THREAD_ID/);
   const n = mk();
+  assert.equal(await run(['role', 'coach'], n.ctx), 0);
   n.ctx.codexNoNetwork = true;
   n.ctx.startDetached = () => assert.fail('nothing starts');
   assert.equal(await run(['queue', '--wait', '300', '--codex'], n.ctx), 1);
@@ -38,6 +41,7 @@ test('queue --wait --codex refuses outside Codex, and with no network', async ()
 test('the detached watch queues a message into the Codex chat when something waits', async () => {
   const queued = [];
   const h = mk({ setup: review });
+  assert.equal(await run(['role', 'coach'], h.ctx), 0);
   h.ctx.codexQueue = (thread, message) => queued.push({ thread, message });
   assert.equal(await run(['queue', '--wait', '300', '--codex-thread', 'T9'], h.ctx), 0);
   assert.equal(queued.length, 1);
@@ -60,6 +64,7 @@ test('in Codex, «always» asks the session to start the watch the Codex way', a
 
 test('in Codex, «always» names the session that already holds the watch and does not ask to start it', async () => {
   const claude = mk({ session: { tool: 'claude', id: 'S1' } });
+  assert.equal(await run(['role', 'coach'], claude.ctx), 0);
   await run(['queue', '--always'], claude.ctx);
   await run(['queue', '--wait', '300'], claude.ctx).catch(() => {});
   const codex = mk();

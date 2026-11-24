@@ -600,7 +600,9 @@ available and a numbered list elsewhere. It records the ask with `huddle role --
 Notices or background wakes do not choose a role. Non-Huddle work and neutral startup housekeeping can continue. Startup labels use
 `--no-assign` until the session uses Coach or Both with the Coach login. After a choice, the session reads `huddle hook` again for startup
 guidance. The `always` setting applies in a selected Coach or Both session. An existing watch stops acting for a role that the person
-has removed from its session. The selected role does not change any GitHub or GitLab permissions.
+has removed from its session. Direct waits in an identifiable session require the selected role, and a label pass from that session
+checks the current Coach login before assigning. Sessionless service jobs keep their existing rules. The selected role does not change
+any GitHub or GitLab permissions.
 
 Asked on 2026-11-11 (Issue #88). The Coach had to tell its session to look at the PRs and questions that wait for it. One
 command now starts a check every few minutes inside the Coach's Claude Code session, and a read-only CLI command lists what waits.

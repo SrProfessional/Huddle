@@ -10,7 +10,7 @@ const BODY = '## Depends on\n\n- None\n';
 function fixture(tool, { me = COACH, id = 's1' } = {}) {
   const h = harness({
     config: CONFIG_DUAL,
-    wrap: (adapter) => ({ ...adapter, me: async () => me }),
+    wrap: (adapter) => ({ ...adapter, me: typeof me === 'function' ? me : async () => me }),
     setup: (w) => {
       w.issue({ number: 42, body: BODY, assignees: [COACH], labels: ['in progress'], reviews: [51] });
       w.review({ number: 51, head: 'latest' });
@@ -34,8 +34,10 @@ const context = (output) => output.hookSpecificOutput?.additionalContext ?? '';
 
 for (const tool of ['claude', 'codex']) {
   test(`${tool}: unspecified role leaves automation idle and supplies a single deferred choice`, async () => {
-    const h = fixture(tool);
+    const h = fixture(tool, { id: 'previous-coach-session' });
+    assert.equal(await h.exec('role', 'coach'), 0);
     assert.equal(await h.exec('queue', '--always'), 0);
+    h.ctx.session = { tool, id: 'fresh-session' };
     let housekeeping = 0;
     h.ctx.startClean = () => { housekeeping += 1; };
     const start = await h.hook();
@@ -53,9 +55,9 @@ for (const tool of ['claude', 'codex']) {
     const h = fixture(tool);
     const second = fixture(tool, { id: 's2' });
     Object.assign(second.ctx, { readFile: h.ctx.readFile, writeFile: h.ctx.writeFile });
-    assert.equal(await h.exec('queue', '--always'), 0);
-    assert.equal(await h.exec('role', 'player'), 0);
     assert.equal(await second.exec('role', 'coach'), 0);
+    assert.equal(await second.exec('queue', '--always'), 0);
+    assert.equal(await h.exec('role', 'player'), 0);
     assert.doesNotMatch(context(await h.hook()), /start the watch|AskUserQuestion|request_user_input/);
     assert.match(context(await second.hook()), /start the watch/);
     assert.equal(await h.exec('role', 'both'), 0);
@@ -86,4 +88,61 @@ test('an explicit role blocks starting the other role’s watches', async () => 
   assert.match(h.errText(), /session role/);
   assert.equal(await h.exec('wait', '42', '--codex'), 1);
   assert.match(h.errText(), /session role/);
+});
+
+test('a fresh identifiable session cannot start either watch or a per-Issue wait', async () => {
+  const h = fixture('codex');
+  h.ctx.codexThread = h.ctx.session.id;
+  const started = [];
+  h.ctx.startDetached = (args) => { started.push(args); return 123; };
+  for (const args of [['queue', '--wait', '--codex'], ['next', '--wait', '--codex'], ['wait', '42', '--codex']]) {
+    assert.equal(await h.exec(...args), 1);
+    assert.match(h.errText(), /session role/);
+  }
+  assert.deepEqual(started, []);
+
+  assert.equal(await h.exec('role', 'both'), 0);
+  assert.equal(await h.exec('queue', '--wait', '--codex'), 0);
+  assert.equal(await h.exec('next', '--wait', '--codex'), 0);
+  assert.equal(await h.exec('wait', '42', '--codex'), 0);
+  assert.deepEqual(started.map(([name]) => name), ['queue', 'next', 'wait']);
+});
+
+test('label assignment in an identifiable session requires both a chosen Coach role and the current Coach login', async () => {
+  let login = COACH;
+  const h = fixture('claude', { me: async () => login });
+  h.world.issue({ number: 43, body: BODY });
+  assert.equal(await h.exec('labels', '--dry-run'), 0);
+  assert.doesNotMatch(h.text(), /#43 assigned to/);
+
+  assert.equal(await h.exec('role', 'coach'), 0);
+  assert.equal(await h.exec('labels', '--dry-run'), 0);
+  assert.match(h.text(), /#43 assigned to/);
+  assert.equal(await h.exec('labels', '--dry-run', '--no-assign'), 0);
+  assert.doesNotMatch(h.text(), /#43 assigned to/);
+
+  login = 'ana';
+  assert.equal(await h.exec('labels', '--dry-run'), 0);
+  assert.doesNotMatch(h.text(), /#43 assigned to/);
+  assert.equal(await h.exec('queue', '--wait-off'), 1);
+});
+
+test('a sessionless labels job may still assign work under the existing service rules', async () => {
+  const h = fixture('claude', { id: null, me: 'ana' });
+  h.world.issue({ number: 43, body: BODY });
+  assert.equal(await h.exec('labels', '--dry-run'), 0);
+  assert.match(h.text(), /#43 assigned to/);
+});
+
+test('a saved Player selection needs an eligible current login before starting waits', async () => {
+  let login = COACH;
+  const h = fixture('codex', { me: async () => login });
+  h.ctx.codexThread = h.ctx.session.id;
+  const started = [];
+  h.ctx.startDetached = (args) => { started.push(args); return 123; };
+  assert.equal(await h.exec('role', 'player'), 0);
+  login = 'outside-team';
+  assert.equal(await h.exec('next', '--wait', '--codex'), 1);
+  assert.equal(await h.exec('wait', '42', '--codex'), 1);
+  assert.deepEqual(started, []);
 });
