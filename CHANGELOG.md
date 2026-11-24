@@ -5,6 +5,10 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+### Fixed
+
+- A `huddle.json` written by a newer Huddle no longer breaks an older session (Issue #325): when its `setup_version` is newer than the running Huddle, unknown keys are ignored and every command says one line on stderr («huddle.json was written by Huddle X and this session runs Y: it ignores …. Reload the plugin»), never inside `--json` output. A typo (an unknown key with a `setup_version` that is not newer) and every other validation error fail exactly as before. `huddle doctor` names both versions and the action (reload the plugin), and its `setup` warning with equal versions now says which files differ instead of repeating the versions.
+
 ## [1.0.4] - 2026-11-24
 
 ### Changed

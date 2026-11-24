@@ -717,6 +717,22 @@ for the repo root (compared without case and with either slash) keeps `--scope p
 `claude plugin marketplace update` has no scope. The team guide says: update inside each project where Huddle is used, open a new
 session, and that a project can be on an older version than another.
 
+**A `huddle.json` from a newer Huddle (Issue #325).** Sessions load the plugin when they start, so a session can run an older Huddle than the one
+that last set the repo up, and the repo's `huddle.json` may hold a key that Huddle does not know (seen on 2026-11-24: a 0.9.5 session against a 1.0.3
+file with `"language"`: every command failed). `loadConfig` takes the running version (`installedVersion(ctx)`, the `version` of the plugin's
+`plugin.json`) and keeps the strictness for typos: an unknown key is an error, with the same text as always, **unless** the file's `setup_version`
+is newer than the installed version. Both must be strictly `major.minor.patch`: a missing, odd or unreadable version (either one) is never
+newer. A newer file with unknown keys and no other error loads without them (a nested one, `labels.nope`, is named by its path), the config carries
+`newer: { setupVersion, installed, keys }`, and every command says one line on **stderr**, once per run, never in `--json` output and never from the
+hook: «huddle.json was written by Huddle <setup_version> and this session runs <installed>: it ignores <keys>. Reload the plugin (/reload-plugins, or
+open a new session) to use the new version.» Every other error (a known key with a wrong type or value, a missing required key) stays an error even
+when the file is newer. `huddle doctor` does not repeat the line: its `setup` line is a warning that names both versions and the action («this
+session runs 0.9.5 but the repo is set up for 1.0.3: reload the plugin»); `setupStatus` has the state `newer` for it, also when no key is unknown.
+The `setup` line with equal versions («the version is the same (X), but these files differ from what this Huddle writes: …; run /huddle-update to
+refresh them») says its real reason: a question is pending only when it is newer than `setup_version`, so with equal versions the only way into
+the `needs` state is `changed`, the files that `setup` would rewrite (the `CLAUDE.md` block, a template); a pending question is
+named too if one ever is.
+
 **Not here:** the hook's own notice (unchanged), a skill that runs the update by itself, a `doctor` line about several installations, and
 finding out why the hook's notice does not show in VS Code.
 
