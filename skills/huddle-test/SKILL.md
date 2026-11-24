@@ -11,6 +11,8 @@ way: say so and stop. The rules are in docs/design.md §21 (the release and the 
 
 **In OpenAI Codex**: run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; make worktrees with `git worktree add` and work in that folder; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
 
+**Asking the person (Issue #321).** A decision for the person is asked with the `AskUserQuestion` tool, never as prose: up to 4 related questions in one call, each with 2 to 4 concrete options (a label plus its trade-off in one line), the recommended one first and marked «(Recommended)», never a yes/no wrapped in prose; the automatic «Other» stays. In OpenAI Codex use Codex's own structured-question tool (`request_user_input`, with options and an «Other» answer) when the session has it (check the tool list at run time, it may exist only in Plan mode); with no such tool, write the same question as a numbered list, the recommended option first, then a last line «Other: tell me what you prefer», and wait. A pending decision stays visible in `huddle queue` and in the «Stalled» block of `huddle next` until answered: a Coach session that starts or wakes with decisions waiting asks them again, once per session, before anything else, and a message that asked and got no answer ends with one line «Pending decisions: #n, #m» (in a numbered list, the list ends with the Issue numbers so the person can answer by number).
+
 Do these in this order.
 
 1. **What is untested.** Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" release --json` and take the Issues in staging that are not tested
@@ -26,7 +28,7 @@ Do these in this order.
    enough to write a step, say so and ask the Coach what to check. A step the session can run itself (a CLI command in a clean worktree of
    `origin/<staging_branch>`, a page it can generate) is run by the session and its output is shown, not handed to the Coach. Only what needs a
    person's eyes, a second account or another device is handed to the Coach, as numbered «🙋 Only you» steps.
-4. **Wait for the Coach's answer for that Issue:**
+4. **Ask the Coach's answer for that Issue as one question** (passed first, then failed, skip, stop), and wait:
    - «passed» (run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` and go on to the next Issue);
    - «failed» (ask what they saw, and offer a bug Issue with `/huddle-bug` or reopening the Issue as in `/huddle-release`; do not mark it);
    - «skip» (leave it unmarked and go on);
