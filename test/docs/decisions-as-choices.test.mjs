@@ -28,7 +28,9 @@ for (const name of NAMES) {
   test(`${name}: a pending decision stays visible, is asked again once per session, and an unanswered message ends with its list`, () => {
     const t = skill(name);
     assert.ok(t.includes('stays visible in `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue` and in the «Stalled» block of `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next` until answered'));
-    assert.match(t, /asks them again, once per session, before anything else/);
+    // Issue #335: /huddle-decide and /huddle-watch ask again once per Coach turn and watch wake; the other skills keep the older wording.
+    if (['huddle-decide', 'huddle-watch'].includes(name)) assert.match(t, /asks again, once, every decision that waits/);
+    else assert.match(t, /asks them again, once per session, before anything else/);
     assert.match(t, /Pending decisions: #n, #m/);
   });
 

@@ -104,6 +104,12 @@ for changes only for what blocks; what does not block is merged and written as a
 Coach only when the choice changes what users see or do (a screen, a flow, a text, a feature's behaviour or scope), the product's
 priorities, money, accounts or secrets, security or privacy rules, deleting work or data, or production (`/huddle-release`).
 
+### The Coach's session asks questions as a multiple choice, and asks again
+
+Every real question to the person (a product decision, an order or priority, money, accounts or secrets, a step that waits for the person's word) is asked with the `AskUserQuestion` tool in Claude Code (2 to 4 options with their trade-off, the recommended one first and marked «(Recommended)», «Other» comes by itself; up to 4 related questions per call), with `request_user_input` in Codex when the session has it, and otherwise as a numbered list ending «Other: tell me what you prefer» with the Issue numbers. It is never written as a paragraph in a status answer, also when the person asks «is there anything to decide?». A technical or process choice with a clear best answer is still decided and said in one line.
+
+A question without an answer is asked again, and says so: `huddle queue` lists each decision that waits with «asked <n> times, last at <time>». At the start of each Coach turn and each watch wake the session asks every one of them once, with «asked at <time>, still waiting» in the question text, and records the ask with `huddle asked <n>`, until it is answered. It never answers a product question for the person. A waiting decision blocks only what depends on the answer: the session does not merge, answer or move forward the Issue that waits for it, nor an Issue that depends on it (`Depends on`) or shares an allowed file with it (`huddle queue` shows them as «holds» and «held»); reviews and merges of independent work go on.
+
 ### Names
 
 The two roles are the Coach and the Player. Older Issues, docs and comments may say «AI Manager» and «developer»: they mean the Coach and
