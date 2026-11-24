@@ -77,3 +77,67 @@ test('planApply refuses a link that would close a circle and names the link to b
   assert.match(p.refused[0].text, /circular wait: #1 → #3 → #2 → #1/);
   assert.match(p.refused[0].breakIt, /«Depends on»/);
 });
+
+// Issue #315: `None` is not a file, CHANGELOG.md does not stop an Issue from being docs-only, a fenced «Depends on» is not the real one, and `--order` takes the Coach's order.
+const rawBody = (allowed, deps = '- None') => `## Depends on\n\n${deps}\n\n## Allowed files\n\n${allowed}\n\n## Contract or spec\n\nx\n`;
+
+test('«None» and «(none)» list no file, in any case, with or without backticks or a dash; two such Issues never conflict', () => {
+  for (const line of ['- None', '- none', '- (none)', '- (None)', '- `None`', '* None', '- None.', '-   NONE']) {
+    const r = conflictReport([{ number: 1, title: 'a', labels: [], body: rawBody(line) }, { number: 2, title: 'b', labels: [], body: rawBody(line) }]);
+    assert.deepEqual(r.rows, [], line);
+    assert.deepEqual(r.free, [1, 2], line);
+  }
+  // A real file next to None still counts, and a file whose name only starts with «none» is a file.
+  const mixed = conflictReport([{ number: 1, title: 'a', labels: [], body: rawBody('- None\n- `a.mjs`') }, { number: 2, title: 'b', labels: [], body: rawBody('- `a.mjs`') }]);
+  assert.equal(mixed.rows.length, 1);
+  const named = conflictReport([{ number: 1, title: 'a', labels: [], body: rawBody('- `none.mjs`') }, { number: 2, title: 'b', labels: [], body: rawBody('- `none.mjs`') }]);
+  assert.equal(named.rows.length, 1);
+});
+
+test('a docs-only Issue that also lists CHANGELOG.md is still docs-only: two of them sharing a docs page do not conflict', () => {
+  const r = conflictReport([issue(1, ['docs/design.md', 'CHANGELOG.md']), issue(2, ['docs/design.md', 'docs/team-guide.md', 'CHANGELOG.md'])]);
+  assert.deepEqual(r.rows, []);
+  const code = conflictReport([issue(1, ['docs/design.md', 'CHANGELOG.md']), issue(2, ['docs/design.md', 'lib/a.mjs', 'CHANGELOG.md'])]);
+  assert.equal(code.rows.length, 1, 'one of them also lists code');
+  const onlyLog = conflictReport([issue(1, ['CHANGELOG.md']), issue(2, ['CHANGELOG.md'])]);
+  assert.deepEqual(onlyLog.rows, []);
+});
+
+test('a fenced «## Depends on» before the real section is not edited and not read; the real one is', () => {
+  const fenced = '## Goal\n\n```text\n## Depends on\n\n- #99\n```\n\n## Depends on\n\n- None\n\n## Allowed files\n\n- `a.mjs`\n';
+  const out = addDependency(fenced, 4);
+  assert.match(out, /```text\n## Depends on\n\n- #99\n```/, 'the fenced block is untouched');
+  assert.match(out, /## Depends on\n\n- #4\n\n## Allowed files/);
+  assert.equal(addDependency(out, 4), out, 'never twice');
+  const fencedOnly = '## Goal\n\n```\n## Depends on\n\n- None\n```\n\n## Allowed files\n\n- `a.mjs`\n';
+  assert.equal(addDependency(fencedOnly, 4), null, 'a fenced section alone is no section');
+  // The report reads the real section too: #2 really depends on #1, so the pair is settled.
+  const r = conflictReport([issue(1, ['a.mjs']), { number: 2, title: 'two', labels: [], body: fenced.replace('- None\n\n## Allowed', '- #1\n\n## Allowed') }]);
+  assert.deepEqual(r.rows.map((x) => [x.first, x.then, x.settled]), [[1, 2, true]]);
+});
+
+test('--order: the named Issues follow the Coach\'s order between the pairs that share a file; the rest of the suggestion stays', () => {
+  const issues = [issue(84, ['Scene.unity', 'A.cs']), issue(85, ['Scene.unity']), issue(91, ['A.cs', 'Scene.unity']), issue(7, ['other.mjs']), issue(8, ['other.mjs'])];
+  const r = conflictReport(issues, { order: [91, 84, 85] });
+  assert.deepEqual(r.rows.map((x) => [x.first, x.then]), [[7, 8], [84, 85], [91, 84], [91, 85]]);
+  const p = planApply(issues, { order: [91, 84, 85] });
+  assert.deepEqual(p.changes.map((c) => [c.issue, c.add]), [[8, [7]], [84, [91]], [85, [84, 91]]]);
+  assert.deepEqual(p.refused, []);
+  // Only pairs that share a file: #86 comes after #91 in the order but shares nothing with it, so it depends on nobody.
+  const apart = planApply([issue(91, ['a.mjs']), issue(86, ['b.mjs']), issue(87, ['a.mjs'])], { order: [87, 86, 91] });
+  assert.deepEqual(apart.changes.map((c) => [c.issue, c.add]), [[91, [87]]]);
+  // A named Issue with an unnamed one keeps the default rule.
+  const half = planApply([issue(1, ['a.mjs']), issue(2, ['a.mjs']), issue(3, ['a.mjs'])], { order: [3, 2] });
+  assert.deepEqual(half.changes.map((c) => [c.issue, c.add]), [[2, [1, 3]], [3, [1]]]);
+  // Without an order nothing changes.
+  assert.deepEqual(planApply(issues), planApply(issues, {}));
+});
+
+test('--order never makes a circle: a link against an existing dependency is refused with the link to break', () => {
+  const issues = [issue(1, ['a.mjs'], { deps: '- #2' }), issue(2, ['a.mjs'])];
+  const p = planApply(issues, { order: [1, 2] });
+  assert.deepEqual(p.changes, []);
+  assert.equal(p.refused.length, 1);
+  assert.deepEqual([p.refused[0].first, p.refused[0].then], [1, 2]);
+  assert.match(p.refused[0].text, /circular wait/);
+});

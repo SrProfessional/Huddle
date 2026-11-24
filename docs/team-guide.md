@@ -82,7 +82,7 @@ in the labels run, not a failure; that Issue stays `blocked`.
 
 ### Planned file conflicts
 
-Two open Issues that list the same allowed file will collide at merge even if neither has started, and the `blocked` label only waits for a file that an active Issue holds. The Coach runs `huddle conflicts` to see every pair (first, then, the files they share, a suggested order) and the Issues with no conflict, and `huddle conflicts --apply` to settle the order once: it adds `- #first` to the «Depends on» of each later Issue (never a circle; it names the link to break) and runs the labels, so the later Issues show `blocked` until the first is merged. `huddle conflicts --apply --dry-run` shows the change first. `/huddle-issue` also warns when a new Issue overlaps an open one.
+Two open Issues that list the same allowed file will collide at merge even if neither has started, and the `blocked` label only waits for a file that an active Issue holds. The Coach runs `huddle conflicts` to see every pair (first, then, the files they share, a suggested order) and the Issues with no conflict, and `huddle conflicts --apply` to settle the order once: it adds `- #first` to the «Depends on» of each later Issue (never a circle; it names the link to break) and runs the labels, so the later Issues show `blocked` until the first is merged. `huddle conflicts --apply --dry-run` shows the change first. When you want a different order than the suggested one (the lowest number first is only a default), say it: `huddle conflicts --apply --order 91,84,85` makes each Issue wait for the ones named before it that share a file with it, and leaves the other pairs as they were. `/huddle-issue` also warns when a new Issue overlaps an open one.
 
 ## How a task goes
 
