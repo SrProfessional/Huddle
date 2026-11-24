@@ -153,25 +153,26 @@ for (const gitlab of [false, true]) {
   });
 
   // Review round 2: a record that cannot be read never breaks a command; the record belongs to one login; the skip path releases the slot.
-  const closedHolder = ({ fail = {} } = {}) => {
-    const issue7 = { number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] };
+  const closedHolder = ({ n: N = 7 } = {}) => {
+    const issue7 = { number: N, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] };
     let broken = null;
+    let brokenLabels = null;
     let who = 'ana';
     const h = harness({ gitlab, config: { ...(gitlab ? GITLAB_CONFIG : CONFIG), staging_branch: 'staging' }, setup: (w) => {
       w.issue(issue7);
       w.review({ number: 70 });
       w.issue({ number: 11, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: ['assigned'] });
       w.issue({ number: 21, title: 'Luis plain', body: body(['q.mjs']), assignees: ['luis'], labels: ['assigned'] });
-    }, wrap: (a) => ({ ...a, me: async () => who, comments: async (n) => { if (broken && n === 7) throw broken; return a.comments(n); } }) });
+    }, wrap: (a) => ({ ...a, me: async () => who, comments: async (n) => { if (broken && n === N) throw broken; return a.comments(n); }, issueLabels: async (n) => { if (broken && n === N) throw brokenLabels ?? broken; return a.issueLabels(n); } }) });
     h.ctx.updateCachePath = '/data/u.json';
     const paths = [];
     const write = h.ctx.writeFile;
     h.ctx.writeFile = (p, t) => { paths.push(p); write(p, t); };
     h.as = (name) => { who = name; };
-    h.breakWith = (e) => { broken = e; };
+    h.breakWith = (e, labelsError = null) => { broken = e; brokenLabels = labelsError; };
     h.ready = async () => {
       h.ctx.writeFile('/tmp/steps.txt', LIST);
-      assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt'], h.ctx), 0);
+      assert.equal(await run(['steps', String(N), '--post', '/tmp/steps.txt'], h.ctx), 0);
       h.world.issue({ ...issue7, state: 'merged', labels: [] });
       h.slotPath = paths.filter((x) => /toolslot/.test(x)).at(-1);
     };
@@ -250,4 +251,41 @@ for (const gitlab of [false, true]) {
     h.as('ana');
     assert.deepEqual((await plan(h)).start.map((s) => s.issue), [11]);
   });
+
+  // Review round 3: only a real «not found» drops a record. The adapters build «<command and arguments> failed: <stderr>»: the arguments hold the Issue number, so a
+  // network error, a rate limit or a DNS error on Issue 404 or 1404 must keep the record. The adapters' own not-found logic is reused through `issueLabels`, which flags `notFound`.
+  const cmd = (n) => (gitlab ? `glab api projects/acme%2Fapp/issues/${n}/notes --paginate failed: ` : `gh api repos/acme/app/issues/${n}/comments --paginate --slurp failed: `);
+  const NOT_THERE = (n) => (gitlab ? [`404 Not Found`, `404 Not found`] : [`gh: Not Found (HTTP 404)`, `GraphQL: Could not resolve to an Issue with the number of ${n}. (repository.issue)`]).map((t) => `${cmd(n)}${t}`);
+  const NOT_GONE = (n) => ['error connecting to api.github.com', gitlab ? 'API rate limit exceeded (429)' : `gh: API rate limit exceeded for user ID ${n} (HTTP 403)`, `Post "https://api.github.com/graphql": dial tcp: lookup api.github.com: Could not resolve host: api.github.com`, 'gh: command not found'].map((t) => `${cmd(n)}${t}`);
+  for (const n of [404, 1404]) {
+    test(`${on}: on Issue ${n} a network error, a rate limit, a DNS error or a missing CLI keep the record, with one line`, async () => {
+      for (const text of NOT_GONE(n)) {
+        const h = closedHolder({ n });
+        await h.ready();
+        h.breakWith(new Error(text)); // the probe fails the same way: not a «not found»
+        h.err.length = 0;
+        const r = await plan(h);
+        assert.equal(h.err.length, 1, text);
+        assert.match(h.errText(), new RegExp(`#${n}.*skipped this time, its record stays`));
+        assert.ok(JSON.parse(h.ctx.readFile(h.slotPath))[n], `the record stays: ${text}`);
+        assert.equal(whyOf(r)[11], undefined, 'this round does not hold, and nothing crashed');
+        h.breakWith(null);
+        assert.equal(whyOf(await plan(h))[11], `waits for the tool: #${n} (closed, its test steps are still open) uses it`, 'the next round holds again');
+      }
+    });
+
+    test(`${on}: on Issue ${n} the real not-found answers drop the record, with one line`, async () => {
+      for (const text of NOT_THERE(n)) {
+        const h = closedHolder({ n });
+        await h.ready();
+        h.breakWith(new Error(text), Object.assign(new Error(text), { notFound: true })); // what the adapter itself flags
+        h.err.length = 0;
+        const r = await plan(h);
+        assert.equal(h.err.length, 1, text);
+        assert.match(h.errText(), new RegExp(`#${n}.*dropped`));
+        assert.deepEqual(JSON.parse(h.ctx.readFile(h.slotPath)), {}, `dropped: ${text}`);
+        assert.deepEqual(r.start.map((x) => x.issue), [11]);
+      }
+    });
+  }
 }
