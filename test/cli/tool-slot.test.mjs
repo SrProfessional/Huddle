@@ -25,7 +25,7 @@ function checkout(h) {
       case 'status --porcelain --untracked-files=all': return state.status;
       case 'branch --show-current': return state.branch;
       case 'rev-list --count HEAD..refs/remotes/origin/staging': return state.behind;
-      default: assert.fail(command);
+      default: if (state.extra) return state.extra(args); assert.fail(command);
     }
   };
   return { state, reads };
@@ -267,7 +267,7 @@ for (const gitlab of [false, true]) {
     assert.equal(h.err.length, 0, 'said once');
   });
 
-  test(`${on}: any other error (a network failure) skips that record for this round, keeps it, and never breaks the command`, async () => {
+  test(`${on}: a transient read error keeps the slot reserved and never breaks the command`, async () => {
     const h = closedHolder();
     await h.ready();
     h.breakWith(new Error('network down'));
@@ -275,7 +275,8 @@ for (const gitlab of [false, true]) {
     const r = await plan(h);
     assert.equal(h.err.length, 1);
     assert.match(h.errText(), /#7.*network down/);
-    assert.deepEqual(r.start.map((s) => s.issue), [11]);
+    assert.deepEqual(r.start, []);
+    assert.equal(whyOf(r)[11], 'waits for the tool: #7 (test step state could not be confirmed) uses it');
     assert.ok(JSON.parse(h.ctx.readFile(h.slotPath))[7], 'the record stays');
     h.out.length = 0;
     assert.equal(await run(['steps', '--json'], h.ctx), 0, 'steps does not crash either');
@@ -348,6 +349,107 @@ for (const gitlab of [false, true]) {
     assert.deepEqual((await plan(h)).start.map(({ issue }) => issue), [11]);
   });
 
+  for (const recovery of ['clean retry', 'conflict resolved with the person']) test(`${on}: an approved stash is recovered by identity and restored behind the reservation (${recovery})`, async () => {
+    const h = build({ gitlab, extra: (w) => {
+      w.issue({ number: 7, title: 'Tool issue', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in progress'] });
+      w.issue({ number: 11, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: ['assigned'] });
+    } });
+    const { state, reads } = checkout(h);
+    const slotFile = () => Object.keys(h.slotWrites).at(-1);
+    const slots = () => JSON.parse(h.ctx.readFile(slotFile()) ?? '{}');
+    h.slotWrites = {};
+    const write = h.ctx.writeFile;
+    h.ctx.writeFile = (f, t) => { if (f.includes('huddle-toolslot-') && f.endsWith('.json')) h.slotWrites[f] = true; write(f, t); };
+    h.ctx.createExclusive = (f, t) => {
+      if (h.ctx.readFile(f)) return false;
+      h.ctx.writeFile(f, t);
+      return true;
+    };
+    h.ctx.removeFile = (f) => h.ctx.writeFile(f, '');
+    const oid = 'a'.repeat(40);
+    const unrelated = 'b'.repeat(40);
+    let tag;
+    let applyOutcome = 'interrupt';
+    let unmerged = '';
+    state.status = ' M person.txt\n';
+    state.extra = (args) => {
+      const [git, command, ...rest] = args;
+      if (git === 'stash' && command === 'list') return `${unrelated}\tOn staging: user stash\n${tag ? `${oid}\tOn staging: ${tag}\n` : ''}`;
+      if (git === 'stash' && command === 'push') {
+        assert.deepEqual(rest.slice(0, 2), ['--include-untracked', '--message']);
+        tag = rest[2];
+        assert.ok(slots()[7].stash.tag, 'the unique tag exists before git changes the checkout');
+        state.status = '';
+        throw new Error('interrupted after Git saved the stash');
+      }
+      if (git === 'update-ref') {
+        assert.match(command, /^refs\/huddle\/tool-stashes\//);
+        assert.deepEqual(rest, [oid]);
+        return '';
+      }
+      if (git === 'stash' && command === 'apply') {
+        assert.deepEqual(rest, ['--index', oid]);
+        assert.ok(slots()[7].stash.restoring, 'the slot is still held while Git restores the stash');
+        if (applyOutcome === 'interrupt') throw new Error('interrupted');
+        state.status = ' M person.txt\n';
+        if (applyOutcome === 'conflict') { unmerged = 'person.txt\n'; throw new Error('conflict'); }
+        return '';
+      }
+      if (git === 'diff' && command === '--name-only') return unmerged;
+      assert.fail(args.join(' '));
+    };
+    assert.equal(await run(['steps', '7', '--stash'], h.ctx), 1);
+    assert.equal(reads.length, 0, 'without approval, Git is not asked to save changes');
+    h.ctx.writeFile('/tmp/preflight.txt', LIST);
+    assert.equal(await run(['steps', '7', '--post', '/tmp/preflight.txt', '--preflight'], h.ctx), 0);
+    h.as('SrProfessional');
+    assert.equal(await run(['steps', '7', '--done', '--note', 'stash'], h.ctx), 0);
+    h.as('ana');
+    assert.equal(await run(['steps', '7', '--stash'], h.ctx), 1, 'the first attempt ends after git created the stash');
+    assert.equal(await run(['steps', '7', '--stash'], h.ctx), 0, 'a later process recovers the already saved stash by its tag');
+    assert.equal(slots()[7].stash.oid, oid);
+    assert.equal(reads.filter((r) => r.startsWith('stash push')).length, 1);
+    assert.equal((await plan(h)).returns, undefined, 'preflight has no pending return');
+    h.ctx.writeFile('/tmp/test.txt', LIST);
+    assert.equal(await run(['steps', '7', '--post', '/tmp/test.txt'], h.ctx), 0);
+    h.world.issue({ number: 7, title: 'Tool issue', body: body(['e.mjs'], NEEDS), assignees: ['ana'], state: 'merged' });
+    h.as('SrProfessional');
+    assert.equal(await run(['steps', '7', '--done'], h.ctx), 0);
+    const lockFile = `${slotFile()}.checkout.lock`;
+    h.ctx.writeFile(lockFile, JSON.stringify({ pid: 99999, at: 1000 }));
+    h.ctx.isAlive = (pid) => pid === 99999;
+    const beforeLockCheck = reads.length;
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    assert.equal(reads.length, beforeLockCheck, 'another live handoff prevents any Git write');
+    h.ctx.isAlive = () => false;
+    state.status = '?? new-work\n';
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    assert.ok(!reads.some((r) => r.startsWith('stash apply')), 'verify the clean base before restoring the saved changes');
+    state.status = '';
+    assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start, []);
+    h.as('SrProfessional');
+    if (recovery === 'clean retry') {
+      applyOutcome = 'success';
+      assert.equal(await run(['steps', '7', '--return'], h.ctx), 0, 'a clean retry can restore the exact stash');
+    } else {
+      applyOutcome = 'conflict';
+      assert.equal(await run(['steps', '7', '--return'], h.ctx), 1);
+      assert.equal(await run(['steps', '7', '--return'], h.ctx), 1, 'a dirty retry does not apply the stash a third time');
+      assert.equal(await run(['steps', '7', '--return', '--confirm-restored'], h.ctx), 1, 'confirmation cannot skip unresolved conflicts');
+      h.as('ana');
+      assert.deepEqual((await plan(h)).start, []);
+      h.as('SrProfessional');
+      unmerged = '';
+      assert.equal(await run(['steps', '7', '--return', '--confirm-restored'], h.ctx), 0);
+    }
+    assert.equal(reads.filter((r) => r.startsWith('stash apply')).length, 2);
+    assert.deepEqual(slots(), {});
+    h.as('ana');
+    assert.deepEqual((await plan(h)).start.map(({ issue }) => issue), [11]);
+  });
+
   // Review round 3: only a real «not found» drops a record. The adapters build «<command and arguments> failed: <stderr>»: the arguments hold the Issue number, so a
   // network error, a rate limit or a DNS error on Issue 404 or 1404 must keep the record. The adapters' own not-found logic is reused through `issueLabels`, which flags `notFound`.
   const cmd = (n) => (gitlab ? `glab api projects/acme%2Fapp/issues/${n}/notes --paginate failed: ` : `gh api repos/acme/app/issues/${n}/comments --paginate --slurp failed: `);
@@ -362,9 +464,9 @@ for (const gitlab of [false, true]) {
         h.err.length = 0;
         const r = await plan(h);
         assert.equal(h.err.length, 1, text);
-        assert.match(h.errText(), new RegExp(`#${n}.*skipped this time, its record stays`));
+        assert.match(h.errText(), new RegExp(`#${n}.*state unconfirmed, the slot stays held`));
         assert.ok(JSON.parse(h.ctx.readFile(h.slotPath))[n], `the record stays: ${text}`);
-        assert.equal(whyOf(r)[11], undefined, 'this round does not hold, and nothing crashed');
+        assert.equal(whyOf(r)[11], `waits for the tool: #${n} (test step state could not be confirmed) uses it`);
         h.breakWith(null);
         assert.equal(whyOf(await plan(h))[11], `waits for the tool: #${n} (closed, its test steps are still open) uses it`, 'the next round holds again');
       }

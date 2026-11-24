@@ -90,7 +90,7 @@ If a task has to run in a tool you already have open on your main checkout (for 
 
 The Issue may close while you are still testing. `huddle next` shows «#n (closed, its test steps are still open)» until you finish or skip the last step in `/huddle-steps`. The session returns the checkout and verifies it before releasing the slot. If it is interrupted, a later session on the same machine can see the pending return and finish it. The slot stays reserved if changes or a failed check prevent the return.
 
-Huddle never touches changes you have not committed. If the main checkout has some, it stops and asks you one question: commit them, save them aside with a stash and it gives them back later, or wait. Huddle can see by itself whether some tools are open (the first one is a game engine's editor); for any other tool the step is «Open <tool> on the main checkout», and it goes on when you close it. The same questions come back if the return finds new changes or a branch you moved: it never forces anything.
+If the main checkout has uncommitted changes, Huddle asks whether to wait, let you commit them, or save them in a stash. With your approval it saves and remembers the exact stash. After verifying the clean base, it restores those changes before releasing the slot and keeps the stash as a backup. If restoration stops or hits a conflict, the slot stays reserved while the session helps you recover. Huddle can see by itself whether some tools are open (the first one is a game engine's editor). For any other tool, it asks you to open it on the main checkout before the work begins.
 
 ## How a task goes
 
