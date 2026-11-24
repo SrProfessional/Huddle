@@ -46,7 +46,8 @@ for (const gitlab of [false, true]) {
     const output = await start(pending);
     const reminder = /2 steps wait for you, the first on #117: Press Play\. Run \/huddle-steps\./;
     assert.match(output.systemMessage ?? '', reminder);
-    assert.match(output.hookSpecificOutput.additionalContext, reminder);
+    assert.doesNotMatch(output.hookSpecificOutput.additionalContext, /Press Play/);
+    assert.match(output.hookSpecificOutput.additionalContext, /2 steps wait for you, the first on #117\. Run \/huddle-steps\./);
     assert.doesNotMatch(output.systemMessage, /#118|#119|huddle (?:queue|steps)|\/huddle-(?:review|watch)/);
     assert.deepEqual(pending.startCalls, empty.startCalls);
     assert.equal(pending.writes.length, 0);
@@ -69,7 +70,10 @@ for (const gitlab of [false, true]) {
     h.ctx.root = '/issue-worktree';
     assert.equal(await run(['steps', '120', '--post', '/shared/input'], h.ctx), 0);
     h.ctx.root = '/repo';
-    assert.match((await start(h)).systemMessage, /1 step waits for you on #120: Open the Editor\. Run \/huddle-steps\./);
+    const output = await start(h);
+    assert.match(output.systemMessage, /1 step waits for you on #120: Open the Editor\. Run \/huddle-steps\./);
+    assert.doesNotMatch(output.hookSpecificOutput.additionalContext, /Open the Editor/);
+    assert.match(output.hookSpecificOutput.additionalContext, /1 step waits for you on #120\. Run \/huddle-steps\./);
     assert.deepEqual(h.startCalls, baselineReads);
     assert.equal(await run(['steps', '120', '--done'], h.ctx), 0);
     assert.equal((await start(h)).systemMessage, undefined);
