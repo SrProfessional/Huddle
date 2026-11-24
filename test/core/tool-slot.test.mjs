@@ -21,6 +21,9 @@ test('«## Needs» is read with its tool name: «- Editor: <tool>», a plain «-
   assert.deepEqual(tool('- Unity Editor'), { tool: 'Unity' });
   assert.deepEqual(tool('- editor:   Android Studio '), { tool: 'Android Studio' });
   assert.deepEqual(tool('- Editor'), { tool: null });
+  assert.deepEqual(tool('- Editor:'), { tool: null }, 'an empty value is a plain Editor, never a dropped requirement');
+  assert.deepEqual(tool('- Editor: '), { tool: null });
+  assert.deepEqual(tool('- Editor:   .'), { tool: null });
   assert.deepEqual(needsTool(body(needs('- a phone', '- Editor: Xcode'))), { tool: 'Xcode' });
 });
 
@@ -31,6 +34,10 @@ test('an Issue without the section, with other needs, in a comment or in a fence
   assert.equal(needsTool(body(['## Needs', '', '<!-- - Editor: Xcode -->', '', ''].join(NL))), null);
   assert.equal(needsTool(body(['```text', '## Needs', '', '- Editor: Xcode', '```', '', ''].join(NL))), null);
   assert.equal(needsTool(null), null);
+});
+
+test('a holder can carry a note that the wait says (a closed Issue whose steps are open)', () => {
+  assert.equal(toolWait({ candidate: { number: 5 }, holders: [9], active: [], notes: { 9: 'closed, its test steps are still open' } }), 'waits for the tool: #9 (closed, its test steps are still open) uses it');
 });
 
 test('the slot: an Issue that needs the tool starts only when nothing else of the login is active', () => {

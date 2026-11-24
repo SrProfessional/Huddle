@@ -116,4 +116,39 @@ for (const gitlab of [false, true]) {
     assert.equal(readSteps(h.world.commentsOf(7)).steps[0].note, 'stash');
     assert.equal(await run(['steps', '7', '--done', '--bogus'], h.ctx), 2);
   });
+
+  test(`${on}: an Issue that closed (its PR landed) while its test steps are open still holds the slot, its steps stay closable, and closing the last one releases it`, async () => {
+    const issue7 = { number: 7, title: 'Tool work', body: body(['e.mjs'], NEEDS), assignees: ['ana'], labels: ['in review'], reviews: [70] };
+    const h = build({ gitlab, extra: (w) => {
+      w.issue(issue7);
+      w.review({ number: 70 });
+      w.issue({ number: 11, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: ['assigned'] });
+      w.issue({ number: 12, title: 'Needs the tool too', body: body(['f.mjs'], NEEDS), assignees: ['ana'], labels: ['assigned'] });
+    } });
+    h.ctx.writeFile('/tmp/steps.txt', LIST);
+    assert.equal(await run(['steps', '7', '--post', '/tmp/steps.txt'], h.ctx), 0);
+    h.world.issue({ ...issue7, state: 'merged', labels: [] }); // the PR landed in staging: the Issue is closed
+    let r = await plan(h);
+    assert.deepEqual(r.start, []);
+    assert.equal(whyOf(r)[11], 'waits for the tool: #7 (closed, its test steps are still open) uses it');
+    assert.equal(whyOf(r)[12], 'waits for the tool: #7 (closed, its test steps are still open) uses it');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '--json'], h.ctx), 0);
+    const listed = JSON.parse(h.text()).steps;
+    assert.deepEqual(listed.map((s) => [s.issue, s.step]), [[7, 1]], 'huddle steps still lists the closed Issue');
+    h.as('SrProfessional');
+    h.out.length = 0;
+    assert.equal(await run(['steps', '7', '--done'], h.ctx), 0);
+    assert.match(h.text(), /main checkout/, 'it tells the session to return the checkout to the base branch');
+    h.as('ana');
+    r = await plan(h);
+    assert.deepEqual(r.start.map((s) => s.issue), [11], 'the last step is closed: the slot is free');
+  });
+
+  test(`${on}: an Issue that is closed and was never a tool Issue is still refused by huddle steps`, async () => {
+    const h = build({ gitlab, extra: (w) => { w.issue({ number: 8, title: 'Plain', body: body(['p.mjs']), assignees: ['ana'], labels: [], state: 'merged' }); } });
+    h.as('SrProfessional');
+    assert.equal(await run(['steps', '8', '--done'], h.ctx), 1);
+    assert.match(h.text(), /not an open Issue/);
+  });
 }
