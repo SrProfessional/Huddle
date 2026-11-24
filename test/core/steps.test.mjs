@@ -113,7 +113,6 @@ test('the writer refuses a step with two actions', () => {
     'Open the Editor, then press Play.',
     'Open the Editor; then press Play.',
     'Open the Editor. Press Play.',
-    'Open the Editor and press Play.',
     '1. Open the Editor 2. Press Play',
   ]) assert.throws(() => stepsBody({ reason: 'r', steps: [{ ...step(), do: bad }] }), /two actions/, bad);
   for (const good of ['Open the Editor on branch h1-x.', 'Open the Package Manager and the Editor window you already use.', 'Check the Denied counter in Staging: it is not 0.']) {
@@ -138,4 +137,37 @@ test('the writer refuses an empty list, a step with a missing part, an unknown e
   assert.throws(() => stepsBody({ reason: 'r', steps: [{ ...step(), do: 'Open <!-- huddle-paused --> it.' }] }), /marker/);
   assert.deepEqual(checkStep(step()), []);
   assert.ok(checkStep({ do: '', see: '', else: '' }).length >= 3);
+});
+
+test('normal good steps stay accepted: a plain «and <verb>», verbs inside quoted names, a single sentence', () => {
+  for (const good of [
+    'Press Play on the Activity scene and tap Denied.',
+    'Open the folder named "Run and Build".',
+    'Log in to the app and open the Settings page.',
+    'Log in with the test account and open the Settings page.',
+    'Tap the Save button and check the number at the top.',
+    'Sign in as the tester and add a comment.',
+    'Open the Unity Editor on the main checkout.',
+    'Check that the Denied counter is not 0 in Staging.',
+    'Open the Huddle dashboard.',
+    'Huddle up with the team in the meeting room.',
+  ]) assert.deepEqual(checkStep({ ...step(), do: good }), [], good);
+});
+
+test('the refusals stay: then, after that, a second action sentence, a second numbered action, and a typed command', () => {
+  for (const bad of [
+    'Open the Editor and then press Play.',
+    'Open the Editor, then press Play.',
+    'Open the Editor. After that press Play.',
+    'Open the Editor after that press Play.',
+    'Open the Editor. Press Play.',
+    '1. Open the Editor 2. Press Play',
+  ]) assert.match(checkStep({ ...step(), do: bad }).join(), /two actions/, bad);
+  for (const bad of ['huddle pause 5 --off', 'huddle steps 3 --done']) assert.match(checkStep({ ...step(), do: bad }).join(), /huddle command/, bad);
+});
+
+test('the writer refuses a list that is too big, with a clear message', () => {
+  assert.throws(() => stepsBody({ reason: 'r', steps: Array.from({ length: 21 }, () => step()) }), /at most 20 steps/);
+  assert.throws(() => stepsBody({ reason: 'r', steps: [{ ...step(), see: 'x'.repeat(501) }] }), /step 1: .*500 characters/);
+  assert.doesNotThrow(() => stepsBody({ reason: 'r', steps: Array.from({ length: 20 }, () => step()) }));
 });

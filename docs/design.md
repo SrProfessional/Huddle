@@ -361,8 +361,8 @@ counter is not 0»: three tasks in one message, a command the person was told to
 the person can go on writes ONE comment on the Issue (`lib/core/steps.mjs`): a visible list «🙋 Step 1 of 3: …» (each step has one action, «You should see:» and «If you
 see something else:») and a hidden marker `<!-- huddle-steps {json} -->` with the steps, the reason and the ending of the list, `resume` (the default) or `none`. The
 JSON escapes `<`, `>` and `-`, so its text can never close the comment early or look like another marker; the name `huddle-steps` shares nothing with the pause markers
-or the machine claim, and each reader matches only its own. A later list replaces the earlier one. **The writer refuses** a step with two actions (a joined «and then»,
-a second sentence or clause that starts with an action verb, a second numbered action) and a step that tells the person to type a `huddle` command or a `/huddle-…` one:
+or the machine claim, and each reader matches only its own. A later list replaces the earlier one. **The writer refuses** a step with two actions («and then», «, then», «after that»,
+a second sentence that starts with an action verb, a second numbered action; a plain «and <verb>» is one task and passes, and quoted names are never read) and a list of more than 20 steps or a text of more than 500 characters and a step that tells the person to type a `huddle` command or a `/huddle-…` one:
 when a command is needed, the session runs it itself after the person confirms. Steps are for a person with no technical background, as the format above. The skill that
 asks the steps and the reminders are Issue #340.
 
