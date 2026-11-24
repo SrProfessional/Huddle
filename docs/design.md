@@ -355,6 +355,17 @@ The smoke test marks each step «Session» or «🙋 Only you», and `docs/team-
 **Never around a refusal.** If a permission is denied or a credential is missing, the session stops and asks, as always:
 it never looks for another way.
 
+**The steps of the person are data, not prose (Issue #338, part 1 of 2).** Asked by the Coach on 2026-11-24 after a real project ended a chat with «an Editor on
+#101's branch, and then `huddle pause 101 --off`; an account and a tablet to reproduce #117, and then `huddle pause 117 --off`; and check in Staging that the Denied
+counter is not 0»: three tasks in one message, a command the person was told to type, and nothing that kept it in front of them. Now a session that stops because only
+the person can go on writes ONE comment on the Issue (`lib/core/steps.mjs`): a visible list «🙋 Step 1 of 3: …» (each step has one action, «You should see:» and «If you
+see something else:») and a hidden marker `<!-- huddle-steps {json} -->` with the steps, the reason and the ending of the list, `resume` (the default) or `none`. The
+JSON escapes `<`, `>` and `-`, so its text can never close the comment early or look like another marker; the name `huddle-steps` shares nothing with the pause markers
+or the machine claim, and each reader matches only its own. A later list replaces the earlier one. **The writer refuses** a step with two actions («and then», «, then», «after that»,
+a second sentence that starts with an action verb, a second numbered action; a plain «and <verb>» is one task and passes, and quoted names are never read) and a list of more than 20 steps or a text of more than 500 characters and a step that tells the person to type a `huddle` command or a `/huddle-…` one:
+when a command is needed, the session runs it itself after the person confirms. Steps are for a person with no technical background, as the format above. The skill that
+asks the steps and the reminders are Issue #340.
+
 ## 14. Bugs
 
 Asked by the Coach on 2026-11-09 (Issue #55). A bug has its own Issue type, so it carries what a task does not have:
@@ -1215,6 +1226,16 @@ taken), the capacity and the open dependencies, never a Design Issue. An Issue t
 key `done:#n`) only when it really closed, and stays pending until a delivery succeeds. Parallel play resumes first, then starts, and
 never ends on an empty queue: it keeps that one watch, which replaces the per-Issue waits of parallel play. This holds in Claude Code
 as in Codex, by the Coach's decision on #248 (numbered play keeps its per-Issue wait).
+
+**Steps for the person: `huddle steps` (Issue #338).** The list of §13 is read by `huddle steps` (read-only): the current step of every open Issue of the login, the one
+the most other work waits for first (the Issues that list it under «Depends on», directly or through others), then the oldest list, one line each («#117 step 1 of 3: open the
+Editor on …», with «N other Issues wait for it» when some do); `--json` gives `{ steps: [{ issue, title, step, of, do, see, else, reason, then, waiting, at }] }`. For the
+Coach's login only, `huddle steps <n> --done`, `--failed --note "<text>"` and `--skip --note "<text>"` close the current step of Issue `n` with a comment that carries
+`<!-- huddle-step-done:i -->`, `huddle-step-failed:i` or `huddle-step-skipped:i` (`i` the step, from 1; the note after «Note:»), then run `labels --issue <n>`; anyone else gets
+one line and no change. Closings count only from the Coach's login and only after the newest list, and they close the steps in order, so the next step becomes current. When the
+last step closes and every step was done or skipped, none failed, and the list says `resume`, the Issue is put back in play with the very code of `huddle pause <n> --off`
+(`putPause` in `lib/cli/run.mjs`: the same resume comment, the same line, the same labels pass). A failed step never resumes the Issue, now or at the end of the list: the output
+says to open `/huddle-bug`, as `/huddle-test` does. A list that ends with `none` is only closed.
 
 **When nothing moves (Issue #302).** Seen on 2026-11-22: the Player and the Coach looked stopped for hours, and the person had to ask each chat why (a decision of the Coach, a step only the person could do, and a circle of waits). Now, when `start` and `resume` are both empty and an Issue of the login is open, `huddle next` (text, and `--json` key `stalled`) says why, one line per Issue and who must act: «waits for the Coach: decision on #n» (`needs decision`), «waits for the Coach: review of PR #p (#n)», «waits for you: <first «🙋 Only you» step>» (only when the Issue's last comment, not a Coach prompt, carries that block), «waits for #m» (a dependency, or a shared file with the Issue and the file), «paused: #n (reason)», «runs on <machine>». It uses only what `next` already read. An Issue in progress with no step for the person is work being done, so the flow is not stalled. A chain of waits that comes back to the same Issue (dependencies, or a file held by an Issue that itself waits) is named: «circular wait: #a → #b → #c → #a», with the link the Coach can break (pause the Issue that holds the file, since a pause frees its files, or change a «Depends on»); `findCycle` in `lib/core/schedule.mjs` is the pure finder. `next` keeps the summary in the shared folder, so `huddle status` repeats it in one line («the flow waits for: …») for an hour, with no network call. The Player's watch (`next --wait`) takes the state of its first round as the baseline and wakes the session once when the set of reasons then changes: `actionable.stalled` and its key `stalled:<hash of the reasons>`, so the same set is not told twice and a changed set is.
 
