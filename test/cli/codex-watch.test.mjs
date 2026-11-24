@@ -49,6 +49,7 @@ test('in Codex, «always» asks the session to start the watch the Codex way', a
   const h = mk();
   h.ctx.tool = 'codex';
   h.ctx.pluginRoot = '/plugin';
+  assert.equal(await run(['role', 'coach'], h.ctx), 0);
   assert.equal(await run(['queue', '--always'], h.ctx), 0);
   h.out.length = 0;
   assert.equal(await run(['hook'], h.ctx), 0);
@@ -66,6 +67,7 @@ test('in Codex, «always» names the session that already holds the watch and do
   codex.ctx.writeFile = claude.ctx.writeFile;
   codex.ctx.tool = 'codex';
   codex.ctx.pluginRoot = '/plugin';
+  assert.equal(await run(['role', 'coach'], codex.ctx), 0);
   assert.equal(await run(['hook'], codex.ctx), 0);
   const out = JSON.parse(codex.text());
   assert.doesNotMatch(out.hookSpecificOutput?.additionalContext ?? '', /start the watch exactly/);
