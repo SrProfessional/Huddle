@@ -34,6 +34,8 @@ test('in Codex the Coach\'s «always» mark asks to start the watch the Codex wa
   h.out.length = 0;
   h.ctx.tool = 'codex';
   h.ctx.pluginRoot = 'D:/Codex/huddle';
+  h.ctx.session = { tool: 'codex', id: 'coach-session' };
+  assert.equal(await run(['role', 'coach'], h.ctx), 0);
   assert.equal(await run(['hook'], h.ctx), 0);
   const all = h.text();
   assert.match(all, /the watch starts now/);

@@ -589,6 +589,19 @@ the name the person types changes.
 
 ## 19. Watching what waits for the Coach: `huddle queue` and `/huddle-watch`
 
+**Session role (Issue #349).** Claude Code and Codex keep the person's choice in the machine-local shared folder, keyed by the
+tool and session ID. `huddle role --json` reports the current choice and eligibilities. The configured Coach login can choose Coach,
+a configured assignee can choose Player, and an account eligible for both can choose Both. The session records the person's explicit
+choice with `huddle role coach|player|both`. A direct request for an unmistakable role-specific workflow can supply the choice without
+another question. Once a role is set, a request within it leaves that choice alone. The person can change it explicitly.
+
+If the person has not chosen and Huddle needs a role, the assistant asks once in their language with a structured question where
+available and a numbered list elsewhere. It records the ask with `huddle role --asked` and waits before beginning either workflow.
+Notices or background wakes do not choose a role. Non-Huddle work and neutral startup housekeeping can continue. Startup labels use
+`--no-assign` until the session uses Coach or Both with the Coach login. After a choice, the session reads `huddle hook` again for startup
+guidance. The `always` setting applies in a selected Coach or Both session. An existing watch stops acting for a role that the person
+has removed from its session. The selected role does not change any GitHub or GitLab permissions.
+
 Asked on 2026-11-11 (Issue #88). The Coach had to tell its session to look at the PRs and questions that wait for it. One
 command now starts a check every few minutes inside the Coach's Claude Code session, and a read-only CLI command lists what waits.
 
@@ -696,7 +709,7 @@ if the login is not `coach`.
    **Always (Issue #160, asked by the Coach on 2026-11-15).** With no Claude tokens while nothing waits, the only reason left to turn
    the watch on by hand each time is that it is the order to merge. `/huddle-watch always` gives that order once: `huddle queue --always`
    (Coach only) leaves a mark for this repo next to the update cache, on this machine only (never in the repo: no PR, nobody else
-   affected), and turns the watch on. At each session start, when the login is `coach` and the mark is set, the hook adds one line
+   affected), and turns the watch on. At each session start, when the login is `coach`, the chosen role is Coach or Both, and the mark is set, the hook adds one line
    («Huddle: the watch starts now, as you asked (/huddle-watch always). /huddle-watch off stops it.») and a context that tells Claude to
    start the watch before anything else, as `/huddle-watch` does; it replaces the start line's «act on nothing until asked», since that
    order was given, while the line about what waits still shows. A hook's context reaches Claude with the person's first message, so the
@@ -1087,6 +1100,10 @@ then. Asking would only offer a person a choice that costs quota. `hourly` and `
 **What does not change.** `huddle labels` itself, the pinned `HUDDLE_REF` of a project (refreshing the file only changes the triggers; moving the pin is a PR the Coach's session opens), and the real cron of a GitLab project (the Coach sets it).
 
 ## 24. The effort of an Issue: 1, 2 or 3 points
+
+**Player sessions (Issue #349).** `/huddle-play` starts and resumes assigned work in sessions using Player or Both. A direct request
+for `/huddle-play` from the person can select Player when the role is unspecified. An automatic wake follows a role already chosen
+(§19). Player-only sessions wait for Coach review even on the Coach's login.
 
 Asked by the Coach on 2026-11-15 (Issue #162), as the base of two later steps: how many Issues one Player's session works on at once
 (Issue #164) and how many PRs/MRs the Coach's watch reviews at once (Issue #165).
