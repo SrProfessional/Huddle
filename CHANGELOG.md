@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-11-24
+
 ### Added
 
 - `huddle conflicts --apply --order <n>,<n>,...` takes the Coach's order (Issue #315): each named Issue depends on the named ones before it that it shares a file with, the other pairs keep the suggestion, a circle still writes nothing, only the Coach's login may apply it, `--dry-run` works, and an Issue that is not open or named twice is refused with no change. Three small reading fixes in `huddle conflicts`: `None` / `(none)` in «Allowed files» is no file, `CHANGELOG.md` does not stop an Issue from being docs-only, and a fenced `## Depends on` is not edited.

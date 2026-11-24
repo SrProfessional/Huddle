@@ -461,6 +461,16 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.4
+
+Run of: 2026-11-24, Huddle `staging` with Issues #312, #313 and #315 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.3 and older tables below still hold for the rest. Context: a Unity project with several Players showed Issues that shared files and none of them `blocked`, because the board only blocked for a file held by ACTIVE work of the SAME login.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| `huddle conflicts` and `--apply`: planned file conflicts, the order written in «Depends on» (#312) | covered by tests | covered by tests | Run live on `staging` in this repo (no conflicts to show: one open Issue). 24 tests, both fakes. Passed by evidence: to be seen with real overlapping Issues in the project that asked for it. |
+| `--order`, `None` is not a file, CHANGELOG-only docs, a fenced «Depends on» (#315) | covered by tests | covered by tests | The real case (#91 first although #84 and #85 have lower numbers) is a test. Passed by evidence. `None` is fixed only inside `huddle conflicts`; the scheduler's reader is a follow-up (#318). |
+| An active Issue holds its files against every Player (#313) | covered by tests | covered by tests | 20 tests with two logins; 3000 random single-login fixtures gave identical results before and after. Passed by evidence. |
+
 ### Results 1.0.3
 
 Run of: 2026-11-23, Huddle `staging` with Issues #298, #300, #302, #303, #304 and #308 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.2 and older tables below still hold for the rest. Context: the 1.0.2 fixes were seen working on a real project (SocialCortex: `used` fell from 8 to 0, three PRs merged with failures that master already had); the Issues below came from what that project still showed.
