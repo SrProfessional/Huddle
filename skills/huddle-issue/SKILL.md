@@ -15,9 +15,11 @@ In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary
 
 ## Do
 
-1. Ask what the task is (goal, the document that rules over it). Read that document and the code it touches.
+1. Ask what the task is (goal, the document that rules over it). Read that document and the code it touches. If the intended
+   creator benefit is unclear, clarify the outcome before drafting.
 2. Fill the repo's Issue template (`.github/ISSUE_TEMPLATE/task.md` or `.gitlab/issue_templates/Task.md`):
-   - **Goal:** one or two sentences.
+   - **Goal:** describe the creator benefit and include an observable acceptance criterion. Infrastructure work can have an
+     indirect benefit such as removing a manual step or making a decision safer.
    - **Depends on:** one `- #N` per line, or `- None`. The labels job reads this section.
    - **Effort:** 1 small, 2 medium or 3 large. Write the draft to a temporary file outside the repo and run
      `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" effort --suggest <file>`: write its `effort` in the «Effort» section and show its `reasons`; the
