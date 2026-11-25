@@ -43,6 +43,9 @@ in their language with the recommended option and at least one alternative, each
 workflow below. Offer a relevant action outside the current request as a suggestion. Keep the next step specific to the goal and
 skip suggestions when the goal is complete.
 
+Before sending a final response, check what the creator's goal still needs. When the next action depends on the person's decision,
+ask that question in the same turn with the recommended action, an alternative, and what each choice changes.
+
 Use this selector order and pending-question rule for every Huddle question. It takes precedence over older skill instructions
 and session-start guidance on which tool to use, when to fall back to a numbered list, and how long to wait. Keep the workflow's
 choices and approvals.
@@ -53,6 +56,12 @@ Before waiting, if an abrupt interruption could lose the question or options, re
 its numbered choices in the chat. Keep the turn active where supported and wait for an actual answer, explicit deferral, or
 interruption. Continue authorized independent work while the question is pending. Elapsed time alone does not end the turn and
 never counts as approval. Act on the recommendation only when the person chooses it.
+
+In Codex, `request_user_input_async` opens the selector. Its acknowledgement does not resolve the question. When independent
+work is finished, use an available interruptible wait tool in short intervals, such as `clock.sleep` in Codex. After each
+wait, check for a reply and wait again while the choice is pending. Send a final response only after an answer, explicit
+deferral, or interruption. If the client cannot keep the selector available, leave the question and the numbered choices
+in the chat with a clear way to answer by text.
 
 On resumption, reopen the selector with the saved question and choices when supported. Otherwise keep the same numbered choices
 available in the chat. For Issue decisions, keep the existing outstanding decision state and record the ask with `huddle asked <n>`
