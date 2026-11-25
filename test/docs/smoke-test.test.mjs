@@ -160,6 +160,19 @@ test('the versions are 1.0.6 and the CHANGELOG has an «Unreleased» section abo
   assert.match(c.slice(c.indexOf('## [0.3.0]'), c.indexOf('## [0.2.0]')), /huddle-areas/);
 });
 
+test('the 1.0.6 release notes record the Player watch fix and its verification', () => {
+  const changelog = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
+  const notes = changelog.slice(changelog.indexOf('## [1.0.6]'), changelog.indexOf('## [1.0.5]'));
+  const entry = notes.match(/^- [^\r\n]*\(Issue #361\)[^\r\n]*(?:\r?\n {2}[^\r\n]*)*/m)?.[0] ?? '';
+  assert.match(entry, /parallel queue is empty/);
+  assert.match(entry, /queues a notification without resuming the chat/);
+
+  const results = smoke.slice(smoke.indexOf('### Results 1.0.6'), smoke.indexOf('### Results 1.0.5'));
+  const row = results.split(/\r?\n/).find((line) => line.startsWith('| ') && line.includes('(#361)')) ?? '';
+  assert.match(row, /25 focused tests with fixtures/);
+  assert.match(row, /live Codex verification remains pending/i);
+});
+
 test('«Areas» says to delete Alpha and Beta, and why closing is not enough', () => {
   const t = section('11\\. Areas').replace(/\s+/g, ' ');
   assert.ok(!/delete or close/i.test(t), 'closing is not enough');

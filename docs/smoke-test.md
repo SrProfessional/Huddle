@@ -478,6 +478,7 @@ are published, the published marketplace installation still needs verification.
 | Editor reservation, checkout return, and diagnostics (#339, #351) | covered by tests | covered by tests | Checkout planning was exercised with canned data and a detached Git worktree. A live editor handoff remains pending. |
 | Per-session Coach, Player, and Both choices (#349) | covered by tests | CLI verified live | Separate Codex-context CLI processes used the real GitLab login: an unselected session was blocked, Player kept the Coach watch idle, and Both got detached watch guidance. Installation of the candidate in Codex and the role question in fresh chats remain pending. |
 | Proactive follow-through and pending questions (#356) | covered by tests | covered by tests | The Coach answered through the live Codex selector after waiting. Recovery after restarting a client was checked in the written instructions, not by interrupting that chat. |
+| Codex Player watch (#361) | staging fixtures passed | staging fixtures passed | Staging passed 25 focused tests with fixtures and all 2,115 tests. The focused tests checked an empty queue after the last Issue and an accepted notification that did not resume the chat. Live Codex verification remains pending. |
 
 ### Results 1.0.5
 

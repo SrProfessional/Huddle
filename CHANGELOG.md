@@ -31,6 +31,9 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 - Tool checkout diagnostics identify a detached HEAD before switching or returning. A literal `<tool>` placeholder still reserves the checkout and prompts for an unnamed editor (Issue #351).
 
+- The Codex Player watch stays active when the parallel queue is empty at startup or after the last Issue finishes (Issue #361).
+  If Codex queues a notification without resuming the chat, the watch keeps checking for new work and avoids sending the same notification twice.
+
 ## [1.0.5] - 2026-11-24
 
 ### Changed
