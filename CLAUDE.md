@@ -35,6 +35,23 @@ root: read them there, never guess them.
 8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
 9. When only the person can go on, post the steps with `huddle steps <n> --post <file>`. Write one action per step and never a command for the person to type. The Coach's session asks them with `/huddle-steps`.
 
+### Follow through on the goal
+
+This rule applies to Coach, Player, and Both. If the next action is within the current goal and authorized, take it
+and report the result. If progress needs the person's authorization or decision, explain what remains and ask one concrete question
+in their language with the recommended option and at least one alternative, each with its trade-off. Use Huddle's multiple-choice
+workflow below. Offer a relevant action outside the current request as a suggestion. Keep the next step specific to the goal and
+skip suggestions when the goal is complete.
+
+Prefer a blocking question tool when available. Otherwise, use an asynchronous selector if it can stay open. Keep the turn active
+and wait for an actual answer, explicit deferral, or interruption. Continue authorized independent work while the question is pending.
+Elapsed time alone does not end the turn and never counts as approval. Act on the recommendation only when the person chooses it.
+
+When the client cannot preserve the selector or the session is interrupted, keep the decision, why it matters, and its numbered
+choices in the chat. Use a numbered list with the recommendation first and «Other: tell me what you prefer» last when the selector
+is unavailable. Present the selector again when the session resumes if the client supports it. For Issue decisions, keep the existing
+outstanding decision state and record the ask with `huddle asked <n>` where the workflow calls for it.
+
 ### Session role
 
 Before doing Huddle work for a role, run `huddle role --json` to check the choices allowed by the login and team configuration. Use the
@@ -121,7 +138,7 @@ priorities, money, accounts or secrets, security or privacy rules, deleting work
 
 ### The Coach's session asks questions as a multiple choice, and asks again
 
-Every real question to the person (a product decision, an order or priority, money, accounts or secrets, a step that waits for the person's word) is asked with the `AskUserQuestion` tool in Claude Code (2 to 4 options with their trade-off, the recommended one first and marked «(Recommended)», «Other» comes by itself; up to 4 related questions per call), with `request_user_input` in Codex when the session has it, and otherwise as a numbered list ending «Other: tell me what you prefer» with the Issue numbers. It is never written as a paragraph in a status answer, also when the person asks «is there anything to decide?». A technical or process choice with a clear best answer is still decided and said in one line.
+Every real question to the person (a product decision, an order or priority, money, accounts or secrets, a step that waits for the person's word) is asked with the `AskUserQuestion` tool in Claude Code (2 to 4 options with their trade-off, the recommended one first and marked «(Recommended)», «Other» comes by itself; up to 4 related questions per call), with `request_user_input` in Codex when the session has it, or with a supported asynchronous selector as described above. When no selector is available, use a numbered list ending «Other: tell me what you prefer» with the Issue numbers, if any. It is never written as a paragraph in a status answer, also when the person asks «is there anything to decide?». A technical or process choice with a clear best answer is still decided and said in one line.
 
 A question without an answer is asked again, and says so: `huddle queue` lists each decision that waits with «asked <n> times, last at <time>». At the start of each Coach turn and each watch wake the session asks every one of them once, with «asked at <time>, still waiting» in the question text, and records the ask with `huddle asked <n>`, until it is answered. It never answers a product question for the person. A waiting decision blocks only what depends on the answer: the session does not merge, answer or move forward the Issue that waits for it, nor an Issue that depends on it (`Depends on`) or shares an allowed file with it (`huddle queue` shows them as «holds» and «held»); reviews and merges of independent work go on.
 

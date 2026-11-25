@@ -27,8 +27,8 @@ AI in their own way, every session understands the project differently. Tasks co
 late, in review or in production. And the one thing the AI cannot bring, knowledge of the business, the users and the
 priorities, gets answered in a rush.
 
-Huddle turns that around. The person's time goes into deciding and reviewing. The AI does the typing, the testing and the
-asking.
+Huddle helps creators focus on decisions about their work while sessions handle implementation, testing, and follow-through.
+Sessions carry out authorized steps and bring choices that need the creator back as concrete questions.
 
 | Without a method | With Huddle |
 |---|---|
