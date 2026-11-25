@@ -35,10 +35,12 @@ test('a cold start with no new starts resumes the Issue that has an unclaimed Co
 
 test('next --wait wakes at once for that request, and exactly once: with its key seen it waits instead', async () => {
   const h = mk();
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait'], h.ctx), 0);
   const woke = JSON.parse(h.text());
   assert.deepEqual(woke.actionable.resume.map((x) => x.issue), [230]);
   const again = mk();
+ assert.equal(await run(['role', 'player'], again.ctx), 0);
   await run(['next', '--wait', '--seen', woke.actionable.resume[0].key], again.ctx).catch(() => {});
   assert.doesNotMatch(again.text(), /actionable/);
 });
@@ -50,6 +52,7 @@ test('an empty queue stays idle on a 120-second poll and wakes when an Issue bec
     sleep: async (ms) => { h.slept.push(ms); if (h.slept.length === 2) h.world.issue({ number: 300, title: 'New', body: body(1, ['x.mjs']), assignees: ['ana'], labels: ['assigned'] }); if (h.slept.length > 3) throw new Error('stop'); },
   });
   h.slept = [];
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait'], h.ctx), 0);
   assert.deepEqual(h.slept, [120000, 120000]);
   assert.deepEqual(JSON.parse(h.text()).actionable.start.map((x) => x.issue), [300]);
@@ -59,6 +62,7 @@ test('in Codex, next --wait --codex starts the watch as a process of its own and
   const started = [];
   const h = mk();
   h.ctx.startDetached = (a) => { started.push(a); return 4242; };
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex'], h.ctx), 0);
   assert.equal(started.length, 1);
   assert.deepEqual(started[0].slice(0, 5), ['next', '--wait', '120', '--codex-thread', 'P1']);
@@ -66,6 +70,7 @@ test('in Codex, next --wait --codex starts the watch as a process of its own and
   assert.match(h.text(), /The Player's watch waits in the background/);
   const c = mk({ session: { tool: 'claude', id: 'S1' } });
   c.ctx.startDetached = () => assert.fail('nothing starts');
+  assert.equal(await run(['role', 'player'], c.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex'], c.ctx), 1);
 });
 
@@ -74,6 +79,7 @@ test('the detached Player watch queues one message into the Codex chat; a failed
   let ok = false;
   const h = mk({ rounds: 3 });
   h.ctx.codexQueue = (thread, message) => { sent.push({ thread, message }); const r = ok; ok = true; return r; };
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], h.ctx), 0);
   assert.equal(sent.length, 2, 'the first delivery failed, the second went through');
   assert.match(sent[1].message, /Huddle \(Player\): resume #230.*Run \$huddle-play and do it/);
@@ -83,21 +89,26 @@ test('the detached Player watch queues one message into the Codex chat; a failed
 test('one Player watch per repo: another session is refused while it runs; --wait-off stops it and frees it', async () => {
   const a = mk({ setup: () => {} });
   Object.assign(a.ctx, { pid: 100, isAlive: () => true, startDetached: () => 101 });
+  assert.equal(await run(['role', 'player'], a.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex'], a.ctx), 0);
   const b = mk({ setup: () => {}, session: { tool: 'codex', id: 'P2' } });
   Object.assign(b.ctx, { pid: 200, isAlive: () => true });
   b.ctx.readFile = a.ctx.readFile; b.ctx.writeFile = a.ctx.writeFile;
+  assert.equal(await run(['role', 'player'], b.ctx), 0);
   assert.equal(await run(['next', '--wait'], b.ctx), 1);
   assert.match(b.text(), /The Player's watch already runs in Codex \(another session\)/);
+  assert.equal(await run(['role', 'player'], b.ctx), 0);
   assert.equal(await run(['next', '--wait-off'], b.ctx), 0);
   const c = mk({ setup: () => {}, session: { tool: 'codex', id: 'P2' } });
   c.ctx.readFile = a.ctx.readFile; c.ctx.writeFile = a.ctx.writeFile;
+ assert.equal(await run(['role', 'player'], c.ctx), 0);
   await run(['next', '--wait'], c.ctx).catch(() => {});
   assert.doesNotMatch(c.text(), /already runs/);
 });
 
 test('huddle status shows the Player\'s watch apart from the Coach\'s', async () => {
   const h = mk({ setup: () => {} });
+ assert.equal(await run(['role', 'player'], h.ctx), 0);
   await run(['next', '--wait'], h.ctx).catch(() => {});
   h.out.length = 0;
   await run(['status'], h.ctx);

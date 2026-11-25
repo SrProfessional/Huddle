@@ -29,8 +29,10 @@ test('the watch files live in the shared folder, and an «always» left in the o
 test('a second session does not start a second watch while the first holds it, and says where it runs', async () => {
   const clock = { t: Date.parse('2026-11-20T20:00:00Z') };
   const claude = mk({ clock });
+ assert.equal(await run(['role', 'coach'], claude.ctx), 0);
   await run(['queue', '--wait', '300'], claude.ctx).catch(() => {});
   const codex = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
+  assert.equal(await run(['role', 'coach'], codex.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], codex.ctx), 1);
   assert.match(codex.text(), /The watch already runs in Claude Code \(another session\), last check .* ago: this session does not start a second one\./);
 });
@@ -38,27 +40,34 @@ test('a second session does not start a second watch while the first holds it, a
 test('the owner keeps the watch while it reviews (up to 45 minutes after it returned items), then another session may take it', async () => {
   const clock = { t: Date.parse('2026-11-20T20:00:00Z') };
   const claude = mk({ clock, setup: (w) => { w.issue({ number: 42, body: MANAGED, assignees: ['ana'], reviews: [51] }); w.review({ number: 51, head: 'aaa' }); } });
+  assert.equal(await run(['role', 'coach'], claude.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], claude.ctx), 0, 'items wait: it returns them to its session');
   clock.t += 30 * 60 * 1000; // 30 minutes later, the Claude session is still reviewing: its heartbeat is old, but it holds the watch
   const codex = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
+  assert.equal(await run(['role', 'coach'], codex.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], codex.ctx), 1);
   assert.match(codex.text(), /Another session \(Claude Code\) took PR #51 to review 30 minutes ago and has not checked since/); // Issue #222
   clock.t += 20 * 60 * 1000; // 50 minutes: the Claude session is gone
   const later = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
+ assert.equal(await run(['role', 'coach'], later.ctx), 0);
   await run(['queue', '--wait', '300'], later.ctx).catch(() => {});
   assert.doesNotMatch(later.text(), /already runs/);
 });
 
-test('the same session restarts its own watch freely, and --wait-off from any session frees it', async () => {
+test('the same session restarts its own watch freely, and --wait-off from another Coach session frees it', async () => {
   const clock = { t: Date.parse('2026-11-20T20:00:00Z') };
   const claude = mk({ clock });
+ assert.equal(await run(['role', 'coach'], claude.ctx), 0);
   await run(['queue', '--wait', '300'], claude.ctx).catch(() => {});
   const again = share(claude, mk({ clock }));
+ assert.equal(await run(['role', 'coach'], again.ctx), 0);
   await run(['queue', '--wait', '300'], again.ctx).catch(() => {});
   assert.doesNotMatch(again.text(), /already runs/);
   const codex = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
+  assert.equal(await run(['role', 'coach'], codex.ctx), 0);
   assert.equal(await run(['queue', '--wait-off'], codex.ctx), 0);
   const codex2 = share(claude, mk({ clock, session: { tool: 'codex', id: 'T9' } }));
+ assert.equal(await run(['role', 'coach'], codex2.ctx), 0);
   await run(['queue', '--wait', '300'], codex2.ctx).catch(() => {});
   assert.doesNotMatch(codex2.text(), /already runs/);
 });
@@ -66,6 +75,7 @@ test('the same session restarts its own watch freely, and --wait-off from any se
 test('huddle status names the tool of the running watch', async () => {
   const clock = { t: Date.parse('2026-11-20T20:00:00Z') };
   const codex = mk({ clock, session: { tool: 'codex', id: 'T9' } });
+ assert.equal(await run(['role', 'coach'], codex.ctx), 0);
   await run(['queue', '--wait', '300'], codex.ctx).catch(() => {});
   codex.out.length = 0;
   assert.equal(await run(['status'], codex.ctx), 0);

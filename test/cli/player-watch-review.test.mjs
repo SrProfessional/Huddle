@@ -26,6 +26,7 @@ function mk({ setup = () => {}, pid = 100, session = { tool: 'codex', id: 'P1' }
 async function launch(h, childPid) {
   let argv = null;
   h.ctx.startDetached = (args) => { argv = args; return childPid; };
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   const code = await run(['next', '--wait', '--codex'], h.ctx);
   return { code, argv };
 }
@@ -36,9 +37,11 @@ test('one Player watch, claimed before the child starts: a second launch (same o
   assert.equal((await launch(a, 101)).code, 0);
   const again = mk({ files: a });
   again.ctx.startDetached = () => assert.fail('no second child');
+  assert.equal(await run(['role', 'player'], again.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex'], again.ctx), 1, 'the same session, a second time');
   const other = mk({ files: a, pid: 200, session: { tool: 'codex', id: 'P2' } });
   other.ctx.startDetached = () => assert.fail('no second child');
+  assert.equal(await run(['role', 'player'], other.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex'], other.ctx), 1);
   assert.match(other.text(), /The Player's watch already runs/);
 });
@@ -48,6 +51,7 @@ test('two launches at the same moment: while one holds the lock, the other is re
   a.ctx.writeFile(labelsFiles(a.ctx).playerLock, JSON.stringify({ pid: 999, at: Date.parse('2026-11-21T12:00:00Z') }));
   const b = mk({ files: a, pid: 200, session: { tool: 'codex', id: 'P2' } });
   b.ctx.startDetached = () => assert.fail('no child while another launch holds the lock');
+  assert.equal(await run(['role', 'player'], b.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex'], b.ctx), 1);
   assert.match(b.text(), /being started by another command/);
   // A lock left by a dead process is broken.
@@ -74,6 +78,7 @@ test('stop, an immediate restart, then the old child\'s next poll: the old child
   const a = mk();
   const first = await launch(a, 101);
   // A stop while the first child runs: it keeps its ownership, marked stopped, until it can exit.
+  assert.equal(await run(['role', 'player'], a.ctx), 0);
   assert.equal(await run(['next', '--wait-off'], a.ctx), 0);
   assert.equal(owner(a).stopped, true);
   // An immediate restart from another session takes over.
@@ -101,6 +106,7 @@ test('stop, an immediate restart, then the old child\'s next poll: the old child
 test('a stopped child that polls before any restart says it stopped, tells nothing, and frees the watch', async () => {
   const a = mk();
   const { argv } = await launch(a, 101);
+ assert.equal(await run(['role', 'player'], a.ctx), 0);
   await run(['next', '--wait-off'], a.ctx);
   const sent = [];
   const child = mk({ files: a, pid: 101, setup: assigned7 });
@@ -196,6 +202,7 @@ test('a closure check that fails is tried again next round, and the confirmed cl
   };
   const sent = [];
   h.ctx.codexQueue = (t, m) => { sent.push({ t, m }); return { queued: true, resumed: true }; };
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], h.ctx), 0);
   assert.equal(lookups, 2, 'tried again after the reset');
   assert.equal(sent.length, 1);
@@ -218,6 +225,7 @@ test('a followed Issue that is merged is told once, even when the queue is then 
     setup: (w) => { w.issue({ number: 60, title: 'In review', body: body(1, ['r.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [600] }); w.review({ number: 600 }); },
     sleep: async () => { rounds += 1; if (rounds === 1) h.world.issue({ number: 60, title: 'In review', body: body(1, ['r.mjs']), assignees: ['ana'], state: 'merged' }); if (rounds > 3) throw new Error('stop'); },
   });
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait'], h.ctx), 0);
   assert.deepEqual(JSON.parse(h.text()).actionable.finished, [60]);
 });
@@ -229,6 +237,7 @@ test('an Issue that only lost its Player (still open) is not told as finished', 
     setup: (w) => { w.issue({ number: 61, title: 'Mine', body: body(1, ['r.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [610] }); w.review({ number: 610 }); },
     sleep: async () => { rounds += 1; if (rounds === 1) h.world.issue({ number: 61, title: 'Mine', body: body(1, ['r.mjs']), assignees: ['luis'], labels: ['in review'] }); if (rounds > 2) throw new Error('stop'); },
   });
+ assert.equal(await run(['role', 'player'], h.ctx), 0);
   await run(['next', '--wait'], h.ctx).catch(() => {});
   assert.doesNotMatch(h.text(), /finished/);
 });
@@ -242,6 +251,7 @@ test('a finished Issue whose first delivery failed is told again, to the same th
   });
   const sent = [];
   h.ctx.codexQueue = (t, m) => { sent.push({ t, m }); return sent.length === 1 ? { queued: false, error: 'codex: busy' } : { queued: true, resumed: true }; };
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], h.ctx), 0);
   assert.equal(sent.length, 2);
   assert.ok(sent.every((x) => x.t === 'P1' && /#60 is finished/.test(x.m)));
@@ -252,6 +262,7 @@ test('in Codex, a message only queued (the session could not be resumed) is kept
   const queuedOnly = mk({ setup: assigned7 });
   const sent = [];
   queuedOnly.ctx.codexQueue = (t, m) => { sent.push(m); return { queued: true, resumed: false, warning: 'could not resume thread P1: start a local daemon' }; };
+  assert.equal(await run(['role', 'player'], queuedOnly.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], queuedOnly.ctx), 0);
   assert.equal(sent.length, 1, 'not sent twice');
   const beat = JSON.parse(queuedOnly.ctx.readFile(labelsFiles(queuedOnly.ctx).playerBeat));
@@ -259,6 +270,7 @@ test('in Codex, a message only queued (the session could not be resumed) is kept
   let calls = 0;
   const failing = mk({ setup: assigned7, sleep: async () => { if (calls > 2) throw new Error('stop'); } });
   failing.ctx.codexQueue = () => { calls += 1; return calls === 1 ? { queued: false, error: 'codex: thread not found' } : { queued: true, resumed: true }; };
+  assert.equal(await run(['role', 'player'], failing.ctx), 0);
   assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], failing.ctx), 0);
   assert.equal(calls, 2, 'retried once the queue failed');
 });
