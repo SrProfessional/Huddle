@@ -47,6 +47,22 @@ test('a pending decision waits for an answer and can be recovered after interrup
   assert.match(rule, /huddle asked <n>/);
 });
 
+test('Codex keeps the active turn open after an asynchronous selector acknowledges the ask', () => {
+  assert.match(rule, /before sending a final response.*?ask.*?in the same turn/i);
+  assert.match(rule, /`request_user_input_async`.*?acknowledgement does not resolve the question/i);
+  assert.match(rule, /interruptible wait.*?check for a reply and wait again/i);
+  assert.match(rule, /send a final response only after an answer, explicit deferral, or interruption/i);
+});
+
+test('the Codex decision and watch skills use the asynchronous selector and wait before ending', () => {
+  for (const name of ['huddle-decide', 'huddle-watch']) {
+    const question = words(skill(name));
+    assert.match(question, /otherwise use `request_user_input_async` when supported/i, name);
+    assert.match(question, /follow the managed block's pending-question rule/i, name);
+    assert.match(question, /after an explicit deferral or interruption.*?Pending decisions: #n, #m/i, name);
+  }
+});
+
 test('release compares production with the published artifact and asks before release preparation', () => {
   const release = words(skill('huddle-release'));
   assert.match(release, /merge.*?only when the Coach says so in the same chat/i);
@@ -55,6 +71,12 @@ test('release compares production with the published artifact and asks before re
   assert.match(release, /Prepare the next version \(Recommended\).*?Defer publication/);
   assert.match(release, /preparation.*?does not authorize publication/);
   assert.match(release, /existing publication approvals.*?smoke test.*?platform permissions/);
+});
+
+test('release follow-through offers the actual next action when a candidate already exists', () => {
+  const release = words(skill('huddle-release'));
+  assert.match(release, /if a candidate already exists.*?remaining release decision/i);
+  assert.match(release, /complete the next outstanding smoke check.*?authorization to publish/i);
 });
 
 for (const name of ['huddle-issue', 'huddle-bug']) {
