@@ -258,15 +258,51 @@ test('a finished Issue whose first delivery failed is told again, to the same th
   assert.deepEqual(JSON.parse(h.text()).actionable.finished, [60]);
 });
 
-test('in Codex, a message only queued (the session could not be resumed) is kept as a diagnostic and not sent again; an error to queue is retried', async () => {
-  const queuedOnly = mk({ setup: assigned7 });
+test('a detached Codex watch keeps polling after a queued wake without resuming, with one notification per event', async () => {
+  const launcher = mk();
+  const { code, argv } = await launch(launcher, 101);
+  assert.equal(code, 0);
+  let rounds = 0;
+  let now = launcher.ctx.now();
+  const status = [];
   const sent = [];
-  queuedOnly.ctx.codexQueue = (t, m) => { sent.push(m); return { queued: true, resumed: false, warning: 'could not resume thread P1: start a local daemon' }; };
-  assert.equal(await run(['role', 'player'], queuedOnly.ctx), 0);
-  assert.equal(await run(['next', '--wait', '--codex-thread', 'P1'], queuedOnly.ctx), 0);
-  assert.equal(sent.length, 1, 'not sent twice');
-  const beat = JSON.parse(queuedOnly.ctx.readFile(labelsFiles(queuedOnly.ctx).playerBeat));
-  assert.match(beat.note, /queued; Codex could not resume the session/);
+  const child = mk({
+    files: launcher, pid: 101,
+    setup: (w) => {
+      w.issue({ number: 7, title: 'Coach request', body: body(1, ['x.mjs']), assignees: ['ana'], labels: ['changes requested from Coach'], reviews: [70] });
+      w.review({ number: 70 });
+      w.comment(70, request(700));
+      w.issue({ number: 8, title: 'In review', body: body(1, ['y.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [80] });
+      w.review({ number: 80 });
+    },
+    sleep: async (ms) => {
+      assert.equal(owner(launcher)?.pid, 101, 'the same child still owns the watch');
+      launcher.out.length = 0;
+      assert.equal(await run(['status'], launcher.ctx), 0);
+      status.push(launcher.text());
+      now += ms;
+      rounds += 1;
+      if (rounds === 2) {
+        child.world.issue({ number: 8, title: 'In review', state: 'merged' });
+      }
+      if (rounds >= 4) assert.equal(await run(['next', '--wait-off'], launcher.ctx), 0);
+    },
+  });
+  child.ctx.now = launcher.ctx.now = () => now;
+  child.ctx.codexQueue = (thread, message) => {
+    sent.push({ thread, message });
+    return { queued: true, resumed: false };
+  };
+
+  assert.equal(await run(argv, child.ctx), 0);
+  assert.equal(rounds, 4, 'the child polls again and only exits at explicit stop');
+  assert.ok(status.every((line) => /player watch: on, last check .*queued; Codex could not resume the session/.test(line)));
+  assert.deepEqual(sent.map(({ thread, message }) => [thread, message.match(/seen keys: ([^)]+)/)?.[1]]), [['P1', 'resume:#7:700'], ['P1', 'done:#8']]);
+  assert.match(child.text(), /"stopped": ?true/);
+  assert.equal(owner(launcher), null);
+});
+
+test('a Codex watch retries failed queue delivery and hands off on a successful resume', async () => {
   let calls = 0;
   const failing = mk({ setup: assigned7, sleep: async () => { if (calls > 2) throw new Error('stop'); } });
   failing.ctx.codexQueue = () => { calls += 1; return calls === 1 ? { queued: false, error: 'codex: thread not found' } : { queued: true, resumed: true }; };
