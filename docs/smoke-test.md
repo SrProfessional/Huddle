@@ -463,11 +463,13 @@ description next to the tables above.
 
 ### Results 1.0.6
 
-Preparation for the changes since v1.0.5. The Coach marked the eleven Issues tested in staging. Claude Code
+Preparation for the changes since v1.0.5. The Coach marked the eleven Issues tested in staging, as recorded in
+[production PR #355](https://github.com/SrProfessional/Huddle/pull/355) and
+[production PR #358](https://github.com/SrProfessional/Huddle/pull/358). Claude Code
 installed 1.0.6 from the local candidate marketplace in an isolated configuration. The installed CLI passed
 `doctor` after refreshing an older private GitHub sandbox and setting up a fresh private GitLab sandbox.
-Installation from the published marketplace and the full live client walkthrough remain pending. The version
-has not been tagged or published.
+The full pre-release smoke checklist and live client walkthrough remain pending. After the tag and release
+are published, the published marketplace installation still needs verification.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|

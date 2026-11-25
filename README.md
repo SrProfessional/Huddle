@@ -10,8 +10,8 @@ request (a merge request on GitLab) and waits for the review on its own.
 The Coach and each Player may use either tool, at the same time: the sessions talk only through GitHub or GitLab. It
 works with GitHub and GitLab, including self-managed GitLab. **Website:** <https://srprofessional.github.io/Huddle/>.
 
-> **Status:** the latest release is [1.0.6](https://github.com/SrProfessional/Huddle/releases/tag/v1.0.6); what came after
-> it is under «Unreleased» in the [changelog](CHANGELOG.md). The design is in [docs/design.md](docs/design.md).
+> **Status:** this checkout is Huddle 1.0.6. See the [latest published release](https://github.com/SrProfessional/Huddle/releases/latest)
+> for the downloadable version and the [changelog](CHANGELOG.md) for changes. The design is in [docs/design.md](docs/design.md).
 
 **Docs:** [roles](docs/roles.md) · [first day](docs/first-day.md) · [team guide](docs/team-guide.md) ·
 [GitLab notes](docs/gitlab.md)

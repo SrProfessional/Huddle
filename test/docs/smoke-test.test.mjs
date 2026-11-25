@@ -126,6 +126,9 @@ test('the versions are 1.0.6 and the CHANGELOG has an «Unreleased» section abo
     assert.ok(notes.includes(`Issue #${issue}`), `missing release notes for #${issue}`);
   }
   assert.match(smoke, /^### Results 1\.0\.6$/m);
+  const readme = readFileSync(path.join(root, 'README.md'), 'utf8');
+  assert.match(readme, /^> \*\*Status:\*\* this checkout is Huddle 1\.0\.6\./m);
+  assert.match(readme, /\[latest published release\]\(https:\/\/github\.com\/SrProfessional\/Huddle\/releases\/latest\)/);
   assert.ok(c.indexOf('## [1.0.5]') < c.indexOf('## [1.0.4]'));
   assert.ok(c.indexOf('## [1.0.4]') < c.indexOf('## [1.0.3]'));
   assert.ok(c.indexOf('## [1.0.3]') < c.indexOf('## [1.0.2]'));
