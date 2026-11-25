@@ -8,6 +8,8 @@ description: Use when the Coach wants its session to check by itself what waits 
 For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you are not the `coach` login in `huddle.json`,
 stop with one clear line («/huddle-watch is for the Coach») and change nothing. The rules are in docs/design.md §19.
 
+**Session role.** Follow the managed Huddle block. A direct request from the person to run this workflow selects Coach if the role is unspecified. Check and record it with `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" role --json` and `role coach` as needed. Preserve Both when already chosen. A watch wake or the always setting never selects a role: start or resume the watch only if this session already uses Coach or Both.
+
 **In OpenAI Codex** (Issue #212): run the background wait as `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --wait <seconds> [--seen <keys>] --codex` (the `huddle` command the session start named; approve network access). It returns at once and the watch waits with no tokens; when this chat gets «Huddle's watch: … Run $huddle-watch», read `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --json` and go on as below, then start the wait again the same way. If it says the watch already runs in another session, say so in one line and stop: that session reviews.
 
 **Another session holds the watch** (Issue #222, in Claude Code and in Codex): «already runs» means its loop is alive: say so in one line and stop. «took … to review … and has not checked since» means that session may be stuck (closed, or out of quota): when the person ran `/huddle-watch` themselves, ask the person «Another session took <what> <when> and has not come back. Take over?» and pass `--take-over` only on yes (with `--codex` too in Codex); on no, stop. The «always» start at a session start never passes `--take-over`: it only names the other session.
@@ -16,12 +18,12 @@ stop with one clear line («/huddle-watch is for the Coach») and change nothing
 
 The watch waits in the background with a small Node process (`queue --wait`), as a Player's session waits for its review: it uses
 **no Claude tokens while nothing waits**, and wakes this session only when something new waits. Nothing turns it on by itself, unless
-the Coach chose `/huddle-watch always`: then each of their sessions of this repo, on this machine, starts it (the session start says so).
+the Coach chose `/huddle-watch always`: then each of their sessions of this repo using Coach or Both, on this machine, starts it (the session start says so).
 
 ## Always (`/huddle-watch always`)
 
 Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" queue --always` (a mark on this machine only, never in the repo: no PR, nobody else affected), then turn the
-watch on as in «On». Say that it will start again in each of your sessions of this repo on this machine until `/huddle-watch off`. When the
+watch on as in «On». Say that it will start again in sessions of this repo using Coach or Both on this machine until `/huddle-watch off`. When the
 session start says «the watch starts now, as you asked», do the same «On» steps before anything else.
 
 ## On (`/huddle-watch` or `/huddle-watch <interval>`)

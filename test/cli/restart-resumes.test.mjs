@@ -36,8 +36,10 @@ const quiet = (w) => w.issue({ number: 5, body: MANAGED });
 
 test('Coach watch: a new session takes the watch at once when the owner process is gone, though its beat is still fresh', async () => {
   const first = mk({ setup: quiet, session: { tool: 'claude', id: 'S1' }, pid: 100 });
+ assert.equal(await run(['role', 'coach'], first.ctx), 0);
   await run(['queue', '--wait', '300'], first.ctx).catch(() => {});
   const second = mk({ setup: reviewWaits, from: first, alive: (p) => p !== 100 });
+  assert.equal(await run(['role', 'coach'], second.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], second.ctx), 0);
   assert.doesNotMatch(second.text(), /already runs/);
   assert.match(second.text(), /"waits": "review"/);
@@ -46,20 +48,25 @@ test('Coach watch: a new session takes the watch at once when the owner process 
 
 test('Coach watch: a live owner process on this machine still keeps the one watch', async () => {
   const first = mk({ setup: quiet, session: { tool: 'claude', id: 'S1' }, pid: 100 });
+ assert.equal(await run(['role', 'coach'], first.ctx), 0);
   await run(['queue', '--wait', '300'], first.ctx).catch(() => {});
   const second = mk({ setup: reviewWaits, from: first, alive: () => true });
+  assert.equal(await run(['role', 'coach'], second.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], second.ctx), 1);
   assert.match(second.text(), /The watch already runs in Claude Code \(another session\)/);
 });
 
 test('Coach watch: an owner that only held the watch to review, from before the machine started, is taken over with no question', async () => {
   const first = mk({ setup: reviewWaits, session: { tool: 'claude', id: 'S1' }, pid: 100 });
+  assert.equal(await run(['role', 'coach'], first.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], first.ctx), 0, 'its loop returned the PR to review');
   const clock = { t: T0 + 30 * MIN };
   const still = mk({ setup: reviewWaits, from: first, clock, alive: () => true });
+  assert.equal(await run(['role', 'coach'], still.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], still.ctx), 1, 'with the machine still on, its session may be reviewing: it asks for --take-over');
   assert.match(still.text(), /take over with --take-over/);
   const rebooted = mk({ setup: reviewWaits, from: first, clock, alive: () => true, boot: T0 + 10 * MIN });
+  assert.equal(await run(['role', 'coach'], rebooted.ctx), 0);
   assert.equal(await run(['queue', '--wait', '300'], rebooted.ctx), 0);
   assert.doesNotMatch(rebooted.text(), /take over with --take-over|already runs/);
 });
@@ -75,16 +82,20 @@ test('Player watch: a dead owner, a pid reused after a restart and a beat gone s
   };
   const fresh = { at: T0 - MIN, every: 120 };
   const live = seeded({ at: T0 - 20 * MIN }, fresh);
+  assert.equal(await run(['role', 'player'], live.ctx), 0);
   assert.equal(await run(['next', '--wait'], live.ctx), 1, 'a live owner with a fresh beat keeps its watch');
   assert.match(live.text(), /already runs/);
   const dead = seeded({ pid: 556, at: T0 - 20 * MIN }, fresh);
+  assert.equal(await run(['role', 'player'], dead.ctx), 0);
   assert.equal(await run(['next', '--wait'], dead.ctx), 0, 'the owner process is gone');
   assert.match(dead.text(), /actionable/);
   const reused = seeded({ at: T0 - 5 * 60 * MIN }, { at: T0 - 5 * 60 * MIN, every: 120 });
   reused.ctx.bootTime = () => T0 - 60 * MIN;
+  assert.equal(await run(['role', 'player'], reused.ctx), 0);
   assert.equal(await run(['next', '--wait'], reused.ctx), 0, 'the pid is alive but it belongs to a process started after the claim: another program');
   assert.match(reused.text(), /actionable/);
   const hung = seeded({ at: T0 - 5 * 60 * MIN }, { at: T0 - 5 * 60 * MIN, every: 120 });
+  assert.equal(await run(['role', 'player'], hung.ctx), 0);
   assert.equal(await run(['next', '--wait'], hung.ctx), 0, 'the owner pid runs but the beat is hours old');
   assert.match(hung.text(), /actionable/);
 });
@@ -196,10 +207,12 @@ for (const gitlab of [false, true]) {
 
   test(`${on}: the Player's watch wakes for an interrupted Issue once, and not again when its key was seen`, async () => {
     const h = play();
+    assert.equal(await run(['role', 'player'], h.ctx), 0);
     assert.equal(await run(['next', '--wait'], h.ctx), 0);
     const woke = JSON.parse(h.text());
     assert.deepEqual(woke.actionable.resume.map((x) => x.kind), ['interrupted']);
     const again = play();
+   assert.equal(await run(['role', 'player'], again.ctx), 0);
     await run(['next', '--wait', '--seen', woke.actionable.keys[0]], again.ctx).catch(() => {});
     assert.doesNotMatch(again.text(), /actionable/);
   });
@@ -251,9 +264,11 @@ for (const gitlab of [false, true]) {
     assert.notEqual(await keyOf('bbbb2222'), first, 'a new commit, a new interruption');
     assert.notEqual(await keyOf('aaaa1111', { session: 'S1', tool: 'claude', at: T0 - 60 * MIN }), first, 'another worker mark is another interruption');
     const seen = withTimes({}, gitWithTree({ lastCommit: old }));
+   assert.equal(await run(['role', 'player'], seen.ctx), 0);
     await run(['next', '--wait', '--seen', first], seen.ctx).catch(() => {});
     assert.doesNotMatch(seen.text(), /actionable/, 'a key already told is not repeated');
     const woken = withTimes({}, gitWithTree({ lastCommit: old, head: 'bbbb2222' }));
+    assert.equal(await run(['role', 'player'], woken.ctx), 0);
     assert.equal(await run(['next', '--wait', '--seen', first], woken.ctx), 0);
     assert.match(woken.text(), /actionable/, 'the later interruption wakes the same long watch');
   });
@@ -267,15 +282,18 @@ for (const gitlab of [false, true]) {
 
   test(`${on}: a new watch skips a PR/MR the Coach already reviewed at the same head, from the marker in its comments (the lost --seen keys)`, async () => {
     const h = mk({ gitlab, setup: reviewed('SrProfessional') });
+   assert.equal(await run(['role', 'coach'], h.ctx), 0);
     await run(['queue', '--wait', '300'], h.ctx).catch(() => {});
     assert.doesNotMatch(h.text(), /"waits"/);
     const next = mk({ gitlab, setup: reviewed('SrProfessional', 'aaaa') });
+    assert.equal(await run(['role', 'coach'], next.ctx), 0);
     assert.equal(await run(['queue', '--wait', '300'], next.ctx), 0, 'another head is a new push: it is told');
     assert.match(next.text(), /"waits": "review"/);
   });
 
   test(`${on}: a marker written by anyone but the Coach does not count, and a plain queue read still lists the PR/MR`, async () => {
     const h = mk({ gitlab, setup: reviewed('ana') });
+    assert.equal(await run(['role', 'coach'], h.ctx), 0);
     assert.equal(await run(['queue', '--wait', '300'], h.ctx), 0);
     assert.match(h.text(), /"waits": "review"/);
     const plain = mk({ gitlab, setup: reviewed('SrProfessional') });

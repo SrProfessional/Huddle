@@ -93,11 +93,25 @@ function hooked({ manager = false, config = {}, now = Date.parse('2026-11-13T10:
   return { h, started };
 }
 
-test('the hook starts the labels pass with --no-assign for a Player and without it for the Coach', async () => {
+test('the hook allows assignment only in a selected Coach session with the Coach login', async () => {
   const dev = hooked();
   assert.equal(await run(['hook'], dev.h.ctx), 0);
   assert.deepEqual(dev.started, [['labels', '--no-assign']]);
+
+  const undecided = hooked({ manager: true });
+  undecided.h.ctx.session = { tool: 'claude', id: 'undecided-session' };
+  assert.equal(await run(['hook'], undecided.h.ctx), 0);
+  assert.deepEqual(undecided.started, [['labels', '--no-assign']]);
+
+  const playing = hooked({ manager: true, config: { assignees: ['SrProfessional'] } });
+  playing.h.ctx.session = { tool: 'claude', id: 'player-session' };
+  assert.equal(await run(['role', 'player'], playing.h.ctx), 0);
+  assert.equal(await run(['hook'], playing.h.ctx), 0);
+  assert.deepEqual(playing.started, [['labels', '--no-assign']]);
+
   const boss = hooked({ manager: true });
+  boss.h.ctx.session = { tool: 'claude', id: 'coach-session' };
+  assert.equal(await run(['role', 'coach'], boss.h.ctx), 0);
   assert.equal(await run(['hook'], boss.h.ctx), 0);
   assert.deepEqual(boss.started, [['labels']]);
 });
