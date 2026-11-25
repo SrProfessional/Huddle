@@ -74,6 +74,60 @@ test('in Codex, next --wait --codex starts the watch as a process of its own and
   assert.equal(await run(['next', '--wait', '--codex'], c.ctx), 1);
 });
 
+test('after the last active Issue finishes, the empty Codex round rearms one detached watch for future work', async () => {
+  const issue = { number: 300, title: 'Last Issue', body: body(1, ['x.mjs']), assignees: ['ana'] };
+  const launches = [];
+  const sent = [];
+  const h = mk({
+    setup: (w) => w.issue({ ...issue, labels: ['assigned'] }),
+    sleep: async (ms) => {
+      h.slept.push(ms);
+      assert.ok(h.slept.length <= 2, 'the next assignment wakes the watch');
+      if (h.slept.length === 2) h.world.issue({ ...issue, number: 301, title: 'Next Issue', labels: ['assigned'] });
+    },
+  });
+  Object.assign(h.ctx, {
+    pid: 100, isAlive: () => true,
+    startDetached: (args) => {
+      const pid = 101 + launches.length;
+      launches.push({ args, pid });
+      return pid;
+    },
+    codexQueue: (thread, message) => {
+      sent.push({ thread, message });
+      return { queued: true, resumed: true };
+    },
+  });
+  const runChild = async ({ args, pid }) => {
+    h.ctx.pid = pid;
+    try { return await run(args, h.ctx); } finally { h.ctx.pid = 100; }
+  };
+
+  assert.equal(await run(['role', 'player'], h.ctx), 0);
+  assert.equal(await run(['next', '--wait', '--codex'], h.ctx), 0);
+  h.out.length = 0;
+  assert.equal(await runChild(launches[0]), 0);
+  const { keys } = JSON.parse(h.text()).actionable;
+  h.world.issue({ ...issue, labels: ['in progress'] });
+  h.out.length = 0;
+  assert.equal(await run(['next', '--json'], h.ctx), 0);
+  assert.deepEqual(JSON.parse(h.text()).active.map((x) => x.issue), [300]);
+
+  h.world.issue({ ...issue, state: 'merged' });
+  h.out.length = 0;
+  assert.equal(await run(['next', '--json'], h.ctx), 0);
+  const { active, start, resume } = JSON.parse(h.text());
+  assert.deepEqual({ active, start, resume }, { active: [], start: [], resume: [] });
+  const rearm = ['next', '--wait', '--seen', keys.join(','), '--codex'];
+  assert.equal(await run(rearm, h.ctx), 0);
+  assert.equal(await run(rearm, h.ctx), 1, 'the same session keeps its existing watch');
+  assert.equal(launches.length, 2, 'one initial watch and one rearm');
+
+  assert.equal(await runChild(launches[1]), 0);
+  assert.deepEqual(h.slept, [120000, 120000]);
+  assert.deepEqual(sent.map(({ thread, message }) => [thread, message.match(/start #\d+/)?.[0]]), [['P1', 'start #300'], ['P1', 'start #301']]);
+});
+
 test('the detached Player watch queues one message into the Codex chat; a failed delivery is recorded and retried, never lost', async () => {
   const sent = [];
   let ok = false;
@@ -124,5 +178,7 @@ test('the parallel play skill resumes first, never ends on an empty queue, and k
   assert.match(t, /next --wait --seen <keys> --codex/);
   assert.match(t, /never start from the old answer/);
   assert.match(t, /next --wait-off/);
+  assert.match(t, /After the last active Issue finishes, if no Issue is eligible, follow step 5 before closing the foreground round/);
+  assert.doesNotMatch(t, /nothing is active and no wait is running, say so and end/);
   assert.doesNotMatch(t, /Nothing starts: say so and stop/);
 });
