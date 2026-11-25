@@ -12,6 +12,10 @@ requested from AI Manager» of older repos keep working (§6, §22); the release
 
 ## 1. Goal
 
+Huddle helps the creator focus on decisions while sessions handle implementation, testing, and follow-through. Each new Issue
+names the creator benefit and an observable acceptance criterion in its Goal. A task can help indirectly by removing a manual
+step or making a decision safer. When the benefit is unclear, the author clarifies the intended outcome before drafting the Issue.
+
 Today Huddle lives inside SocialCortex, mixed with that project's rules. This work makes it a product that any team can
 install in its own repo in a few minutes. It has to work with **GitHub** and with **GitLab**, both on gitlab.com and on a
 company's own GitLab server.
@@ -309,10 +313,19 @@ With a staging branch the milestone query reads 10 milestones per page (50 witho
 Asked by the Coach on 2026-11-08 (Issue #50). The Coach's own Claude Code session does every step it can, and
 Huddle gives step-by-step instructions only for the steps that truly need the person.
 
-**The rule.** Before a session hands a step to the Coach (or to a Player), it checks whether it can do the step
-itself with the tools and logins it has: `gh`, `glab`, the sandboxes and git. If it can, it does it itself and reports what
-it did. Merging an approved PR/MR, tagging a release, creating a release page, running a smoke-test step on the sandboxes
-and filling «Results» are all the session's steps.
+**The rule.** A session using Coach, Player, or Both checks whether the next step belongs to the current goal and
+whether it has the tools (such as `gh`, `glab` and git), permissions, and approval. If so, it does it itself and
+reports what it did. That includes running smoke tests and filling their results, merging an approved PR/MR, and
+tagging or publishing when the release workflow authorizes it. When a decision or authorization is needed, it
+explains what remains and asks one concrete question in the person's language with a recommended option and at
+least one alternative, using the multiple-choice workflow (§19). A relevant action outside the request can be
+suggested as a next step. Skip suggestions when the goal is complete.
+
+Prefer a blocking question tool. With an asynchronous selector, keep the turn active while the client supports it
+until the person answers, explicitly defers, or interrupts. An unanswered question stays pending after any elapsed
+time and carries no approval. Independent work may continue. If the selector cannot be preserved or the session is
+interrupted, keep the question and choices as a numbered list in the chat and present the selector again on resumption
+when available. Issue decisions retain the queue, recorded asks, and dependent-work holds in §19.
 
 **What goes to the person.** Only a step that needs something the session cannot have:
 
@@ -922,6 +935,10 @@ Issue in staging was tested there**. Unset, the commands say «no staging branch
   Issue, ask whether it was tested and run `huddle tested <n>` only on a yes; the project's **clean check** on staging (the one the project documents in its `CLAUDE.md`: a fresh
   worktree of `origin/<staging>`, a clean install, its test command; when none is documented it asks and never invents one; a failing suite stops the release); show the list and
   wait for the OK; `huddle release open`; merge with a merge commit only when the Coach says so in the same chat.
+- **Production and publication.** After the merge, confirm what reached the default branch. For a separately versioned package or plugin,
+  compare the production changes with the current published version using the release record, tag or commit, and version files. If the
+  published version omits those changes, report both states and ask whether to prepare the next version and its release or defer. Approval
+  to prepare leaves the publication approvals, smoke-test requirements, Coach role, and platform permissions in place.
 - **`/huddle-test`** (`$huddle-test` in Codex; Coach only; `huddle doctor` first). A guided test of staging: it takes the staged Issues with `tested: false` from `huddle release --json`, orders them (what other Issues depend on first, then what a person sees or touches, then what needs another tool or device, docs- and tests-only last) with a reason each, and walks the Coach through them one at a time with numbered steps in the §13 form, built from the Issue's optional «How to test in staging» section, else its Goal, «Tests that must pass» and the merged PR (it never invents a behaviour). The session runs the steps it can; only a person's eyes, a second account or another device go to the Coach as «🙋 Only you». It runs `huddle tested <n>` only on a «passed» from the Coach in the same chat; «failed» offers `/huddle-bug` or a reopen and does not mark; «skip» and «stop» are allowed. `/huddle-release` points to it.
 - **`/huddle-steps`** (`$huddle-steps` in Codex; Coach only; `huddle doctor` first). The same guided way as `/huddle-test` for every step that is the person's (§13, Issue #340): one Issue and one step at a time, asked as a multiple choice, recorded with `huddle steps`, kept in front of the person until it is closed (§19), with the dependent work held and the rest going on.
 - **Branch protection.** A staging branch should have branch protection on the platform: nothing technical in Huddle stops a Player from merging into it. The label is cosmetic by

@@ -28,7 +28,9 @@ In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary
    Fill the bug block with what you found and mark what is confirmed and what is a guess: What happens (exact error text),
    What should happen, How to reproduce (with the environment), Evidence, Severity, Probable cause (files and lines, or
    «unknown yet») and The failing test to write first (what it checks and where it goes). Then the Task sections, as in
-   `/huddle-issue`, with these rules:
+   `/huddle-issue`, with these rules. If the creator benefit is unclear, clarify the outcome before drafting.
+   - **Goal:** explain the creator benefit of the fix and include an observable acceptance criterion for the corrected behavior.
+     An infrastructure fix can have an indirect benefit such as removing a manual step or making a decision safer.
    - **Prompt for Claude Code:** it says to write the failing test first and see it fail, then fix it.
    - **Allowed files:** the smallest set that can fix it.
    - **Tests that must pass:** the area's suite plus the new test.
