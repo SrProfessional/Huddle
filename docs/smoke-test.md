@@ -461,6 +461,24 @@ description next to the tables above.
 | 11. Areas: `huddle doctor` with `gh` / `glab` off the PATH | ✔ | ✔ | Off the PATH → «not installed or not on the PATH» with the winget command and the PATH reload; an invalid token for one command → «is not logged in» (the real login was not logged out). |
 | 12. Clean up | not run | not run | the sandboxes are kept for the next run |
 
+### Results 1.0.6
+
+Preparation for the changes since v1.0.5. The Coach marked the eleven Issues tested in staging, as recorded in
+[production PR #355](https://github.com/SrProfessional/Huddle/pull/355) and
+[production PR #358](https://github.com/SrProfessional/Huddle/pull/358). Claude Code
+installed 1.0.6 from the local candidate marketplace in an isolated configuration. The installed CLI passed
+`doctor` after refreshing an older private GitHub sandbox and setting up a fresh private GitLab sandbox.
+The full pre-release smoke checklist and live client walkthrough remain pending. After the tag and release
+are published, the published marketplace installation still needs verification.
+
+| Section | GitHub | GitLab | Notes |
+|---|---|---|---|
+| Allowed paths with spaces and PR/MR linkage (#333, #334) | linkage verified live | linkage verified live | Spaced paths were covered by fixtures. On both sandboxes, `queue` and `doctor` reported a review using `Refs`; `Closes` moved it into review, `land` closed its Issue, and the dependent became ready. |
+| Outstanding decisions and guided steps (#335, #338, #340, #344, #345) | guided CLI verified live | guided CLI verified live | A two-step dry run posted nothing. The posted list appeared in the queue with its recorded ask; closing the first step moved to the second, and closing the second resumed the Issue. Live decision and startup prompts in a new client remain pending. |
+| Editor reservation, checkout return, and diagnostics (#339, #351) | covered by tests | covered by tests | Checkout planning was exercised with canned data and a detached Git worktree. A live editor handoff remains pending. |
+| Per-session Coach, Player, and Both choices (#349) | covered by tests | CLI verified live | Separate Codex-context CLI processes used the real GitLab login: an unselected session was blocked, Player kept the Coach watch idle, and Both got detached watch guidance. Installation of the candidate in Codex and the role question in fresh chats remain pending. |
+| Proactive follow-through and pending questions (#356) | covered by tests | covered by tests | The Coach answered through the live Codex selector after waiting. Recovery after restarting a client was checked in the written instructions, not by interrupting that chat. |
+
 ### Results 1.0.5
 
 Run of: 2026-11-24, Huddle `staging` with Issues #325, #326 and #329 merged, by the Coach's Claude Code session, Issue by Issue with the Coach (`/huddle-test`'s steps, followed by hand). Only the new parts were checked; the 1.0.4 and older tables below still hold for the rest. Context: on a real project a Player session still ran the 0.9.5 plugin after the repo's `huddle.json` was updated to 1.0.3, and every command of that session failed with `huddle.json: "language" is not allowed`.

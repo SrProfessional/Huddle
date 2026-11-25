@@ -112,13 +112,23 @@ test('a «Results 0.3.0» table with GitHub and GitLab columns covers the new pa
   assert.ok(!smoke.includes('11. Clean up'), '«Clean up» moved to 12');
 });
 
-test('the versions are 1.0.5 and the CHANGELOG has an «Unreleased» section above «1.0.5»', () => {
-  for (const f of ['package.json', '.claude-plugin/plugin.json']) assert.equal(JSON.parse(readFileSync(path.join(root, f), 'utf8')).version, '1.0.5', f);
+test('the versions are 1.0.6 and the CHANGELOG has an «Unreleased» section above «1.0.6»', () => {
+  for (const f of ['package.json', '.claude-plugin/plugin.json']) assert.equal(JSON.parse(readFileSync(path.join(root, f), 'utf8')).version, '1.0.6', f);
   const m = JSON.parse(readFileSync(path.join(root, '.claude-plugin/marketplace.json'), 'utf8'));
-  assert.ok(m.plugins.every((p) => p.version === '1.0.5'));
+  assert.ok(m.plugins.every((p) => p.version === '1.0.6'));
   const c = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
   // Work merged after the release (for example the website, Issue #56) lives under «Unreleased» until the next one.
   assert.match(c, /## \[Unreleased\]\r?\n[\s\S]*?## \[1\.0\.0\] - \d{4}-\d{2}-\d{2}/);
+  assert.match(c, /## \[Unreleased\]\r?\n\s*## \[1\.0\.6\] - \d{4}-\d{2}-\d{2}/);
+  assert.ok(c.indexOf('## [1.0.6]') < c.indexOf('## [1.0.5]'));
+  const notes = c.slice(c.indexOf('## [1.0.6]'), c.indexOf('## [1.0.5]'));
+  for (const issue of [333, 334, 335, 338, 339, 340, 344, 345, 349, 351, 356]) {
+    assert.ok(notes.includes(`Issue #${issue}`), `missing release notes for #${issue}`);
+  }
+  assert.match(smoke, /^### Results 1\.0\.6$/m);
+  const readme = readFileSync(path.join(root, 'README.md'), 'utf8');
+  assert.match(readme, /^> \*\*Status:\*\* this checkout is Huddle 1\.0\.6\./m);
+  assert.match(readme, /\[latest published release\]\(https:\/\/github\.com\/SrProfessional\/Huddle\/releases\/latest\)/);
   assert.ok(c.indexOf('## [1.0.5]') < c.indexOf('## [1.0.4]'));
   assert.ok(c.indexOf('## [1.0.4]') < c.indexOf('## [1.0.3]'));
   assert.ok(c.indexOf('## [1.0.3]') < c.indexOf('## [1.0.2]'));
