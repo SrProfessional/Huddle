@@ -463,16 +463,18 @@ description next to the tables above.
 
 ### Results 1.0.6
 
-Preparation for the changes since v1.0.5. The Coach marked the eleven Issues tested in staging. Those checks
-provide evidence for the changes below. The full live sandbox checklist and installing the version from the
-marketplace remain pending. The version has not been tagged or published.
+Preparation for the changes since v1.0.5. The Coach marked the eleven Issues tested in staging. Claude Code
+installed 1.0.6 from the local candidate marketplace in an isolated configuration. The installed CLI passed
+`doctor` after refreshing an older private GitHub sandbox and setting up a fresh private GitLab sandbox.
+Installation from the published marketplace and the full live client walkthrough remain pending. The version
+has not been tagged or published.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|
-| Allowed paths with spaces and PR/MR linkage (#333, #334) | covered by tests | covered by tests | Staging checks used canned issues and reviews. |
-| Outstanding decisions and guided steps (#335, #338, #340, #344, #345) | covered by tests | covered by tests | Staging exercised the commands and hooks with canned platform data. Live decision and startup prompts were not run in a new client. |
+| Allowed paths with spaces and PR/MR linkage (#333, #334) | linkage verified live | linkage verified live | Spaced paths were covered by fixtures. On both sandboxes, `queue` and `doctor` reported a review using `Refs`; `Closes` moved it into review, `land` closed its Issue, and the dependent became ready. |
+| Outstanding decisions and guided steps (#335, #338, #340, #344, #345) | guided CLI verified live | guided CLI verified live | A two-step dry run posted nothing. The posted list appeared in the queue with its recorded ask; closing the first step moved to the second, and closing the second resumed the Issue. Live decision and startup prompts in a new client remain pending. |
 | Editor reservation, checkout return, and diagnostics (#339, #351) | covered by tests | covered by tests | Checkout planning was exercised with canned data and a detached Git worktree. A live editor handoff remains pending. |
-| Per-session Coach, Player, and Both choices (#349) | covered by tests | covered by tests | Staging ran real CLI processes with canned platform data. The role question in live Claude Code and Codex chats remains pending. |
+| Per-session Coach, Player, and Both choices (#349) | covered by tests | CLI verified live | Separate Codex-context CLI processes used the real GitLab login: an unselected session was blocked, Player kept the Coach watch idle, and Both got detached watch guidance. Installation of the candidate in Codex and the role question in fresh chats remain pending. |
 | Proactive follow-through and pending questions (#356) | covered by tests | covered by tests | The Coach answered through the live Codex selector after waiting. Recovery after restarting a client was checked in the written instructions, not by interrupting that chat. |
 
 ### Results 1.0.5
