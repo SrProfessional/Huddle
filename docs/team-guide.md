@@ -84,6 +84,14 @@ in the labels run, not a failure; that Issue stays `blocked`.
 
 Two open Issues that list the same allowed file will collide at merge even if neither has started, and the `blocked` label only waits for a file that an active Issue holds. The Coach runs `huddle conflicts` to see every pair (first, then, the files they share, a suggested order) and the Issues with no conflict, and `huddle conflicts --apply` to settle the order once: it adds `- #first` to the «Depends on» of each later Issue (never a circle; it names the link to break) and runs the labels, so the later Issues show `blocked` until the first is merged. `huddle conflicts --apply --dry-run` shows the change first. When you want a different order than the suggested one (the lowest number first is only a default), say it: `huddle conflicts --apply --order 91,84,85` makes each Issue wait for the ones named before it that share a file with it, and leaves the other pairs as they were. `/huddle-issue` also warns when a new Issue overlaps an open one.
 
+### Tasks that need a tool open on your checkout
+
+If a task has to run in a tool you already have open on your main checkout (for example a game engine's editor, Xcode or Android Studio), write `- Editor: <tool>` under `## Needs` in the Issue (the Task template has the section; for example `- Editor: Unity`). You only keep the tool open: Huddle starts that task only when nothing else of yours is running, lets nothing else of yours start while it works, switches the main checkout to the task's branch, does the work through the open tool, and leaves it there with a list of test steps for you. When you close the steps (`/huddle-steps`), it returns the checkout to the staging branch, up to date and clean, and the next task can start. `huddle next` shows «waits for the tool: #n is running» while it waits.
+
+The Issue may close while you are still testing. `huddle next` shows «#n (closed, its test steps are still open)» until you finish or skip the last step in `/huddle-steps`. The session returns the checkout and verifies it before releasing the slot. If it is interrupted, a later session on the same machine can see the pending return and finish it. The slot stays reserved if changes or a failed check prevent the return.
+
+If the main checkout has uncommitted changes, Huddle asks whether to wait, let you commit them, or save them in a stash. With your approval it saves and remembers the exact stash. After verifying the clean base, it restores those changes before releasing the slot and keeps the stash as a backup. If restoration stops or hits a conflict, the slot stays reserved while the session helps you recover. Huddle can see by itself whether some tools are open (the first one is a game engine's editor). For any other tool, it asks you to open it on the main checkout before the work begins.
+
 ## How a task goes
 
 Huddle includes `/huddle-tdd`, `/huddle-debug`, `/huddle-verify`, and `/huddle-answer-review` to guide a Player through
@@ -123,6 +131,8 @@ have to paste, **You should see:** what it looks like when it worked, and **If y
 A word like terminal or token gets a one-line meaning the first time it appears. Issues use the same mark, so a step
 without it belongs to the session. The rule and the format are in [the design](design.md#13-the-session-does-every-step-it-can).
 
+**The steps are a list, asked one by one (Issue #340).** When only you can go on, the session writes the steps as one list on the Issue, never as a paragraph and never with a command for you to type. In the Coach's session, `/huddle-steps` (`$huddle-steps` in Codex) shows the first step of one Issue as a question with **Done**, **I could not do it**, **It failed** and **Skip it** (the Issue goes on without that step), records your answer itself, and then shows the next step. A step you have not closed stays in `huddle queue`, in `huddle next` and in `huddle status` («waits for you: step 1 of 3 of #117: …»), and the Coach's session asks it again at the start of each turn, saying «still waiting». Only the work that depends on that step waits; everything else goes on. A session posts the list with one command, `huddle steps <n> --post <file>` (the file has a `Reason:` line and, for each step, `Step:`, `See:` and `Otherwise:` lines; `--dry-run` shows the comment without posting it). If a step is refused, for example because it holds two actions, nothing is posted and one line says which step and why. Any login can post a list; only the Coach closes steps.
+
 If a permission is denied or a credential is missing, the session stops and asks, as always: it never looks for another
 way.
 
@@ -151,6 +161,8 @@ It does not guess. It commits and pushes what is done, comments on the Issue sta
 Issue #N stopped: waiting for a decision». The Coach answers with `/huddle-decide`, on the Issue and on the PR/MR,
 and the session continues on the same branch: it keeps waiting in the background and picks the answer up by itself (leave it open; if
 Claude Code was closed, run `/huddle-play <n>`). The session never closes the Issue.
+
+**A question that waits is asked again (Issue #335).** The Coach's session asks every real question as a multiple choice (with «Other»), never as a paragraph, also when you ask «is there anything to decide?». If you do not answer, it asks again at the start of each turn and each watch wake, saying «asked at <time>, still waiting»; it records each ask with `huddle asked <n>`, and `huddle queue` shows «asked <n> times, last at <time>». While a decision waits, only the Issue that waits for it, what depends on it («Depends on») and what shares an allowed file with it stay put; reviews and merges of other work go on.
 
 ## Issues change only through a session
 
@@ -276,9 +288,11 @@ about it.
 | See what `huddle labels` would change | `huddle labels --dry-run` |
 | Update the labels of one Issue only | `huddle labels --issue <n>` |
 | Continue after a request | `/huddle-play <n>`, or answer yes to the hook |
-| See what waits for the Coach | `huddle queue` |
+| See what waits for the Coach, and the open PRs/MRs that close no Issue | `huddle queue` |
 | See if a newer Huddle exists (the skills say it too) | `huddle notice` |
 | Have the Coach's session review by itself (Coach) | `/huddle-watch`, and `/huddle-watch off` to stop |
+
+**A PR/MR must close its Issue.** Huddle links a PR/MR to its Issue only through «Closes #N» in its description. One that says «Refs #N» (or «Part of #N») belongs to no Issue: the board does not see it in review. `huddle queue` lists every open PR/MR that closes no Issue (drafts apart) with the Issue it points to, `huddle doctor` warns once, and a merged PR/MR that only said «Refs #N» is named by `huddle land` and `huddle queue` while #N is still open. A PR that fixes only part of an Issue is linked with «Closes» to a smaller Issue, and the rest is written as a new Issue: the Coach's session reduces the Issue's text first. Never use «Refs #N» to keep an Issue open.
 
 **What waiting costs.** After a PR/MR opens, the Player's session waits with a small Node process on the Player's own computer
 (`huddle wait`) that asks GitHub or GitLab every two minutes, with the Player's own login: it uses no Claude tokens and no GitHub

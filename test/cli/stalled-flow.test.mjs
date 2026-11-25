@@ -108,6 +108,7 @@ for (const gitlab of [false, true]) {
     // Round 1 sees the stalled flow (no wake: the session that started the watch has just seen it); round 2 sees a new reason.
     let h;
     h = mk(stuck, { gitlab, sleep: async () => { h.world.issue({ number: 30, title: 'Asked too', body: body(1, ['f.mjs']), assignees: ['ana'], labels: ['needs decision'] }); } });
+    assert.equal(await run(['role', 'player'], h.ctx), 0);
     assert.equal(await run(['next', '--wait'], h.ctx), 0);
     const woke = JSON.parse(h.text());
     assert.deepEqual(woke.actionable.start, []);
@@ -116,11 +117,13 @@ for (const gitlab of [false, true]) {
     // The same set for many rounds wakes nobody.
     let rounds = 0;
     const same = mk(stuck, { gitlab, sleep: async () => { rounds += 1; if (rounds > 3) throw new Error('stop'); } });
+   assert.equal(await run(['role', 'player'], same.ctx), 0);
     await run(['next', '--wait'], same.ctx).catch(() => {});
     assert.doesNotMatch(same.text(), /actionable/);
     // A restarted watch that was told that key does not tell it again.
     let again = 0;
     const seen = mk((w) => { stuck(w); w.issue({ number: 30, title: 'Asked too', body: body(1, ['f.mjs']), assignees: ['ana'], labels: ['needs decision'] }); }, { gitlab, sleep: async () => { again += 1; if (again > 2) throw new Error('stop'); } });
+   assert.equal(await run(['role', 'player'], seen.ctx), 0);
     await run(['next', '--wait', '--seen', woke.actionable.stalled.key], seen.ctx).catch(() => {});
     assert.doesNotMatch(seen.text(), /actionable/);
   });

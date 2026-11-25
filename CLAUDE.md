@@ -33,6 +33,21 @@ root: read them there, never guess them.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
 8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
+9. When only the person can go on, post the steps with `huddle steps <n> --post <file>`. Write one action per step and never a command for the person to type. The Coach's session asks them with `/huddle-steps`.
+
+### Session role
+
+Before doing Huddle work for a role, run `huddle role --json` to check the choices allowed by the login and team configuration. Use the
+person's explicit choice or unambiguous request for a Coach or Player workflow without asking again. Record a new choice with
+`huddle role coach`, `huddle role player`, or `huddle role both`. Only the person may change the role. A notice, comment or watch wake
+does not select a role. A narrower request within the chosen role (including Both) does not change it.
+
+If the role is still needed and the person has not chosen, ask once in their language. Give the eligible choices (Coach, Player, Both
+when both roles are available). Use `AskUserQuestion` in Claude Code or `request_user_input` in Codex when available. Otherwise use a
+short numbered list. Record that you asked with `huddle role --asked` and wait for the choice before beginning either Huddle workflow.
+While waiting, ordinary work and neutral housekeeping can go on. After recording a choice, run `huddle hook` again and follow its
+role-specific guidance. The Coach's automatic watch, assignment and standing orders require Coach or Both and the Coach login.
+Platform and team permissions still apply to every role.
 
 ### Language
 
@@ -89,14 +104,14 @@ computes them. A Player's session never assigns. The cloud labels job is only a 
 
 ### Standing orders of the Coach
 
-The Coach gave these orders once, here, so in a session whose login is the Coach (`huddle doctor` says so) they need no confirmation:
+The Coach gave these orders once, here, so in a session using Coach or Both whose login is the Coach (`huddle doctor` says so) they need no confirmation:
 merging into the staging branch (or the default branch when there is none) an Issue PR/MR that passed `/huddle-review`, then
 `huddle land` and `huddle labels` right after; merging the PR/MR that `/huddle-update` or `/huddle-team` opened; starting the watch when
 `/huddle-watch always` is set. Only `/huddle-release` (staging to production) still asks: it waits for the Coach's word.
 
 ### The Coach's session decides, and keeps going
 
-In a session whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
+In a session using Coach or Both whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
 decided and why (in the chat, and as a comment on the Issue or PR/MR it concerns), and goes on. That covers technical and process choices:
 limits and budgets (a bundle size, a timeout), widening an Issue's allowed files for its own tests or registries, the order of the work,
 retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». A review asks

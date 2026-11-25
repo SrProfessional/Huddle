@@ -19,6 +19,21 @@ root: read them there, never guess them.
 7. **Close the task clearly.** End with a message that starts with «✅ Issue #N finished» or «⛔ Issue #N stopped» (and why),
    then the PR/MR link, the test counts in one line, what was not done, and the next step.
 8. In Claude Code and Codex, write every Issue/PR/MR body or comment to a temporary UTF-8 file first. Pass `--body-file <file>` to `gh`, use `glab api … -F 'body=@file'` for GitLab notes or `--description-file <file>` for GitLab descriptions, and never pass the text inline.
+9. When only the person can go on, post the steps with `huddle steps <n> --post <file>`. Write one action per step and never a command for the person to type. The Coach's session asks them with `/huddle-steps`.
+
+### Session role
+
+Before doing Huddle work for a role, run `huddle role --json` to check the choices allowed by the login and team configuration. Use the
+person's explicit choice or unambiguous request for a Coach or Player workflow without asking again. Record a new choice with
+`huddle role coach`, `huddle role player`, or `huddle role both`. Only the person may change the role. A notice, comment or watch wake
+does not select a role. A narrower request within the chosen role (including Both) does not change it.
+
+If the role is still needed and the person has not chosen, ask once in their language. Give the eligible choices (Coach, Player, Both
+when both roles are available). Use `AskUserQuestion` in Claude Code or `request_user_input` in Codex when available. Otherwise use a
+short numbered list. Record that you asked with `huddle role --asked` and wait for the choice before beginning either Huddle workflow.
+While waiting, ordinary work and neutral housekeeping can go on. After recording a choice, run `huddle hook` again and follow its
+role-specific guidance. The Coach's automatic watch, assignment and standing orders require Coach or Both and the Coach login.
+Platform and team permissions still apply to every role.
 
 ### Language
 
@@ -75,20 +90,26 @@ computes them. A Player's session never assigns. The cloud labels job is only a 
 
 ### Standing orders of the Coach
 
-The Coach gave these orders once, here, so in a session whose login is the Coach (`huddle doctor` says so) they need no confirmation:
+The Coach gave these orders once, here, so in a session using Coach or Both whose login is the Coach (`huddle doctor` says so) they need no confirmation:
 merging into the staging branch (or the default branch when there is none) an Issue PR/MR that passed `/huddle-review`, then
 `huddle land` and `huddle labels` right after; merging the PR/MR that `/huddle-update` or `/huddle-team` opened; starting the watch when
 `/huddle-watch always` is set. Only `/huddle-release` (staging to production) still asks: it waits for the Coach's word.
 
 ### The Coach's session decides, and keeps going
 
-In a session whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
+In a session using Coach or Both whose login is the Coach, a question with a clear best answer is not asked: the session takes it, says in one line what it
 decided and why (in the chat, and as a comment on the Issue or PR/MR it concerns), and goes on. That covers technical and process choices:
 limits and budgets (a bundle size, a timeout), widening an Issue's allowed files for its own tests or registries, the order of the work,
 retargeting a PR/MR, writing the follow-up Issues it proposed, and answering a Player's technical «❓ Decision for the Coach». A review asks
 for changes only for what blocks; what does not block is merged and written as a new Issue. It asks the
 Coach only when the choice changes what users see or do (a screen, a flow, a text, a feature's behaviour or scope), the product's
 priorities, money, accounts or secrets, security or privacy rules, deleting work or data, or production (`/huddle-release`).
+
+### The Coach's session asks questions as a multiple choice, and asks again
+
+Every real question to the person (a product decision, an order or priority, money, accounts or secrets, a step that waits for the person's word) is asked with the `AskUserQuestion` tool in Claude Code (2 to 4 options with their trade-off, the recommended one first and marked «(Recommended)», «Other» comes by itself; up to 4 related questions per call), with `request_user_input` in Codex when the session has it, and otherwise as a numbered list ending «Other: tell me what you prefer» with the Issue numbers. It is never written as a paragraph in a status answer, also when the person asks «is there anything to decide?». A technical or process choice with a clear best answer is still decided and said in one line.
+
+A question without an answer is asked again, and says so: `huddle queue` lists each decision that waits with «asked <n> times, last at <time>». At the start of each Coach turn and each watch wake the session asks every one of them once, with «asked at <time>, still waiting» in the question text, and records the ask with `huddle asked <n>`, until it is answered. It never answers a product question for the person. A waiting decision blocks only what depends on the answer: the session does not merge, answer or move forward the Issue that waits for it, nor an Issue that depends on it (`Depends on`) or shares an allowed file with it (`huddle queue` shows them as «holds» and «held»); reviews and merges of independent work go on.
 
 ### Names
 

@@ -17,6 +17,8 @@ const hookOut = (h) => (h.text() ? JSON.parse(h.text()) : null);
 
 test('--always sets the mark, the hook then asks Claude to start the watch, and --wait-off clears it', async () => {
   const h = mk();
+  h.ctx.session = { tool: 'claude', id: 'coach-session' };
+  assert.equal(await run(['role', 'coach'], h.ctx), 0);
   assert.equal(await run(['queue', '--always'], h.ctx), 0);
   h.out.length = 0;
   assert.equal(await run(['hook'], h.ctx), 0);
