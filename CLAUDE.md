@@ -43,14 +43,20 @@ in their language with the recommended option and at least one alternative, each
 workflow below. Offer a relevant action outside the current request as a suggestion. Keep the next step specific to the goal and
 skip suggestions when the goal is complete.
 
-Prefer a blocking question tool when available. Otherwise, use an asynchronous selector if it can stay open. Keep the turn active
-and wait for an actual answer, explicit deferral, or interruption. Continue authorized independent work while the question is pending.
-Elapsed time alone does not end the turn and never counts as approval. Act on the recommendation only when the person chooses it.
+Use this selector order and pending-question rule for every Huddle question. It takes precedence over older skill instructions
+and session-start guidance on which tool to use, when to fall back to a numbered list, and how long to wait. Keep the workflow's
+choices and approvals.
+Prefer a blocking question tool when available. Otherwise, use a supported asynchronous selector if it can stay open.
+When neither selector can be used, present a numbered list with the recommendation first and «Other: tell me what you prefer» last.
 
-When the client cannot preserve the selector or the session is interrupted, keep the decision, why it matters, and its numbered
-choices in the chat. Use a numbered list with the recommendation first and «Other: tell me what you prefer» last when the selector
-is unavailable. Present the selector again when the session resumes if the client supports it. For Issue decisions, keep the existing
-outstanding decision state and record the ask with `huddle asked <n>` where the workflow calls for it.
+Before waiting, if an abrupt interruption could lose the question or options, record the pending question, why it matters, and
+its numbered choices in the chat. Keep the turn active where supported and wait for an actual answer, explicit deferral, or
+interruption. Continue authorized independent work while the question is pending. Elapsed time alone does not end the turn and
+never counts as approval. Act on the recommendation only when the person chooses it.
+
+On resumption, reopen the selector with the saved question and choices when supported. Otherwise keep the same numbered choices
+available in the chat. For Issue decisions, keep the existing outstanding decision state and record the ask with `huddle asked <n>`
+where the workflow calls for it.
 
 ### Session role
 
@@ -59,9 +65,9 @@ person's explicit choice or unambiguous request for a Coach or Player workflow w
 `huddle role coach`, `huddle role player`, or `huddle role both`. Only the person may change the role. A notice, comment or watch wake
 does not select a role. A narrower request within the chosen role (including Both) does not change it.
 
-If the role is still needed and the person has not chosen, ask once in their language. Give the eligible choices (Coach, Player, Both
-when both roles are available). Use `AskUserQuestion` in Claude Code or `request_user_input` in Codex when available. Otherwise use a
-short numbered list. Record that you asked with `huddle role --asked` and wait for the choice before beginning either Huddle workflow.
+If the role is still needed and the person has not chosen, ask once in their language using the shared question rule above. Give the
+eligible choices (Coach, Player, Both when both roles are available). Record the ask with `huddle role --asked` and wait for the
+choice before beginning either Huddle workflow.
 While waiting, ordinary work and neutral housekeeping can go on. After recording a choice, run `huddle hook` again and follow its
 role-specific guidance. The Coach's automatic watch, assignment and standing orders require Coach or Both and the Coach login.
 Platform and team permissions still apply to every role.
