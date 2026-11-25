@@ -48,7 +48,7 @@ test('/huddle-decide and /huddle-watch ask again with «asked at», record it wi
 });
 
 test('the CHANGELOG, the team guide and design §19 name the rule', () => {
-  assert.match(read('CHANGELOG.md').split('## [Unreleased]')[1].split(/\n## \[/)[0], /huddle asked/);
+  assert.match(read('CHANGELOG.md').split('## [1.0.6]')[1].split(/\n## \[/)[0], /huddle asked/);
   assert.match(flat('docs/team-guide.md'), /huddle asked/);
   const d = flat('docs/design.md');
   assert.match(d.slice(d.indexOf('## 19')), /huddle asked/);

@@ -155,6 +155,6 @@ test('the design (§13, §19, §21), the team guide and the changelog say it', (
   assert.match(s21, /`\/huddle-steps`/);
   assert.match(read('docs/team-guide.md'), /`\/huddle-steps`/);
   const log = read('CHANGELOG.md');
-  const unreleased = section(log, '## [Unreleased]', '## [1.0.5]');
-  assert.match(unreleased, /`\/huddle-steps`.*Issue #340/);
+  const release = section(log, '## [1.0.6]', '## [1.0.5]');
+  assert.match(release, /`\/huddle-steps`.*Issue #340/);
 });

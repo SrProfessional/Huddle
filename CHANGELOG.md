@@ -5,6 +5,8 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-11-24
+
 ### Added
 
 - Huddle's workflow keeps creators focused on decisions while sessions handle authorized implementation, testing, and follow-through (Issue #356).
@@ -26,6 +28,11 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 ### Fixed
 
 - A path with spaces under «Allowed files» is read whole, not cut at its first space (Issue #333): `Assets/1 Scenes/Mentor Dashboard/Mentor Dashboard.unity (new)` is one file, so `huddle next`, the board and `huddle conflicts` no longer report a shared phantom file such as `Assets/1` between Issues that touch different files. The path ends at a `code` span, or at a trailing «(…)» group or a spaced hyphen, en dash or em dash separator; an item whose first word was already a complete path (`lib/a.mjs the reader`) reads as before.
+
+- Tool checkout diagnostics identify a detached HEAD before switching or returning. A literal `<tool>` placeholder still reserves the checkout and prompts for an unnamed editor (Issue #351).
+
+- The Codex Player watch stays active when the parallel queue is empty at startup or after the last Issue finishes (Issue #361).
+  If Codex queues a notification without resuming the chat, the watch keeps checking for new work and avoids sending the same notification twice.
 
 ## [1.0.5] - 2026-11-24
 

@@ -55,13 +55,15 @@ When `used` is above `capacity` (a request came back), nothing new starts: wait 
 
 ## 5. Keep watching: the Player's watch (Issue #248)
 
-After each round (and when there was nothing to do), start the Player's watch, which waits with no tokens and wakes this session when an
-Issue can start or the Coach answers one: `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next --wait --seen <keys>` in the background
+After each round, including an empty queue at startup, ensure the Player's watch is running before closing the foreground round.
+Keep the watch if it is already running in this session. Otherwise start it with
+`node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next --wait --seen <keys>` in the background
 (in OpenAI Codex: `next --wait --seen <keys> --codex`, which returns at once; this chat gets «Huddle (Player): … Run $huddle-play and do it»).
 `<keys>` are the keys it gave before for what you already handled (`start:#n`, `resume:#n:<id>`), so the same thing never wakes you twice;
 leave `--seen` out the first time. When it wakes: run `next --json` again (the queue is re-read live: never start from the old answer) and
 go on from step 1. It checks every 2 minutes. One per Player and repo: if it says it already runs in another session, say so in one line and
 stop. `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" next --wait-off` stops it. It needs this session open and the computer on.
+It waits with no tokens. If Codex queues a message without resuming the chat, the same watch keeps polling for new events.
 
 **After you closed the chat or turned off the computer** (Issue #304): a new session simply runs `/huddle-play` again, with no question. A watch whose owner is gone (its process, its heartbeat, or a restart of the computer) is taken over by the new one without `--take-over`; only a live owner keeps it. The session start clears the stale wait markers of sessions that are gone, so no warning says «run /huddle-play n» for an Issue with nothing to resume (a Coach request that waits is still offered by `resume`). An Issue of this login that was in progress on this machine, with commits, and whose worker is gone shows in `resume` with `kind: "interrupted"` (and a `branch`); it is never offered when another machine claimed it, or it is paused, parked, in review or waiting for the Coach.
 
@@ -81,6 +83,6 @@ An Issue with `- Editor: <tool>` (or plain `- Editor`; `- Unity Editor` is the s
 
 Keep a short list for the Player: each Issue, its state (working, in review, waiting for you, stopped) and its PR/MR, and add what
 `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" status` says about the waits (each one's last check, so a wait that died shows). Show it when asked
-and after each change. When nothing is left to start, nothing is active and no wait is running, say so and end.
+and after each change. After the last active Issue finishes, if no Issue is eligible, follow step 5 before closing the foreground round.
 
 `/huddle-play <n>` still works on one Issue in this session, as before.
