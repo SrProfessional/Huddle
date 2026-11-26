@@ -34,6 +34,12 @@ All notable changes to Huddle: Decision-led development for teams coding with AI
 - The Codex Player watch stays active when the parallel queue is empty at startup or after the last Issue finishes (Issue #361).
   If Codex queues a notification without resuming the chat, the watch keeps checking for new work and avoids sending the same notification twice.
 
+- Huddle uses Codex's available selector for required decisions in staging tests, guided steps, reviews, and session role selection (Issue #367).
+  It waits for the answer and offers numbered choices when the client has no selector.
+
+- `$huddle-test` continues the current staging test round when the Coach discards a correction (Issue #374).
+  It refreshes the staging list, keeps approvals intact, and advances to the next eligible independent Issue or its decision prompt.
+
 ## [1.0.5] - 2026-11-24
 
 ### Changed
