@@ -45,6 +45,9 @@ test('it shows ONE step of ONE Issue with AskUserQuestion and the four options, 
   for (const option of [/\*\*Done\*\*/, /\*\*I could not do it\*\*/, /\*\*It failed \(I will tell you what I saw\)\*\*/, /\*\*Skip it\*\*/]) assert.match(t, option);
   assert.match(t, /recommended one first and marked «\(Recommended\)»/);
   assert.match(t, /`request_user_input`/);
+  assert.match(t, /otherwise use `request_user_input_async` when supported/);
+  assert.match(t, /follow the managed block's pending-question rule/);
+  assert.match(t, /when neither selector is available, write the same question as a numbered list/i);
   assert.match(t, /numbered list/);
   assert.match(t, /Other: tell me what you prefer/);
   assert.match(t, /«You should see:» its `see` and «If you see something else:» its `else`/);

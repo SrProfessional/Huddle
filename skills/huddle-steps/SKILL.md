@@ -9,7 +9,7 @@ For the Coach only. Run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" doctor`: if you
 
 **In OpenAI Codex**: run the `huddle` command the session start named wherever this skill writes `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle"`; run `gh`, `glab`, `git push` and `huddle` with network access (approve it when Codex asks).
 
-**Asking the step (Issue #321).** The step is asked with the `AskUserQuestion` tool, never as prose: one question, the recommended one first and marked «(Recommended)». Ordinary steps have 4 options. The automatic «Other» stays. In OpenAI Codex use `request_user_input` (with options and an «Other» answer) when the session has it (check the tool list at run time, it may exist only in Plan mode); with no such tool, write the same question as a numbered list, the recommended option first, then a last line «Other: tell me what you prefer», and wait.
+**Asking the step (Issue #321).** The step is asked with the `AskUserQuestion` tool, never as prose: one question, the recommended one first and marked «(Recommended)». Ordinary steps have 4 options. The automatic «Other» stays. In OpenAI Codex use `request_user_input` (with options and an «Other» answer) when the session has it (check the tool list at run time, it may exist only in Plan mode); otherwise use `request_user_input_async` when supported and follow the managed block's pending-question rule. When neither selector is available, write the same question as a numbered list, the recommended option first, then a last line «Other: tell me what you prefer», and wait.
 
 Do these in this order.
 

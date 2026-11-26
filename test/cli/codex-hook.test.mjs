@@ -109,6 +109,11 @@ for (const client of ['claude', 'codex']) {
     const initial = guidance(cli(['hook'], hookEnv, input));
     assert.match(initial, /Coach, Player, Both/);
     assert.match(initial, isCodex ? /request_user_input/ : /AskUserQuestion/);
+    if (isCodex) {
+      assert.match(initial, /request_user_input if available, otherwise request_user_input_async when supported/);
+      assert.match(initial, /numbered list only when neither selector is available/);
+      assert.match(initial, /follow the managed pending-question rule and wait for the reply/);
+    }
 
     cli(['role', 'coach'], foreground);
     cli(['queue', '--always'], foreground);
