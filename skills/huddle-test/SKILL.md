@@ -30,11 +30,25 @@ Do these in this order.
    person's eyes, a second account or another device is handed to the Coach, as numbered «🙋 Only you» steps.
 4. **Ask the Coach's answer for that Issue as one question** (passed first, then failed, skip, stop), and wait:
    - «passed» (run `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" tested <n>` and go on to the next Issue);
-   - «failed» (ask what they saw, and offer a bug Issue with `/huddle-bug` or reopening the Issue as in `/huddle-release`; do not mark it);
+   - «failed» (ask what they saw, and offer a bug Issue with `/huddle-bug` or reopening the Issue as in `/huddle-release`; do not mark it and follow «After a correction decision»);
    - «skip» (leave it unmarked and go on);
    - «stop» (go to step 5).
    Never mark an Issue tested without a yes from the Coach in this chat.
-5. **The end.** Show what is marked, what failed and what was skipped. When nothing is left untested, say that `/huddle-release` is next.
+5. **The end.** Show what is marked, what failed and what was skipped. Include any Issues deferred for this round. When nothing
+   is left untested, say that `/huddle-release` is next. If untested Issues remain and none can proceed, explain what they are waiting for.
+
+### After a correction decision
+
+Keep the current staging test round active when switching to a correction or an Issue reopening. Retain the current Issue and
+the outcomes already recorded in this chat. An explicit Pause or Stop suspends the round and goes to step 5.
+
+After the correction is resolved or discarded, run `huddle release --json` again to refresh the list from staging. A decision to
+discard a correction leaves staging approval unchanged. If the current Issue was set aside without approval, defer it for this
+round. Issues that depend on an unapproved prerequisite remain pending.
+
+Continue with the next eligible independent Issue in the current round, keeping the order from step 2. Run the checks you can.
+If the person needs to act or decide, ask in the same turn with the available selector and wait for the answer. When no eligible
+Issue remains, go to step 5.
 
 ## Who does each step
 
