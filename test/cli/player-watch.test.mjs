@@ -182,3 +182,14 @@ test('the parallel play skill resumes first, never ends on an empty queue, and k
   assert.doesNotMatch(t, /nothing is active and no wait is running, say so and end/);
   assert.doesNotMatch(t, /Nothing starts: say so and stop/);
 });
+
+test('a Player completion wake follows the active conversation goal after refreshing and rearming', () => {
+  const instructions = readFileSync(new URL('../../skills/huddle-play/parallel.md', import.meta.url), 'utf8');
+  const completion = instructions.split('### After a completion wake')[1]?.split('\n### ')[0] ?? '';
+  const rule = completion.replace(/\s+/g, ' ');
+  assert.match(rule, /refresh the Player queue.*?keep the monitor running.*?unfinished goal in this chat/i);
+  assert.match(rule, /next authorized action within the chosen role.*?empty/i);
+  assert.match(rule, /external blocker.*?independent.*?same goal/i);
+  assert.match(rule, /ask in the same turn.*?shared.*?selector.*?recommended option.*?alternative.*?wait/i);
+  assert.match(rule, /idle watch.*?completed goal.*?status.*?without an extra question/i);
+});
