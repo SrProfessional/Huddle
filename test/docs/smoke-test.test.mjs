@@ -173,6 +173,14 @@ test('the 1.0.6 release notes record the Player watch fix and its verification',
   assert.match(row, /live Codex verification remains pending/i);
 });
 
+test('the 1.0.6 fixes describe the verified Codex selector and staging test continuation', () => {
+  const changelog = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
+  const notes = changelog.slice(changelog.indexOf('## [1.0.6]'), changelog.indexOf('## [1.0.5]'));
+  const fixes = notes.split('### Fixed')[1] ?? '';
+  assert.match(fixes, /^- .*available selector.*required decisions.*\(Issue #367\)/m);
+  assert.match(fixes, /^- .*continues the current staging test round.*discards a correction.*\(Issue #374\)/m);
+});
+
 test('the 1.0.6 smoke results record the live Windows Unity checkout handoff', () => {
   const results = smoke.slice(smoke.indexOf('### Results 1.0.6'), smoke.indexOf('### Results 1.0.5'));
   const row = results.split(/\r?\n/).find((line) => line.startsWith('| Editor reservation,')) ?? '';
