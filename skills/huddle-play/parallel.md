@@ -51,7 +51,8 @@ When `used` is above `capacity` (a request came back), nothing new starts: wait 
   If SendMessage is not available here, or the subagent's ID is lost (a new session, an old wait that died), launch a new background
   subagent with that same message instead: it works in the Issue's existing worktree. When it ends, go back to step 3.
 - **An interrupted Issue** (`kind: "interrupted"`, no Coach request): continue it the same way, with the message «#<n> was interrupted: run `huddle take <n>`, then follow «Continue an Issue» of SKILL.md for #<n>: in its worktree run the tests, finish what the Issue asks and open the PR/MR». `take` marks this session as its worker, so no other session offers it.
-- **The Issue is finished** (its PR/MR was merged, or the Issue was closed): say so in one line and run `huddle next --json` again.
+- **The Issue is finished** (its PR/MR was merged, or the Issue was closed): say so in one line, run `huddle next --json` again,
+  and follow «After a completion wake» below before ending the turn.
 
 ## 5. Keep watching: the Player's watch (Issue #248)
 
@@ -84,5 +85,18 @@ An Issue with `- Editor: <tool>` (or plain `- Editor`; `- Unity Editor` is the s
 Keep a short list for the Player: each Issue, its state (working, in review, waiting for you, stopped) and its PR/MR, and add what
 `node "${CLAUDE_PLUGIN_ROOT}/bin/huddle" status` says about the waits (each one's last check, so a wait that died shows). Show it when asked
 and after each change. After the last active Issue finishes, if no Issue is eligible, follow step 5 before closing the foreground round.
+
+### After a completion wake
+
+Refresh the Player queue and keep the monitor running as in step 5. Then check whether the completion belongs to an
+unfinished goal in this chat, such as verifying a release. An empty queue can still leave work on that goal.
+
+- Take the next authorized action within the chosen role, even if the Player queue is empty. If an external blocker
+  stops one part, continue with independent authorized work toward the same goal. If all remaining work depends on the
+  blocker, tell the person what needs to change before work can continue.
+- If the next action needs the creator's decision, ask in the same turn. Use the managed block's shared selector rule,
+  including Codex's asynchronous option when available. Give the recommended option and a meaningful alternative, and
+  wait for the answer before taking the dependent action.
+- For an idle watch or a completed goal, report the status without an extra question.
 
 `/huddle-play <n>` still works on one Issue in this session, as before.
