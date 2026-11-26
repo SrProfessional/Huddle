@@ -75,6 +75,26 @@ test('release, review and test name their own asks in the same form', () => {
   assert.match(skill('huddle-test'), /as one question/);
 });
 
+for (const name of ['huddle-review', 'huddle-test']) {
+  test(`${name} opens the available Codex selector before falling back to text`, () => {
+    const instructions = skill(name);
+    assert.match(instructions, /otherwise use `request_user_input_async` when supported/);
+    assert.match(instructions, /follow the managed block's pending-question rule/);
+    assert.match(instructions, /when neither selector is available, write the same question as a numbered list/i);
+    assert.match(instructions, /after an explicit deferral or interruption.*?Pending decisions: #n, #m/i);
+  });
+}
+
+test('staging validation resumes after the Coach discards a proposed correction', () => {
+  const instructions = skill('huddle-test');
+  const followThrough = instructions.split('### After a correction decision')[1] ?? '';
+  assert.match(followThrough, /keep the current staging test round active/i);
+  assert.match(followThrough, /after the correction is resolved.*?discarded.*?release --json/i);
+  assert.match(followThrough, /next eligible independent Issue.*?same turn.*?available selector/i);
+  assert.match(followThrough, /explicit pause or stop.*?suspend/i);
+  assert.match(followThrough, /approval.*?unchanged.*?depend on.*?remain pending/i);
+});
+
 test('design §19 says it, and the CHANGELOG lists it in 1.0.4 only', () => {
   const d = read('docs/design.md');
   const s19 = d.slice(d.indexOf('## 19. Watching what waits'), d.indexOf('## 20. The version notice'));
