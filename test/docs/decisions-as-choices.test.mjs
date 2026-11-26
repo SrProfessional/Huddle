@@ -75,6 +75,16 @@ test('release, review and test name their own asks in the same form', () => {
   assert.match(skill('huddle-test'), /as one question/);
 });
 
+for (const name of ['huddle-review', 'huddle-test']) {
+  test(`${name} opens the available Codex selector before falling back to text`, () => {
+    const instructions = skill(name);
+    assert.match(instructions, /otherwise use `request_user_input_async` when supported/);
+    assert.match(instructions, /follow the managed block's pending-question rule/);
+    assert.match(instructions, /when neither selector is available, write the same question as a numbered list/i);
+    assert.match(instructions, /after an explicit deferral or interruption.*?Pending decisions: #n, #m/i);
+  });
+}
+
 test('design §19 says it, and the CHANGELOG lists it in 1.0.4 only', () => {
   const d = read('docs/design.md');
   const s19 = d.slice(d.indexOf('## 19. Watching what waits'), d.indexOf('## 20. The version notice'));
