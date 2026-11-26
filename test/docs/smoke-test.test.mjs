@@ -173,6 +173,16 @@ test('the 1.0.6 release notes record the Player watch fix and its verification',
   assert.match(row, /live Codex verification remains pending/i);
 });
 
+test('the 1.0.6 smoke results record the live Windows Unity checkout handoff', () => {
+  const results = smoke.slice(smoke.indexOf('### Results 1.0.6'), smoke.indexOf('### Results 1.0.5'));
+  const row = results.split(/\r?\n/).find((line) => line.startsWith('| Editor reservation,')) ?? '';
+  assert.match(row, /\| live Windows Unity handoff \| covered by tests \|/);
+  assert.match(row, /refused an early return while the step was open/i);
+  assert.match(row, /released the reservation after verifying the clean, up-to-date staging checkout/i);
+  assert.match(row, /huddle-staging-test\/issues\/14#issuecomment-7182508368/);
+  assert.match(results, /full pre-release smoke checklist and live client walkthrough remain pending/i);
+});
+
 test('«Areas» says to delete Alpha and Beta, and why closing is not enough', () => {
   const t = section('11\\. Areas').replace(/\s+/g, ' ');
   assert.ok(!/delete or close/i.test(t), 'closing is not enough');
