@@ -171,6 +171,10 @@
         <p><strong>With a staging branch</strong> (<code>staging_branch</code> in <code>huddle.json</code>), Issue branches start from staging and their PRs target it. After merging one there, run <code>huddle land</code> to close its Issue; after trying it in staging, <code>huddle tested</code>. When everything in staging was tested, <code>/huddle-release</code> opens and merges the PR from staging into the default branch.</p>
       </li>
       <li>
+        <h3>Preview worktree cleanup</h3>
+        <p>Run <code>huddle clean --dry-run</code> to preview cleanup. Huddle considers clean worktrees under <code>.claude/worktrees/</code> after 24 hours of inactivity. It checks that their commits reached the configured staging branch, or the default branch when staging is unset. Codex-managed worktrees live outside this directory and are managed by Codex.</p>
+      </li>
+      <li>
         <h3>Add someone to the team</h3>
         <p>Invite them to the repository (GitHub: <em>Settings, Collaborators</em>; GitLab: <em>Manage, Members</em>, role Developer). Then run <code>/huddle-team</code>: it checks that the login can be assigned, adds it to <code>assignees</code> in <code>huddle.json</code> through a PR, and gives you the message to send them with the install steps. <code>huddle team</code> lists the team and shows who cannot be assigned yet. Once that PR is merged, Huddle assigns them <code>ready</code> Issues.</p>
       </li>

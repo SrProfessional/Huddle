@@ -468,15 +468,22 @@ Preparation for the changes since v1.0.5. The Coach marked the eleven Issues tes
 [production PR #358](https://github.com/SrProfessional/Huddle/pull/358). Claude Code
 installed 1.0.6 from the local candidate marketplace in an isolated configuration. The installed CLI passed
 `doctor` after refreshing an older private GitHub sandbox and setting up a fresh private GitLab sandbox.
-The full pre-release smoke checklist and live client walkthrough remain pending. After the tag and release
-are published, the published marketplace installation still needs verification.
+The Coach published [Huddle v1.0.6](https://github.com/SrProfessional/Huddle/releases/tag/v1.0.6) on
+2026-11-27 from commit `f4bf1ab6` ([production PR #378](https://github.com/SrProfessional/Huddle/pull/378)).
+The release commit passed 2,121 automated tests and all six CI checks. Live checks covered the Codex Desktop
+role and guided-step selectors, the Claude Code startup review notice, and GitHub and GitLab sandbox workflows.
+The Coach accepted partial live smoke coverage. The live addition and removal of a second team member and the
+review-author check with another identity were omitted. The 44 focused automated team and review checks passed.
+
+After publishing, a fresh Claude Code configuration installed 1.0.6 from the GitHub marketplace. All 69 installed files
+checked matched the published commit, and `huddle doctor` confirmed version 1.0.6 in the GitHub sandbox.
 
 | Section | GitHub | GitLab | Notes |
 |---|---|---|---|
 | Allowed paths with spaces and PR/MR linkage (#333, #334) | linkage verified live | linkage verified live | Spaced paths were covered by fixtures. On both sandboxes, `queue` and `doctor` reported a review using `Refs`; `Closes` moved it into review, `land` closed its Issue, and the dependent became ready. |
-| Outstanding decisions and guided steps (#335, #338, #340, #344, #345) | guided CLI verified live | guided CLI verified live | A two-step dry run posted nothing. The posted list appeared in the queue with its recorded ask; closing the first step moved to the second, and closing the second resumed the Issue. Live decision and startup prompts in a new client remain pending. |
+| Outstanding decisions and guided steps (#335, #338, #340, #344, #345) | guided CLI verified live | guided CLI verified live | A two-step dry run posted nothing. The posted list appeared in the queue with its recorded ask; closing the first step moved to the second, and closing the second resumed the Issue. A fresh Codex Desktop chat showed the native four-option guided-step selector. [Sandbox evidence](https://github.com/SrProfessional/huddle-staging-test/issues/17). |
 | Editor reservation, checkout return, and diagnostics (#339, #351) | live Windows Unity handoff | covered by tests | Unity 6.3 LTS imported the marker on the Issue branch and again after returning to staging in the same editor process. Huddle refused an early return while the step was open and released the reservation after verifying the clean, up-to-date staging checkout. [Sandbox evidence](https://github.com/SrProfessional/huddle-staging-test/issues/14#issuecomment-7182508368). |
-| Per-session Coach, Player, and Both choices (#349) | covered by tests | CLI verified live | Separate Codex-context CLI processes used the real GitLab login: an unselected session was blocked, Player kept the Coach watch idle, and Both got detached watch guidance. Installation of the candidate in Codex and the role question in fresh chats remain pending. |
+| Per-session Coach, Player, and Both choices (#349) | covered by tests | CLI verified live | Separate Codex-context CLI processes used the real GitLab login: an unselected session was blocked, Player kept the Coach watch idle, and Both got detached watch guidance. A fresh Codex Desktop chat using the 1.0.6 candidate displayed the native role selector and recorded Coach. [Sandbox evidence](https://github.com/SrProfessional/huddle-staging-test/issues/17). |
 | Proactive follow-through and pending questions (#356) | covered by tests | covered by tests | The Coach answered through the live Codex selector after waiting. Recovery after restarting a client was checked in the written instructions, not by interrupting that chat. |
 | Codex Player watch (#361) | staging fixtures passed | staging fixtures passed | Staging passed 25 focused tests with fixtures and all 2,115 tests. The focused tests checked an empty queue after the last Issue and an accepted notification that did not resume the chat. Live Codex verification remains pending. |
 
