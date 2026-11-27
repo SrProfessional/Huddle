@@ -109,7 +109,7 @@ for (const gitlab of [false, true]) {
   test(`${on}: the last step done resumes the Issue exactly as huddle pause <n> --off does`, async () => {
     const paused = (w) => {
       w.issue({ number: 5, title: 'Paused', body: body(2, ['a.mjs']), assignees: [COACH], labels: ['in progress'] });
-      put(5, 1, pauseBody('waiting for the person'), '2026-11-01T10:00:00Z', COACH)(w);
+      put(5, 1, pauseBody('waiting for the person', { started: true }), '2026-11-01T10:00:00Z', COACH)(w);
       put(5, 2, list(5, { steps: [step('Open the Editor.'), step('Press Play.')] }), '2026-11-02T10:00:00Z')(w);
     };
     const viaSteps = harness({ gitlab, setup: paused });
