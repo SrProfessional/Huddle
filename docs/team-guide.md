@@ -311,9 +311,9 @@ Player's wait as any request). To check from any terminal that the watch and the
 
 ## Old worktrees clean themselves
 
-Every Issue's session works in a folder of its own, a git worktree in `.claude/worktrees/`. In a project with dependencies each
-folder carries its own `node_modules`, and finished ones used to stay forever until the disk was full. Now Huddle removes them.
-It works the same on Windows, macOS and Linux.
+Each Issue runs in a Git worktree. In a project with dependencies, each worktree can have its own `node_modules`.
+Huddle cleans finished worktrees under the main checkout's `.claude/worktrees/` on Windows, macOS and Linux. Worktrees outside `.claude/worktrees/`,
+including worktrees managed by Codex, are left for the tool that created them.
 
 **When.** Each time a session starts, in the background: it never slows the start down. You can also run it yourself:
 
@@ -326,7 +326,9 @@ The first only says what it would do. Each worktree gets a line: `removed <folde
 
 **What it removes.** Only a worktree under `.claude/worktrees/` that passes every check:
 
-- its work is merged into the default branch (`main` unless `huddle.json` says otherwise);
+- its HEAD is an ancestor of `origin/<staging_branch>` when `staging_branch` is set in `huddle.json`
+  (if that ref is missing, cleanup keeps all worktrees). Without a staging branch, Huddle checks
+  `origin/<default_branch>`, then `origin/HEAD`, then `origin/master`, and uses the first ref that exists.
 - nothing in it is uncommitted;
 - nobody touched it for 24 hours (a branch that was just created is also «merged», and must not go);
 - it is not locked, and it is not the folder the command runs in.

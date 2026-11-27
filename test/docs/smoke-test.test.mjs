@@ -188,7 +188,16 @@ test('the 1.0.6 smoke results record the live Windows Unity checkout handoff', (
   assert.match(row, /refused an early return while the step was open/i);
   assert.match(row, /released the reservation after verifying the clean, up-to-date staging checkout/i);
   assert.match(row, /huddle-staging-test\/issues\/14#issuecomment-7182508368/);
-  assert.match(results, /full pre-release smoke checklist and live client walkthrough remain pending/i);
+});
+
+test('the 1.0.6 smoke results record the published install and the approved exception', () => {
+  const results = smoke.slice(smoke.indexOf('### Results 1.0.6'), smoke.indexOf('### Results 1.0.5'));
+  assert.match(results, /releases\/tag\/v1\.0\.6/);
+  assert.match(results, /fresh Claude Code configuration installed 1\.0\.6 from the GitHub marketplace/);
+  assert.match(results, /69 installed files\s+checked matched the published commit/);
+  assert.match(results, /Coach accepted partial live smoke coverage/);
+  assert.match(results, /addition and removal of a second team member/);
+  assert.match(results, /review-author check with another identity were omitted/);
 });
 
 test('«Areas» says to delete Alpha and Beta, and why closing is not enough', () => {
