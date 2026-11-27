@@ -114,6 +114,43 @@ for (const gitlab of [false, true]) {
     assert.deepEqual(done.parked, []);
   });
 
+  test(`${on}: an explicit pause overrides a draft with an open dependency and releases its file`, async () => {
+    const h = asAna((w) => {
+      w.issue({ number: 8, title: 'Draft', body: body(2, ['api/openapi.json'], { deps: '- #13' }), assignees: ['ana'], labels: ['blocked'], reviews: [80] });
+      w.review({ number: 80, draft: true, commits: ['2026-11-21T10:00:00Z'] });
+      w.issue({ number: 13, title: 'Dependency', body: body(1, ['api/openapi.json']), assignees: ['ana'], labels: ['blocked'] });
+      pause(8, '2026-11-22T10:00:00Z', 801)(w);
+    }, gitlab);
+    const r = await next(h);
+    assert.deepEqual(r.paused.map((p) => p.issue), [8]);
+    assert.deepEqual(r.parked, []);
+    assert.deepEqual(r.start.map((p) => p.issue), [13]);
+    assert.equal(await run(['labels', '--issue', '8'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(13), ['assigned']);
+  });
+
+  test(`${on}: labels remove active status while paused and explicit resume restores started work`, async () => {
+    const h = harness({ gitlab, setup: coachWorld });
+    assert.equal(await run(['pause', '5', '--reason', 'on hold'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(5), []);
+    assert.equal(await run(['labels', '--issue', '5'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(5), [], 'a second labels pass still honors the pause');
+    assert.equal(await run(['pause', '5', '--off'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(5), ['in progress']);
+  });
+
+  test(`${on}: the Coach queue leaves a paused review alone`, async () => {
+    const h = harness({ gitlab, setup: (w) => {
+      w.issue({ number: 5, title: 'Reviewed later', body: body(2, ['api/a.mjs']), assignees: ['ana'], labels: ['in review'], reviews: [50] });
+      w.review({ number: 50 });
+      pause(5, '2026-11-22T10:00:00Z', 501)(w);
+    } });
+    assert.equal(await run(['queue', '--json'], h.ctx), 0, h.errText());
+    assert.deepEqual(JSON.parse(h.text()).waiting, []);
+    assert.equal(await run(['labels', '--issue', '5'], h.ctx), 0, h.errText());
+    assert.deepEqual(h.world.labelsOf(5), []);
+  });
+
   test(`${on}: used and every «points in use» message give the same number (8 of 5, not 4 of 5)`, async () => {
     const r = await next(asAna((w) => {
       for (const n of [1, 2, 3, 4]) {
@@ -148,9 +185,10 @@ for (const gitlab of [false, true]) {
     const [first] = mine(7, h);
     assert.match(first.body, /⏸️ Paused by the Coach: staging on hold/);
     assert.match(first.body, /<!-- huddle-paused -->/);
-    assert.deepEqual(h.world.labelsOf(7), ['assigned'], 'huddle labels --issue 7 ran after it');
+    assert.deepEqual(h.world.labelsOf(7), [], 'the paused Issue has no active status');
     assert.equal(await run(['pause', '7', '--off'], h.ctx), 0);
     assert.match(mine(7, h)[1].body, /<!-- huddle-resumed -->/);
+    assert.deepEqual(h.world.labelsOf(7), ['assigned']);
   });
 
   test(`${on}: only the Coach's login can pause or resume`, async () => {
